@@ -1009,11 +1009,13 @@ function applyDockOrder() {
     var btns = {};
     dock.querySelectorAll('.dock-btn[data-p]').forEach(function(b) { btns[b.dataset.p] = b; });
     var seps = Array.from(dock.children).filter(function(c) { return c.classList && c.classList.contains('dock-sep'); });
+    var extras = Array.from(dock.children).filter(function(c) { return !c.dataset.p && !(c.classList && c.classList.contains('dock-sep')); });
     dock.innerHTML = '';
     order.forEach(function(p) {
       if (btns[p]) dock.appendChild(btns[p]);
       else if (p === 'sep' && seps.length > 0) dock.appendChild(seps.shift());
     });
+    extras.forEach(function(el) { dock.appendChild(el); });
   } catch(e) {}
 }
 var dockDragListenersInitialized = false;
