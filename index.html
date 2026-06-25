@@ -1397,7 +1397,7 @@ function renderLinks() {
   el.innerHTML = html;
 }
 
-renderBookmarks(); renderTasks(); renderLinks(); fetchStocks(); loadForecast();
+renderBookmarks(); renderTasks(); renderLinks(); fetchStocks();
 
 // ── EMBEDDED CACHED DATA (refreshed by GitHub Actions) ──
 console.log('=== DASHBOARD INITIALIZATION ===');
@@ -1405,12 +1405,23 @@ var DASHBOARD_CACHE = {
   "weather": {
     "latitude": 49.18432,
     "longitude": -122.82682,
-    "generationtime_ms": 0.09,
+    "generationtime_ms": 0.14495849609375,
+    "utc_offset_seconds": 0,
+    "timezone": "GMT",
+    "timezone_abbreviation": "GMT",
+    "elevation": 86.0,
+    "current_units": {
+      "time": "iso8601",
+      "interval": "seconds",
+      "temperature_2m": "°C",
+      "weather_code": "wmo code",
+      "is_day": ""
+    },
     "current": {
-      "time": "2026-06-24T23:30",
+      "time": "2026-06-25T02:45",
       "interval": 900,
-      "temperature_2m": 28.2,
-      "weather_code": 2,
+      "temperature_2m": 26.1,
+      "weather_code": 0,
       "is_day": 1
     }
   },
@@ -1418,37 +1429,358 @@ var DASHBOARD_CACHE = {
     "https://globalnews.ca/bc/feed/": {
       "status": "ok",
       "items": [
-        {"title":"B.C. businesses face uncertainty ahead of CUSMA review next week","pubDate":"2026-06-24 22:40:02","link":"https://globalnews.ca/news/11937259/bc-businesses-uncertainty-cusma-review/","source":"Global BC"},
-        {"title":"Former B.C. corrections officer sentenced for breach of trust","pubDate":"2026-06-24 21:36:08","link":"https://globalnews.ca/news/11937138/former-bc-corrections-officer-sentenced-breach-trust-relationship-inmate/","source":"Global BC"},
-        {"title":"Okanagan Falls to be incorporated as B.C.'s newest municipality in November","pubDate":"2026-06-24 20:29:21","link":"https://globalnews.ca/news/11937128/bc-okanagan-falls-incorporated-november/","source":"Global BC"},
-        {"title":"B.C. murder suspect evidence at trial 'not credible' or 'logical,' Crown lawyer says","pubDate":"2026-06-24 18:28:54","link":"https://globalnews.ca/news/11936801/lumby-bc-murder/","source":"Global BC"},
-        {"title":"'A big inspiration': Ashtrey Recovery Resource Centre to open in Vancouver's DTES","pubDate":"2026-06-24 17:24:35","link":"https://globalnews.ca/news/11936594/ashtrey-recovery-resource-centre-open-vancouver-dtes/","source":"Global BC"}
+        {
+          "title": "‘She deserved better’: Owner mourns dog taken by coyote in Vancouver park",
+          "link": "https://globalnews.ca/news/11937410/chihuahua-taken-coyote-vancouver-park/",
+          "pubDate": "2026-06-25 01:42:13",
+          "source": "Global BC"
+        },
+        {
+          "title": "Kelowna business turns crash damage into colourful community artwork",
+          "link": "https://globalnews.ca/news/11937385/kelowna-business-turns-crash-damage-colourful-community-artwork/",
+          "pubDate": "2026-06-25 01:29:43",
+          "source": "Global BC"
+        },
+        {
+          "title": "B.C. businesses face uncertainty ahead of CUSMA review next week",
+          "link": "https://globalnews.ca/news/11937259/bc-businesses-uncertainty-cusma-review/",
+          "pubDate": "2026-06-24 22:40:02",
+          "source": "Global BC"
+        },
+        {
+          "title": "WATCH: Global Okanagan News at 5:30 p.m. – June 24",
+          "link": "https://globalnews.ca/news/9913127/watch-global-okanagan-news-at-530/",
+          "pubDate": "2026-06-24 22:00:38",
+          "source": "Global BC"
+        },
+        {
+          "title": "Former B.C. corrections officer sentenced for breach of trust",
+          "link": "https://globalnews.ca/news/11937138/former-bc-corrections-officer-sentenced-breach-trust-relationship-inmate/",
+          "pubDate": "2026-06-24 21:36:08",
+          "source": "Global BC"
+        }
       ]
     },
     "https://www.cbc.ca/cmlink/rss-canada-britishcolumbia": {
       "status": "ok",
       "items": [
-        {"title":"Canada finishes 2nd in World Cup Group B after 2-1 loss to Switzerland","pubDate":"2026-06-11 20:05:56","link":"https://www.cbc.ca/sports/soccer/worldcup/fifa-canada-world-cup-canada-switzerland-recap-june-24-9.7246842","source":"CBC BC"},
-        {"title":"Scorching weather results in 21 B.C. communities breaking max temperature records","pubDate":"2026-06-24 23:04:43","link":"https://www.cbc.ca/news/canada/british-columbia/bc-heat-weather-records-fall-9.7247997","source":"CBC BC"},
-        {"title":"Stash of drugs, $1.5M in cash discovered after multi-year investigation in B.C.","pubDate":"2026-06-24 23:22:37","link":"https://www.cbc.ca/news/canada/british-columbia/drugs-bust-delta-metro-vancouver-9.7247982","source":"CBC BC"},
-        {"title":"Prosecutor says testimony of man accused of killing ex-wife in B.C. Interior 'inconsistent'","pubDate":"2026-06-24 22:53:50","link":"https://www.cbc.ca/news/canada/british-columbia/vitali-stefanski-trial-closing-arguments-9.7247949","source":"CBC BC"},
-        {"title":"B.C. government puts Victoria-Saanich amalgamation vote on hold","pubDate":"2026-06-24 21:46:33","link":"https://www.cbc.ca/news/canada/british-columbia/victoria-saanich-amalgamation-debate-government-yellow-light-9.7247811","source":"CBC BC"}
+        {
+          "title": "Backlash over rental prices at Sen̓áḵw development in Vancouver",
+          "link": "https://www.cbc.ca/news/canada/british-columbia/senakw-rental-prices-backlash-9.7248096?cmp=rss",
+          "pubDate": "2026-06-24 21:07:58",
+          "source": "CBC BC"
+        },
+        {
+          "title": "'Really dangerous': B.C. faces calls to bolster worker heat safety regulations",
+          "link": "https://www.cbc.ca/news/canada/british-columbia/b-c-worker-heat-safety-regulations-9.7247575?cmp=rss",
+          "pubDate": "2026-06-24 20:43:08",
+          "source": "CBC BC"
+        },
+        {
+          "title": "Canada falls 2-1 to Switzerland to finish World Cup group as runners-up",
+          "link": "https://www.cbc.ca/sports/livestory/canada-vs-switzerland-june-24-live-updates-fifa-world-cup-2026-9.7222405?cmp=rss",
+          "pubDate": "2026-06-24 13:01:24",
+          "source": "CBC BC"
+        },
+        {
+          "title": "15-year-old seriously injured in latest e-bike, scooter crash in B.C.",
+          "link": "https://www.cbc.ca/news/canada/british-columbia/electronic-dirt-bike-e-scooter-crash-bc-9.7248064?cmp=rss",
+          "pubDate": "2026-06-24 20:13:11",
+          "source": "CBC BC"
+        },
+        {
+          "title": "Scorching weather results in 21 B.C. communities breaking max temperature records",
+          "link": "https://www.cbc.ca/news/canada/british-columbia/bc-heat-weather-records-fall-9.7247997?cmp=rss",
+          "pubDate": "2026-06-24 19:04:43",
+          "source": "CBC BC"
+        }
       ]
     },
-    "https://www.bbc.com/news/world/rss.xml": {
+    "https://www.cbc.ca/cmlink/rss-topstories": {
       "status": "ok",
       "items": [
-        {"title":"France, UK and Spain see record temperatures as heatwave grips western Europe","pubDate":"2026-06-24 21:39:18","link":"https://www.bbc.co.uk/news/articles/c78y4102n1zo","source":"BBC World"},
-        {"title":"Air conditioning creates political divide after France records hottest day","pubDate":"2026-06-24 13:51:24","link":"https://www.bbc.co.uk/news/articles/c4gyqldl3p5o","source":"BBC World"},
-        {"title":"UN nuclear chief says inspectors will visit Iran sites as part of war deal","pubDate":"2026-06-24 17:31:48","link":"https://www.bbc.co.uk/news/articles/cpd395zv81vo","source":"BBC World"},
-        {"title":"Clean sweep for Mamdani-backed candidates in New York's Democratic primary","pubDate":"2026-06-24 13:03:35","link":"https://www.bbc.co.uk/news/articles/clye652m41po","source":"BBC World"},
-        {"title":"Biggest city in Crimea without power after Ukraine strikes","pubDate":"2026-06-24 09:48:24","link":"https://www.bbc.co.uk/news/articles/c3ryv72pjqno","source":"BBC World"}
+        {
+          "title": "Strong back-to-back earthquakes hit Venezuela prompting fears of heavy casualities",
+          "link": "https://www.cbc.ca/news/world/earthquake-venezuela-caracas-9.7248076?cmp=rss",
+          "pubDate": "2026-06-24 21:33:43",
+          "source": "CBC News"
+        },
+        {
+          "title": "Trump's D.C. reflecting pool is the butt of online jokes. What happened?",
+          "link": "https://www.cbc.ca/news/world/trump-reflecting-pool-renovations-9.7248005?cmp=rss",
+          "pubDate": "2025-12-25 04:00:00",
+          "source": "CBC News"
+        },
+        {
+          "title": "Canada finishes 2nd in World Cup Group B after 2-1 loss to Switzerland, will play knockout game Sunday",
+          "link": "https://www.cbc.ca/sports/soccer/worldcup/fifa-canada-world-cup-canada-switzerland-recap-june-24-9.7246842?cmp=rss",
+          "pubDate": "2026-06-11 16:05:56",
+          "source": "CBC News"
+        },
+        {
+          "title": "Halifax-bound Air Canada flight diverted to Boston after captain experiences medical issue",
+          "link": "https://www.cbc.ca/news/canada/nova-scotia/flight-to-halifax-diverted-boston-captain-emedical-issue-9.7248001?cmp=rss",
+          "pubDate": "2026-06-24 18:52:41",
+          "source": "CBC News"
+        },
+        {
+          "title": "Canada has made it to the knockout stage of the FIFA World Cup for the 1st time. What happens next?",
+          "link": "https://www.cbc.ca/sports/soccer/worldcup/canada-world-cup-group-of-32-whats-next-9.7248114?cmp=rss",
+          "pubDate": "2026-06-24 21:48:38",
+          "source": "CBC News"
+        }
+      ]
+    },
+    "https://globalnews.ca/feed/": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Raptors draft Jaden Bradley 50th overall",
+          "link": "https://globalnews.ca/news/11937703/raptors-draft-jaden-bradley-50th-overall/",
+          "pubDate": "2026-06-25 01:59:50",
+          "source": "Global News"
+        },
+        {
+          "title": "Back-to-back powerful earthquakes slam Venezuela, collapsing buildings",
+          "link": "https://globalnews.ca/news/11937689/earthquakes-caracas-venezuela/",
+          "pubDate": "2026-06-25 01:56:14",
+          "source": "Global News"
+        },
+        {
+          "title": "‘She deserved better’: Owner mourns dog taken by coyote in Vancouver park",
+          "link": "https://globalnews.ca/news/11937410/chihuahua-taken-coyote-vancouver-park/",
+          "pubDate": "2026-06-25 01:42:13",
+          "source": "Global News"
+        },
+        {
+          "title": "Calgary police seeing massive spike in reported catalytic converter thefts",
+          "link": "https://globalnews.ca/news/11937566/calgary-police-spike-catalytic-converter-thefts/",
+          "pubDate": "2026-06-25 01:36:26",
+          "source": "Global News"
+        },
+        {
+          "title": "Kelowna business turns crash damage into colourful community artwork",
+          "link": "https://globalnews.ca/news/11937385/kelowna-business-turns-crash-damage-colourful-community-artwork/",
+          "pubDate": "2026-06-25 01:29:43",
+          "source": "Global News"
+        }
+      ]
+    },
+    "https://nationalpost.com/feed/": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Australia’s social media ban for children has had little effect, study finds",
+          "link": "https://nationalpost.com/news/world/australia-social-media-ban-children",
+          "pubDate": "2026-06-25 02:32:55",
+          "source": "National Post"
+        },
+        {
+          "title": "Trump, Republican senators clash over Iran war, president’s refusal to sign housing bill",
+          "link": "https://nationalpost.com/news/trump-republican-senators-clash-over-iran-war",
+          "pubDate": "2026-06-25 02:21:47",
+          "source": "National Post"
+        },
+        {
+          "title": "Judge wants to know why Kennedy Center facade has been covered since Trump’s name removed",
+          "link": "https://nationalpost.com/news/world/judge-wants-to-know-why-kennedy-center-facade-has-been-covered-since-trumps-name-removed",
+          "pubDate": "2026-06-25 01:54:19",
+          "source": "National Post"
+        },
+        {
+          "title": "Tristin Hopper: Trespassing charges dropped against academic Frances Widdowson",
+          "link": "https://nationalpost.com/opinion/tristin-hopper-trespassing-charges-dropped-against-academic-frances-widdowson",
+          "pubDate": "2026-06-25 00:42:07",
+          "source": "National Post"
+        },
+        {
+          "title": "Afternoon front page: Canada advances, despite loss to Swiss at World Cup; three infrastructure projects selected for possible fast-track; and more",
+          "link": "https://nationalpost.com/editors/canada-advances-despite-loss-to-swiss-at-world-cup-three-infrastructure-projects-selected-for-possible-fast-track-and-more",
+          "pubDate": "2026-06-24 21:36:12",
+          "source": "National Post"
+        }
+      ]
+    },
+    "https://feeds.bbci.co.uk/news/world/rss.xml": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "France, UK and Spain see record temperatures as heatwave grips western Europe",
+          "link": "https://www.bbc.co.uk/news/articles/c78y4102n1zo?at_medium=RSS&at_campaign=rss",
+          "pubDate": "2026-06-24 21:39:18",
+          "source": "BBC World"
+        },
+        {
+          "title": "Air conditioning creates political divide after France records hottest day",
+          "link": "https://www.bbc.co.uk/news/articles/c4gyqldl3p5o?at_medium=RSS&at_campaign=rss",
+          "pubDate": "2026-06-24 13:51:24",
+          "source": "BBC World"
+        },
+        {
+          "title": "UN nuclear chief says inspectors will visit Iran sites as part of war deal",
+          "link": "https://www.bbc.co.uk/news/articles/cpd395zv81vo?at_medium=RSS&at_campaign=rss",
+          "pubDate": "2026-06-24 17:31:48",
+          "source": "BBC World"
+        },
+        {
+          "title": "Clean sweep for Mamdani-backed candidates in New York's Democratic primary",
+          "link": "https://www.bbc.co.uk/news/articles/clye652m41po?at_medium=RSS&at_campaign=rss",
+          "pubDate": "2026-06-24 13:03:35",
+          "source": "BBC World"
+        },
+        {
+          "title": "Biggest city in Crimea without power after Ukraine strikes",
+          "link": "https://www.bbc.co.uk/news/articles/c3ryv72pjqno?at_medium=RSS&at_campaign=rss",
+          "pubDate": "2026-06-24 09:48:24",
+          "source": "BBC World"
+        }
       ]
     }
   },
-  "updated": "2026-06-24T23:37:10.739Z"
+  "sports": {
+    "https://www.espn.com/espn/rss/news": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Reaction to every pick of the second round of the ...",
+          "link": "https://www.espn.com/nba/draft/live",
+          "pubDate": "2026-06-24 22:31:23",
+          "source": "ESPN"
+        },
+        {
+          "title": "Sources: Pistons trading Stewart to Grizzlies",
+          "link": "https://www.espn.com/nba/story/_/id/49170745/sources-pistons-trading-isaiah-stewart-grizzlies",
+          "pubDate": "2026-06-24 22:14:33",
+          "source": "ESPN"
+        },
+        {
+          "title": "Bickerstaff: Nori's Blazers deal a 'slap in the fa...",
+          "link": "https://www.espn.com/nba/story/_/id/49168201/bickerstaff-nori-contract-portland-slap-face",
+          "pubDate": "2026-06-24 22:14:33",
+          "source": "ESPN"
+        },
+        {
+          "title": "Sources: Milan rejects NYCFC approach for Pulisic",
+          "link": "https://www.espn.com/soccer/story/_/id/49169086/ac-milan-rejects-nycfc-approach-christian-pulisic",
+          "pubDate": "2026-06-24 22:14:33",
+          "source": "ESPN"
+        },
+        {
+          "title": "Pochettino won't 'risk' USMNT players on yellows",
+          "link": "https://www.espn.com/soccer/story/_/id/49169923/pochettino-risk-united-states-players-yellows",
+          "pubDate": "2026-06-24 22:14:32",
+          "source": "ESPN"
+        }
+      ]
+    },
+    "https://www.sportsnet.ca/feed/": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Home Page Featured",
+          "link": "https://www.sportsnet.ca/?sn-collection=top-collection-july-2",
+          "pubDate": "2025-07-02 10:34:53",
+          "source": "Sportsnet"
+        },
+        {
+          "title": "Blue Jays let another winnable game slip away, drop series to Astros",
+          "link": "https://www.sportsnet.ca/mlb/article/blue-jays-let-another-winnable-game-slip-away-drop-series-to-astros/",
+          "pubDate": "2026-06-24 21:59:45",
+          "source": "Sportsnet"
+        },
+        {
+          "title": "Blue Jays’ ‘circus’ proves costly in sloppy loss to Astros",
+          "link": "https://www.sportsnet.ca/mlb/video/blue-jays-circus-proves-costly-in-sloppy-loss-to-astros/",
+          "pubDate": "2026-06-24 22:34:32",
+          "source": "Sportsnet"
+        },
+        {
+          "title": "‘This is what we want’: Oilers’ McDavid all in on Babcock as coach",
+          "link": "https://www.sportsnet.ca/nhl/article/this-is-what-we-want-oilers-mcdavid-all-in-on-babcock-as-coach/",
+          "pubDate": "2026-06-24 15:55:00",
+          "source": "Sportsnet"
+        },
+        {
+          "title": "Canada loses home advantage at World Cup as blown chances loom large",
+          "link": "https://www.sportsnet.ca/fifa-world-cup/article/canada-loses-home-advantage-at-world-cup-as-blown-chances-loom-large/",
+          "pubDate": "2026-06-24 20:40:28",
+          "source": "Sportsnet"
+        }
+      ]
+    },
+    "https://www.cfl.ca/rss/": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "REDBLACKS release offensive lineman Martez Ivey",
+          "link": "https://www.cfl.ca/2026/06/24/redblacks-release-offensive-lineman-martez-ivey/",
+          "pubDate": "2026-06-25 02:49:45",
+          "source": "CFL.ca"
+        },
+        {
+          "title": "3 keys to victory for Edmonton, Winnipeg in Week 4",
+          "link": "https://www.cfl.ca/2026/06/24/3-keys-to-victory-for-edmonton-winnipeg-in-week-4/",
+          "pubDate": "2026-06-25 02:49:45",
+          "source": "CFL.ca"
+        },
+        {
+          "title": "Alouettes bring back defensive back Faion Hicks",
+          "link": "https://www.cfl.ca/2026/06/24/alouettes-bring-back-defensive-back-faion-hicks/",
+          "pubDate": "2026-06-25 02:49:45",
+          "source": "CFL.ca"
+        },
+        {
+          "title": "Riders sign American running back Star Thomas",
+          "link": "https://www.cfl.ca/2026/06/24/riders-sign-american-running-back-star-thomas/",
+          "pubDate": "2026-06-25 02:49:45",
+          "source": "CFL.ca"
+        },
+        {
+          "title": "4 storylines to watch in Week 4",
+          "link": "https://www.cfl.ca/2026/06/24/4-storylines-to-watch-in-week-4-2/",
+          "pubDate": "2026-06-25 02:49:45",
+          "source": "CFL.ca"
+        }
+      ]
+    },
+    "https://www.mlb.com/feeds/news/rss.xml": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "15 RBIs in one series?! Dansby's dominance knows no bounds",
+          "link": "https://www.mlb.com/news/dansby-swanson-drives-in-four-runs-cubs-doubleheader-sweep",
+          "pubDate": "2026-06-25 02:19:46",
+          "source": "MLB.com"
+        },
+        {
+          "title": "Hill's a hero! Down to last strike, Phils rally for 2nd straight comeback win",
+          "link": "https://www.mlb.com/news/derek-hill-hits-game-winning-pinch-hit-home-run-vs-nationals",
+          "pubDate": "2026-06-25 02:11:35",
+          "source": "MLB.com"
+        },
+        {
+          "title": "Ohtani gets bounce-back he needed in strong start for series sweep",
+          "link": "https://www.mlb.com/news/shohei-ohtani-pitches-against-twins",
+          "pubDate": "2026-06-25 02:29:00",
+          "source": "MLB.com"
+        },
+        {
+          "title": "Goldy (2 HRs) gets best of Skubal before Domínguez delivers decisive blast",
+          "link": "https://www.mlb.com/news/paul-goldschmidt-jasson-dominguez-homer-in-yankees-win-over-tigers",
+          "pubDate": "2026-06-25 01:41:12",
+          "source": "MLB.com"
+        },
+        {
+          "title": "Angels rally twice, walk off O's on 10th-inning hit that went ... 15 feet!",
+          "link": "https://www.mlb.com/news/angels-walk-off-orioles-in-10-innings-after-pair-of-late-comebacks",
+          "pubDate": "2026-06-25 00:35:00",
+          "source": "MLB.com"
+        }
+      ]
+    }
+  },
+  "updated": "2026-06-25T02:49:46.065073+00:00"
 };
-
 // ── DIAGNOSTIC TEST FOR FETCH/API SUPPORT ──
 (function() {
   console.log('=== TESLA BROWSER DIAGNOSTICS ===');
@@ -1511,34 +1843,24 @@ function httpGet(url) {
     return tryDirectRequest();
   }
 
-  // Check if this is cached news data (embedded in HTML)
+  // Check if this is a cached feed (news or sports) embedded in HTML
   if (url.includes('rss2json.com')) {
-    if (DASHBOARD_CACHE && DASHBOARD_CACHE.news) {
-      // Try to extract the feed URL from the rss2json proxy URL
+    if (DASHBOARD_CACHE) {
       var match = url.match(/rss_url=([^&]+)/);
       if (match) {
-        var encodedFeed = match[1];
-        var decodedFeed = decodeURIComponent(encodedFeed);
-        if (DASHBOARD_CACHE.news[decodedFeed]) {
-          var cachedData = DASHBOARD_CACHE.news[decodedFeed];
-          if (cachedData && cachedData.items && cachedData.items.length > 0) {
-            console.log('✓ Using embedded news cache from:', decodedFeed, '(' + cachedData.items.length + ' items)');
-            return Promise.resolve(cachedData);
-          }
+        var decodedFeed = decodeURIComponent(match[1]);
+        var feedData = (DASHBOARD_CACHE.news && DASHBOARD_CACHE.news[decodedFeed]) ||
+                       (DASHBOARD_CACHE.sports && DASHBOARD_CACHE.sports[decodedFeed]);
+        if (feedData && feedData.items && feedData.items.length > 0) {
+          console.log('✓ Using embedded cache from:', decodedFeed, '(' + feedData.items.length + ' items)');
+          return Promise.resolve(feedData);
         }
       }
-      // Fallback: return first available news source with items
-      var newsKeys = Object.keys(DASHBOARD_CACHE.news);
-      for (var i = 0; i < newsKeys.length; i++) {
-        var source = newsKeys[i];
-        var newsData = DASHBOARD_CACHE.news[source];
-        if (newsData && newsData.items && newsData.items.length > 0) {
-          console.log('✓ Using embedded news cache (fallback) from:', source, '(' + newsData.items.length + ' items)');
-          return Promise.resolve(newsData);
-        }
-      }
+      // Feed not in embedded cache — return null immediately rather than hanging
+      // on live API calls that will timeout in Tesla browser environments
+      console.log('✗ Feed not in embedded cache, skipping network:', url);
+      return Promise.resolve(null);
     }
-    console.log('✗ No embedded news cache - trying direct API');
     return tryDirectRequest();
   }
 
@@ -1622,9 +1944,10 @@ function loadWeatherForCoords() {
   });
 }
 
-// Load weather immediately with default coords
+// Load weather and forecast immediately with default coords
 console.log('Loading weather immediately with geoCoords:', geoCoords);
 loadWeatherForCoords();
+loadForecast();
 
 // Then try to get better location if available
 if (navigator.geolocation) {
@@ -1737,7 +2060,7 @@ function renderFeed(items, id) {
     var timeStr = 'Recently';
     if (item.pubDate) {
       try {
-        var ms = Date.now() - new Date(item.pubDate).getTime();
+        var ms = Date.now() - new Date(item.pubDate.replace(' ', 'T')).getTime();
         if (!isNaN(ms) && ms > 0) {
           var mins = Math.floor(ms / 60000);
           timeStr = mins < 60 ? mins + 'm ago' : Math.floor(mins / 60) + 'h ago';
@@ -1788,12 +2111,12 @@ function loadFeeds(configs, targetId) {
         var source = configs[i].source;
         bySource[source] = [];
         r.items.forEach(function(item) {
-          item.source = source;
+          var it = {title: item.title, link: item.link, pubDate: item.pubDate, source: source};
           try {
-            var age = Date.now() - new Date(item.pubDate.replace(' ', 'T')).getTime();
+            var age = Date.now() - new Date(it.pubDate.replace(' ', 'T')).getTime();
             if (!isNaN(age) && age > 604800000) return;
           } catch(e) {}
-          if (item.link && item.title && bySource[source].length < 3) bySource[source].push(item);
+          if (it.link && it.title && bySource[source].length < 3) bySource[source].push(it);
         });
       });
       // Interleave articles from different sources for diversity
@@ -1805,7 +2128,7 @@ function loadFeeds(configs, targetId) {
           if (bySource[source][round]) all.push(bySource[source][round]);
         });
       }
-      all.sort(function(a, b) { return new Date(b.pubDate) - new Date(a.pubDate); });
+      all.sort(function(a, b) { return new Date(b.pubDate.replace(' ', 'T')) - new Date(a.pubDate.replace(' ', 'T')); });
       currentFeed = all;
       renderFeed(all, targetId);
     }).catch(function(err) {
