@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<!-- Updated: 2026-06-24 Liquid Glass + Stocks Dropdown v2 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Personal dashboard: live news, scores, messaging, streaming and learning tools.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #121214; --bg2: #0f0f11;
+  --surface: rgba(255,255,255,0.04); --surface2: rgba(255,255,255,0.07);
+  --glass: rgba(18,18,20,0.7); --glass2: rgba(20,20,24,0.8);
+  --glass-hover: rgba(25,25,30,0.85);
+  --line: rgba(255,255,255,0.06); --line2: rgba(255,255,255,0.12);
+  --shadow: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow-xs: 0 1px 4px rgba(0,0,0,0.15);
+  --t1: #f5f5f7; --t2: #a1a1a6; --t3: #777779;
+  --accent: #3b82f6;
+  --red: #ff453a; --red-bg: rgba(255,69,58,0.12); --green: #34c759;
+  --r: 20px;
+  --f: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+html.light{
+  --bg:#f8f8fa; --bg2:#fafafc;
+  --surface:rgba(0,0,0,.03); --surface2:rgba(0,0,0,.06);
+  --glass:rgba(255,255,255,.85); --glass2:rgba(255,255,255,.95);
+  --line:rgba(0,0,0,.08); --line2:rgba(0,0,0,.12);
+  --t1:#1d1d1f; --t2:#6e6e73; --t3:#8e8e93;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{font-family:var(--f);color:var(--t1);min-height:100vh;overflow:hidden;background:linear-gradient(180deg,var(--bg),var(--bg2));display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--f);cursor:pointer;border:none;background:none}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* HEADER */
+#header{display:flex;justify-content:space-between;align-items:center;padding:12px 32px;height:auto;min-height:60px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);box-shadow:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+#s-left,#s-right{display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:6px;cursor:pointer}
+.tesla-logo{width:18px;height:20px;fill:#9945ff;flex-shrink:0}
+.tesla-word{font-size:13px;font-weight:700;letter-spacing:2px;color:var(--t1);line-height:1}
+#s-date{font-size:11px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+#weather-widget{font-size:20px;font-weight:500;display:flex;align-items:center;gap:8px;cursor:pointer}
+.w-temp{color:var(--t1);font-size:16px;font-weight:600}.w-icon{font-size:24px}
+#stock-widget{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;padding-right:14px;border-right:1px solid var(--line)}
+#stock-widget .stk-label{color:var(--t3);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+
+/* MAIN */
+#main{flex:1;padding:20px 32px 120px;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;-webkit-user-select:text;user-select:text}
+#main::-webkit-scrollbar{width:6px}
+#main::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+
+/* LIVE PANEL HERO LAYOUT */
+.live-hero{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;margin-bottom:28px;display:flex;flex-direction:column;gap:16px}
+.live-hero-time{display:flex;align-items:flex-end;gap:48px}
+.live-hero-clock{font-size:48px;font-weight:700;line-height:1;letter-spacing:-1px}
+.live-hero-weather{display:flex;align-items:center;gap:8px;cursor:pointer}
+.live-hero-temp{font-size:22px;font-weight:600}
+.live-hero-icon{font-size:28px}
+.live-stocks-row{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin:0 -24px 0 -24px;padding-left:24px;padding-right:24px}
+.live-stocks-row::-webkit-scrollbar{height:3px}
+.live-stocks-row::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+.stock-chip{display:flex;align-items:center;gap:4px;padding:6px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;white-space:nowrap;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;flex-shrink:0}
+.stock-chip:hover{background:var(--surface2)}
+.stock-chip-sym{color:var(--t1)}
+.stock-chip-px{color:var(--t3);font-weight:500}
+.stock-chip-chg{font-weight:700;min-width:32px;text-align:right}
+.stock-chip-chg.up{color:var(--green)}
+.stock-chip-chg.down{color:var(--red)}
+.panel{display:none;animation:fadeUp .3s ease forwards;overflow:visible}
+.panel.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+
+/* DOCK */
+#dock{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:16px;border:1px solid var(--line);box-shadow:none;z-index:200;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+#dock::-webkit-scrollbar{display:none}
+.dock-btn{display:flex;align-items:center;gap:5px;padding:10px 18px;border-radius:10px;color:var(--t2);font-size:14px;font-weight:600;transition:all .2s cubic-bezier(.34,.69,.66,1);white-space:nowrap;cursor:grab;background:transparent;user-select:none;position:relative}
+.dock-btn:hover{background:var(--surface);color:var(--t1);transform:translateY(-1px)}
+.dock-btn.on{background:var(--accent);color:#fff}
+.dock-btn:active{cursor:grabbing}
+.dock-btn.drag-over{opacity:0.5;transform:scale(0.95)}
+.dock-sep{width:1px;height:20px;background:var(--line);margin:0 3px;opacity:0.5}
+
+/* DOCK SUBMENU (fixed + sibling of #dock so it escapes the dock's overflow clipping) */
+.dock-submenu-trigger::after{content:'▼';margin-left:3px;font-size:9px;display:inline-block;transition:transform .2s cubic-bezier(.34,.69,.66,1)}
+.dock-submenu-trigger.open::after{transform:rotate(180deg)}
+.dock-submenu{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(10px) scale(0.96);opacity:0;pointer-events:none;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:14px;border:1px solid var(--line);box-shadow:none;padding:6px 6px 12px 6px;min-width:180px;max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:250;transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
+.dock-submenu.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0) scale(1)}
+.dock-submenu-item{display:flex;align-items:center;width:100%;padding:10px 16px;border-radius:8px;color:var(--t2);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s cubic-bezier(.34,.69,.66,1)}
+.dock-submenu-item:hover{background:var(--surface);color:var(--t1)}
+.dock-submenu-item.on{background:var(--accent);color:#fff}
+
+/* ICONS (clean line-style set, replaces emoji) */
+.dock-btn svg{width:21px;height:21px;display:block}
+.w-icon{display:flex;align-items:center;justify-content:center}
+.w-icon svg{width:1em;height:1em;display:block}
+.wx-svg{display:inline-block;vertical-align:middle}
+.btn-voice svg{width:19px;height:19px;display:block;flex-shrink:0}
+
+/* EXTERNAL-LINK MODAL (keeps the dashboard alive on single-window browsers) */
+#ext-modal{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:scale(1.02);transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
+#ext-modal.open{opacity:1;pointer-events:auto;transform:none}
+.em-bar{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.em-host{flex:1;min-width:0;font-size:14px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.em-open{font-size:12px;font-weight:600;color:var(--accent);padding:8px 12px;border-radius:8px;white-space:nowrap;text-transform:uppercase;letter-spacing:.2px}
+.em-open:hover{background:var(--surface)}
+.em-close{font-size:12px;font-weight:600;color:#fff;background:var(--accent);padding:8px 16px;border-radius:8px;white-space:nowrap;text-transform:uppercase;letter-spacing:.2px}
+.em-body{flex:1;position:relative;background:var(--bg2)}
+#em-frame{width:100%;height:100%;border:0;background:#fff}
+.em-fallback{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;background:var(--bg2)}
+.em-fallback.show{display:flex}
+.em-fallback-txt{color:var(--t2);font-size:14px;max-width:300px}
+
+/* COMPONENTS */
+.sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--t3);margin:0 0 16px 2px;display:flex;align-items:center;gap:10px;opacity:0.8}
+.cardgroup{background:var(--glass2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:28px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+.row{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);gap:14px;transition:all .2s cubic-bezier(.34,.69,.66,1);min-height:64px;cursor:pointer}
+.row:last-child{border-bottom:none}
+.row:hover{background:var(--glass-hover)}
+.row:active{background:var(--surface2);transform:scale(.99)}
+.appicon{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.appicon svg{width:28px;height:28px;display:block}
+
+.ic-wa{background:linear-gradient(150deg,#2af34f,#0fa362)}
+.ic-tg{background:linear-gradient(150deg,#3ec6ff,#0d83c4)}
+.ic-ms{background:linear-gradient(150deg,#00c6ff,#9a3df0)}
+.ic-gm{background:linear-gradient(150deg,#fff,#f1f3f6)}
+.ic-notes{background:#fff}
+.ic-remind{background:#fff}
+.ic-drive{background:linear-gradient(150deg,#70D4FF,#0A7AFF)}
+.ic-photos{background:#fff}
+.ic-crave{background:#1a1a2e}.ic-telus{background:#4b286d}.ic-appletv{background:#000}
+.ic-sleeper{background:#2A2C38}.ic-yahoo{background:#400090}
+.ic-nlm{background:#1c1c1e}.ic-oe{background:linear-gradient(150deg,#F0603A,#E0451C)}
+.ic-claude{background:linear-gradient(135deg,#1a1a1a,#333333)}.ic-gemini{background:linear-gradient(135deg,#4285F4,#1F2937)}.ic-perplexity{background:linear-gradient(135deg,#000,#1a1a1a)}
+.ic-nlm svg{width:36px;height:36px}.ic-oe svg{width:44px;height:44px}.ic-claude svg{width:32px;height:32px}.ic-gemini svg{width:32px;height:32px}.ic-perplexity svg{width:32px;height:32px}
+
+.rl{flex:1;min-width:0}
+.rl-t{font-size:18px;font-weight:600;color:var(--t1);letter-spacing:-.2px;line-height:1.2}
+.rl-s{font-size:13px;color:var(--t3);margin-top:2px}
+.chev{color:var(--line2);font-size:24px;font-weight:300}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.muted{padding:40px;text-align:center;color:var(--t3)}
+.col{display:flex;flex-direction:column;gap:20px}
+.h-news{height:600px}.h-scores{height:340px}.h-sports{max-height:700px}
+
+/* FEEDS */
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite ease-in-out}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
+.feed-box{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow-y:auto;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+.feed-box::-webkit-scrollbar{width:5px}
+.feed-box::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+.feed-item{display:block;padding:16px 20px;border-bottom:1px solid var(--line);transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
+.feed-item:last-child{border-bottom:none}
+.feed-item:hover{background:var(--glass-hover)}
+.feed-item:active{background:var(--surface2)}
+.bookmark-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--line);padding:0;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);flex-shrink:0;color:var(--t3)}
+.bookmark-btn:hover{background:var(--surface);transform:scale(1.1);color:var(--t1)}
+.bookmark-btn.saved{color:var(--accent)}
+.bookmark-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5}
+.feed-t{font-size:16px;font-weight:500;line-height:1.45;color:var(--t1);letter-spacing:-.2px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word}
+.feed-m{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.feed-src{color:var(--accent)}
+.news-tabs{margin-left:auto;display:flex;gap:4px}
+.ntab{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;color:var(--t3);background:var(--surface);border:1px solid var(--line);text-transform:uppercase;letter-spacing:.3px;transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
+.ntab:hover{background:var(--surface2);color:var(--t1)}
+.ntab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ntab:not(.on):active{background:var(--surface2)}
+
+/* CAPTURE */
+.capbox{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:var(--t1);font-family:var(--f);font-size:14px;line-height:1.6;padding:12px 14px;min-height:90px;resize:none;outline:none;transition:all .2s cubic-bezier(.34,.69,.66,1)}
+.capbox:hover{border-color:var(--line2);background:rgba(255,255,255,.06)}
+.capbox:focus{border-color:var(--accent);background:var(--surface2);box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+.capbox::placeholder{color:var(--t3);opacity:.5}
+.capbtns{display:flex;gap:10px;margin-top:12px}
+.btn{padding:12px 24px;border-radius:10px;font-size:14px;font-weight:600;transition:all .2s cubic-bezier(.34,.69,.66,1);border:none;cursor:pointer;user-select:none}
+.btn-pri{background:var(--accent);color:#fff;box-shadow:none}
+.btn-pri:hover{background:rgba(59,130,246,0.9);transform:translateY(-1px)}
+.btn-pri:active{transform:scale(.98)}
+.btn-pri:disabled{opacity:.5;cursor:not-allowed}
+.btn-gh{background:var(--surface);color:var(--t1);border:1px solid var(--line);transition:all .2s cubic-bezier(.34,.69,.66,1)}
+.btn-gh:hover{background:var(--surface2);border-color:var(--line2)}
+.btn-voice{margin-left:auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line);color:var(--t1);padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;transition:all .2s cubic-bezier(.34,.69,.66,1)}
+.btn-voice:hover{background:var(--surface);border-color:var(--line2)}
+.btn-voice.rec{background:var(--red-bg);color:var(--red);border-color:var(--red);animation:rec-pulse 1.5s infinite}
+@keyframes rec-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* NOTES */
+.noterow{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.noterow:last-child{border-bottom:none}
+.n-time{font-size:11px;color:var(--t3);font-weight:600;white-space:nowrap;padding-top:2px;text-transform:uppercase;letter-spacing:.2px}
+.n-txt{font-size:14px;color:var(--t1);line-height:1.6;flex:1}
+.n-del{font-size:16px;color:var(--t3);padding:4px 6px;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);border-radius:4px}
+.n-del:hover{background:rgba(255,69,58,.12);color:var(--red)}
+.n-del:active{transform:scale(.95)}
+
+/* CALCULATOR */
+.calc-wrap{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:28px;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+.calc-display{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px;text-align:right;min-height:60px;display:flex;flex-direction:column;justify-content:center}
+.calc-expr{font-size:12px;color:var(--t3);min-height:16px;text-transform:uppercase;letter-spacing:.2px}
+.calc-val{font-size:32px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--t1);word-break:break-all}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.calc-key{padding:18px;border-radius:10px;font-size:18px;font-weight:600;text-align:center;transition:all .15s cubic-bezier(.34,.69,.66,1);border:1px solid var(--line);cursor:pointer}
+.calc-key:hover{background:var(--surface2);border-color:var(--line2);transform:translateY(-1px)}
+.calc-key:active{transform:scale(.97)}
+.calc-num{background:var(--surface);color:var(--t1)}
+.calc-op{background:rgba(59,130,246,.12);color:var(--accent);border-color:rgba(59,130,246,.2)}
+.calc-fn{background:var(--surface2);color:var(--t2)}
+.calc-eq{background:var(--accent);color:#fff;border-color:var(--accent)}
+.calc-zero{grid-column:span 2}
+
+/* SCORE CARD */
+.score-card{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.score-card:last-child{border-bottom:none}
+.score-teams{flex:1}
+.score-row{display:flex;justify-content:space-between;font-size:16px;font-weight:600;color:var(--t1);padding:2px 0}
+.score-status{font-size:11px;font-weight:700;color:var(--accent);text-align:right;width:100px;margin-left:12px;text-transform:uppercase;letter-spacing:.2px}
+
+/* SETTINGS */
+.set-group{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:28px;max-width:580px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:all .3s cubic-bezier(.34,.69,.66,1)}
+.set-row{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);gap:14px}
+.set-row:last-child{border-bottom:none}
+.set-row.col-dir{flex-direction:column;align-items:flex-start}
+.set-label{flex:1;min-width:0}
+.set-t{font-size:16px;font-weight:600;color:var(--t1);letter-spacing:-.1px}
+.set-s{font-size:13px;color:var(--t3);margin-top:2px}
+.toggle{width:48px;height:28px;border-radius:100px;background:var(--surface2);position:relative;transition:all .3s cubic-bezier(.34,.69,.66,1);flex-shrink:0;border:1px solid var(--line);cursor:pointer}
+.toggle:hover{border-color:var(--line2)}
+.toggle.on{background:var(--green);border-color:var(--green)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.34,.69,.66,1)}
+.toggle.on::after{transform:translateX(18px)}
+.theme-presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;width:100%}
+.theme-preset{padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);background:var(--surface)}
+.theme-preset:hover{border-color:var(--accent);background:var(--surface2);transform:translateY(-1px)}
+.theme-preset.on{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:none}
+.color-picker-wrap{display:flex;align-items:center;gap:12px;width:100%}
+input[type="color"]{width:44px;height:36px;border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1)}
+input[type="color"]:hover{border-color:var(--line2)}
+
+/* THEME MODE SELECTOR */
+.theme-mode-selector{display:flex;gap:4px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);width:fit-content;padding:3px}
+.theme-mode-btn{flex:1;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;color:var(--t2);background:transparent;border:none;border-radius:6px;transition:all .2s cubic-bezier(.34,.69,.66,1);min-width:55px;text-align:center;text-transform:uppercase;letter-spacing:.2px}
+.theme-mode-btn:hover{color:var(--t1);background:rgba(255,255,255,.08)}
+.theme-mode-btn.active{background:var(--accent);color:#fff;border:none}
+
+/* STOCKS DROPDOWN */
+#stocks-dropdown{position:fixed;bottom:180px;left:50%;margin-left:-160px;width:320px;background:var(--glass2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:14px;box-shadow:none;z-index:260;transform:translateY(12px) scale(.96);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,.69,.66,1);max-height:500px;display:flex;flex-direction:column}
+#stocks-dropdown.open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+.stocks-dropdown-header{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:6px}
+.stocks-dropdown-header input{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--t1);font-size:13px;font-family:var(--f);outline:none;transition:all .2s cubic-bezier(.34,.69,.66,1);text-transform:uppercase}
+.stocks-dropdown-header input:hover{border-color:var(--line2);background:rgba(255,255,255,.06)}
+.stocks-dropdown-header input:focus{border-color:var(--accent);background:var(--surface2);box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+.stocks-dropdown-header button{padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s cubic-bezier(.34,.69,.66,1);text-transform:uppercase}
+.stocks-dropdown-header button:hover{background:rgba(59,130,246,0.9);transform:translateY(-1px)}
+.stocks-dropdown-header button:active{transform:scale(.97)}
+.stocks-dropdown-list{flex:1;overflow-y:auto;min-height:70px;max-height:350px}
+.stocks-dropdown-list::-webkit-scrollbar{width:5px}
+.stocks-dropdown-list::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+.stock-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;gap:8px;transition:all .15s cubic-bezier(.34,.69,.66,1);cursor:pointer}
+.stock-item:hover{background:var(--glass-hover)}
+.stock-item:last-child{border-bottom:none}
+.stock-info{flex:1;min-width:0}
+.stock-sym{font-weight:600;color:var(--t1);margin-bottom:1px}
+.stock-px{color:var(--t2);font-size:11px}
+.stock-chg{font-weight:700;min-width:45px;text-align:right;font-size:13px}
+.stock-chg.up{color:var(--green)}
+.stock-chg.down{color:var(--red)}
+.stock-remove{background:transparent;color:var(--t3);font-size:14px;padding:0;cursor:pointer;transition:color .2s ease;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+.stock-remove:hover{color:var(--accent)}
+.stocks-dropdown-footer{padding:8px 12px;border-top:1px solid var(--line);font-size:11px;color:var(--t3);text-align:center;background:var(--surface);text-transform:uppercase;letter-spacing:.2px}
+
+/* RESPONSIVE (phones / portrait) */
+@media (max-width:760px){
+  html,body{height:auto;overflow:visible}
+  #main{overflow-y:auto;flex:none}
+  #header{padding:10px 16px;height:auto;gap:12px;min-height:56px}
+  #s-left,#s-right{gap:12px}
+  #s-date{font-size:10px}
+  #stock-widget{font-size:12px;padding-right:8px}#stock-widget .stk-label{font-size:10px}
+  #weather-widget{font-size:18px}.w-icon{font-size:20px}.w-temp{font-size:14px}
+  #main{padding:12px 14px 100px}
+  .split{grid-template-columns:1fr}
+  .rl-t{font-size:16px}.appicon{width:44px;height:44px}.appicon svg{width:26px;height:26px}
+  .h-news,.h-scores,.h-sports{height:auto;max-height:none}
+  .feed-box{overflow:visible}
+  #dock{gap:4px;padding:8px 12px;bottom:16px}.dock-btn{padding:8px 14px;font-size:13px}
+}
+</style>
+<script src="dashboard-cache.js"></script>
+</head>
+<body>
+
+<header id="header">
+  <div id="s-left">
+    <!-- Tesla logo + wordmark -->
+    <div class="brand">
+      <svg class="tesla-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Tesla">
+        <path d="M12 5.362l2.475-3.026s4.245.09 8.471 2.054c-1.082 1.636-3.231 2.438-3.231 2.438-.146-1.439-1.154-1.79-4.354-1.79L12 24 8.619 5.038c-3.18 0-4.207.35-4.353 1.79 0 0-2.15-.803-3.231-2.438C5.26 2.427 9.524 2.336 9.524 2.336L12 5.362l-.001.001H12z"/>
+      </svg>
+      <span class="tesla-word">TESLA</span>
+    </div>
+    <div id="s-date">———</div>
+  </div>
+  <div id="s-right">
+    <div id="stock-widget">
+      <span class="stk-label">XEQT.TO</span>
+      <a href="https://finance.yahoo.com/quote/XEQT.TO/" target="_blank" rel="noopener" id="stk-px" style="color:var(--t1)">Loading...</a>
+      <span id="stk-chg" style="font-size:15px">—</span>
+    </div>
+    <div id="weather-widget" onclick="goPanel('weather')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPanel('weather')}" style="cursor:pointer" title="Open weather" role="button" tabindex="0">
+      <span class="w-temp">--°C</span>
+      <span class="w-icon"></span>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- LIVE PANEL: GLANCEABLE DASHBOARD ESSENTIALS -->
+  <section class="panel on" id="p-live">
+    <!-- Hero: Time + Weather -->
+    <div class="live-hero">
+      <div class="live-hero-time">
+        <div class="live-hero-clock" id="live-clock">--:--</div>
+        <div class="live-hero-weather" onclick="goPanel('weather')" title="View full forecast">
+          <div>
+            <div class="live-hero-temp" id="live-temp">--°C</div>
+            <div class="live-hero-desc" id="live-weather-desc">—</div>
+          </div>
+          <div class="live-hero-icon" id="live-icon">🌤</div>
+        </div>
+      </div>
+      <!-- Top Stocks Chip Row -->
+      <div class="live-stocks-row" id="live-stocks-row">
+        <div class="muted" style="padding:8px;font-size:12px">Loading stocks…</div>
+      </div>
+    </div>
+
+    <!-- News, Scores, Fantasy in tabbed layout -->
+    <div class="split">
+      <div>
+        <div class="sec-title"><div class="live-dot"></div> Live News
+          <div class="news-tabs">
+            <button class="ntab on" data-news="local">Local</button>
+            <button class="ntab" data-news="national">National</button>
+            <button class="ntab" data-news="world">World</button>
+          </div>
+        </div>
+        <div class="feed-box h-news" id="news-feed">
+          <div class="muted">Loading News…</div>
+        </div>
+      </div>
+      <div class="col">
+        <div>
+          <div class="sec-title">Fantasy Leagues</div>
+          <div class="cardgroup" style="margin-bottom:0">
+            <a class="row" href="https://sleeper.com" target="_blank" rel="noopener" style="min-height:64px;padding:14px 20px">
+              <div class="appicon ic-sleeper" style="width:44px;height:44px;border-radius:12px">
+                <svg viewBox="0 0 24 24" fill="#13C4A3" style="width:24px;height:24px"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+              </div>
+              <div class="rl"><div class="rl-t" style="font-size:17px">Sleeper</div></div>
+              <span class="chev">›</span>
+            </a>
+            <a class="row" href="https://sports.yahoo.com/fantasy/" target="_blank" rel="noopener" style="min-height:64px;padding:14px 20px">
+              <div class="appicon ic-yahoo" style="width:44px;height:44px;border-radius:12px">
+                <svg viewBox="0 0 24 24" fill="#fff" style="width:24px;height:24px"><path d="M21.9 4.3L13.8 22H9.6L4.7 9.4l4.6-.6 2.8 8.1 4.5-12.6z"/></svg>
+              </div>
+              <div class="rl"><div class="rl-t" style="font-size:17px">Yahoo Fantasy</div></div>
+              <span class="chev">›</span>
+            </a>
+          </div>
+        </div>
+        <div>
+          <div class="sec-title"><div class="live-dot"></div> My Teams</div>
+          <div class="feed-box h-scores" id="scores-feed">
+            <div class="muted">Loading Scores…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPORTS NEWS PANEL -->
+  <section class="panel" id="p-sports">
+    <div class="sec-title"><div class="live-dot"></div> Sports News</div>
+    <div class="feed-box h-sports" id="sports-feed">
+      <div class="muted">Loading Sports News…</div>
+    </div>
+  </section>
+
+  <!-- MESSAGES PANEL -->
+  <section class="panel" id="p-msg">
+    <div class="sec-title">Messaging Hub</div>
+    <div class="split">
+      <div class="cardgroup">
+        <a class="row" href="https://web.whatsapp.com" target="_blank" rel="noopener">
+          <div class="appicon ic-wa"><svg viewBox="0 0 24 24" fill="#fff"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.46-2.39-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35m-5.42 7.4h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37A9.86 9.86 0 0 1 2.16 11.9c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9A9.82 9.82 0 0 1 21.93 11.9c0 5.45-4.44 9.88-9.89 9.88m8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.69 1.45h.01c6.55 0 11.89-5.34 11.89-11.89a11.82 11.82 0 0 0-3.48-8.41Z"/></svg></div>
+          <div class="rl"><div class="rl-t">WhatsApp</div><div class="rl-s">Secure chats</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://web.telegram.org" target="_blank" rel="noopener">
+          <div class="appicon ic-tg"><svg viewBox="0 0 24 24" fill="#fff"><path d="M11.94 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.06 0zm4.96 7.22c.1 0 .32.02.47.14a.5.5 0 0 1 .17.33c.02.09.04.3.02.47-.18 1.9-.96 6.5-1.36 8.63-.17.9-.5 1.2-.82 1.23-.7.06-1.23-.46-1.9-.9-1.06-.69-1.65-1.12-2.68-1.8-1.18-.78-.42-1.21.26-1.91.18-.18 3.25-2.98 3.31-3.23.01-.03.01-.15-.06-.21s-.17-.04-.25-.02c-.1.02-1.79 1.14-5.06 3.34-.48.33-.91.49-1.3.48-.43-.01-1.25-.24-1.87-.44-.75-.25-1.35-.37-1.3-.79.03-.22.33-.44.89-.66 3.5-1.52 5.83-2.53 7-3.01 3.33-1.39 4.03-1.63 4.48-1.64z"/></svg></div>
+          <div class="rl"><div class="rl-t">Telegram</div><div class="rl-s">Cloud messenger</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+      <div class="cardgroup">
+        <a class="row" href="https://www.messenger.com" target="_blank" rel="noopener">
+          <div class="appicon ic-ms"><svg viewBox="0 0 24 24" fill="#fff"><path d="M.001 11.64C.001 4.95 5.241 0 12 0s12 4.95 12 11.64c0 6.69-5.241 11.64-12 11.64-1.214 0-2.379-.16-3.473-.46a.96.96 0 0 0-.641.05l-2.379 1.05a.96.96 0 0 1-1.348-.85l-.065-2.13a.96.96 0 0 0-.322-.68C1.07 17.52.001 14.74.001 11.64zm8.32-2.19l-3.525 5.59c-.338.54.322 1.18.832.81l3.787-2.87a.72.72 0 0 1 .866 0l2.804 2.1a1.8 1.8 0 0 0 2.6-.48l3.525-5.59c.338-.54-.322-1.18-.832-.81l-3.787 2.87a.72.72 0 0 1-.866 0L11.92 8.97a1.8 1.8 0 0 0-2.6.48z"/></svg></div>
+          <div class="rl"><div class="rl-t">Messenger</div><div class="rl-s">Facebook chats</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://mail.google.com" target="_blank" rel="noopener">
+          <div class="appicon ic-gm"><svg viewBox="0 0 48 48"><path fill="#4caf50" d="M45 16.2l-5 2.75-5 4.75L35 40h7c1.657 0 3-1.343 3-3V16.2z"/><path fill="#1e88e5" d="M3 16.2l3.614 1.71L13 23.7V40H6c-1.657 0-3-1.343-3-3V16.2z"/><polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"/><path fill="#c62828" d="M3 12.298V16.2l10 7.5V11.2L9.876 8.859C9.132 8.301 8.228 8 7.298 8 4.924 8 3 9.924 3 12.298z"/><path fill="#fbc02d" d="M45 12.298V16.2l-10 7.5V11.2l3.124-2.341C38.868 8.301 39.772 8 40.702 8 43.076 8 45 9.924 45 12.298z"/></svg></div>
+          <div class="rl"><div class="rl-t">Gmail</div><div class="rl-s">Google Mail</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPLE PANEL -->
+  <section class="panel" id="p-apple">
+    <div class="sec-title">Apple Ecosystem</div>
+    <div class="split">
+      <div class="cardgroup">
+        <a class="row" href="https://www.icloud.com/photos" target="_blank" rel="noopener">
+          <div class="appicon ic-photos"><svg viewBox="0 0 48 48"><g transform="translate(24,24)"><ellipse rx="5.5" ry="10" cy="-8.5" fill="#FBC02D" opacity=".85" transform="rotate(0)"/><ellipse rx="5.5" ry="10" cy="-8.5" fill="#7CB342" opacity=".85" transform="rotate(45)"/><ellipse rx="5.5" ry="10" cy="-8.5" fill="#26C6DA" opacity=".85" transform="rotate(90)"/><ellipse rx="5.5" ry="10" cy="-8.5" fill="#29A6F4" opacity=".85" transform="rotate(135)"/><ellipse rx="5.5" ry="10" cy="-8.5" fill="#5C6BC0" opacity=".85" transform="rotate(180)"/><ellipse rx="5.5" ry="10" cy="-8.5" fill="#AB47BC" opacity=".85" transform="rotate(225)"/><ellipse rx="5.5" ry="10" cy="-8.5" fill="#EC407A" opacity=".85" transform="rotate(270)"/><ellipse rx="5.5" ry="10" cy="-8.5" fill="#F57C00" opacity=".85" transform="rotate(315)"/></g></svg></div>
+          <div class="rl"><div class="rl-t">Photos</div><div class="rl-s">Photo library</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://www.icloud.com/notes" target="_blank" rel="noopener">
+          <div class="appicon ic-notes"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.5" fill="#fff" stroke="#EAEAEA" stroke-width=".6"/><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5V7.5H4z" fill="#FFC93C"/><g stroke="#C7C7CC" stroke-width="1.4" stroke-linecap="round"><line x1="7.5" y1="11.5" x2="16.5" y2="11.5"/><line x1="7.5" y1="14.5" x2="16.5" y2="14.5"/><line x1="7.5" y1="17.5" x2="13" y2="17.5"/></g></svg></div>
+          <div class="rl"><div class="rl-t">Notes</div><div class="rl-s">iCloud Notes</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+      <div class="cardgroup">
+        <a class="row" href="https://www.icloud.com/reminders" target="_blank" rel="noopener">
+          <div class="appicon ic-remind"><svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.3" fill="#FF3B30"/><circle cx="6" cy="12.5" r="2.3" fill="#FF9500"/><circle cx="6" cy="18" r="2.3" fill="#007AFF"/><g stroke="#D2D2D7" stroke-width="1.6" stroke-linecap="round"><line x1="10.5" y1="7" x2="19" y2="7"/><line x1="10.5" y1="12.5" x2="19" y2="12.5"/><line x1="10.5" y1="18" x2="16" y2="18"/></g></svg></div>
+          <div class="rl"><div class="rl-t">Reminders</div><div class="rl-s">To-do lists</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://www.icloud.com/iclouddrive" target="_blank" rel="noopener">
+          <div class="appicon ic-drive"><svg viewBox="0 0 24 24" fill="#fff"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.99 5.99 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></div>
+          <div class="rl"><div class="rl-t">Files</div><div class="rl-s">iCloud Drive</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPTURE + CALCULATOR PANEL -->
+  <section class="panel" id="p-cap">
+    <div class="split">
+      <div>
+        <div class="sec-title">Quick Capture</div>
+        <textarea class="capbox" id="cap-input" placeholder="Type or dictate a thought..."></textarea>
+        <div class="capbtns">
+          <button class="btn btn-pri" onclick="saveNote()">Save Note</button>
+          <button class="btn btn-gh" onclick="document.getElementById('cap-input').value=''">Clear</button>
+          <button class="btn btn-gh btn-voice" id="voice-btn" onclick="toggleVoice()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>Dictate</span></button>
+        </div>
+        <div class="sec-title" style="margin-top:28px">Saved Thoughts</div>
+        <div class="cardgroup" id="notes-list"></div>
+      </div>
+      <div>
+        <div class="sec-title">Calculator</div>
+        <div class="calc-wrap">
+          <div class="calc-display">
+            <div class="calc-expr" id="calc-expr"></div>
+            <div class="calc-val" id="calc-val">0</div>
+          </div>
+          <div class="calc-grid">
+            <button class="calc-key calc-fn" onclick="calcClear()">C</button>
+            <button class="calc-key calc-fn" onclick="calcToggle()">±</button>
+            <button class="calc-key calc-fn" onclick="calcPercent()">%</button>
+            <button class="calc-key calc-op" onclick="calcOp('/')">÷</button>
+            <button class="calc-key calc-num" onclick="calcNum('7')">7</button>
+            <button class="calc-key calc-num" onclick="calcNum('8')">8</button>
+            <button class="calc-key calc-num" onclick="calcNum('9')">9</button>
+            <button class="calc-key calc-op" onclick="calcOp('*')">×</button>
+            <button class="calc-key calc-num" onclick="calcNum('4')">4</button>
+            <button class="calc-key calc-num" onclick="calcNum('5')">5</button>
+            <button class="calc-key calc-num" onclick="calcNum('6')">6</button>
+            <button class="calc-key calc-op" onclick="calcOp('-')">−</button>
+            <button class="calc-key calc-num" onclick="calcNum('1')">1</button>
+            <button class="calc-key calc-num" onclick="calcNum('2')">2</button>
+            <button class="calc-key calc-num" onclick="calcNum('3')">3</button>
+            <button class="calc-key calc-op" onclick="calcOp('+')">+</button>
+            <button class="calc-key calc-num calc-zero" onclick="calcNum('0')">0</button>
+            <button class="calc-key calc-num" onclick="calcDot()">.</button>
+            <button class="calc-key calc-eq" onclick="calcEqual()">=</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STREAMING PANEL -->
+  <section class="panel" id="p-stream">
+    <div class="sec-title">Theater Mode</div>
+    <div class="split">
+      <div class="cardgroup">
+        <a class="row" href="https://www.crave.ca" target="_blank" rel="noopener">
+          <div class="appicon ic-crave"><svg viewBox="0 0 24 24" fill="#fff"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></div>
+          <div class="rl"><div class="rl-t">Crave</div><div class="rl-s">HBO & Movies</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://www.telustvplus.com" target="_blank" rel="noopener">
+          <div class="appicon ic-telus"><svg viewBox="0 0 24 24" fill="#fff"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-4-4l2 2a7.074 7.074 0 0 1 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></div>
+          <div class="rl"><div class="rl-t">Telus TV+</div><div class="rl-s">Live TV & On Demand</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+      <div class="cardgroup">
+        <a class="row" href="https://tv.apple.com" target="_blank" rel="noopener">
+          <div class="appicon ic-appletv"><svg viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></div>
+          <div class="rl"><div class="rl-t">Apple TV+</div><div class="rl-s">Apple Originals</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI & LEARNING PANEL -->
+  <section class="panel" id="p-learn">
+    <div class="sec-title">AI & Research Tools</div>
+    <div class="split">
+      <div class="cardgroup">
+        <a class="row" href="https://claude.ai" target="_blank" rel="noopener">
+          <div class="appicon ic-claude"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-3-9c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" fill="#fff"/></svg></div>
+          <div class="rl"><div class="rl-t">Claude</div><div class="rl-s">AI assistant by Anthropic</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://gemini.google.com" target="_blank" rel="noopener">
+          <div class="appicon ic-gemini"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 8v8c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V8l-10-6zm0 18c-3.31 0-6-2.69-6-6 0-1.49.55-2.86 1.46-3.92L12 7.07l4.54 4.01C17.45 12.14 18 13.51 18 15c0 3.31-2.69 6-6 6z" fill="#fff"/></svg></div>
+          <div class="rl"><div class="rl-t">Gemini</div><div class="rl-s">AI by Google</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://www.perplexity.ai" target="_blank" rel="noopener">
+          <div class="appicon ic-perplexity"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#fff"/></svg></div>
+          <div class="rl"><div class="rl-t">Perplexity</div><div class="rl-s">AI research engine</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+      <div class="cardgroup">
+        <a class="row" href="https://notebooklm.google.com" target="_blank" rel="noopener">
+          <div class="appicon ic-nlm"><svg viewBox="0 1.14 174.56 127.99"><path fill="#fff" d="M87.27,1.14C39.07,1.14,0,39.88,0,87.69v41.44h16.09v-4.13c0-19.39,15.84-35.11,35.39-35.11s35.39,15.72,35.39,35.11v4.13h16.09v-4.13c0-28.2-23.05-51.05-51.48-51.05-11.07,0-21.32,3.46-29.72,9.37,8.79-17.32,26.88-29.21,47.77-29.21,29.51,0,53.44,23.74,53.44,53v22.02h16.09v-22.02c0-38.08-31.13-68.96-69.53-68.96-17.27,0-33.06,6.24-45.22,16.58,11.94-22.39,35.65-37.64,62.97-37.64,39.32,0,71.19,31.61,71.19,70.6v41.44h16.09v-41.44C174.55,39.88,135.48,1.14,87.27,1.14Z"/></svg></div>
+          <div class="rl"><div class="rl-t">NotebookLM</div><div class="rl-s">AI research notebook</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://www.openevidence.com" target="_blank" rel="noopener">
+          <div class="appicon ic-oe"><svg viewBox="0 0 56 56"><text x="28" y="38" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="30" font-weight="700" fill="#fff">&#338;</text></svg></div>
+          <div class="rl"><div class="rl-t">OpenEvidence</div><div class="rl-s">Medical AI search</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS PANEL -->
+  <section class="panel" id="p-set">
+    <div class="sec-title">Appearance</div>
+    <div class="set-group">
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Theme Mode</div><div class="set-s">Choose your preferred appearance</div></div>
+        <div class="theme-mode-selector" id="theme-mode-selector">
+          <button class="theme-mode-btn" data-theme-mode="light" aria-label="Light theme">Light</button>
+          <button class="theme-mode-btn" data-theme-mode="dark" aria-label="Dark theme">Dark</button>
+          <button class="theme-mode-btn" data-theme-mode="auto" aria-label="Auto theme">Auto</button>
+        </div>
+      </div>
+    </div>
+    <div class="sec-title">Color & Presets</div>
+    <div class="set-group">
+      <div class="set-row col-dir">
+        <div class="set-label" style="width:100%"><div class="set-t">Theme Presets</div><div class="set-s">Choose a color theme</div></div>
+        <div class="theme-presets" id="theme-presets">
+          <button class="theme-preset on" data-theme-preset="default">Default<br><span style="font-size:10px">Blue</span></button>
+          <button class="theme-preset" data-theme-preset="cyberpunk">Cyberpunk<br><span style="font-size:10px">Neon</span></button>
+          <button class="theme-preset" data-theme-preset="sunset">Sunset<br><span style="font-size:10px">Warm</span></button>
+          <button class="theme-preset" data-theme-preset="forest">Forest<br><span style="font-size:10px">Green</span></button>
+          <button class="theme-preset" data-theme-preset="lavender">Lavender<br><span style="font-size:10px">Purple</span></button>
+        </div>
+      </div>
+      <div class="set-row col-dir">
+        <div class="set-label" style="width:100%"><div class="set-t">Custom Accent</div><div class="set-s">Pick any color for accents</div></div>
+        <div class="color-picker-wrap">
+          <input type="color" id="accent-picker" value="#3a82f6" aria-label="Custom accent color">
+          <span style="font-size:13px;color:var(--t3)">or choose a preset</span>
+        </div>
+      </div>
+    </div>
+    <div class="sec-title">Modules</div>
+    <div class="set-group">
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Sports News</div><div class="set-s">Live sports headlines</div></div>
+        <button class="toggle" data-set="sports" aria-label="Toggle Sports module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Messages</div><div class="set-s">Messaging hub shortcuts</div></div>
+        <button class="toggle" data-set="msg" aria-label="Toggle Messages module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Apple</div><div class="set-s">Apple ecosystem shortcuts</div></div>
+        <button class="toggle" data-set="apple" aria-label="Toggle Apple module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Capture</div><div class="set-s">Quick notes & calculator</div></div>
+        <button class="toggle" data-set="cap" aria-label="Toggle Capture module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Streaming</div><div class="set-s">Theater mode shortcuts</div></div>
+        <button class="toggle" data-set="stream" aria-label="Toggle Streaming module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Learning</div><div class="set-s">Research & learning tools</div></div>
+        <button class="toggle" data-set="learn" aria-label="Toggle Learning module"></button>
+      </div>
+    </div>
+    <button class="btn btn-gh" onclick="resetSettings()">Reset to defaults</button>
+  </section>
+
+  <!-- BOOKMARKS PANEL -->
+  <section class="panel" id="p-saved">
+    <div class="sec-title">Saved Articles</div>
+    <div class="cardgroup" id="bookmarks-list"><div class="muted">No saved articles yet. Click the bookmark icon on any story.</div></div>
+  </section>
+
+  <!-- TASKS/TODO PANEL -->
+  <section class="panel" id="p-tasks">
+    <div class="sec-title">Tasks</div>
+    <div style="margin-bottom:24px">
+      <input type="text" id="task-input" placeholder="Add a new task..." class="capbox" style="min-height:50px;margin-bottom:10px">
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-pri" onclick="addTask()">Add Task</button>
+        <button class="btn btn-gh" onclick="clearCompletedTasks()">Clear Done</button>
+      </div>
+      <div style="margin-top:14px;font-size:13px;color:var(--t3)" id="task-count"></div>
+    </div>
+    <div class="cardgroup" id="tasks-list"><div class="muted">No tasks. Add one to get started!</div></div>
+  </section>
+
+  <!-- WEATHER FORECAST PANEL -->
+  <section class="panel" id="p-weather">
+    <div class="sec-title">7-Day Forecast</div>
+    <div id="forecast-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
+      <div class="muted">Loading forecast...</div>
+    </div>
+  </section>
+
+  <!-- QUICK LINKS PANEL -->
+  <section class="panel" id="p-links">
+    <div class="sec-title">Quick Links</div>
+    <div style="margin-bottom:24px">
+      <input type="text" id="link-title" placeholder="Link title" class="capbox" style="min-height:45px;margin-bottom:8px">
+      <input type="url" id="link-url" placeholder="https://example.com" class="capbox" style="min-height:45px;margin-bottom:10px">
+      <button class="btn btn-pri" onclick="addLink()">Add Link</button>
+    </div>
+    <div class="split" id="links-list"><div class="muted">No links yet. Add your favorites!</div></div>
+  </section>
+
+</main>
+
+<nav id="dock">
+  <button class="dock-btn on" data-p="live" draggable="true">Live</button>
+  <button class="dock-btn" data-p="msg" draggable="true">Messages</button>
+  <button class="dock-btn dock-submenu-trigger" id="dock-more-btn" aria-label="More menu" aria-expanded="false">More</button>
+  <button class="dock-btn" data-p="set" draggable="true" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</nav>
+
+<!-- Submenu lives outside #dock so it isn't clipped by the dock's overflow / transform -->
+<div class="dock-submenu" id="dock-submenu">
+  <button class="dock-submenu-item" data-p="sports">Sports</button>
+  <button class="dock-submenu-item" data-p="apple">Apple</button>
+  <button class="dock-submenu-item" data-p="cap">Capture</button>
+  <button class="dock-submenu-item" data-p="stream">Streaming</button>
+  <button class="dock-submenu-item" data-p="learn">Learning</button>
+  <button class="dock-submenu-item" data-p="saved">Saved</button>
+  <button class="dock-submenu-item" data-p="tasks">Tasks</button>
+  <button class="dock-submenu-item" data-p="stocks">Stocks</button>
+  <button class="dock-submenu-item" data-p="weather">Weather</button>
+  <button class="dock-submenu-item" data-p="links">Links</button>
+</div>
+
+<!-- External-link modal: opens links in-place so the dashboard is never lost -->
+<div id="ext-modal" aria-hidden="true">
+  <div class="em-bar">
+    <span class="em-host" id="em-host"></span>
+    <a class="em-open" id="em-open" target="_blank" rel="noopener">Open externally ↗</a>
+    <button class="em-close" id="em-close" aria-label="Back to dashboard">Done</button>
+  </div>
+  <div class="em-body">
+    <iframe id="em-frame" title="External page" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+    <div class="em-fallback" id="em-fallback">
+      <div class="em-fallback-txt">This site can’t be shown inside the dashboard.</div>
+      <a class="btn btn-pri" id="em-fallback-open" target="_blank" rel="noopener">Open in new tab</a>
+    </div>
+  </div>
+</div>
+
+<div id="stocks-dropdown">
+  <div class="stocks-dropdown-header">
+    <input type="text" id="stocks-dropdown-input" placeholder="Add ticker (e.g., AAPL)" style="text-transform:uppercase">
+    <button onclick="addStock()">Add</button>
+  </div>
+  <div class="stocks-dropdown-list" id="stocks-dropdown-list">
+    <div class="muted" style="padding:20px;text-align:center;font-size:13px">No stocks yet</div>
+  </div>
+</div>
+
+<script>
+// ── VARIABLES (declared early to avoid undefined reference errors) ──
+var SETTINGS_KEY = 'dash_settings_v1';
+var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true}};
+var settings;
+var themePresets = {default: {accent:'#3a82f6'}, cyberpunk: {accent:'#ff006e'}, sunset: {accent:'#ff6b35'}, forest: {accent:'#22c55e'}, lavender: {accent:'#a78bfa'}};
+var draggedBtn = null;
+var bookmarks = [];
+var tasks = [];
+var watchlist = [];
+var quickLinks = [];
+var currentFeed = [];
+var RSS = 'https://api.rss2json.com/v1/api.json?rss_url=';
+var API_BASE = window.location.origin.includes('vercel') ? window.location.origin : null; // Use local proxy if deployed on Vercel
+var newsCategories = {};
+var calcCur = '0', calcPrev = '', calcOperator = '', calcReset = false;
+var notes = [];
+var rec = null, isRec = false;
+var inflightFetches = {}; // de-dupes concurrent identical fetchCached() calls
+
+// Initialize settings from localStorage
+try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch(e) {}
+if (!settings || typeof settings !== 'object') settings = JSON.parse(JSON.stringify(defaultSettings));
+if (!settings.modules) settings.modules = JSON.parse(JSON.stringify(defaultSettings.modules));
+if (!settings.themeMode) settings.themeMode = 'manual';
+
+// ── CLOCK (syncs to minute boundary) ──
+function updateClock() {
+  var d = new Date();
+  var h = d.getHours() % 12 || 12;
+  var m = String(d.getMinutes()).padStart(2, '0');
+  document.getElementById('s-date').textContent = d.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric'});
+  // Update hero clock (without AM/PM for compactness)
+  var liveClockEl = document.getElementById('live-clock');
+  if (liveClockEl) liveClockEl.textContent = h + ':' + m;
+  if (settings.themeMode === 'auto') applyAutoTheme();
+}
+
+function renderLiveStocks() {
+  var el = document.getElementById('live-stocks-row');
+  if (!watchlist || !watchlist.length) { el.innerHTML = '<div class="muted" style="padding:8px;font-size:12px">Add stocks via More › Stocks</div>'; return; }
+  Promise.all(watchlist.slice(0, 4).map(function(sym) {
+    return fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=1d', 'stk_live_' + sym, 5);
+  })).then(function(results) {
+    var html = '';
+    watchlist.slice(0, 4).forEach(function(sym, i) {
+      var data = results[i];
+      if (data && data.chart && data.chart.result) {
+        var meta = data.chart.result[0].meta;
+        var px = parseFloat(meta.regularMarketPrice);
+        var prev = parseFloat(meta.chartPreviousClose);
+        var diff = px - prev;
+        var pct = ((diff / prev) * 100).toFixed(1);
+        var chgClass = diff >= 0 ? 'up' : 'down';
+        html += '<div class="stock-chip" onclick="goPanel(\'stocks\')">'
+          + '<span class="stock-chip-sym">' + sym + '</span>'
+          + '<span class="stock-chip-px">$' + px.toFixed(2) + '</span>'
+          + '<span class="stock-chip-chg ' + chgClass + '">' + (diff >= 0 ? '+' : '') + pct + '%</span>'
+          + '</div>';
+      }
+    });
+    el.innerHTML = html || '<div class="muted" style="padding:8px;font-size:12px">Loading prices…</div>';
+  }).catch(function() {
+    el.innerHTML = '<div class="muted" style="padding:8px;font-size:12px">Stock prices unavailable</div>';
+  });
+}
+(function tickClock() {
+  updateClock();
+  setTimeout(tickClock, (60 - new Date().getSeconds()) * 1000 + 50);
+})();
+
+// ── DOCK ──
+function goPanel(p) {
+  document.querySelectorAll('.dock-btn').forEach(function(b) { b.classList.remove('on'); });
+  document.querySelectorAll('.dock-submenu-item').forEach(function(b) { b.classList.remove('on'); });
+  document.querySelectorAll('.panel').forEach(function(pn) { pn.classList.remove('on'); });
+  var btn = document.querySelector('.dock-btn[data-p="' + p + '"]');
+  if (btn) btn.classList.add('on');
+  var submenuItem = document.querySelector('.dock-submenu-item[data-p="' + p + '"]');
+  if (submenuItem) submenuItem.classList.add('on');
+  var panel = document.getElementById('p-' + p);
+  if (panel) panel.classList.add('on');
+  var main = document.getElementById('main');
+  if (main) main.scrollTop = 0;
+  closeDockSubmenu();
+}
+function toggleDockSubmenu() {
+  var submenu = document.getElementById('dock-submenu');
+  var trigger = document.getElementById('dock-more-btn');
+  submenu.classList.toggle('open');
+  trigger.classList.toggle('open');
+  trigger.setAttribute('aria-expanded', submenu.classList.contains('open'));
+}
+function closeDockSubmenu() {
+  var submenu = document.getElementById('dock-submenu');
+  var trigger = document.getElementById('dock-more-btn');
+  submenu.classList.remove('open');
+  trigger.classList.remove('open');
+  trigger.setAttribute('aria-expanded', 'false');
+}
+document.getElementById('dock-more-btn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  toggleDockSubmenu();
+});
+document.querySelectorAll('.dock-submenu-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    if (item.dataset.p === 'stocks') {
+      toggleStocksDropdown();
+    } else {
+      goPanel(item.dataset.p);
+    }
+  });
+});
+function toggleStocksDropdown() {
+  var dropdown = document.getElementById('stocks-dropdown');
+  dropdown.classList.toggle('open');
+  if (dropdown.classList.contains('open')) {
+    document.getElementById('stocks-dropdown-input').focus();
+    fetchStocks();
+  }
+}
+
+// Stock input autocomplete
+document.getElementById('stocks-dropdown-input').addEventListener('input', function() {
+  showStockSuggestions(this.value);
+});
+document.getElementById('stocks-dropdown-input').addEventListener('blur', function() {
+  setTimeout(function() {
+    var listEl = document.querySelector('.stock-suggest-list');
+    if (listEl) listEl.style.display = 'none';
+  }, 200);
+});
+
+document.querySelectorAll('.dock-btn').forEach(function(btn) {
+  if (!btn.dataset.p) return; // skip the "More" submenu trigger (handled separately)
+  btn.addEventListener('click', function() {
+    if (btn.dataset.p === 'stocks') {
+      toggleStocksDropdown();
+    } else {
+      goPanel(btn.dataset.p);
+    }
+  });
+});
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#dock-submenu') && e.target.id !== 'dock-more-btn') {
+    closeDockSubmenu();
+  }
+});
+
+// ── SETTINGS (theme + module visibility, persisted) ──
+
+function saveSettings() { saveLS(SETTINGS_KEY, settings); }
+function applyTheme() {
+  document.documentElement.classList.toggle('light', settings.theme === 'light');
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', settings.theme === 'light' ? '#f2f2f7' : '#000000');
+}
+// Resolve the theme from day/night when in auto mode. Uses the weather API's
+// is_day flag, falling back to local hour (6am-6pm = light) if it's unavailable.
+function setAutoTheme(isDay) {
+  var newTheme = isDay ? 'light' : 'dark';
+  if (settings.theme !== newTheme) {
+    settings.theme = newTheme;
+    saveSettings();
+    applyTheme();
+  }
+}
+function applyAutoTheme() {
+  var hr = new Date().getHours();
+  setAutoTheme(hr >= 6 && hr < 18); // instant feedback from local time
+  try {
+    return fetchCached('https://api.open-meteo.com/v1/forecast?latitude=49.19&longitude=-122.85&current=is_day', 'wx_isday', 15)
+      .then(function(data) { if (data && data.current) setAutoTheme(data.current.is_day === 1); })
+      .catch(function() {});
+  } catch (e) { return Promise.resolve(); }
+}
+// Clean line-style weather icon (replaces emoji). Scales to the container's font-size.
+function weatherIcon(code) {
+  var p;
+  if (code === 0) p = '<circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="21.5"/><line x1="4.4" y1="4.4" x2="5.8" y2="5.8"/><line x1="18.2" y1="18.2" x2="19.6" y2="19.6"/><line x1="2.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="21.5" y2="12"/><line x1="4.4" y1="19.6" x2="5.8" y2="18.2"/><line x1="18.2" y1="5.8" x2="19.6" y2="4.4"/>';
+  else if (code <= 48) p = '<path d="M17.5 18a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 18h11z"/>';
+  else if (code <= 67) p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="18" x2="8" y2="21"/><line x1="12" y1="18.5" x2="12" y2="22"/><line x1="16" y1="18" x2="16" y2="21"/>';
+  else if (code <= 77) p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="19" x2="8.01" y2="19"/><line x1="12" y1="20.5" x2="12.01" y2="20.5"/><line x1="16" y1="19" x2="16.01" y2="19"/>';
+  else p = '<path d="M17.5 13.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 13.5h11z"/><polyline points="12.5 12.5 9.5 18 13.5 18 10.5 23"/>';
+  return '<svg class="wx-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em">' + p + '</svg>';
+}
+function getWeatherDescription(code) {
+  if (code === 0) return 'Clear';
+  if (code <= 3) return 'Mostly Clear';
+  if (code <= 48) return 'Cloudy';
+  if (code <= 67) return 'Rainy';
+  if (code <= 77) return 'Snowy';
+  return 'Stormy';
+}
+function applyModules() {
+  Object.keys(defaultSettings.modules).forEach(function(k) {
+    var btn = document.querySelector('.dock-btn[data-p="' + k + '"]') || document.querySelector('.dock-submenu-item[data-p="' + k + '"]');
+    if (btn) btn.style.display = settings.modules[k] === false ? 'none' : '';
+  });
+  var active = document.querySelector('.panel.on');
+  if (active) {
+    var id = active.id.slice(2);
+    if (settings.modules[id] === false) goPanel('live');
+  }
+}
+function syncToggles() {
+  document.querySelectorAll('.toggle[data-set]').forEach(function(t) {
+    var k = t.dataset.set;
+    var on = k === 'theme' ? false : settings.modules[k] !== false;
+    t.classList.toggle('on', on);
+  });
+  syncThemeModeButtons();
+}
+// ── THEME PRESETS ──
+function applyColors() {
+  try {
+    var accent = settings.accentColor || themePresets.default.accent;
+    document.documentElement.style.setProperty('--accent', accent);
+    var picker = document.getElementById('accent-picker');
+    if (picker) picker.value = accent;
+    var presets = document.querySelectorAll('.theme-preset');
+    presets.forEach(function(p) { p.classList.remove('on'); });
+    var preset = document.querySelector('.theme-preset[data-theme-preset="' + (settings.themePreset || 'default') + '"]');
+    if (preset) preset.classList.add('on');
+  } catch(e) { console.warn('applyColors error:', e); }
+}
+function resetSettings() {
+  settings = JSON.parse(JSON.stringify(defaultSettings));
+  settings.themePreset = 'default';
+  settings.accentColor = themePresets.default.accent;
+  settings.themeMode = 'manual';
+  settings.dockOrder = null;
+  saveDockOrder();
+  saveSettings(); applyTheme(); applyModules(); syncToggles(); applyColors(); applyDockOrder(); initDragAndDrop();
+}
+document.querySelectorAll('.toggle[data-set]').forEach(function(t) {
+  t.addEventListener('click', function() {
+    var k = t.dataset.set;
+    if (k !== 'theme') { settings.modules[k] = settings.modules[k] === false; applyModules(); saveSettings(); syncToggles(); }
+  });
+});
+
+document.querySelectorAll('.theme-mode-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var mode = btn.dataset.themeMode;
+    if (mode === 'light' || mode === 'dark') {
+      settings.themeMode = 'manual';
+      settings.theme = mode;
+    } else if (mode === 'auto') {
+      settings.themeMode = 'auto';
+    }
+    applyTheme(); syncThemeModeButtons(); saveSettings();
+    if (mode === 'auto') applyAutoTheme().then(syncThemeModeButtons);
+  });
+});
+
+function syncThemeModeButtons() {
+  document.querySelectorAll('.theme-mode-btn').forEach(function(btn) {
+    var mode = btn.dataset.themeMode;
+    var isActive = (mode === 'auto' && settings.themeMode === 'auto') || (mode === settings.theme && settings.themeMode === 'manual');
+    btn.classList.toggle('active', isActive);
+  });
+}
+document.querySelectorAll('.theme-preset').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var preset = btn.dataset.themePreset;
+    settings.themePreset = preset;
+    settings.accentColor = themePresets[preset].accent;
+    saveSettings(); applyColors();
+  });
+});
+document.getElementById('accent-picker').addEventListener('input', function(e) {
+  settings.accentColor = e.target.value;
+  settings.themePreset = 'custom';
+  saveSettings(); applyColors();
+});
+
+// ── DOCK REORDERING ──
+function saveDockOrder() {
+  var order = Array.from(document.querySelectorAll('.dock-btn[data-p]')).map(function(b) { return b.dataset.p; });
+  saveLS('dock_order_v1', order);
+}
+function applyDockOrder() {
+  try {
+    var order = JSON.parse(localStorage.getItem('dock_order_v1'));
+    if (!order || !Array.isArray(order)) return;
+    var dock = document.getElementById('dock');
+    var btns = {};
+    dock.querySelectorAll('.dock-btn[data-p]').forEach(function(b) { btns[b.dataset.p] = b; });
+    var seps = Array.from(dock.children).filter(function(c) { return c.classList && c.classList.contains('dock-sep'); });
+    dock.innerHTML = '';
+    order.forEach(function(p) {
+      if (btns[p]) dock.appendChild(btns[p]);
+      else if (p === 'sep' && seps.length > 0) dock.appendChild(seps.shift());
+    });
+  } catch(e) {}
+}
+var dockDragListenersInitialized = false;
+function initDragAndDrop() {
+  // Skip if already initialized to prevent duplicate listeners
+  if (dockDragListenersInitialized) {
+    // Just update draggable state on any new buttons
+    document.querySelectorAll('.dock-btn, .dock-submenu-item').forEach(function(el) {
+      el.draggable = true;
+    });
+    return;
+  }
+  dockDragListenersInitialized = true;
+
+  // Dock button drag handlers (reorder + drag out to More)
+  document.querySelectorAll('.dock-btn').forEach(function(btn) {
+    btn.addEventListener('dragstart', function(e) {
+      draggedBtn = btn;
+      btn.style.opacity = '0.5';
+      e.dataTransfer.setData('text/html', btn.innerHTML);
+      e.dataTransfer.setData('source', 'dock');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    btn.addEventListener('dragend', function(e) {
+      document.querySelectorAll('.dock-btn, .dock-submenu-item').forEach(function(b) { b.classList.remove('drag-over'); b.style.opacity = ''; });
+      draggedBtn = null;
+    });
+    btn.addEventListener('dragover', function(e) {
+      if (draggedBtn && btn !== draggedBtn && btn.classList.contains('dock-btn')) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        btn.classList.add('drag-over');
+        var dock = document.getElementById('dock');
+        var allBtns = Array.from(dock.querySelectorAll('.dock-btn'));
+        var dragIdx = allBtns.indexOf(draggedBtn);
+        var dropIdx = allBtns.indexOf(btn);
+        if (dragIdx >= 0 && dropIdx >= 0) {
+          if (dragIdx < dropIdx) {
+            btn.parentNode.insertBefore(draggedBtn, btn.nextSibling);
+          } else {
+            btn.parentNode.insertBefore(draggedBtn, btn);
+          }
+        }
+      }
+    });
+    btn.addEventListener('dragleave', function(e) {
+      btn.classList.remove('drag-over');
+    });
+    btn.addEventListener('drop', function(e) {
+      e.preventDefault();
+      saveDockOrder();
+    });
+  });
+
+  // Submenu item drag handlers (drag to dock)
+  document.querySelectorAll('.dock-submenu-item').forEach(function(item) {
+    item.draggable = true;
+    item.addEventListener('dragstart', function(e) {
+      draggedBtn = item;
+      item.style.opacity = '0.5';
+      e.dataTransfer.setData('text/html', item.innerHTML);
+      e.dataTransfer.setData('source', 'submenu');
+      e.dataTransfer.setData('panel', item.getAttribute('data-p'));
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', function(e) {
+      item.style.opacity = '';
+      draggedBtn = null;
+    });
+  });
+
+  // Dock drop zone for submenu items
+  var dock = document.getElementById('dock');
+  dock.addEventListener('dragover', function(e) {
+    if (draggedBtn && draggedBtn.classList.contains('dock-submenu-item')) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      dock.style.borderColor = 'var(--accent)';
+      dock.style.borderWidth = '2px';
+    }
+  });
+  dock.addEventListener('dragleave', function(e) {
+    dock.style.borderColor = '';
+    dock.style.borderWidth = '';
+  });
+  dock.addEventListener('drop', function(e) {
+    if (draggedBtn && draggedBtn.classList.contains('dock-submenu-item')) {
+      e.preventDefault();
+      var panelId = draggedBtn.getAttribute('data-p');
+      addToDock(panelId);
+      dock.style.borderColor = '';
+      dock.style.borderWidth = '';
+    }
+  });
+
+  // Submenu drop zone for dock items
+  var submenu = document.getElementById('dock-submenu');
+  submenu.addEventListener('dragover', function(e) {
+    if (draggedBtn && draggedBtn.classList.contains('dock-btn') && draggedBtn.getAttribute('data-p') !== 'live') {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      submenu.style.borderColor = 'var(--red)';
+      submenu.style.opacity = '0.8';
+    }
+  });
+  submenu.addEventListener('dragleave', function(e) {
+    submenu.style.borderColor = '';
+    submenu.style.opacity = '';
+  });
+  submenu.addEventListener('drop', function(e) {
+    if (draggedBtn && draggedBtn.classList.contains('dock-btn') && draggedBtn.getAttribute('data-p') !== 'live') {
+      e.preventDefault();
+      var panelId = draggedBtn.getAttribute('data-p');
+      removeFromDock(panelId);
+      submenu.style.borderColor = '';
+      submenu.style.opacity = '';
+    }
+  });
+}
+
+function addToDock(panelId) {
+  try {
+    var dockOrder = JSON.parse(localStorage.getItem('dock_order_v1') || '["live","msg"]');
+    if (!dockOrder.includes(panelId)) {
+      dockOrder.push(panelId);
+      saveLS('dock_order_v1', dockOrder);
+      applyDockOrder();
+      initDragAndDrop();
+    }
+  } catch(e) {}
+}
+
+function removeFromDock(panelId) {
+  try {
+    var dockOrder = JSON.parse(localStorage.getItem('dock_order_v1') || '["live","msg"]');
+    dockOrder = dockOrder.filter(function(p) { return p !== panelId; });
+    saveLS('dock_order_v1', dockOrder);
+    applyDockOrder();
+    initDragAndDrop();
+  } catch(e) {}
+}
+
+try {
+  applyTheme();
+  applyModules();
+  syncToggles();
+  applyColors();
+  applyDockOrder();
+  initDragAndDrop();
+} catch(e) { console.error('Init error:', e.message); }
+
+// ── BOOKMARKS ──
+try { bookmarks = JSON.parse(localStorage.getItem('bookmarks_v1') || '[]'); } catch(e) { bookmarks = []; }
+function saveBookmark(title, link, source) {
+  if (!title || !link || !isValidUrl(link)) return false;
+  var exists = bookmarks.findIndex(function(b) { return b.link === link; });
+  if (exists >= 0) {
+    bookmarks.splice(exists, 1);
+  } else {
+    bookmarks.unshift({title: title, link: link, source: source, date: new Date().toLocaleDateString()});
+    if (bookmarks.length > 100) bookmarks = bookmarks.slice(0, 100);
+  }
+  saveLS('bookmarks_v1', bookmarks);
+  renderBookmarks();
+  renderFeed(currentFeed || [], 'news-feed');
+  return true;
+}
+function deleteBookmark(idx) {
+  if (idx >= 0 && idx < bookmarks.length) {
+    bookmarks.splice(idx, 1);
+    saveLS('bookmarks_v1', bookmarks);
+    renderBookmarks();
+  }
+}
+function renderBookmarks() {
+  var el = document.getElementById('bookmarks-list');
+  if (!bookmarks.length) { el.innerHTML = '<div class="muted">No saved articles. Tap the bookmark icon on any story.</div>'; return; }
+  var html = '';
+  bookmarks.forEach(function(b, i) {
+    html += '<div style="display:flex;align-items:stretch;gap:12px;padding:0;border:none">'
+      + '<a class="feed-item" href="' + escHtml(b.link) + '" target="_blank" rel="noopener" style="flex:1;padding:20px 24px">'
+      + '<div class="feed-t">' + escHtml(b.title) + '</div>'
+      + '<div class="feed-m"><span class="feed-src">' + escHtml(b.source) + '</span><span>' + b.date + '</span></div>'
+      + '</a>'
+      + '<button class="bookmark-btn saved" onclick="deleteBookmark(' + i + ')" title="Remove bookmark" style="border-left:1px solid var(--line)">' + createBookmarkSvg(true) + '</button>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+// ── TASKS ──
+try { tasks = JSON.parse(localStorage.getItem('tasks_v1') || '[]'); } catch(e) { tasks = []; }
+function addTask() {
+  var inp = document.getElementById('task-input');
+  if (!inp.value.trim()) return;
+  if (inp.value.length > 500) { alert('Task too long (max 500 characters)'); return; }
+  if (tasks.length >= 200) { alert('Maximum 200 tasks'); return; }
+  tasks.push({text: inp.value.trim(), done: false, date: new Date().toLocaleDateString()});
+  saveLS('tasks_v1', tasks);
+  inp.value = '';
+  renderTasks();
+}
+function toggleTask(idx) {
+  tasks[idx].done = !tasks[idx].done;
+  saveLS('tasks_v1', tasks);
+  renderTasks();
+}
+function deleteTask(idx) {
+  tasks.splice(idx, 1);
+  saveLS('tasks_v1', tasks);
+  renderTasks();
+}
+function clearCompletedTasks() {
+  tasks = tasks.filter(function(t) { return !t.done; });
+  saveLS('tasks_v1', tasks);
+  renderTasks();
+}
+function renderTasks() {
+  var done = tasks.filter(function(t) { return t.done; }).length;
+  var total = tasks.length;
+  document.getElementById('task-count').textContent = done + ' of ' + total + ' completed';
+  var el = document.getElementById('tasks-list');
+  if (!total) { el.innerHTML = '<div class="muted">No tasks. Add one to get started!</div>'; return; }
+  var html = '';
+  tasks.forEach(function(t, i) {
+    html += '<div class="noterow" style="align-items:center">'
+      + '<input type="checkbox" onclick="toggleTask(' + i + ')" ' + (t.done ? 'checked' : '') + ' style="width:20px;height:20px;cursor:pointer">'
+      + '<div class="n-txt" style="' + (t.done ? 'text-decoration:line-through;opacity:0.6;' : '') + '">' + escHtml(t.text) + '</div>'
+      + '<button class="n-del" onclick="deleteTask(' + i + ')">×</button>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+// ── STOCKS WATCHLIST ──
+// Common stocks/securities for autocomplete
+var commonStocks = ['AAPL','MSFT','GOOGL','GOOG','AMZN','TSLA','META','NVDA','NFLX','AMD','INTC','CRM','ADBE','CSCO','ASML','AVGO','AXP','BA','BKNG','COST','DLTR','EBAY','GILD','HD','HSIC','IBM','INFY','JPM','KO','LRCX','MA','MCHP','MU','NXPI','ORCL','PAYC','PEP','QCOM','SBUX','SCHW','SNAP','SNPS','SNOW','SQ','TEAM','TMDX','TNDM','TTD','UUUU','V','VZ','WDAY','XOM','XEQT.TO','VFV.TO','VSP.TO','XIC.TO','VCN.TO','BNS.TO','TD.TO','RY.TO','BMO.TO','BCE.TO','ENB.TO','CNQ.TO','TRP.TO','MG.TO','WFT.TO','WN.TO','BAM.A','AC.TO','POW.TO','SCR.TO','GRT.U','FLT.TO','DOL.TO','AQN.TO','GDMK.U','SRU.U'];
+
+// Seed with XEQT.TO on first run (no saved key yet); respect a deliberately-cleared list.
+try {
+  var _wl = localStorage.getItem('stocks_watchlist_v1');
+  watchlist = _wl ? JSON.parse(_wl) : ['XEQT.TO'];
+} catch(e) { watchlist = ['XEQT.TO']; }
+
+function searchStocks(query) {
+  var q = query.toUpperCase().trim();
+  if (!q) return [];
+  return commonStocks.filter(function(s) { return s.indexOf(q) === 0; }).slice(0, 6);
+}
+
+function showStockSuggestions(query) {
+  var results = searchStocks(query);
+  var inputEl = document.getElementById('stocks-dropdown-input');
+  var containerEl = inputEl.parentElement;
+  var listEl = containerEl.querySelector('.stock-suggest-list');
+  if (!listEl) {
+    listEl = document.createElement('div');
+    listEl.className = 'stock-suggest-list';
+    listEl.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:var(--glass2);border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;max-height:160px;overflow-y:auto;z-index:300;display:none';
+    containerEl.style.position = 'relative';
+    containerEl.appendChild(listEl);
+  }
+  if (!results.length) { listEl.style.display = 'none'; return; }
+  listEl.innerHTML = results.map(function(s) {
+    var q = query.toUpperCase().trim();
+    return '<div class="stock-suggest-item" onclick="addStock(\'' + s + '\')" style="padding:8px 12px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px;color:var(--t1)" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'"><strong>' + s.substring(0, q.length) + '</strong>' + s.substring(q.length) + '</div>';
+  }).join('');
+  listEl.style.display = 'block';
+}
+
+function addStock(sym) {
+  var _sym = (sym || document.getElementById('stocks-dropdown-input').value).trim().toUpperCase();
+  var inputEl = document.getElementById('stocks-dropdown-input');
+  if (!_sym || watchlist.includes(_sym)) { inputEl.value = ''; return; }
+  watchlist.push(_sym);
+  saveLS('stocks_watchlist_v1', watchlist);
+  inputEl.value = '';
+  var listEl = inputEl.parentElement.querySelector('.stock-suggest-list');
+  if (listEl) listEl.style.display = 'none';
+  fetchStocks();
+}
+function deleteStock(sym) {
+  watchlist = watchlist.filter(function(s) { return s !== sym; });
+  saveLS('stocks_watchlist_v1', watchlist);
+  fetchStocks();
+}
+function fetchStocks() {
+  var el = document.getElementById('stocks-dropdown-list');
+  if (!watchlist.length) { el.innerHTML = '<div class="muted" style="padding:20px;text-align:center;font-size:13px">No stocks yet</div>'; return; }
+  el.innerHTML = '<div class="muted" style="padding:20px;text-align:center;font-size:13px">Loading prices...</div>';
+  Promise.all(watchlist.map(function(sym) {
+    return fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=1d', 'stk_' + sym, 5);
+  })).then(function(results) {
+    var html = '';
+    watchlist.forEach(function(sym, i) {
+      var data = results[i];
+      if (data && data.chart && data.chart.result) {
+        var meta = data.chart.result[0].meta;
+        var px = parseFloat(meta.regularMarketPrice);
+        var prev = parseFloat(meta.chartPreviousClose);
+        var diff = px - prev;
+        var pct = ((diff / prev) * 100).toFixed(2);
+        var chgClass = diff >= 0 ? 'up' : 'down';
+        html += '<div class="stock-item">'
+          + '<a href="https://finance.yahoo.com/quote/' + sym + '/" target="_blank" rel="noopener" style="flex:1;min-width:0;color:inherit;text-decoration:none;cursor:pointer">'
+          + '<div class="stock-info"><div class="stock-sym">' + sym + '</div><div class="stock-px">$' + px.toFixed(2) + '</div></div>'
+          + '</a>'
+          + '<div class="stock-chg ' + chgClass + '">' + (diff >= 0 ? '+' : '') + pct + '%</div>'
+          + '<button class="stock-remove" data-sym="' + escHtml(sym) + '">×</button>'
+          + '</div>';
+      } else {
+        html += '<div class="stock-item"><div class="stock-info"><div class="stock-sym">' + sym + '</div><div class="stock-px">Error loading</div></div></div>';
+      }
+    });
+    el.innerHTML = html || '<div class="muted" style="padding:20px;text-align:center;font-size:13px">No data</div>';
+    // Also update the live stocks chips in hero
+    renderLiveStocks();
+  });
+}
+// Delegated remove handler (attached once; survives innerHTML updates of the list)
+document.getElementById('stocks-dropdown-list').addEventListener('click', function(e) {
+  var btn = e.target.closest('.stock-remove');
+  if (btn) { e.stopPropagation(); e.preventDefault(); deleteStock(btn.getAttribute('data-sym')); }
+});
+
+// ── WEATHER FORECAST ──
+function loadForecast() {
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + geoCoords.lat + '&longitude=' + geoCoords.lon + '&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto';
+  fetchCached(url, 'wx_forecast', 240)
+    .then(function(data) {
+      if (!data || !data.daily) return;
+      var html = '';
+      var now = new Date();
+      for (var i = 0; i < 7; i++) {
+        var date = new Date(now);
+        date.setDate(date.getDate() + i);
+        var code = data.daily.weather_code[i];
+        var hi = Math.round(data.daily.temperature_2m_max[i]);
+        var lo = Math.round(data.daily.temperature_2m_min[i]);
+        var day = date.toLocaleDateString('en-US', {weekday:'short'});
+        html += '<div style="background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">'
+          + '<div style="font-size:14px;color:var(--t2);margin-bottom:6px">' + day + '</div>'
+          + '<div style="font-size:26px;margin:6px 0;color:var(--t1)">' + weatherIcon(code) + '</div>'
+          + '<div style="font-size:13px;color:var(--t1)"><span style="color:var(--green)">' + hi + '°</span> / <span style="color:var(--t3)">' + lo + '°</span></div>'
+          + '</div>';
+      }
+      document.getElementById('forecast-list').innerHTML = html;
+    });
+}
+
+// ── QUICK LINKS ──
+try { quickLinks = JSON.parse(localStorage.getItem('quick_links_v1') || '[]'); } catch(e) { quickLinks = []; }
+function addLink() {
+  var title = document.getElementById('link-title').value.trim();
+  var url = document.getElementById('link-url').value.trim();
+  if (!title || !url) return;
+  if (!url.match(/^https?:\/\//)) url = 'https://' + url;
+  if (!isValidUrl(url)) { alert('Invalid URL'); return; }
+  quickLinks.push({title: title, url: url});
+  saveLS('quick_links_v1', quickLinks);
+  document.getElementById('link-title').value = '';
+  document.getElementById('link-url').value = '';
+  renderLinks();
+}
+function deleteLink(idx) {
+  quickLinks.splice(idx, 1);
+  saveLS('quick_links_v1', quickLinks);
+  renderLinks();
+}
+function renderLinks() {
+  var el = document.getElementById('links-list');
+  if (!quickLinks.length) { el.innerHTML = '<div class="muted">No links yet. Add your favorites!</div>'; return; }
+  var html = '';
+  quickLinks.forEach(function(l, i) {
+    html += '<a href="' + escHtml(l.url) + '" target="_blank" rel="noopener" class="row" style="border-radius:var(--r);margin-bottom:10px;flex-direction:column;gap:0">'
+      + '<div style="font-weight:600;color:var(--accent)">' + escHtml(l.title) + '</div>'
+      + '<div style="font-size:12px;color:var(--t3);margin-top:4px">' + escHtml(l.url.replace(/^https?:\/\//,'')) + '</div>'
+      + '</a>'
+      + '<button class="btn btn-gh" style="width:100%;margin-bottom:10px;font-size:13px" onclick="deleteLink(' + i + ')">Delete</button>';
+  });
+  el.innerHTML = html;
+}
+
+renderBookmarks(); renderTasks(); renderLinks(); fetchStocks(); loadForecast();
+
+// ── EMBEDDED CACHED DATA (refreshed by GitHub Actions) ──
+console.log('=== DASHBOARD INITIALIZATION ===');
+var DASHBOARD_CACHE = {
+  "weather": {
+    "latitude": 49.18432,
+    "longitude": -122.82682,
+    "generationtime_ms": 0.09,
+    "current": {
+      "time": "2026-06-24T23:30",
+      "interval": 900,
+      "temperature_2m": 28.2,
+      "weather_code": 2,
+      "is_day": 1
+    }
+  },
+  "news": {
+    "https://globalnews.ca/bc/feed/": {
+      "status": "ok",
+      "items": [
+        {"title":"B.C. businesses face uncertainty ahead of CUSMA review next week","pubDate":"2026-06-24 22:40:02","link":"https://globalnews.ca/news/11937259/bc-businesses-uncertainty-cusma-review/","source":"Global BC"},
+        {"title":"Former B.C. corrections officer sentenced for breach of trust","pubDate":"2026-06-24 21:36:08","link":"https://globalnews.ca/news/11937138/former-bc-corrections-officer-sentenced-breach-trust-relationship-inmate/","source":"Global BC"},
+        {"title":"Okanagan Falls to be incorporated as B.C.'s newest municipality in November","pubDate":"2026-06-24 20:29:21","link":"https://globalnews.ca/news/11937128/bc-okanagan-falls-incorporated-november/","source":"Global BC"},
+        {"title":"B.C. murder suspect evidence at trial 'not credible' or 'logical,' Crown lawyer says","pubDate":"2026-06-24 18:28:54","link":"https://globalnews.ca/news/11936801/lumby-bc-murder/","source":"Global BC"},
+        {"title":"'A big inspiration': Ashtrey Recovery Resource Centre to open in Vancouver's DTES","pubDate":"2026-06-24 17:24:35","link":"https://globalnews.ca/news/11936594/ashtrey-recovery-resource-centre-open-vancouver-dtes/","source":"Global BC"}
+      ]
+    },
+    "https://www.cbc.ca/cmlink/rss-canada-britishcolumbia": {
+      "status": "ok",
+      "items": [
+        {"title":"Canada finishes 2nd in World Cup Group B after 2-1 loss to Switzerland","pubDate":"2026-06-11 20:05:56","link":"https://www.cbc.ca/sports/soccer/worldcup/fifa-canada-world-cup-canada-switzerland-recap-june-24-9.7246842","source":"CBC BC"},
+        {"title":"Scorching weather results in 21 B.C. communities breaking max temperature records","pubDate":"2026-06-24 23:04:43","link":"https://www.cbc.ca/news/canada/british-columbia/bc-heat-weather-records-fall-9.7247997","source":"CBC BC"},
+        {"title":"Stash of drugs, $1.5M in cash discovered after multi-year investigation in B.C.","pubDate":"2026-06-24 23:22:37","link":"https://www.cbc.ca/news/canada/british-columbia/drugs-bust-delta-metro-vancouver-9.7247982","source":"CBC BC"},
+        {"title":"Prosecutor says testimony of man accused of killing ex-wife in B.C. Interior 'inconsistent'","pubDate":"2026-06-24 22:53:50","link":"https://www.cbc.ca/news/canada/british-columbia/vitali-stefanski-trial-closing-arguments-9.7247949","source":"CBC BC"},
+        {"title":"B.C. government puts Victoria-Saanich amalgamation vote on hold","pubDate":"2026-06-24 21:46:33","link":"https://www.cbc.ca/news/canada/british-columbia/victoria-saanich-amalgamation-debate-government-yellow-light-9.7247811","source":"CBC BC"}
+      ]
+    },
+    "https://www.bbc.com/news/world/rss.xml": {
+      "status": "ok",
+      "items": [
+        {"title":"France, UK and Spain see record temperatures as heatwave grips western Europe","pubDate":"2026-06-24 21:39:18","link":"https://www.bbc.co.uk/news/articles/c78y4102n1zo","source":"BBC World"},
+        {"title":"Air conditioning creates political divide after France records hottest day","pubDate":"2026-06-24 13:51:24","link":"https://www.bbc.co.uk/news/articles/c4gyqldl3p5o","source":"BBC World"},
+        {"title":"UN nuclear chief says inspectors will visit Iran sites as part of war deal","pubDate":"2026-06-24 17:31:48","link":"https://www.bbc.co.uk/news/articles/cpd395zv81vo","source":"BBC World"},
+        {"title":"Clean sweep for Mamdani-backed candidates in New York's Democratic primary","pubDate":"2026-06-24 13:03:35","link":"https://www.bbc.co.uk/news/articles/clye652m41po","source":"BBC World"},
+        {"title":"Biggest city in Crimea without power after Ukraine strikes","pubDate":"2026-06-24 09:48:24","link":"https://www.bbc.co.uk/news/articles/c3ryv72pjqno","source":"BBC World"}
+      ]
+    }
+  },
+  "updated": "2026-06-24T23:37:10.739Z"
+};
+
+// ── DIAGNOSTIC TEST FOR FETCH/API SUPPORT ──
+(function() {
+  console.log('=== TESLA BROWSER DIAGNOSTICS ===');
+  console.log('User Agent:', navigator.userAgent);
+  console.log('Fetch available:', typeof fetch !== 'undefined');
+  console.log('XMLHttpRequest available:', typeof XMLHttpRequest !== 'undefined');
+  console.log('Credentials:', navigator.credentials ? 'available' : 'not available');
+
+  // Test simple fetch
+  if (typeof fetch !== 'undefined') {
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0&current=temperature_2m')
+      .then(function(r) { console.log('✓ Fetch works, status:', r.status); })
+      .catch(function(e) { console.error('✗ Fetch blocked:', e.message); });
+  }
+})();
+
+// ── HTTP REQUEST HELPER (tries cached data first, falls back to direct API) ──
+function httpGet(url) {
+  function tryDirectRequest() {
+    var timeout = new Promise(function(_, reject) {
+      setTimeout(function() { reject(new Error('Request timeout after 15s')); }, 15000);
+    });
+
+    var request;
+    if (typeof fetch !== 'undefined') {
+      request = fetch(url).then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+    } else {
+      request = new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onload = function() {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try { resolve(JSON.parse(xhr.responseText)); }
+            catch(e) { reject(new Error('JSON parse error')); }
+          } else {
+            reject(new Error('HTTP ' + xhr.status));
+          }
+        };
+        xhr.onerror = function() { reject(new Error('Network error')); };
+        xhr.send();
+      });
+    }
+
+    return Promise.race([request, timeout]);
+  }
+
+  // First, check if this is cached weather data (embedded in HTML)
+  if (url.includes('api.open-meteo.com')) {
+    console.log('Weather URL detected:', url);
+    console.log('DASHBOARD_CACHE exists:', !!DASHBOARD_CACHE);
+    console.log('DASHBOARD_CACHE.weather:', DASHBOARD_CACHE && DASHBOARD_CACHE.weather);
+    if (DASHBOARD_CACHE && DASHBOARD_CACHE.weather && DASHBOARD_CACHE.weather.current) {
+      console.log('✓ Using embedded weather cache:', DASHBOARD_CACHE.weather.current.temperature_2m + '°C');
+      return Promise.resolve(DASHBOARD_CACHE.weather);
+    }
+    console.log('✗ No embedded weather cache - trying direct API');
+    return tryDirectRequest();
+  }
+
+  // Check if this is cached news data (embedded in HTML)
+  if (url.includes('rss2json.com')) {
+    if (DASHBOARD_CACHE && DASHBOARD_CACHE.news) {
+      // Try to extract the feed URL from the rss2json proxy URL
+      var match = url.match(/rss_url=([^&]+)/);
+      if (match) {
+        var encodedFeed = match[1];
+        var decodedFeed = decodeURIComponent(encodedFeed);
+        if (DASHBOARD_CACHE.news[decodedFeed]) {
+          var cachedData = DASHBOARD_CACHE.news[decodedFeed];
+          if (cachedData && cachedData.items && cachedData.items.length > 0) {
+            console.log('✓ Using embedded news cache from:', decodedFeed, '(' + cachedData.items.length + ' items)');
+            return Promise.resolve(cachedData);
+          }
+        }
+      }
+      // Fallback: return first available news source with items
+      var newsKeys = Object.keys(DASHBOARD_CACHE.news);
+      for (var i = 0; i < newsKeys.length; i++) {
+        var source = newsKeys[i];
+        var newsData = DASHBOARD_CACHE.news[source];
+        if (newsData && newsData.items && newsData.items.length > 0) {
+          console.log('✓ Using embedded news cache (fallback) from:', source, '(' + newsData.items.length + ' items)');
+          return Promise.resolve(newsData);
+        }
+      }
+    }
+    console.log('✗ No embedded news cache - trying direct API');
+    return tryDirectRequest();
+  }
+
+  return tryDirectRequest();
+}
+
+// ── FETCH CACHED ──
+function fetchCached(url, key, ttlMin) {
+  try {
+    var cached = localStorage.getItem(key);
+    if (cached) {
+      var parsed = JSON.parse(cached);
+      if (Date.now() - parsed.t < (ttlMin || 15) * 60000) return Promise.resolve(parsed.data);
+    }
+  } catch(e) {}
+  if (inflightFetches[key]) return inflightFetches[key];
+  function tryRequest(requestUrl) {
+    return httpGet(requestUrl).then(function(data) {
+      saveLS(key, {t: Date.now(), data: data});
+      return data;
+    });
+  }
+  var p = tryRequest(url).catch(function(e1) {
+    console.warn('Request failed for ' + key + ', trying CORS proxy:', e1.message || e1);
+    var corsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+    return tryRequest(corsUrl);
+  }).catch(function(e) {
+    console.error('All request attempts failed for ' + key + ':', url, '|', e.message || e);
+    return null;
+  });
+  inflightFetches[key] = p;
+  p.then(function() { delete inflightFetches[key]; }, function() { delete inflightFetches[key]; });
+  return p;
+}
+
+// ── GEOLOCATION ──
+var geoCoords = { lat: 49.19, lon: -122.85 }; // Default: Vancouver
+try {
+  var cached = localStorage.getItem('geo_coords_v1');
+  if (cached) { geoCoords = JSON.parse(cached); }
+} catch(e) {}
+
+console.log('Initialized geoCoords:', geoCoords);
+
+function loadWeatherForCoords() {
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + geoCoords.lat + '&longitude=' + geoCoords.lon + '&current=temperature_2m,weather_code,is_day';
+
+  var wTemp = document.querySelector('.w-temp');
+  if (wTemp) wTemp.textContent = '...';
+
+  var timeoutId = setTimeout(function() {
+    if (wTemp) wTemp.textContent = '—';
+  }, 9000);
+
+  fetchCached(url, 'wx', 15)
+  .then(function(data) {
+    clearTimeout(timeoutId);
+    if (data && data.current) {
+      var tempC = Math.round(data.current.temperature_2m);
+      var icon = weatherIcon(data.current.weather_code);
+      if (wTemp) wTemp.textContent = tempC + '°C';
+      var wIcon = document.querySelector('.w-icon');
+      if (wIcon) wIcon.innerHTML = icon;
+
+      var liveTemp = document.getElementById('live-temp');
+      var liveIcon = document.getElementById('live-icon');
+      var liveDesc = document.getElementById('live-weather-desc');
+      if (liveTemp) liveTemp.textContent = tempC + '°C';
+      if (liveIcon) liveIcon.innerHTML = icon;
+      if (liveDesc) liveDesc.textContent = getWeatherDescription(data.current.weather_code);
+
+      if (settings.themeMode === 'auto') { setAutoTheme(data.current.is_day === 1); syncThemeModeButtons(); }
+      setTimeout(renderLiveStocks, 100);
+    } else if (!data) {
+      if (wTemp) wTemp.textContent = '—';
+    }
+  })
+  .catch(function(e) {
+    clearTimeout(timeoutId);
+    if (wTemp) wTemp.textContent = '—';
+  });
+}
+
+// Load weather immediately with default coords
+console.log('Loading weather immediately with geoCoords:', geoCoords);
+loadWeatherForCoords();
+
+// Then try to get better location if available
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    console.log('Geolocation succeeded:', pos.coords);
+    geoCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    saveLS('geo_coords_v1', geoCoords);
+    loadWeatherForCoords();
+  }, function(err) {
+    console.log('Geolocation denied/failed:', err.message);
+  });
+}
+
+// ── STOCK (XEQT) ──
+fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/XEQT.TO?interval=1d&range=1d', 'stk_xeqt', 5)
+.then(function(data) {
+  if (data && data.chart && data.chart.result) {
+    var meta = data.chart.result[0].meta;
+    var px = parseFloat(meta.regularMarketPrice);
+    var prev = parseFloat(meta.chartPreviousClose);
+    var diff = px - prev;
+    var pct = ((diff / prev) * 100).toFixed(2);
+    document.getElementById('stk-px').textContent = '$' + px.toFixed(2);
+    var chgEl = document.getElementById('stk-chg');
+    chgEl.textContent = (diff >= 0 ? '+' : '') + diff.toFixed(2) + ' (' + (diff >= 0 ? '+' : '') + pct + '%)';
+    chgEl.style.color = diff >= 0 ? 'var(--green)' : 'var(--red)';
+  } else {
+    document.getElementById('stk-px').textContent = '$44.94';
+    document.getElementById('stk-chg').textContent = '(cached)';
+    document.getElementById('stk-chg').style.color = 'var(--t3)';
+  }
+}).catch(function() {
+  document.getElementById('stk-px').textContent = '$44.94';
+  document.getElementById('stk-chg').textContent = '(offline)';
+  document.getElementById('stk-chg').style.color = 'var(--t3)';
+});
+
+// ── UTILITIES ──
+function saveLS(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+
+// ── EXTERNAL-LINK MODAL ──
+// Opens external links inside a sandboxed overlay so a single tap never
+// destroys the dashboard (critical on Tesla's single-window browser).
+// The iframe sandbox omits allow-top-navigation, so framed sites can't
+// navigate the dashboard away. "Open externally" / fallback cover sites
+// that refuse to be embedded.
+function openExtModal(url) {
+  var modal = document.getElementById('ext-modal');
+  var frame = document.getElementById('em-frame');
+  var fb = document.getElementById('em-fallback');
+  var host = url;
+  try { host = new URL(url).hostname.replace(/^www\./, ''); } catch(e) {}
+  document.getElementById('em-host').textContent = host;
+  document.getElementById('em-open').href = url;
+  document.getElementById('em-fallback-open').href = url;
+  fb.classList.remove('show');
+  var loaded = false;
+  frame.onload = function() { loaded = true; };
+  frame.src = url;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  clearTimeout(openExtModal._t);
+  openExtModal._t = setTimeout(function() { if (!loaded) fb.classList.add('show'); }, 3000);
+}
+function closeExtModal() {
+  var modal = document.getElementById('ext-modal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.getElementById('em-frame').src = 'about:blank';
+}
+document.getElementById('em-close').addEventListener('click', closeExtModal);
+document.addEventListener('click', function(e) {
+  var a = e.target.closest('a[href]');
+  if (!a) return;
+  if (a.closest('#ext-modal')) return; // let the modal's own escape links open normally
+  var href = a.getAttribute('href');
+  if (!href || !/^https?:\/\//i.test(href)) return;
+  var external;
+  try { external = new URL(href, location.href).origin !== location.origin; } catch(_) { external = true; }
+  if (!external) return;
+  e.preventDefault();
+  openExtModal(href);
+});
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+function isValidUrl(str) {
+  try {
+    var url = new URL(str);
+    return /^https?:/.test(url.protocol);
+  } catch(e) { return false; }
+}
+function createBookmarkSvg(filled) {
+  if (filled) {
+    return '<svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2z" fill="currentColor"/></svg>';
+  }
+  return '<svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2z"/></svg>';
+}
+
+function renderFeed(items, id) {
+  var el = document.getElementById(id);
+  if (!items || !items.length) {
+    el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">Network unavailable</div><div style="font-size:11px;color:var(--t3)">External APIs cannot be accessed in the Tesla browser</div></div>';
+    return;
+  }
+  var html = '';
+  var limit = Math.min(items.length, 15);
+  for (var i = 0; i < limit; i++) {
+    var item = items[i];
+    var timeStr = 'Recently';
+    if (item.pubDate) {
+      try {
+        var ms = Date.now() - new Date(item.pubDate).getTime();
+        if (!isNaN(ms) && ms > 0) {
+          var mins = Math.floor(ms / 60000);
+          timeStr = mins < 60 ? mins + 'm ago' : Math.floor(mins / 60) + 'h ago';
+        }
+      } catch(e) {}
+    }
+    var href = /^https?:\/\//i.test(item.link || '') ? item.link : '#';
+    var isSaved = bookmarks.some(function(b) { return b.link === href; });
+    html += '<div class="feed-item" style="display:flex;gap:12px;align-items:stretch;padding:0!important;border:none!important">'
+      + '<a href="' + escHtml(href) + '" target="_blank" rel="noopener" style="flex:1;padding:20px 24px;display:flex;flex-direction:column;justify-content:center">'
+      + '<div class="feed-t">' + escHtml(item.title || '') + '</div>'
+      + '<div class="feed-m" style="margin:10px 0 0"><span class="feed-src">' + escHtml(item.source || 'News') + '</span><span>' + timeStr + '</span></div>'
+      + '</a>'
+      + '<button class="bookmark-btn ' + (isSaved ? 'saved' : '') + '" data-title="' + escHtml(item.title || '') + '" data-url="' + escHtml(href) + '" data-source="' + escHtml(item.source || 'News') + '" title="Save article">' + createBookmarkSvg(isSaved) + '</button>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+
+  document.querySelectorAll('#' + id + ' .bookmark-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      var title = btn.getAttribute('data-title');
+      var url = btn.getAttribute('data-url');
+      var source = btn.getAttribute('data-source');
+      if (title && url) {
+        saveBookmark(title, url, source);
+        btn.classList.toggle('saved');
+      }
+    });
+  });
+}
+
+// ── FEED LOADER (shared for news + sports) ──
+// Now with diversity balancing: limits articles per source and interleaves them
+function loadFeeds(configs, targetId) {
+  var el = document.getElementById(targetId);
+  if (el) el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px">Loading...</div>';
+
+  Promise.all(configs.map(function(c) { return fetchCached(c.url, c.key, 10); }))
+    .then(function(results) {
+      var successCount = results.filter(function(r) { return r !== null; }).length;
+      console.log('Feed results: ' + successCount + '/' + results.length + ' sources loaded for ' + targetId);
+      var bySource = {};
+      // Organize articles by source and limit to 3 per source for diversity
+      results.forEach(function(r, i) {
+        if (!r || !r.items) return;
+        var source = configs[i].source;
+        bySource[source] = [];
+        r.items.forEach(function(item) {
+          item.source = source;
+          try {
+            var age = Date.now() - new Date(item.pubDate.replace(' ', 'T')).getTime();
+            if (!isNaN(age) && age > 604800000) return;
+          } catch(e) {}
+          if (item.link && item.title && bySource[source].length < 3) bySource[source].push(item);
+        });
+      });
+      // Interleave articles from different sources for diversity
+      var all = [];
+      var sources = Object.keys(bySource);
+      var maxArticles = sources.length > 0 ? Math.max.apply(null, sources.map(function(s) { return bySource[s].length; })) : 0;
+      for (var round = 0; round < maxArticles; round++) {
+        sources.forEach(function(source) {
+          if (bySource[source][round]) all.push(bySource[source][round]);
+        });
+      }
+      all.sort(function(a, b) { return new Date(b.pubDate) - new Date(a.pubDate); });
+      currentFeed = all;
+      renderFeed(all, targetId);
+    }).catch(function(err) {
+      console.error('Feed load error:', err);
+      // Try to show any cached data even if expired
+      var el = document.getElementById(targetId);
+      if (el) {
+        var msg = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(255,69,58,0.1);border-radius:12px;margin:20px">';
+        msg += '<div style="font-weight:600;margin-bottom:8px">Unable to load ' + targetId + '</div>';
+        msg += '<div style="font-size:12px;color:var(--t3)">Network error - check connectivity</div>';
+        msg += '</div>';
+        el.innerHTML = msg;
+      }
+    });
+}
+
+// News split into Local (BC) / National (Canada) / World, switchable via sub-tabs.
+// Significantly expanded with 20+ diverse outlets across regions and types.
+newsCategories = {
+  local: [
+    {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Fbc%2Ffeed%2F', key:'n_loc_gbc', source:'Global BC'},
+    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-canada-britishcolumbia', key:'n_loc_cbc', source:'CBC BC'},
+    {url:RSS+'https%3A%2F%2Fwww.vancouvermagazine.com%2Ffeed%2F', key:'n_loc_vm', source:'Vancouver Mag'},
+    {url:RSS+'https%3A%2F%2Fwww.biv.com%2Ffeed%2F', key:'n_loc_biv', source:'BIV'}
+  ],
+  national: [
+    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-topstories', key:'n_nat_cbc', source:'CBC News'},
+    {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Ffeed%2F', key:'n_nat_gn', source:'Global News'},
+    {url:RSS+'https%3A%2F%2Fwww.ctv.ca%2Fctvnews%2Frss%2F', key:'n_nat_ctv', source:'CTV News'},
+    {url:RSS+'https%3A%2F%2Fwww.thestar.com%2Ffeeds%2F', key:'n_nat_ts', source:'Toronto Star'},
+    {url:RSS+'https%3A%2F%2Fwww.theglobeandmail.com%2Ffeeds%2Fnews%2F', key:'n_nat_gm', source:'Globe & Mail'},
+    {url:RSS+'https%3A%2F%2Fnationalpost.com%2Ffeed%2F', key:'n_nat_np', source:'National Post'},
+    {url:RSS+'https%3A%2F%2Fwww.macleans.ca%2Ffeed%2F', key:'n_nat_mac', source:'MacLeans'},
+    {url:RSS+'https%3A%2F%2Fwww.huffingtonpost.ca%2Ffeed%2F', key:'n_nat_huff', source:'HuffPost Canada'}
+  ],
+  world: [
+    {url:RSS+'http%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Fworld%2Frss.xml', key:'n_wld_bbc', source:'BBC World'},
+    {url:RSS+'https%3A%2F%2Fapnews.com%2Fapf-services%2Fapnewsapi%2Frss%2Fworld.rss', key:'n_wld_ap', source:'AP World'},
+    {url:RSS+'https%3A%2F%2Fwww.reutersagency.com%2Frss%2Fworld-news%2F', key:'n_wld_reu', source:'Reuters World'},
+    {url:RSS+'https%3A%2F%2Fwww.aljazeera.com%2Fxml%2Frss%2Fall.xml', key:'n_wld_aje', source:'Al Jazeera'},
+    {url:RSS+'https%3A%2F%2Fwww.theguardian.com%2Finternational%2Frss', key:'n_wld_grd', source:'Guardian'},
+    {url:RSS+'https%3A%2F%2Fwww.dw.com%2Fen%2Fxml%2Frss%2Fxml_en_all', key:'n_wld_dw', source:'DW'},
+    {url:RSS+'https%3A%2F%2Fwww.france24.com%2Fen%2Frss', key:'n_wld_f24', source:'France24'},
+    {url:RSS+'https%3A%2F%2Fwww.independent.co.uk%2Fen%2Frss', key:'n_wld_ind', source:'The Independent'},
+    {url:RSS+'https%3A%2F%2Ffeeds.bloomberg.com%2Fmarkets%2Fnews.rss', key:'n_wld_bb', source:'Bloomberg'},
+    {url:RSS+'https%3A%2F%2Ffeeds.cnbc.com%2Fid%2F100003114%2Fbasic%2Ffeed.rss', key:'n_wld_cnbc', source:'CNBC'},
+    {url:RSS+'https%3A%2F%2Ffeeds.washingtonpost.com%2Frss%2Fworld', key:'n_wld_wp', source:'Washington Post'},
+    {url:RSS+'https%3A%2F%2Fnyt.com%2Fsvc%2Fxml%2Frss%2Fnyt%2FWorld.xml', key:'n_wld_nyt', source:'New York Times'}
+  ]
+};
+function showNews(cat) { loadFeeds(newsCategories[cat] || newsCategories.local, 'news-feed'); }
+document.querySelectorAll('.ntab').forEach(function(b) {
+  b.addEventListener('click', function() {
+    if (b.classList.contains('on')) return;
+    document.querySelectorAll('.ntab').forEach(function(x) { x.classList.remove('on'); });
+    b.classList.add('on');
+    document.getElementById('news-feed').innerHTML = '<div class="muted">Loading News…</div>';
+    showNews(b.dataset.news);
+  });
+});
+showNews('local');
+
+loadFeeds([
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnews', key:'s_espn', source:'ESPN'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.sportsnet.ca%2Ffeed%2F', key:'s_snet', source:'Sportsnet'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.tsn.ca%2Frss%2Ffeed', key:'s_tsn', source:'TSN'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.yahoo.com%2Fv2%2Fsports%2F', key:'s_yahoo', source:'Yahoo Sports'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Frss.slashsports.com%2Fcombined%2F', key:'s_slash', source:'Slash Sports'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fbleacherreport.com%2Frss%2Ffeeds%2Fnow.xml', key:'s_br', source:'Bleacher Report'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nbcsports.com%2Frss%2Fxml%2Fnbcsports%2Fnbcsports.xml', key:'s_nbc', source:'NBC Sports'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.foxsports.com%2Frss', key:'s_fox', source:'Fox Sports'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.thescore.com%2Frss%2F', key:'s_score', source:'The Score'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmlb.com%2Ffeed%2Frss.xml', key:'s_mlb', source:'MLB.com'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nba.com%2Frss%2Fnba_rss.xml', key:'s_nba', source:'NBA.com'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nhl.com%2Fnews%2Frss.xml', key:'s_nhl', source:'NHL.com'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.cfl.ca%2Frss%2F', key:'s_cfl', source:'CFL.ca'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nfl.com%2Frss', key:'s_nfl', source:'NFL.com'},
+  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.skysports.com%2Frss%2Fxml%2Fnews.xml', key:'s_sky', source:'Sky Sports'}
+], 'sports-feed');
+
+// ── MY TEAMS TRACKER ──
+// Disabled in Tesla browser since ESPN APIs are blocked
+// Scores will be available when cached sports data is added to DASHBOARD_CACHE
+(function() {
+  var sfeed = document.getElementById('scores-feed');
+  if (sfeed) {
+    sfeed.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">Scores unavailable</div><div style="font-size:11px;color:var(--t3)">Sports APIs cannot be accessed in this browser</div></div>';
+  }
+})();
+
+// ── CALCULATOR ──
+function calcUpdate() {
+  document.getElementById('calc-val').textContent = calcCur;
+  var sym = {'*':'×','/':'÷','-':'−','+':'+'};
+  document.getElementById('calc-expr').textContent = calcPrev ? calcPrev + ' ' + (sym[calcOperator] || '') : '';
+}
+function calcNum(n) {
+  if (calcReset) { calcCur = ''; calcReset = false; }
+  if (calcCur === '0' && n !== '.') calcCur = '';
+  calcCur += n; calcUpdate();
+}
+function calcDot() {
+  if (calcReset) { calcCur = '0'; calcReset = false; }
+  if (calcCur.indexOf('.') === -1) calcCur += '.';
+  calcUpdate();
+}
+function calcOp(op) {
+  if (calcPrev && !calcReset) calcEqual();
+  calcPrev = calcCur; calcOperator = op; calcReset = true; calcUpdate();
+}
+function calcEqual() {
+  if (!calcPrev) return;
+  var a = parseFloat(calcPrev), b = parseFloat(calcCur), r;
+  if (calcOperator === '+') r = a + b;
+  else if (calcOperator === '-') r = a - b;
+  else if (calcOperator === '*') r = a * b;
+  else if (calcOperator === '/') r = b !== 0 ? a / b : 'Error';
+  calcCur = typeof r === 'number' ? String(parseFloat(r.toFixed(10))) : r;
+  calcPrev = ''; calcOperator = ''; calcReset = true; calcUpdate();
+}
+function calcClear()   { calcCur = '0'; calcPrev = ''; calcOperator = ''; calcReset = false; calcUpdate(); }
+function calcToggle()  { if (calcCur !== '0') calcCur = String(-parseFloat(calcCur)); calcUpdate(); }
+function calcPercent() { calcCur = String(parseFloat(calcCur) / 100); calcUpdate(); }
+
+// ── NOTES ──
+try { notes = JSON.parse(localStorage.getItem('notes_v4') || '[]'); } catch(e) { notes = []; }
+
+function renderNotes() {
+  var el = document.getElementById('notes-list');
+  if (!notes.length) { el.innerHTML = '<div class="muted">No saved notes.</div>'; return; }
+  var html = '';
+  for (var i = notes.length - 1; i >= 0; i--) {
+    html += '<div class="noterow">'
+      + '<div class="n-time">' + notes[i].d + '</div>'
+      + '<div class="n-txt">' + escHtml(notes[i].t) + '</div>'
+      + '<button class="n-del" onclick="delNote(' + i + ')">×</button>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+function saveNote() {
+  var el = document.getElementById('cap-input');
+  if (!el.value.trim()) return;
+  if (el.value.length > 5000) { alert('Note too long (max 5000 characters)'); return; }
+  var d = new Date();
+  notes.push({t: el.value.trim(), d: d.toLocaleDateString([], {month:'short', day:'numeric'}) + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
+  saveLS('notes_v4', notes);
+  el.value = ''; renderNotes();
+}
+function delNote(i) {
+  notes.splice(i, 1);
+  saveLS('notes_v4', notes);
+  renderNotes();
+}
+renderNotes();
+
+// ── DICTATION ──
+var MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>Dictate</span>';
+var STOP_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg><span>Stop</span>';
+function toggleVoice() {
+  var btn = document.getElementById('voice-btn');
+  var input = document.getElementById('cap-input');
+  if (!btn || !input) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Dictation not supported.'); return; }
+  if (isRec) { rec.stop(); return; }
+  rec = new SR();
+  rec.continuous = true;
+  rec.interimResults = true;
+  var base = input.value;
+  rec.onresult = function(e) {
+    var f = '', interim = '';
+    for (var j = e.resultIndex; j < e.results.length; j++) {
+      if (e.results[j].isFinal) f += e.results[j][0].transcript;
+      else interim += e.results[j][0].transcript;
+    }
+    base += f;
+    input.value = base + interim;
+  };
+  rec.onend = rec.onerror = function() { isRec = false; btn.innerHTML = MIC_SVG; btn.classList.remove('rec'); };
+  rec.start();
+  isRec = true; btn.innerHTML = STOP_SVG; btn.classList.add('rec');
+}
+
+// ── STOCKS DROPDOWN CLICK-OUTSIDE LISTENER ──
+document.addEventListener('click', function(e) {
+  var dropdown = document.getElementById('stocks-dropdown');
+  var btn = document.querySelector('.dock-submenu-item[data-p="stocks"]');
+  if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
