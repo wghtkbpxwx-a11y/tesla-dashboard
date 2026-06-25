@@ -1397,7 +1397,7 @@ function renderLinks() {
   el.innerHTML = html;
 }
 
-renderBookmarks(); renderTasks(); renderLinks(); fetchStocks(); loadForecast();
+renderBookmarks(); renderTasks(); renderLinks(); fetchStocks();
 
 // ── EMBEDDED CACHED DATA (refreshed by GitHub Actions) ──
 console.log('=== DASHBOARD INITIALIZATION ===');
@@ -1511,34 +1511,21 @@ function httpGet(url) {
     return tryDirectRequest();
   }
 
-  // Check if this is cached news data (embedded in HTML)
+  // Check if this is a cached feed (news or sports) embedded in HTML
   if (url.includes('rss2json.com')) {
-    if (DASHBOARD_CACHE && DASHBOARD_CACHE.news) {
-      // Try to extract the feed URL from the rss2json proxy URL
+    if (DASHBOARD_CACHE) {
       var match = url.match(/rss_url=([^&]+)/);
       if (match) {
-        var encodedFeed = match[1];
-        var decodedFeed = decodeURIComponent(encodedFeed);
-        if (DASHBOARD_CACHE.news[decodedFeed]) {
-          var cachedData = DASHBOARD_CACHE.news[decodedFeed];
-          if (cachedData && cachedData.items && cachedData.items.length > 0) {
-            console.log('✓ Using embedded news cache from:', decodedFeed, '(' + cachedData.items.length + ' items)');
-            return Promise.resolve(cachedData);
-          }
-        }
-      }
-      // Fallback: return first available news source with items
-      var newsKeys = Object.keys(DASHBOARD_CACHE.news);
-      for (var i = 0; i < newsKeys.length; i++) {
-        var source = newsKeys[i];
-        var newsData = DASHBOARD_CACHE.news[source];
-        if (newsData && newsData.items && newsData.items.length > 0) {
-          console.log('✓ Using embedded news cache (fallback) from:', source, '(' + newsData.items.length + ' items)');
-          return Promise.resolve(newsData);
+        var decodedFeed = decodeURIComponent(match[1]);
+        var feedData = (DASHBOARD_CACHE.news && DASHBOARD_CACHE.news[decodedFeed]) ||
+                       (DASHBOARD_CACHE.sports && DASHBOARD_CACHE.sports[decodedFeed]);
+        if (feedData && feedData.items && feedData.items.length > 0) {
+          console.log('✓ Using embedded cache from:', decodedFeed, '(' + feedData.items.length + ' items)');
+          return Promise.resolve(feedData);
         }
       }
     }
-    console.log('✗ No embedded news cache - trying direct API');
+    console.log('✗ No embedded cache for this feed - trying direct API');
     return tryDirectRequest();
   }
 
@@ -1622,9 +1609,10 @@ function loadWeatherForCoords() {
   });
 }
 
-// Load weather immediately with default coords
+// Load weather and forecast immediately with default coords
 console.log('Loading weather immediately with geoCoords:', geoCoords);
 loadWeatherForCoords();
+loadForecast();
 
 // Then try to get better location if available
 if (navigator.geolocation) {
@@ -1737,7 +1725,7 @@ function renderFeed(items, id) {
     var timeStr = 'Recently';
     if (item.pubDate) {
       try {
-        var ms = Date.now() - new Date(item.pubDate).getTime();
+        var ms = Date.now() - new Date(item.pubDate.replace(' ', 'T')).getTime();
         if (!isNaN(ms) && ms > 0) {
           var mins = Math.floor(ms / 60000);
           timeStr = mins < 60 ? mins + 'm ago' : Math.floor(mins / 60) + 'h ago';
@@ -1788,12 +1776,12 @@ function loadFeeds(configs, targetId) {
         var source = configs[i].source;
         bySource[source] = [];
         r.items.forEach(function(item) {
-          item.source = source;
+          var it = {title: item.title, link: item.link, pubDate: item.pubDate, source: source};
           try {
-            var age = Date.now() - new Date(item.pubDate.replace(' ', 'T')).getTime();
+            var age = Date.now() - new Date(it.pubDate.replace(' ', 'T')).getTime();
             if (!isNaN(age) && age > 604800000) return;
           } catch(e) {}
-          if (item.link && item.title && bySource[source].length < 3) bySource[source].push(item);
+          if (it.link && it.title && bySource[source].length < 3) bySource[source].push(it);
         });
       });
       // Interleave articles from different sources for diversity
@@ -1805,7 +1793,7 @@ function loadFeeds(configs, targetId) {
           if (bySource[source][round]) all.push(bySource[source][round]);
         });
       }
-      all.sort(function(a, b) { return new Date(b.pubDate) - new Date(a.pubDate); });
+      all.sort(function(a, b) { return new Date(b.pubDate.replace(' ', 'T')) - new Date(a.pubDate.replace(' ', 'T')); });
       currentFeed = all;
       renderFeed(all, targetId);
     }).catch(function(err) {
