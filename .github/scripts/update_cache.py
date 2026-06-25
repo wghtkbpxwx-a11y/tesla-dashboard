@@ -35,6 +35,87 @@ SPORTS_FEEDS = {
     "https://www.mlb.com/feeds/news/rss.xml": "MLB.com",
 }
 
+# "My Teams" — the scores box on the Live panel. ESPN site API, team schedule
+# endpoint per team. `path` is the sport/league, `id` is the ESPN team id/abbr.
+MY_TEAMS = [
+    {"name": "Blue Jays", "league": "MLB", "path": "baseball/mlb",  "id": "tor"},
+    {"name": "Canucks",   "league": "NHL", "path": "hockey/nhl",    "id": "van"},
+    {"name": "Raptors",   "league": "NBA", "path": "basketball/nba", "id": "tor"},
+    {"name": "Whitecaps", "league": "MLS", "path": "soccer/usa.1",  "id": "9727"},
+    {"name": "BC Lions",  "league": "CFL", "path": "football/cfl",  "id": "79"},
+]
+
+
+def _event_dt(ev):
+    try:
+        return datetime.fromisoformat(ev["date"].replace("Z", "+00:00"))
+    except Exception:
+        return None
+
+
+def _pick_game(events):
+    """Choose the most relevant game: a live one, else the latest final,
+    else the next upcoming."""
+    now = datetime.now(timezone.utc)
+    live = last_final = next_up = None
+    for ev in events:
+        comp = (ev.get("competitions") or [{}])[0]
+        state = comp.get("status", {}).get("type", {}).get("state")
+        dt = _event_dt(ev)
+        if state == "in":
+            live = ev
+        elif state == "post":
+            if last_final is None or (dt and dt > _event_dt(last_final)):
+                last_final = ev
+        elif state == "pre" and dt and dt >= now:
+            if next_up is None or dt < _event_dt(next_up):
+                next_up = ev
+    return live or last_final or next_up or (events[-1] if events else None)
+
+
+def _side(competitors, home_away):
+    c = next((x for x in competitors if x.get("homeAway") == home_away), None)
+    if not c:
+        return None
+    score = c.get("score")
+    if isinstance(score, dict):
+        score = score.get("displayValue")
+    team = c.get("team", {})
+    return {
+        "abbr": team.get("abbreviation", ""),
+        "name": team.get("shortDisplayName") or team.get("displayName", ""),
+        "score": score if score not in (None, "") else "-",
+        "winner": bool(c.get("winner", False)),
+    }
+
+
+def fetch_scores():
+    """Fetch the latest/next game for each followed team."""
+    out = []
+    for t in MY_TEAMS:
+        rec = {"team": t["name"], "league": t["league"]}
+        try:
+            url = f'https://site.api.espn.com/apis/site/v2/sports/{t["path"]}/teams/{t["id"]}/schedule'
+            resp = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+            game = _pick_game(resp.json().get("events", []))
+            if not game:
+                rec["status"] = "No game"
+                print(f'  • {t["name"]}: no current game')
+            else:
+                comp = game["competitions"][0]
+                st = comp.get("status", {}).get("type", {})
+                rec["home"] = _side(comp.get("competitors", []), "home")
+                rec["away"] = _side(comp.get("competitors", []), "away")
+                rec["state"] = st.get("state")
+                rec["status"] = st.get("shortDetail") or st.get("description") or ""
+                print(f'  • {t["name"]}: {rec["status"]}')
+        except Exception as e:
+            rec["status"] = "Unavailable"
+            print(f'  ✗ {t["name"]}: {e}')
+        out.append(rec)
+    return out
+
 
 def parse_rss(content: bytes, source: str) -> list[dict]:
     """Parse RSS/Atom XML and return list of item dicts."""
@@ -136,6 +217,9 @@ def main():
         if result:
             sports[url] = result
 
+    print("Fetching My Teams scores...")
+    scores = fetch_scores()
+
     # Read current index.html
     with open("index.html", "r", encoding="utf-8") as f:
         html = f.read()
@@ -154,6 +238,7 @@ def main():
         "weather": weather or existing.get("weather"),
         "news": news if news else existing.get("news", {}),
         "sports": sports if sports else existing.get("sports", {}),
+        "scores": scores if scores else existing.get("scores", []),
         "updated": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -169,7 +254,7 @@ def main():
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print(f"Done. news={len(cache['news'])} sources, sports={len(cache['sports'])} sources")
+    print(f"Done. news={len(cache['news'])} sources, sports={len(cache['sports'])} sources, scores={len(cache['scores'])} teams")
 
 
 if __name__ == "__main__":
