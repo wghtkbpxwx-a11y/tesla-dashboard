@@ -26,6 +26,10 @@ NEWS_FEEDS = {
     "https://nationalpost.com/feed/": "National Post",
     # World
     "https://feeds.bbci.co.uk/news/world/rss.xml": "BBC World",
+    "https://www.aljazeera.com/xml/rss/all.xml": "Al Jazeera",
+    "https://www.theguardian.com/international/rss": "Guardian",
+    "https://www.dw.com/en/xml/rss/xml_en_all": "DW",
+    "https://www.france24.com/en/rss": "France24",
 }
 
 SPORTS_FEEDS = {
@@ -199,9 +203,30 @@ def fetch_weather() -> dict | None:
         return None
 
 
+def fetch_forecast() -> dict | None:
+    url = (
+        f"https://api.open-meteo.com/v1/forecast"
+        f"?latitude={LAT}&longitude={LON}"
+        f"&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto"
+    )
+    try:
+        resp = requests.get(url, timeout=TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+        days = len(data.get("daily", {}).get("weather_code", []))
+        print(f"  ✓ Forecast: {days} days")
+        return data
+    except Exception as e:
+        print(f"  ✗ Forecast: {e}")
+        return None
+
+
 def main():
     print("Fetching weather...")
     weather = fetch_weather()
+
+    print("Fetching 7-day forecast...")
+    forecast = fetch_forecast()
 
     print("Fetching news feeds...")
     news = {}
@@ -236,6 +261,7 @@ def main():
     # Build new cache, keeping existing data as fallback if live fetch failed
     cache = {
         "weather": weather or existing.get("weather"),
+        "forecast": forecast or existing.get("forecast"),
         "news": news if news else existing.get("news", {}),
         "sports": sports if sports else existing.get("sports", {}),
         "scores": scores if scores else existing.get("scores", []),
@@ -254,7 +280,8 @@ def main():
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print(f"Done. news={len(cache['news'])} sources, sports={len(cache['sports'])} sources, scores={len(cache['scores'])} teams")
+    forecast_days = len((cache.get("forecast") or {}).get("daily", {}).get("weather_code", []))
+    print(f"Done. news={len(cache['news'])} sources, sports={len(cache['sports'])} sources, scores={len(cache['scores'])} teams, forecast={forecast_days} days")
 
 
 if __name__ == "__main__":

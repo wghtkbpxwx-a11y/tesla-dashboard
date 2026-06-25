@@ -627,6 +627,22 @@ input[type="color"]:hover{border-color:var(--line2)}
         <div class="set-label"><div class="set-t">Learning</div><div class="set-s">Research & learning tools</div></div>
         <button class="toggle" data-set="learn" aria-label="Toggle Learning module"></button>
       </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Weather</div><div class="set-s">Forecast & conditions panel</div></div>
+        <button class="toggle" data-set="weather" aria-label="Toggle Weather module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Tasks</div><div class="set-s">Personal to-do list</div></div>
+        <button class="toggle" data-set="tasks" aria-label="Toggle Tasks module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Quick Links</div><div class="set-s">Favorite link shortcuts</div></div>
+        <button class="toggle" data-set="links" aria-label="Toggle Links module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Saved</div><div class="set-s">Bookmarked articles</div></div>
+        <button class="toggle" data-set="saved" aria-label="Toggle Saved module"></button>
+      </div>
     </div>
     <button class="btn btn-gh" onclick="resetSettings()">Reset to defaults</button>
   </section>
@@ -722,7 +738,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 <script>
 // ── VARIABLES (declared early to avoid undefined reference errors) ──
 var SETTINGS_KEY = 'dash_settings_v1';
-var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true}};
+var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, tasks:true, links:true, saved:true}};
 var settings;
 var themePresets = {default: {accent:'#3a82f6'}, cyberpunk: {accent:'#ff006e'}, sunset: {accent:'#ff6b35'}, forest: {accent:'#22c55e'}, lavender: {accent:'#a78bfa'}};
 var draggedBtn = null;
@@ -743,6 +759,10 @@ var inflightFetches = {}; // de-dupes concurrent identical fetchCached() calls
 try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch(e) {}
 if (!settings || typeof settings !== 'object') settings = JSON.parse(JSON.stringify(defaultSettings));
 if (!settings.modules) settings.modules = JSON.parse(JSON.stringify(defaultSettings.modules));
+// Migrate: ensure any new module keys are present in saved settings
+Object.keys(defaultSettings.modules).forEach(function(k) {
+  if (settings.modules[k] === undefined) settings.modules[k] = defaultSettings.modules[k];
+});
 if (!settings.themeMode) settings.themeMode = 'manual';
 
 // ── CLOCK (syncs to minute boundary) ──
@@ -750,10 +770,10 @@ function updateClock() {
   var d = new Date();
   var h = d.getHours() % 12 || 12;
   var m = String(d.getMinutes()).padStart(2, '0');
+  var ampm = d.getHours() >= 12 ? 'PM' : 'AM';
   document.getElementById('s-date').textContent = d.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric'});
-  // Update hero clock (without AM/PM for compactness)
   var liveClockEl = document.getElementById('live-clock');
-  if (liveClockEl) liveClockEl.textContent = h + ':' + m;
+  if (liveClockEl) liveClockEl.textContent = h + ':' + m + ' ' + ampm;
   if (settings.themeMode === 'auto') applyAutoTheme();
 }
 
@@ -808,6 +828,7 @@ function goPanel(p) {
 function toggleDockSubmenu() {
   var submenu = document.getElementById('dock-submenu');
   var trigger = document.getElementById('dock-more-btn');
+  if (!submenu || !trigger) return;
   submenu.classList.toggle('open');
   trigger.classList.toggle('open');
   trigger.setAttribute('aria-expanded', submenu.classList.contains('open'));
@@ -815,9 +836,8 @@ function toggleDockSubmenu() {
 function closeDockSubmenu() {
   var submenu = document.getElementById('dock-submenu');
   var trigger = document.getElementById('dock-more-btn');
-  submenu.classList.remove('open');
-  trigger.classList.remove('open');
-  trigger.setAttribute('aria-expanded', 'false');
+  if (submenu) submenu.classList.remove('open');
+  if (trigger) { trigger.classList.remove('open'); trigger.setAttribute('aria-expanded', 'false'); }
 }
 document.getElementById('dock-more-btn').addEventListener('click', function(e) {
   e.stopPropagation();
@@ -946,6 +966,7 @@ function applyColors() {
   } catch(e) { console.warn('applyColors error:', e); }
 }
 function resetSettings() {
+  if (!confirm('Reset all appearance and module settings to defaults?')) return;
   settings = JSON.parse(JSON.stringify(defaultSettings));
   settings.themePreset = 'default';
   settings.accentColor = themePresets.default.accent;
@@ -1009,11 +1030,13 @@ function applyDockOrder() {
     var btns = {};
     dock.querySelectorAll('.dock-btn[data-p]').forEach(function(b) { btns[b.dataset.p] = b; });
     var seps = Array.from(dock.children).filter(function(c) { return c.classList && c.classList.contains('dock-sep'); });
+    var extras = Array.from(dock.children).filter(function(c) { return !c.dataset.p && !(c.classList && c.classList.contains('dock-sep')); });
     dock.innerHTML = '';
     order.forEach(function(p) {
       if (btns[p]) dock.appendChild(btns[p]);
       else if (p === 'sep' && seps.length > 0) dock.appendChild(seps.shift());
     });
+    extras.forEach(function(el) { dock.appendChild(el); });
   } catch(e) {}
 }
 var dockDragListenersInitialized = false;
@@ -1341,26 +1364,39 @@ document.getElementById('stocks-dropdown-list').addEventListener('click', functi
 
 // ── WEATHER FORECAST ──
 function loadForecast() {
+  var el = document.getElementById('forecast-list');
+  function renderForecast(data) {
+    if (!data || !data.daily) {
+      if (el) el.innerHTML = '<div class="muted">Forecast unavailable — will retry when connected.</div>';
+      return;
+    }
+    var html = '';
+    var now = new Date();
+    for (var i = 0; i < 7; i++) {
+      var date = new Date(now);
+      date.setDate(date.getDate() + i);
+      var code = data.daily.weather_code[i];
+      var hi = Math.round(data.daily.temperature_2m_max[i]);
+      var lo = Math.round(data.daily.temperature_2m_min[i]);
+      var day = date.toLocaleDateString('en-US', {weekday:'short'});
+      html += '<div style="background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">'
+        + '<div style="font-size:14px;color:var(--t2);margin-bottom:6px">' + day + '</div>'
+        + '<div style="font-size:26px;margin:6px 0;color:var(--t1)">' + weatherIcon(code) + '</div>'
+        + '<div style="font-size:13px;color:var(--t1)"><span style="color:var(--green)">' + hi + '°</span> / <span style="color:var(--t3)">' + lo + '°</span></div>'
+        + '</div>';
+    }
+    if (el) el.innerHTML = html;
+  }
+  // Use embedded cache first (refreshed every 4 h by GitHub Actions)
+  if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE.forecast && DASHBOARD_CACHE.forecast.daily) {
+    renderForecast(DASHBOARD_CACHE.forecast);
+    return;
+  }
   var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + geoCoords.lat + '&longitude=' + geoCoords.lon + '&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto';
   fetchCached(url, 'wx_forecast', 240)
-    .then(function(data) {
-      if (!data || !data.daily) return;
-      var html = '';
-      var now = new Date();
-      for (var i = 0; i < 7; i++) {
-        var date = new Date(now);
-        date.setDate(date.getDate() + i);
-        var code = data.daily.weather_code[i];
-        var hi = Math.round(data.daily.temperature_2m_max[i]);
-        var lo = Math.round(data.daily.temperature_2m_min[i]);
-        var day = date.toLocaleDateString('en-US', {weekday:'short'});
-        html += '<div style="background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">'
-          + '<div style="font-size:14px;color:var(--t2);margin-bottom:6px">' + day + '</div>'
-          + '<div style="font-size:26px;margin:6px 0;color:var(--t1)">' + weatherIcon(code) + '</div>'
-          + '<div style="font-size:13px;color:var(--t1)"><span style="color:var(--green)">' + hi + '°</span> / <span style="color:var(--t3)">' + lo + '°</span></div>'
-          + '</div>';
-      }
-      document.getElementById('forecast-list').innerHTML = html;
+    .then(renderForecast)
+    .catch(function() {
+      if (el) el.innerHTML = '<div class="muted">Forecast unavailable — will retry when connected.</div>';
     });
 }
 
@@ -2017,7 +2053,22 @@ fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/XEQT.TO?interval=
 });
 
 // ── UTILITIES ──
-function saveLS(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+function saveLS(key, val) {
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      // Evict stale feed/weather cache entries and retry
+      var toRemove = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && /^(n_|s_|wx|stk_live)/.test(k)) toRemove.push(k);
+      }
+      toRemove.forEach(function(k) { try { localStorage.removeItem(k); } catch(e2) {} });
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch(e3) {}
+    }
+  }
+}
 
 // ── EXTERNAL-LINK MODAL ──
 // Opens external links inside a sandboxed overlay so a single tap never
@@ -2196,7 +2247,7 @@ newsCategories = {
     {url:RSS+'https%3A%2F%2Fwww.huffingtonpost.ca%2Ffeed%2F', key:'n_nat_huff', source:'HuffPost Canada'}
   ],
   world: [
-    {url:RSS+'http%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Fworld%2Frss.xml', key:'n_wld_bbc', source:'BBC World'},
+    {url:RSS+'https%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Fworld%2Frss.xml', key:'n_wld_bbc', source:'BBC World'},
     {url:RSS+'https%3A%2F%2Fapnews.com%2Fapf-services%2Fapnewsapi%2Frss%2Fworld.rss', key:'n_wld_ap', source:'AP World'},
     {url:RSS+'https%3A%2F%2Fwww.reutersagency.com%2Frss%2Fworld-news%2F', key:'n_wld_reu', source:'Reuters World'},
     {url:RSS+'https%3A%2F%2Fwww.aljazeera.com%2Fxml%2Frss%2Fall.xml', key:'n_wld_aje', source:'Al Jazeera'},
