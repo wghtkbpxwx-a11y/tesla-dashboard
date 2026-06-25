@@ -1897,16 +1897,31 @@ function httpGet(url) {
     return Promise.race([request, timeout]);
   }
 
-  // First, check if this is cached weather data (embedded in HTML)
+  // Check embedded weather / forecast cache
   if (url.includes('api.open-meteo.com')) {
-    console.log('Weather URL detected:', url);
-    console.log('DASHBOARD_CACHE exists:', !!DASHBOARD_CACHE);
-    console.log('DASHBOARD_CACHE.weather:', DASHBOARD_CACHE && DASHBOARD_CACHE.weather);
-    if (DASHBOARD_CACHE && DASHBOARD_CACHE.weather && DASHBOARD_CACHE.weather.current) {
-      console.log('✓ Using embedded weather cache:', DASHBOARD_CACHE.weather.current.temperature_2m + '°C');
-      return Promise.resolve(DASHBOARD_CACHE.weather);
+    if (url.includes('daily=')) {
+      // Forecast endpoint
+      if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.forecast && DASHBOARD_CACHE.forecast.daily) {
+        return Promise.resolve(DASHBOARD_CACHE.forecast);
+      }
+    } else {
+      // Current-weather endpoint
+      if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.weather && DASHBOARD_CACHE.weather.current) {
+        return Promise.resolve(DASHBOARD_CACHE.weather);
+      }
     }
-    console.log('✗ No embedded weather cache - trying direct API');
+    return tryDirectRequest();
+  }
+
+  // Serve stock quotes from embedded cache to avoid CORS failures
+  if (url.includes('finance.yahoo.com')) {
+    var symMatch = url.match(/chart\/([^?]+)/);
+    if (symMatch && typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.stocks) {
+      var cachedSym = decodeURIComponent(symMatch[1]);
+      if (DASHBOARD_CACHE.stocks[cachedSym]) {
+        return Promise.resolve(DASHBOARD_CACHE.stocks[cachedSym]);
+      }
+    }
     return tryDirectRequest();
   }
 
