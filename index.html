@@ -37,14 +37,16 @@ html.light{
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
-body{font-family:var(--f);color:var(--t1);min-height:100vh;overflow:hidden;background:radial-gradient(1100px 500px at 15% -8%,var(--accent-soft),transparent 65%),linear-gradient(180deg,var(--bg),var(--bg2));display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+/* The document itself scrolls (no inner scroll container) — Tesla's browser
+   only reliably touch-scrolls the page, not nested overflow divs */
+body{font-family:var(--f);color:var(--t1);min-height:100vh;overflow-x:hidden;background:radial-gradient(1100px 500px at 15% -8%,var(--accent-soft),transparent 65%),linear-gradient(180deg,var(--bg),var(--bg2));display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--f);cursor:pointer;border:none;background:none}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* HEADER */
-#header{display:flex;justify-content:space-between;align-items:center;padding:12px 32px;height:auto;min-height:60px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);box-shadow:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+#header{position:sticky;top:0;z-index:150;display:flex;justify-content:space-between;align-items:center;padding:12px 32px;height:auto;min-height:60px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);box-shadow:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
 #s-left,#s-right{display:flex;align-items:center;gap:16px}
 .brand{display:flex;align-items:center;gap:6px;cursor:pointer}
 .tesla-logo{width:18px;height:20px;fill:#9945ff;flex-shrink:0}
@@ -56,9 +58,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #stock-widget .stk-label{color:var(--t3);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
 
 /* MAIN */
-#main{flex:1;padding:20px 32px 120px;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;-webkit-user-select:text;user-select:text}
-#main::-webkit-scrollbar{width:6px}
-#main::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+#main{flex:1;padding:20px 32px 130px;overflow:visible;-webkit-user-select:text;user-select:text}
 
 /* LIVE PANEL HERO LAYOUT */
 .live-hero{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;margin-bottom:28px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow-sm)}
@@ -105,7 +105,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* DOCK */
 #dock{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:200;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
 #dock::-webkit-scrollbar{display:none}
-.dock-btn{display:flex;align-items:center;gap:5px;padding:10px 18px;border-radius:10px;color:var(--t2);font-size:14px;font-weight:600;transition:all .2s cubic-bezier(.34,.69,.66,1);white-space:nowrap;cursor:grab;background:transparent;user-select:none;position:relative}
+.dock-btn{display:flex;align-items:center;gap:6px;padding:14px 24px;border-radius:12px;color:var(--t2);font-size:16px;font-weight:600;transition:all .2s cubic-bezier(.34,.69,.66,1);white-space:nowrap;cursor:grab;background:transparent;user-select:none;position:relative}
 .dock-btn:hover{background:var(--surface);color:var(--t1);transform:translateY(-1px)}
 .dock-btn.on{background:var(--accent);color:#fff;box-shadow:0 4px 16px var(--accent-soft)}
 .dock-btn:active{cursor:grabbing}
@@ -115,42 +115,29 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* DOCK SUBMENU (fixed + sibling of #dock so it escapes the dock's overflow clipping) */
 .dock-submenu-trigger::after{content:'▼';margin-left:3px;font-size:9px;display:inline-block;transition:transform .2s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu-trigger.open::after{transform:rotate(180deg)}
-.dock-submenu{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(10px) scale(0.96);opacity:0;pointer-events:none;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:6px 6px 12px 6px;min-width:180px;max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:250;transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
+.dock-submenu{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(10px) scale(0.96);opacity:0;pointer-events:none;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:6px 6px 12px 6px;min-width:180px;z-index:250;transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0) scale(1)}
-.dock-submenu-item{display:flex;align-items:center;width:100%;padding:10px 16px;border-radius:8px;color:var(--t2);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s cubic-bezier(.34,.69,.66,1)}
+.dock-submenu-item{display:flex;align-items:center;width:100%;padding:15px 18px;border-radius:10px;color:var(--t2);font-size:16px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu-item:hover{background:var(--surface);color:var(--t1)}
 .dock-submenu-item.on{background:var(--accent);color:#fff}
 
 /* ICONS (clean line-style set, replaces emoji) */
-.dock-btn svg{width:21px;height:21px;display:block}
+.dock-btn svg{width:26px;height:26px;display:block}
 .w-icon{display:flex;align-items:center;justify-content:center}
 .w-icon svg{width:1em;height:1em;display:block}
 .wx-svg{display:inline-block;vertical-align:middle}
 .btn-voice svg{width:19px;height:19px;display:block;flex-shrink:0}
 
-/* EXTERNAL-LINK MODAL (keeps the dashboard alive on single-window browsers) */
-#ext-modal{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:scale(1.02);transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
-#ext-modal.open{opacity:1;pointer-events:auto;transform:none}
-.em-bar{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
-.em-host{flex:1;min-width:0;font-size:14px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.em-open{font-size:12px;font-weight:600;color:var(--accent);padding:8px 12px;border-radius:8px;white-space:nowrap;text-transform:uppercase;letter-spacing:.2px}
-.em-open:hover{background:var(--surface)}
-.em-close{font-size:12px;font-weight:600;color:#fff;background:var(--accent);padding:8px 16px;border-radius:8px;white-space:nowrap;text-transform:uppercase;letter-spacing:.2px}
-.em-body{flex:1;position:relative;background:var(--bg2)}
-#em-frame{width:100%;height:100%;border:0;background:#fff}
-.em-fallback{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;background:var(--bg2)}
-.em-fallback.show{display:flex}
-.em-fallback-txt{color:var(--t2);font-size:14px;max-width:300px}
 
 /* COMPONENTS */
 .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--t3);margin:0 0 16px 2px;display:flex;align-items:center;gap:10px;opacity:0.8}
 .cardgroup{background:var(--glass2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:28px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow-sm);transition:all .3s cubic-bezier(.34,.69,.66,1)}
-.row{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);gap:14px;transition:all .2s cubic-bezier(.34,.69,.66,1);min-height:64px;cursor:pointer}
+.row{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);gap:16px;transition:all .2s cubic-bezier(.34,.69,.66,1);min-height:80px;cursor:pointer}
 .row:last-child{border-bottom:none}
 .row:hover{background:var(--glass-hover)}
 .row:active{background:var(--surface2);transform:scale(.99)}
-.appicon{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.appicon svg{width:28px;height:28px;display:block}
+.appicon{width:62px;height:62px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.appicon svg{width:38px;height:38px;display:block}
 
 .ic-wa{background:linear-gradient(150deg,#2af34f,#0fa362)}
 .ic-tg{background:linear-gradient(150deg,#3ec6ff,#0d83c4)}
@@ -164,23 +151,22 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ic-sleeper{background:#2A2C38}.ic-yahoo{background:#400090}
 .ic-nlm{background:#1c1c1e}.ic-oe{background:linear-gradient(150deg,#F0603A,#E0451C)}
 .ic-claude{background:linear-gradient(135deg,#1a1a1a,#333333)}.ic-gemini{background:linear-gradient(135deg,#4285F4,#1F2937)}.ic-perplexity{background:linear-gradient(135deg,#000,#1a1a1a)}
-.ic-nlm svg{width:36px;height:36px}.ic-oe svg{width:44px;height:44px}.ic-claude svg{width:32px;height:32px}.ic-gemini svg{width:32px;height:32px}.ic-perplexity svg{width:32px;height:32px}
+.ic-nlm svg{width:46px;height:46px}.ic-oe svg{width:54px;height:54px}.ic-claude svg{width:42px;height:42px}.ic-gemini svg{width:42px;height:42px}.ic-perplexity svg{width:42px;height:42px}
 
 .rl{flex:1;min-width:0}
-.rl-t{font-size:18px;font-weight:600;color:var(--t1);letter-spacing:-.2px;line-height:1.2}
+.rl-t{font-size:20px;font-weight:600;color:var(--t1);letter-spacing:-.2px;line-height:1.2}
 .rl-s{font-size:13px;color:var(--t3);margin-top:2px}
 .chev{color:var(--line2);font-size:24px;font-weight:300}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .muted{padding:40px;text-align:center;color:var(--t3)}
 .col{display:flex;flex-direction:column;gap:20px}
-.h-news{height:600px}.h-scores{height:340px}.h-sports{max-height:700px}
+/* Natural heights — inner scroll areas are unreachable on Tesla's touchscreen */
+.h-news,.h-scores,.h-sports{height:auto;max-height:none}
 
 /* FEEDS */
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite ease-in-out}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
-.feed-box{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow-y:auto;transition:all .3s cubic-bezier(.34,.69,.66,1);box-shadow:var(--shadow-sm)}
-.feed-box::-webkit-scrollbar{width:5px}
-.feed-box::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+.feed-box{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:visible;transition:all .3s cubic-bezier(.34,.69,.66,1);box-shadow:var(--shadow-sm)}
 .feed-item{display:block;padding:16px 20px;border-bottom:1px solid var(--line);transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
 .feed-item:last-child{border-bottom:none}
 .feed-item:hover{background:var(--glass-hover)}
@@ -275,7 +261,8 @@ input[type="color"]:hover{border-color:var(--line2)}
 .theme-mode-btn.active{background:var(--accent);color:#fff;border:none}
 
 /* STOCKS DROPDOWN */
-#stocks-dropdown{position:fixed;bottom:180px;left:50%;margin-left:-160px;width:320px;background:var(--glass2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);z-index:260;transform:translateY(12px) scale(.96);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,.69,.66,1);max-height:500px;display:flex;flex-direction:column}
+/* Anchored to the top so Tesla's on-screen keyboard (bottom half) never covers it */
+#stocks-dropdown{position:fixed;top:76px;left:50%;margin-left:-190px;width:380px;background:var(--glass2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);z-index:260;transform:translateY(-12px) scale(.96);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,.69,.66,1);max-height:60vh;display:flex;flex-direction:column}
 #stocks-dropdown.open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
 .stocks-dropdown-header{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:6px}
 .stocks-dropdown-header input{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--t1);font-size:13px;font-family:var(--f);outline:none;transition:all .2s cubic-bezier(.34,.69,.66,1);text-transform:uppercase}
@@ -301,7 +288,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 .stocks-dropdown-footer{padding:8px 12px;border-top:1px solid var(--line);font-size:11px;color:var(--t3);text-align:center;background:var(--surface);text-transform:uppercase;letter-spacing:.2px}
 
 /* SUBMENU GROUPS */
-.dock-submenu{min-width:300px}
+.dock-submenu{min-width:360px}
 .dock-submenu-head{padding:10px 16px 4px;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px}
 .dock-submenu-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:0 4px}
 
@@ -357,19 +344,16 @@ input[type="color"]:hover{border-color:var(--line2)}
 
 /* RESPONSIVE (phones / portrait) */
 @media (max-width:760px){
-  html,body{height:auto;overflow:visible}
-  #main{overflow-y:auto;flex:none}
   #header{padding:10px 16px;height:auto;gap:12px;min-height:56px}
   #s-left,#s-right{gap:12px}
   #s-date{font-size:10px}
   #stock-widget{font-size:12px;padding-right:8px}#stock-widget .stk-label{font-size:10px}
   #weather-widget{font-size:18px}.w-icon{font-size:20px}.w-temp{font-size:14px}
-  #main{padding:12px 14px 100px}
+  #main{padding:12px 14px 110px}
   .split{grid-template-columns:1fr}
-  .rl-t{font-size:16px}.appicon{width:44px;height:44px}.appicon svg{width:26px;height:26px}
-  .h-news,.h-scores,.h-sports{height:auto;max-height:none}
-  .feed-box{overflow:visible}
-  #dock{gap:4px;padding:8px 12px;bottom:16px}.dock-btn{padding:8px 14px;font-size:13px}
+  .rl-t{font-size:17px}.appicon{width:52px;height:52px}.appicon svg{width:32px;height:32px}
+  #dock{gap:4px;padding:8px 12px;bottom:16px}.dock-btn{padding:10px 16px;font-size:14px}
+  #stocks-dropdown{width:calc(100vw - 24px);left:12px;margin-left:0}
 }
 </style>
 </head>
@@ -938,22 +922,6 @@ input[type="color"]:hover{border-color:var(--line2)}
   </div>
 </div>
 
-<!-- External-link modal: opens links in-place so the dashboard is never lost -->
-<div id="ext-modal" aria-hidden="true">
-  <div class="em-bar">
-    <span class="em-host" id="em-host"></span>
-    <a class="em-open" id="em-open" target="_blank" rel="noopener">Open externally ↗</a>
-    <button class="em-close" id="em-close" aria-label="Back to dashboard">Done</button>
-  </div>
-  <div class="em-body">
-    <iframe id="em-frame" title="External page" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
-    <div class="em-fallback" id="em-fallback">
-      <div class="em-fallback-txt">This site can’t be shown inside the dashboard.</div>
-      <a class="btn btn-pri" id="em-fallback-open" target="_blank" rel="noopener">Open in new tab</a>
-    </div>
-  </div>
-</div>
-
 <div id="stocks-dropdown">
   <div class="stocks-dropdown-header">
     <input type="text" id="stocks-dropdown-input" placeholder="Add ticker (e.g., AAPL)" style="text-transform:uppercase">
@@ -1089,8 +1057,7 @@ function goPanel(p) {
   if (submenuItem) submenuItem.classList.add('on');
   var panel = document.getElementById('p-' + p);
   if (panel) panel.classList.add('on');
-  var main = document.getElementById('main');
-  if (main) main.scrollTop = 0;
+  window.scrollTo(0, 0);
   closeDockSubmenu();
 }
 function toggleDockSubmenu() {
@@ -2924,49 +2891,9 @@ function saveLS(key, val) {
   }
 }
 
-// ── EXTERNAL-LINK MODAL ──
-// Opens external links inside a sandboxed overlay so a single tap never
-// destroys the dashboard (critical on Tesla's single-window browser).
-// The iframe sandbox omits allow-top-navigation, so framed sites can't
-// navigate the dashboard away. "Open externally" / fallback cover sites
-// that refuse to be embedded.
-function openExtModal(url) {
-  var modal = document.getElementById('ext-modal');
-  var frame = document.getElementById('em-frame');
-  var fb = document.getElementById('em-fallback');
-  var host = url;
-  try { host = new URL(url).hostname.replace(/^www\./, ''); } catch(e) {}
-  document.getElementById('em-host').textContent = host;
-  document.getElementById('em-open').href = url;
-  document.getElementById('em-fallback-open').href = url;
-  fb.classList.remove('show');
-  var loaded = false;
-  frame.onload = function() { loaded = true; };
-  frame.src = url;
-  modal.classList.add('open');
-  modal.setAttribute('aria-hidden', 'false');
-  clearTimeout(openExtModal._t);
-  openExtModal._t = setTimeout(function() { if (!loaded) fb.classList.add('show'); }, 3000);
-}
-function closeExtModal() {
-  var modal = document.getElementById('ext-modal');
-  modal.classList.remove('open');
-  modal.setAttribute('aria-hidden', 'true');
-  document.getElementById('em-frame').src = 'about:blank';
-}
-document.getElementById('em-close').addEventListener('click', closeExtModal);
-document.addEventListener('click', function(e) {
-  var a = e.target.closest('a[href]');
-  if (!a) return;
-  if (a.closest('#ext-modal')) return; // let the modal's own escape links open normally
-  var href = a.getAttribute('href');
-  if (!href || !/^https?:\/\//i.test(href)) return;
-  var external;
-  try { external = new URL(href, location.href).origin !== location.origin; } catch(_) { external = true; }
-  if (!external) return;
-  e.preventDefault();
-  openExtModal(href);
-});
+// External links open natively in a new tab (target="_blank" everywhere).
+// The old iframe overlay broke sites that refuse embedding (Gmail, WhatsApp,
+// YouTube all send X-Frame-Options/CSP deny), leaving a blank page instead.
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
 }
