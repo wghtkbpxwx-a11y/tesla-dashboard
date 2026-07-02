@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Updated: 2026-06-24 Liquid Glass + Stocks Dropdown v2 -->
+<!-- Updated: 2026-07-02 Glanceable revamp: freshness chip, hero forecast strip, driving-friendly touch targets -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -23,6 +23,7 @@
   --shadow-xs: 0 1px 4px rgba(0,0,0,0.15);
   --t1: #f5f5f7; --t2: #a1a1a6; --t3: #777779;
   --accent: #3b82f6;
+  --accent-soft: rgba(59,130,246,0.16);
   --red: #ff453a; --red-bg: rgba(255,69,58,0.12); --green: #34c759;
   --r: 20px;
   --f: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
@@ -36,7 +37,7 @@ html.light{
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
-body{font-family:var(--f);color:var(--t1);min-height:100vh;overflow:hidden;background:linear-gradient(180deg,var(--bg),var(--bg2));display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+body{font-family:var(--f);color:var(--t1);min-height:100vh;overflow:hidden;background:radial-gradient(1100px 500px at 15% -8%,var(--accent-soft),transparent 65%),linear-gradient(180deg,var(--bg),var(--bg2));display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--f);cursor:pointer;border:none;background:none}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -60,9 +61,30 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #main::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
 
 /* LIVE PANEL HERO LAYOUT */
-.live-hero{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;margin-bottom:28px;display:flex;flex-direction:column;gap:16px}
-.live-hero-time{display:flex;align-items:flex-end;gap:48px}
+.live-hero{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;margin-bottom:28px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow-sm)}
+.live-hero-time{display:flex;align-items:flex-end;gap:48px;flex-wrap:wrap}
 .live-hero-clock{font-size:48px;font-weight:700;line-height:1;letter-spacing:-1px}
+.live-hero-date{font-size:14px;font-weight:500;color:var(--t2);margin-top:8px}
+.fresh-chip{margin-left:auto;display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--surface);border:1px solid var(--line);border-radius:100px;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;white-space:nowrap;transition:all .2s;text-transform:uppercase;letter-spacing:.3px}
+.fresh-chip:hover{background:var(--surface2);color:var(--t1);border-color:var(--line2)}
+.fresh-chip .fresh-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.fresh-chip.stale .fresh-dot{background:#ffd60a}
+.fresh-chip.old .fresh-dot{background:var(--red)}
+.live-hero-desc{font-size:13px;color:var(--t3);margin-top:2px}
+.live-hero-greet{font-size:15px;font-weight:600;color:var(--accent);margin-bottom:6px;letter-spacing:-.1px}
+.wx-meta-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 24px 20px}
+.wx-meta{display:flex;flex-direction:column;gap:2px;padding:10px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:86px}
+.wx-meta .wm-l{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px}
+.wx-meta .wm-v{font-size:16px;font-weight:600;color:var(--t1)}
+.live-forecast-row{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.live-forecast-row::-webkit-scrollbar{height:3px}
+.live-forecast-row::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+.fc-mini{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:11px;font-weight:600;color:var(--t2);white-space:nowrap;flex-shrink:0;cursor:pointer;transition:all .2s}
+.fc-mini:hover{background:var(--surface2)}
+.fc-mini.today{border-color:var(--accent);background:rgba(59,130,246,.1)}
+.fc-mini .fc-day{text-transform:uppercase;letter-spacing:.3px;color:var(--t3);font-size:10px}
+.fc-mini .fc-ico{font-size:18px;color:var(--t1);display:flex}
+.fc-mini .fc-temps{color:var(--t1)}
 .live-hero-weather{display:flex;align-items:center;gap:8px;cursor:pointer}
 .live-hero-temp{font-size:22px;font-weight:600}
 .live-hero-icon{font-size:28px}
@@ -81,11 +103,11 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
 
 /* DOCK */
-#dock{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:16px;border:1px solid var(--line);box-shadow:none;z-index:200;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+#dock{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:200;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
 #dock::-webkit-scrollbar{display:none}
 .dock-btn{display:flex;align-items:center;gap:5px;padding:10px 18px;border-radius:10px;color:var(--t2);font-size:14px;font-weight:600;transition:all .2s cubic-bezier(.34,.69,.66,1);white-space:nowrap;cursor:grab;background:transparent;user-select:none;position:relative}
 .dock-btn:hover{background:var(--surface);color:var(--t1);transform:translateY(-1px)}
-.dock-btn.on{background:var(--accent);color:#fff}
+.dock-btn.on{background:var(--accent);color:#fff;box-shadow:0 4px 16px var(--accent-soft)}
 .dock-btn:active{cursor:grabbing}
 .dock-btn.drag-over{opacity:0.5;transform:scale(0.95)}
 .dock-sep{width:1px;height:20px;background:var(--line);margin:0 3px;opacity:0.5}
@@ -93,7 +115,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* DOCK SUBMENU (fixed + sibling of #dock so it escapes the dock's overflow clipping) */
 .dock-submenu-trigger::after{content:'▼';margin-left:3px;font-size:9px;display:inline-block;transition:transform .2s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu-trigger.open::after{transform:rotate(180deg)}
-.dock-submenu{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(10px) scale(0.96);opacity:0;pointer-events:none;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:14px;border:1px solid var(--line);box-shadow:none;padding:6px 6px 12px 6px;min-width:180px;max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:250;transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
+.dock-submenu{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(10px) scale(0.96);opacity:0;pointer-events:none;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:6px 6px 12px 6px;min-width:180px;max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:250;transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0) scale(1)}
 .dock-submenu-item{display:flex;align-items:center;width:100%;padding:10px 16px;border-radius:8px;color:var(--t2);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu-item:hover{background:var(--surface);color:var(--t1)}
@@ -122,7 +144,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* COMPONENTS */
 .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--t3);margin:0 0 16px 2px;display:flex;align-items:center;gap:10px;opacity:0.8}
-.cardgroup{background:var(--glass2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:28px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+.cardgroup{background:var(--glass2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:28px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow-sm);transition:all .3s cubic-bezier(.34,.69,.66,1)}
 .row{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);gap:14px;transition:all .2s cubic-bezier(.34,.69,.66,1);min-height:64px;cursor:pointer}
 .row:last-child{border-bottom:none}
 .row:hover{background:var(--glass-hover)}
@@ -156,14 +178,14 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* FEEDS */
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite ease-in-out}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
-.feed-box{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow-y:auto;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+.feed-box{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow-y:auto;transition:all .3s cubic-bezier(.34,.69,.66,1);box-shadow:var(--shadow-sm)}
 .feed-box::-webkit-scrollbar{width:5px}
 .feed-box::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
 .feed-item{display:block;padding:16px 20px;border-bottom:1px solid var(--line);transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
 .feed-item:last-child{border-bottom:none}
 .feed-item:hover{background:var(--glass-hover)}
 .feed-item:active{background:var(--surface2)}
-.bookmark-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--line);padding:0;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);flex-shrink:0;color:var(--t3)}
+.bookmark-btn{width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--line);padding:0;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);flex-shrink:0;color:var(--t3)}
 .bookmark-btn:hover{background:var(--surface);transform:scale(1.1);color:var(--t1)}
 .bookmark-btn.saved{color:var(--accent)}
 .bookmark-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5}
@@ -171,7 +193,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .feed-m{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
 .feed-src{color:var(--accent)}
 .news-tabs{margin-left:auto;display:flex;gap:4px}
-.ntab{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;color:var(--t3);background:var(--surface);border:1px solid var(--line);text-transform:uppercase;letter-spacing:.3px;transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
+.ntab{padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;color:var(--t3);background:var(--surface);border:1px solid var(--line);text-transform:uppercase;letter-spacing:.3px;transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
 .ntab:hover{background:var(--surface2);color:var(--t1)}
 .ntab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .ntab:not(.on):active{background:var(--surface2)}
@@ -199,7 +221,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .noterow:last-child{border-bottom:none}
 .n-time{font-size:11px;color:var(--t3);font-weight:600;white-space:nowrap;padding-top:2px;text-transform:uppercase;letter-spacing:.2px}
 .n-txt{font-size:14px;color:var(--t1);line-height:1.6;flex:1}
-.n-del{font-size:16px;color:var(--t3);padding:4px 6px;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);border-radius:4px}
+.n-del{font-size:20px;color:var(--t3);padding:10px 14px;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);border-radius:8px}
 .n-del:hover{background:rgba(255,69,58,.12);color:var(--red)}
 .n-del:active{transform:scale(.95)}
 
@@ -253,7 +275,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 .theme-mode-btn.active{background:var(--accent);color:#fff;border:none}
 
 /* STOCKS DROPDOWN */
-#stocks-dropdown{position:fixed;bottom:180px;left:50%;margin-left:-160px;width:320px;background:var(--glass2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:14px;box-shadow:none;z-index:260;transform:translateY(12px) scale(.96);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,.69,.66,1);max-height:500px;display:flex;flex-direction:column}
+#stocks-dropdown{position:fixed;bottom:180px;left:50%;margin-left:-160px;width:320px;background:var(--glass2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);z-index:260;transform:translateY(12px) scale(.96);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,.69,.66,1);max-height:500px;display:flex;flex-direction:column}
 #stocks-dropdown.open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
 .stocks-dropdown-header{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:6px}
 .stocks-dropdown-header input{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--t1);font-size:13px;font-family:var(--f);outline:none;transition:all .2s cubic-bezier(.34,.69,.66,1);text-transform:uppercase}
@@ -274,8 +296,8 @@ input[type="color"]:hover{border-color:var(--line2)}
 .stock-chg{font-weight:700;min-width:45px;text-align:right;font-size:13px}
 .stock-chg.up{color:var(--green)}
 .stock-chg.down{color:var(--red)}
-.stock-remove{background:transparent;color:var(--t3);font-size:14px;padding:0;cursor:pointer;transition:color .2s ease;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
-.stock-remove:hover{color:var(--accent)}
+.stock-remove{background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--t3);font-size:18px;padding:0;cursor:pointer;transition:all .2s ease;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stock-remove:hover{color:var(--red);background:var(--red-bg);border-color:var(--red)}
 .stocks-dropdown-footer{padding:8px 12px;border-top:1px solid var(--line);font-size:11px;color:var(--t3);text-align:center;background:var(--surface);text-transform:uppercase;letter-spacing:.2px}
 
 /* RESPONSIVE (phones / portrait) */
@@ -295,7 +317,6 @@ input[type="color"]:hover{border-color:var(--line2)}
   #dock{gap:4px;padding:8px 12px;bottom:16px}.dock-btn{padding:8px 14px;font-size:13px}
 }
 </style>
-<script src="dashboard-cache.js"></script>
 </head>
 <body>
 
@@ -330,7 +351,11 @@ input[type="color"]:hover{border-color:var(--line2)}
     <!-- Hero: Time + Weather -->
     <div class="live-hero">
       <div class="live-hero-time">
-        <div class="live-hero-clock" id="live-clock">--:--</div>
+        <div>
+          <div class="live-hero-greet" id="live-greet"></div>
+          <div class="live-hero-clock" id="live-clock">--:--</div>
+          <div class="live-hero-date" id="live-date">—</div>
+        </div>
         <div class="live-hero-weather" onclick="goPanel('weather')" title="View full forecast">
           <div>
             <div class="live-hero-temp" id="live-temp">--°C</div>
@@ -338,7 +363,12 @@ input[type="color"]:hover{border-color:var(--line2)}
           </div>
           <div class="live-hero-icon" id="live-icon">🌤</div>
         </div>
+        <button class="fresh-chip" id="fresh-chip" onclick="location.reload()" title="Data refreshes automatically every 4 hours — tap to reload now">
+          <span class="fresh-dot"></span><span id="fresh-chip-txt">Checking data…</span><span style="font-size:13px">⟳</span>
+        </button>
       </div>
+      <!-- Glanceable 5-day forecast strip (no tap needed) -->
+      <div class="live-forecast-row" id="live-forecast-row"></div>
       <!-- Top Stocks Chip Row -->
       <div class="live-stocks-row" id="live-stocks-row">
         <div class="muted" style="padding:8px;font-size:12px">Loading stocks…</div>
@@ -669,10 +699,23 @@ input[type="color"]:hover{border-color:var(--line2)}
 
   <!-- WEATHER FORECAST PANEL -->
   <section class="panel" id="p-weather">
+    <div class="sec-title">Current Conditions</div>
+    <div class="cardgroup" style="max-width:560px">
+      <div style="display:flex;align-items:center;gap:20px;padding:22px 24px 16px">
+        <div id="wx-now-icon" style="font-size:44px;color:var(--t1);display:flex">—</div>
+        <div style="flex:1">
+          <div id="wx-now-temp" style="font-size:34px;font-weight:700;line-height:1">--°C</div>
+          <div id="wx-now-desc" style="font-size:14px;color:var(--t2);margin-top:5px">Loading…</div>
+        </div>
+      </div>
+      <div class="wx-meta-row" id="wx-meta-row"></div>
+    </div>
     <div class="sec-title">7-Day Forecast</div>
     <div id="forecast-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
       <div class="muted">Loading forecast...</div>
     </div>
+    <div id="wx-sun-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"></div>
+    <div id="wx-updated" style="margin-top:16px;font-size:12px;color:var(--t3)"></div>
   </section>
 
   <!-- QUICK LINKS PANEL -->
@@ -774,17 +817,56 @@ function updateClock() {
   document.getElementById('s-date').textContent = d.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric'});
   var liveClockEl = document.getElementById('live-clock');
   if (liveClockEl) liveClockEl.textContent = h + ':' + m + ' ' + ampm;
+  var liveDateEl = document.getElementById('live-date');
+  if (liveDateEl) liveDateEl.textContent = d.toLocaleDateString('en-CA', {weekday:'long', month:'long', day:'numeric'});
+  var greetEl = document.getElementById('live-greet');
+  if (greetEl) {
+    var hr24 = d.getHours();
+    greetEl.textContent = hr24 < 5 ? 'Good night' : hr24 < 12 ? 'Good morning' : hr24 < 17 ? 'Good afternoon' : 'Good evening';
+  }
+  renderFreshness();
   if (settings.themeMode === 'auto') applyAutoTheme();
+}
+
+// ── DATA FRESHNESS (from DASHBOARD_CACHE.updated, refreshed every 4 h by Actions) ──
+function cacheAgeMinutes() {
+  try {
+    if (typeof DASHBOARD_CACHE === 'undefined' || !DASHBOARD_CACHE || !DASHBOARD_CACHE.updated) return null;
+    var ms = Date.now() - new Date(DASHBOARD_CACHE.updated).getTime();
+    if (isNaN(ms) || ms < 0) return null;
+    return Math.floor(ms / 60000);
+  } catch(e) { return null; }
+}
+function cacheAgeText() {
+  var mins = cacheAgeMinutes();
+  if (mins === null) return null;
+  if (mins < 60) return mins + 'm ago';
+  var hrs = Math.floor(mins / 60);
+  if (hrs < 48) return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+function renderFreshness() {
+  var chip = document.getElementById('fresh-chip');
+  var txt = document.getElementById('fresh-chip-txt');
+  if (!chip || !txt) return;
+  var age = cacheAgeText();
+  var mins = cacheAgeMinutes();
+  if (age === null) { txt.textContent = 'Live data'; return; }
+  txt.textContent = 'Updated ' + age;
+  chip.classList.remove('stale', 'old');
+  // Green under 6 h (normal 4-hourly refresh), yellow under 24 h, red beyond
+  if (mins >= 1440) chip.classList.add('old');
+  else if (mins >= 360) chip.classList.add('stale');
 }
 
 function renderLiveStocks() {
   var el = document.getElementById('live-stocks-row');
   if (!watchlist || !watchlist.length) { el.innerHTML = '<div class="muted" style="padding:8px;font-size:12px">Add stocks via More › Stocks</div>'; return; }
-  Promise.all(watchlist.slice(0, 4).map(function(sym) {
+  Promise.all(watchlist.slice(0, 6).map(function(sym) {
     return fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=1d', 'stk_live_' + sym, 5);
   })).then(function(results) {
     var html = '';
-    watchlist.slice(0, 4).forEach(function(sym, i) {
+    watchlist.slice(0, 6).forEach(function(sym, i) {
       var data = results[i];
       if (data && data.chart && data.chart.result) {
         var meta = data.chart.result[0].meta;
@@ -917,13 +999,14 @@ function applyAutoTheme() {
 }
 // Clean line-style weather icon (replaces emoji). Scales to the container's font-size.
 function weatherIcon(code) {
-  var p;
-  if (code === 0) p = '<circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="21.5"/><line x1="4.4" y1="4.4" x2="5.8" y2="5.8"/><line x1="18.2" y1="18.2" x2="19.6" y2="19.6"/><line x1="2.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="21.5" y2="12"/><line x1="4.4" y1="19.6" x2="5.8" y2="18.2"/><line x1="18.2" y1="5.8" x2="19.6" y2="4.4"/>';
-  else if (code <= 48) p = '<path d="M17.5 18a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 18h11z"/>';
-  else if (code <= 67) p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="18" x2="8" y2="21"/><line x1="12" y1="18.5" x2="12" y2="22"/><line x1="16" y1="18" x2="16" y2="21"/>';
-  else if (code <= 77) p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="19" x2="8.01" y2="19"/><line x1="12" y1="20.5" x2="12.01" y2="20.5"/><line x1="16" y1="19" x2="16.01" y2="19"/>';
-  else p = '<path d="M17.5 13.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 13.5h11z"/><polyline points="12.5 12.5 9.5 18 13.5 18 10.5 23"/>';
-  return '<svg class="wx-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em">' + p + '</svg>';
+  var p, color;
+  if (code === 0) { p = '<circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="21.5"/><line x1="4.4" y1="4.4" x2="5.8" y2="5.8"/><line x1="18.2" y1="18.2" x2="19.6" y2="19.6"/><line x1="2.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="21.5" y2="12"/><line x1="4.4" y1="19.6" x2="5.8" y2="18.2"/><line x1="18.2" y1="5.8" x2="19.6" y2="4.4"/>'; color = '#ffd60a'; }
+  else if (code <= 48) { p = '<path d="M17.5 18a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 18h11z"/>'; color = ''; }
+  else if (code <= 67) { p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="18" x2="8" y2="21"/><line x1="12" y1="18.5" x2="12" y2="22"/><line x1="16" y1="18" x2="16" y2="21"/>'; color = '#4da6ff'; }
+  else if (code <= 77) { p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="19" x2="8.01" y2="19"/><line x1="12" y1="20.5" x2="12.01" y2="20.5"/><line x1="16" y1="19" x2="16.01" y2="19"/>'; color = '#9edcff'; }
+  else { p = '<path d="M17.5 13.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 13.5h11z"/><polyline points="12.5 12.5 9.5 18 13.5 18 10.5 23"/>'; color = '#a78bfa'; }
+  // Clouds keep currentColor so they adapt to the theme; the rest get a hint of color
+  return '<svg class="wx-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"' + (color ? ' style="color:' + color + '"' : '') + '>' + p + '</svg>';
 }
 function getWeatherDescription(code) {
   if (code === 0) return 'Clear';
@@ -957,6 +1040,13 @@ function applyColors() {
   try {
     var accent = settings.accentColor || themePresets.default.accent;
     document.documentElement.style.setProperty('--accent', accent);
+    // Derive the soft tint (glows, background wash) from the accent hex
+    var hex = /^#?([0-9a-f]{6})$/i.exec(accent);
+    if (hex) {
+      var n = parseInt(hex[1], 16);
+      document.documentElement.style.setProperty('--accent-soft',
+        'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',0.16)');
+    }
     var picker = document.getElementById('accent-picker');
     if (picker) picker.value = accent;
     var presets = document.querySelectorAll('.theme-preset');
@@ -1196,7 +1286,7 @@ function saveBookmark(title, link, source) {
   if (exists >= 0) {
     bookmarks.splice(exists, 1);
   } else {
-    bookmarks.unshift({title: title, link: link, source: source, date: new Date().toLocaleDateString()});
+    bookmarks.unshift({title: title, link: link, source: source, date: new Date().toISOString()});
     if (bookmarks.length > 100) bookmarks = bookmarks.slice(0, 100);
   }
   saveLS('bookmarks_v1', bookmarks);
@@ -1211,6 +1301,15 @@ function deleteBookmark(idx) {
     renderBookmarks();
   }
 }
+// Renders any stored date (ISO from new saves, locale strings from old ones)
+// in the same "Thu, Jun 25" style used across the dashboard.
+function formatSavedDate(d) {
+  try {
+    var dt = new Date(d);
+    if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric'});
+  } catch(e) {}
+  return d || '';
+}
 function renderBookmarks() {
   var el = document.getElementById('bookmarks-list');
   if (!bookmarks.length) { el.innerHTML = '<div class="muted">No saved articles. Tap the bookmark icon on any story.</div>'; return; }
@@ -1219,7 +1318,7 @@ function renderBookmarks() {
     html += '<div style="display:flex;align-items:stretch;gap:12px;padding:0;border:none">'
       + '<a class="feed-item" href="' + escHtml(b.link) + '" target="_blank" rel="noopener" style="flex:1;padding:20px 24px">'
       + '<div class="feed-t">' + escHtml(b.title) + '</div>'
-      + '<div class="feed-m"><span class="feed-src">' + escHtml(b.source) + '</span><span>' + b.date + '</span></div>'
+      + '<div class="feed-m"><span class="feed-src">' + escHtml(b.source) + '</span><span>Saved ' + escHtml(formatSavedDate(b.date)) + '</span></div>'
       + '</a>'
       + '<button class="bookmark-btn saved" onclick="deleteBookmark(' + i + ')" title="Remove bookmark" style="border-left:1px solid var(--line)">' + createBookmarkSvg(true) + '</button>'
       + '</div>';
@@ -1250,6 +1349,9 @@ function deleteTask(idx) {
   renderTasks();
 }
 function clearCompletedTasks() {
+  var done = tasks.filter(function(t) { return t.done; }).length;
+  if (!done) return;
+  if (!confirm('Delete ' + done + ' completed task' + (done === 1 ? '' : 's') + '?')) return;
   tasks = tasks.filter(function(t) { return !t.done; });
   saveLS('tasks_v1', tasks);
   renderTasks();
@@ -1260,10 +1362,15 @@ function renderTasks() {
   document.getElementById('task-count').textContent = done + ' of ' + total + ' completed';
   var el = document.getElementById('tasks-list');
   if (!total) { el.innerHTML = '<div class="muted">No tasks. Add one to get started!</div>'; return; }
+  // Show active tasks first, completed at the bottom; keep original indices
+  // so toggle/delete keep pointing at the right entry
+  var ordered = tasks.map(function(t, i) { return {t: t, i: i}; })
+    .sort(function(a, b) { return (a.t.done ? 1 : 0) - (b.t.done ? 1 : 0); });
   var html = '';
-  tasks.forEach(function(t, i) {
+  ordered.forEach(function(o) {
+    var t = o.t, i = o.i;
     html += '<div class="noterow" style="align-items:center">'
-      + '<input type="checkbox" onclick="toggleTask(' + i + ')" ' + (t.done ? 'checked' : '') + ' style="width:20px;height:20px;cursor:pointer">'
+      + '<input type="checkbox" onclick="toggleTask(' + i + ')" ' + (t.done ? 'checked' : '') + ' style="width:24px;height:24px;cursor:pointer">'
       + '<div class="n-txt" style="' + (t.done ? 'text-decoration:line-through;opacity:0.6;' : '') + '">' + escHtml(t.text) + '</div>'
       + '<button class="n-del" onclick="deleteTask(' + i + ')">×</button>'
       + '</div>';
@@ -1275,11 +1382,11 @@ function renderTasks() {
 // Common stocks/securities for autocomplete
 var commonStocks = ['AAPL','MSFT','GOOGL','GOOG','AMZN','TSLA','META','NVDA','NFLX','AMD','INTC','CRM','ADBE','CSCO','ASML','AVGO','AXP','BA','BKNG','COST','DLTR','EBAY','GILD','HD','HSIC','IBM','INFY','JPM','KO','LRCX','MA','MCHP','MU','NXPI','ORCL','PAYC','PEP','QCOM','SBUX','SCHW','SNAP','SNPS','SNOW','SQ','TEAM','TMDX','TNDM','TTD','UUUU','V','VZ','WDAY','XOM','XEQT.TO','VFV.TO','VSP.TO','XIC.TO','VCN.TO','BNS.TO','TD.TO','RY.TO','BMO.TO','BCE.TO','ENB.TO','CNQ.TO','TRP.TO','MG.TO','WFT.TO','WN.TO','BAM.A','AC.TO','POW.TO','SCR.TO','GRT.U','FLT.TO','DOL.TO','AQN.TO','GDMK.U','SRU.U'];
 
-// Seed with XEQT.TO on first run (no saved key yet); respect a deliberately-cleared list.
+// Seed with pre-cached tickers on first run (no saved key yet); respect a deliberately-cleared list.
 try {
   var _wl = localStorage.getItem('stocks_watchlist_v1');
-  watchlist = _wl ? JSON.parse(_wl) : ['XEQT.TO'];
-} catch(e) { watchlist = ['XEQT.TO']; }
+  watchlist = _wl ? JSON.parse(_wl) : ['XEQT.TO', 'VFV.TO', 'TSLA', 'AAPL'];
+} catch(e) { watchlist = ['XEQT.TO', 'VFV.TO', 'TSLA', 'AAPL']; }
 
 function searchStocks(query) {
   var q = query.toUpperCase().trim();
@@ -1371,6 +1478,7 @@ function loadForecast() {
       return;
     }
     var html = '';
+    var miniHtml = '';
     var now = new Date();
     for (var i = 0; i < 7; i++) {
       var date = new Date(now);
@@ -1378,14 +1486,56 @@ function loadForecast() {
       var code = data.daily.weather_code[i];
       var hi = Math.round(data.daily.temperature_2m_max[i]);
       var lo = Math.round(data.daily.temperature_2m_min[i]);
-      var day = date.toLocaleDateString('en-US', {weekday:'short'});
-      html += '<div style="background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">'
-        + '<div style="font-size:14px;color:var(--t2);margin-bottom:6px">' + day + '</div>'
+      var day = i === 0 ? 'Today' : date.toLocaleDateString('en-US', {weekday:'short'});
+      var todayStyle = i === 0 ? 'border-color:var(--accent);background:var(--accent-soft)' : '';
+      var precip = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[i] != null)
+        ? data.daily.precipitation_probability_max[i] : null;
+      html += '<div style="background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;' + todayStyle + '">'
+        + '<div style="font-size:14px;color:' + (i === 0 ? 'var(--accent)' : 'var(--t2)') + ';font-weight:600;margin-bottom:6px">' + day + '</div>'
         + '<div style="font-size:26px;margin:6px 0;color:var(--t1)">' + weatherIcon(code) + '</div>'
         + '<div style="font-size:13px;color:var(--t1)"><span style="color:var(--green)">' + hi + '°</span> / <span style="color:var(--t3)">' + lo + '°</span></div>'
+        + (precip !== null ? '<div style="font-size:11px;font-weight:600;color:' + (precip >= 40 ? '#4da6ff' : 'var(--t3)') + ';margin-top:5px">💧 ' + precip + '%</div>' : '')
         + '</div>';
+      if (i < 5) {
+        miniHtml += '<div class="fc-mini' + (i === 0 ? ' today' : '') + '" onclick="goPanel(\'weather\')">'
+          + '<span class="fc-day">' + day + '</span>'
+          + '<span class="fc-ico">' + weatherIcon(code) + '</span>'
+          + '<span class="fc-temps">' + hi + '°/' + lo + '°</span>'
+          + (precip !== null && precip >= 30 ? '<span style="font-size:10px;color:#4da6ff;font-weight:700">💧' + precip + '%</span>' : '')
+          + '</div>';
+      }
     }
     if (el) el.innerHTML = html;
+    var mini = document.getElementById('live-forecast-row');
+    if (mini) mini.innerHTML = miniHtml;
+    // Sunrise / sunset for today (only present in newer caches)
+    var sunRow = document.getElementById('wx-sun-row');
+    if (sunRow) {
+      var sun = '';
+      function fmtSun(iso) {
+        try {
+          var t = new Date(iso);
+          if (isNaN(t.getTime())) return null;
+          var hh = t.getHours() % 12 || 12;
+          return hh + ':' + String(t.getMinutes()).padStart(2, '0') + (t.getHours() >= 12 ? ' PM' : ' AM');
+        } catch(e) { return null; }
+      }
+      if (data.daily.sunrise && data.daily.sunrise[0]) {
+        var sr = fmtSun(data.daily.sunrise[0]);
+        if (sr) sun += '<div class="wx-meta" style="min-width:110px"><span class="wm-l">🌅 Sunrise</span><span class="wm-v">' + sr + '</span></div>';
+      }
+      if (data.daily.sunset && data.daily.sunset[0]) {
+        var ss = fmtSun(data.daily.sunset[0]);
+        if (ss) sun += '<div class="wx-meta" style="min-width:110px"><span class="wm-l">🌇 Sunset</span><span class="wm-v">' + ss + '</span></div>';
+      }
+      sunRow.innerHTML = sun;
+      sunRow.style.display = sun ? '' : 'none';
+    }
+    var stamp = document.getElementById('wx-updated');
+    if (stamp) {
+      var age = cacheAgeText();
+      stamp.textContent = 'Forecast for Surrey / Vancouver, BC' + (age ? ' · updated ' + age + ' · auto-refreshes every 4 hours' : '');
+    }
   }
   // Use embedded cache first (refreshed every 4 h by GitHub Actions)
   if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE.forecast && DASHBOARD_CACHE.forecast.daily) {
@@ -1441,7 +1591,7 @@ var DASHBOARD_CACHE = {
   "weather": {
     "latitude": 49.18432,
     "longitude": -122.82682,
-    "generationtime_ms": 0.16200542449951172,
+    "generationtime_ms": 0.16760826110839844,
     "utc_offset_seconds": 0,
     "timezone": "GMT",
     "timezone_abbreviation": "GMT",
@@ -1451,20 +1601,26 @@ var DASHBOARD_CACHE = {
       "interval": "seconds",
       "temperature_2m": "°C",
       "weather_code": "wmo code",
-      "is_day": ""
+      "is_day": "",
+      "apparent_temperature": "°C",
+      "relative_humidity_2m": "%",
+      "wind_speed_10m": "km/h"
     },
     "current": {
-      "time": "2026-07-02T18:15",
+      "time": "2026-07-02T19:30",
       "interval": 900,
-      "temperature_2m": 16.8,
+      "temperature_2m": 15.7,
       "weather_code": 3,
-      "is_day": 1
+      "is_day": 1,
+      "apparent_temperature": 14.8,
+      "relative_humidity_2m": 76,
+      "wind_speed_10m": 9.5
     }
   },
   "forecast": {
     "latitude": 49.18432,
     "longitude": -122.82682,
-    "generationtime_ms": 0.4049539566040039,
+    "generationtime_ms": 0.5040168762207031,
     "utc_offset_seconds": -25200,
     "timezone": "America/Vancouver",
     "timezone_abbreviation": "GMT-7",
@@ -1473,7 +1629,10 @@ var DASHBOARD_CACHE = {
       "time": "iso8601",
       "temperature_2m_max": "°C",
       "temperature_2m_min": "°C",
-      "weather_code": "wmo code"
+      "weather_code": "wmo code",
+      "precipitation_probability_max": "%",
+      "sunrise": "iso8601",
+      "sunset": "iso8601"
     },
     "daily": {
       "time": [
@@ -1486,7 +1645,7 @@ var DASHBOARD_CACHE = {
         "2026-07-08"
       ],
       "temperature_2m_max": [
-        16.6,
+        16.3,
         18.5,
         20.9,
         22.8,
@@ -1505,12 +1664,39 @@ var DASHBOARD_CACHE = {
       ],
       "weather_code": [
         61,
-        51,
+        3,
         3,
         0,
         3,
         51,
         51
+      ],
+      "precipitation_probability_max": [
+        85,
+        26,
+        2,
+        1,
+        0,
+        9,
+        14
+      ],
+      "sunrise": [
+        "2026-07-02T05:11",
+        "2026-07-03T05:12",
+        "2026-07-04T05:12",
+        "2026-07-05T05:13",
+        "2026-07-06T05:14",
+        "2026-07-07T05:15",
+        "2026-07-08T05:16"
+      ],
+      "sunset": [
+        "2026-07-02T21:19",
+        "2026-07-03T21:19",
+        "2026-07-04T21:18",
+        "2026-07-05T21:18",
+        "2026-07-06T21:17",
+        "2026-07-07T21:17",
+        "2026-07-08T21:16"
       ]
     }
   },
@@ -1519,33 +1705,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
-          "title": "B.C. will not fight decision in court if pipeline is built from Alberta to the coast: Eby",
-          "link": "https://globalnews.ca/news/11950379/bc-not-fight-decision-court-alberta-pipeline/",
-          "pubDate": "2026-07-02 18:03:41",
+          "title": "BC Nurses’ Union now in legal strike position after 72-hour notice",
+          "link": "https://globalnews.ca/news/11950499/bc-nurses-legal-strike-position/",
+          "pubDate": "2026-07-02T19:11:08Z",
           "source": "Global BC"
         },
         {
-          "title": "Ottawa will ‘fully’ maintain B.C. tanker ban, Carney and Eby say",
+          "title": "B.C. man who drove into ocean in livestream stunt charged with dangerous driving in New West crash",
+          "link": "https://globalnews.ca/news/11950455/bc-man-drove-ocean-livestream-stunt-charged-with-dangerous-driving-new-west-crash/",
+          "pubDate": "2026-07-02T18:38:38Z",
+          "source": "Global BC"
+        },
+        {
+          "title": "B.C. will not fight decision in court if pipeline is built from Alberta to the coast: Eby",
+          "link": "https://globalnews.ca/news/11950379/bc-not-fight-decision-court-alberta-pipeline/",
+          "pubDate": "2026-07-02T18:03:41Z",
+          "source": "Global BC"
+        },
+        {
+          "title": "Ottawa and B.C. agree to maintain tanker ban. What’s in the new deal?",
           "link": "https://globalnews.ca/news/11950337/ottawa-bc-tanker-ban-carney/",
-          "pubDate": "2026-07-02 17:43:10",
+          "pubDate": "2026-07-02T17:43:10Z",
           "source": "Global BC"
         },
         {
           "title": "Alberta’s Smith set to unveil details of proposed oil pipeline",
           "link": "https://globalnews.ca/news/11949863/alberta-oil-pipeline-announcement-danielle-smith/",
-          "pubDate": "2026-07-02 12:10:21",
-          "source": "Global BC"
-        },
-        {
-          "title": "Transit advocates call for low-income transit pass as TransLink fares increase",
-          "link": "https://globalnews.ca/news/11949584/transit-advocates-low-income-transit-pass-translink-fares-increase/",
-          "pubDate": "2026-07-02 00:06:25",
-          "source": "Global BC"
-        },
-        {
-          "title": "Suspect in Kits Beach stranger attack released after less than 48 hours in custody",
-          "link": "https://globalnews.ca/news/11949578/suspect-kits-beach-stranger-attack-released-less-48-hours-custody/",
-          "pubDate": "2026-07-02 00:06:21",
+          "pubDate": "2026-07-02T12:10:21Z",
           "source": "Global BC"
         }
       ]
@@ -1554,33 +1740,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
-          "title": "North Coast oil tanker ban to remain in place as part of multibillion-dollar deal between B.C. and Ottawa",
+          "title": "Carney agrees to uphold tanker ban on B.C.'s North Coast, hours before Alberta's pipeline proposal update",
           "link": "https://www.cbc.ca/news/canada/livestory/energy-proposal-ab-bc-west-coast-july-2-live-updates-9.7251535?cmp=rss",
-          "pubDate": "2026-07-02 13:04:01",
+          "pubDate": "2026-07-02T17:04:01Z",
           "source": "CBC BC"
         },
         {
           "title": "Vancouver 'RoboCop' is 1st Canadian ALS patient to receive Elon Musk's Neuralink brain implant",
           "link": "https://www.cbc.ca/news/canada/british-columbia/vancouver-neuralink-patient-als-vpd-sergeant-9.7253579?cmp=rss",
-          "pubDate": "2026-07-02 07:00:00",
+          "pubDate": "2026-07-02T11:00:00Z",
           "source": "CBC BC"
         },
         {
           "title": "Quesnel rolling out the red carpet to attract U.S.-trained doctors — and it's working",
           "link": "https://www.cbc.ca/news/canada/british-columbia/quesnel-us-trained-doctors-9.7254880?cmp=rss",
-          "pubDate": "2026-07-02 06:00:00",
+          "pubDate": "2026-07-02T10:00:00Z",
           "source": "CBC BC"
         },
         {
           "title": "Meet the working security dogs of the FIFA World Cup in Vancouver",
           "link": "https://www.cbc.ca/news/canada/british-columbia/working-security-dogs-fifa-world-cup-vancouver-9.7254957?cmp=rss",
-          "pubDate": "2026-07-02 09:00:00",
+          "pubDate": "2026-07-02T13:00:00Z",
           "source": "CBC BC"
         },
         {
           "title": "Want to cool off with a dip in a river or lake? Here's how to stay safe",
           "link": "https://www.cbc.ca/news/canada/heat-wave-swimming-risk-canada-9.7253498?cmp=rss",
-          "pubDate": "2026-07-02 04:00:00",
+          "pubDate": "2026-07-02T08:00:00Z",
           "source": "CBC BC"
         }
       ]
@@ -1589,33 +1775,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
-          "title": "North Coast oil tanker ban to remain in place as part of multibillion-dollar deal between B.C. and Ottawa",
+          "title": "Carney agrees to uphold tanker ban on B.C.'s North Coast, hours before Alberta's pipeline proposal update",
           "link": "https://www.cbc.ca/news/canada/livestory/energy-proposal-ab-bc-west-coast-july-2-live-updates-9.7251535?cmp=rss",
-          "pubDate": "2026-07-02 13:04:01",
+          "pubDate": "2026-07-02T17:04:01Z",
           "source": "CBC News"
         },
         {
           "title": "Venezuelans now face grim and daunting task of recovering bodies from devastated areas",
           "link": "https://www.cbc.ca/news/world/venezuela-rescue-earthquake-9.7255637?cmp=rss",
-          "pubDate": "2026-06-24 21:33:43",
+          "pubDate": "2026-06-25T01:33:43Z",
           "source": "CBC News"
         },
         {
           "title": "Trump isn't extending CUSMA trade deal, so what happens now?",
           "link": "https://www.cbc.ca/news/politics/what-next-cusma-usmca-us-canada-mexico-trump-tariffs-9.7255435?cmp=rss",
-          "pubDate": "2026-06-14 04:00:00",
+          "pubDate": "2026-06-14T08:00:00Z",
           "source": "CBC News"
         },
         {
           "title": "New York City permit shows schedule for Taylor Swift and Travis Kelce's wedding",
           "link": "https://www.cbc.ca/news/entertainment/permit-taylor-swift-travis-kelce-9.7256102?cmp=rss",
-          "pubDate": "2026-07-02 13:15:11",
+          "pubDate": "2026-07-02T17:15:11Z",
           "source": "CBC News"
         },
         {
-          "title": "City of Ottawa provides update following Canada Day storm",
-          "link": "https://www.cbc.ca/player/play/9.7256115?cmp=rss",
-          "pubDate": "2026-07-02 13:55:00",
+          "title": "Vancouver 'RoboCop' is 1st Canadian ALS patient to receive Elon Musk's Neuralink brain implant",
+          "link": "https://www.cbc.ca/news/canada/british-columbia/vancouver-neuralink-patient-als-vpd-sergeant-9.7253579?cmp=rss",
+          "pubDate": "2026-07-02T11:00:00Z",
           "source": "CBC News"
         }
       ]
@@ -1624,33 +1810,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
-          "title": "Everything we know about Taylor Swift and Travis Kelce’s rumoured wedding",
-          "link": "https://globalnews.ca/news/11949958/taylor-swift-travis-kelce-rumoured-wedding-details/",
-          "pubDate": "2026-07-02 18:17:15",
+          "title": "Heat warnings as hot, humid weather forecast for Maritimes until Saturday",
+          "link": "https://globalnews.ca/news/11950108/heat-warnings-maritimes/",
+          "pubDate": "2026-07-02T19:30:32Z",
           "source": "Global News"
         },
         {
-          "title": "B.C. will not fight decision in court if pipeline is built from Alberta to the coast: Eby",
-          "link": "https://globalnews.ca/news/11950379/bc-not-fight-decision-court-alberta-pipeline/",
-          "pubDate": "2026-07-02 18:03:41",
+          "title": "Bridgewater, N.S. fire victim remembered as ‘ray of light’ by co-workers",
+          "link": "https://globalnews.ca/news/11950299/bridgewater-fire-victim-amitoj-kaur/",
+          "pubDate": "2026-07-02T19:26:27Z",
           "source": "Global News"
         },
         {
-          "title": "Ottawa will ‘fully’ maintain B.C. tanker ban, Carney and Eby say",
-          "link": "https://globalnews.ca/news/11950337/ottawa-bc-tanker-ban-carney/",
-          "pubDate": "2026-07-02 17:43:10",
+          "title": "Former U.S. Olympian indicted over alleged vandalism of Reflecting Pool",
+          "link": "https://globalnews.ca/news/11950563/former-us-olympian-indicted-felony-charge-alleged-vandalism-reflecting-pool/",
+          "pubDate": "2026-07-02T19:25:49Z",
           "source": "Global News"
         },
         {
-          "title": "Man, 24, killed in boating incident near Nova Scotia’s Oak Island",
-          "link": "https://globalnews.ca/news/11950306/fatal-boating-incident-oak-island/",
-          "pubDate": "2026-07-02 17:40:02",
+          "title": "BC Nurses’ Union now in legal strike position after 72-hour notice",
+          "link": "https://globalnews.ca/news/11950499/bc-nurses-legal-strike-position/",
+          "pubDate": "2026-07-02T19:11:08Z",
           "source": "Global News"
         },
         {
-          "title": "16 pilot whales die after stranding on Nova Scotia’s remote Sable Island",
-          "link": "https://globalnews.ca/news/11950103/sable-island-pilot-whales-stranded/",
-          "pubDate": "2026-07-02 17:38:06",
+          "title": "2 arrested after raid at alleged migrant smuggling house in Montreal, RCMP say",
+          "link": "https://globalnews.ca/news/11950438/migrant-smuggling-house-raid-montreal/",
+          "pubDate": "2026-07-02T18:54:53Z",
           "source": "Global News"
         }
       ]
@@ -1659,33 +1845,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
+          "title": "Feds admit they haven’t enacted any policies toward advancing promise to release 23.6 million barrels of oil",
+          "link": "https://nationalpost.com/news/politics/liberal-government-tim-hodgson-oil-reserves",
+          "pubDate": "2026-07-02T19:14:13Z",
+          "source": "National Post"
+        },
+        {
+          "title": "Toronto lawyer says he was attacked in the street for being Jewish",
+          "link": "https://nationalpost.com/news/canada/toronto-lawyer-says-he-was-attacked-in-the-street-for-being-jewish",
+          "pubDate": "2026-07-02T19:13:03Z",
+          "source": "National Post"
+        },
+        {
+          "title": "Allowing private health insurance for basic care could reduce wait times, expand hospital beds: report",
+          "link": "https://nationalpost.com/news/canada/allowing-private-health-insurance-for-basic-care-could-reduce-wait-times-expand-hospital-beds-report",
+          "pubDate": "2026-07-02T19:00:43Z",
+          "source": "National Post"
+        },
+        {
           "title": "N.S. woman who strangled daughter to death gets six more months of day parole after ‘clear progress’",
           "link": "https://nationalpost.com/news/canada/penny-patricia-boudreau-nova-scotia",
-          "pubDate": "2026-07-02 17:51:38",
+          "pubDate": "2026-07-02T17:51:38Z",
           "source": "National Post"
         },
         {
           "title": "What we know (and don’t) about Canada’s ‘tightly guarded secret’ gift for America’s 250th birthday",
           "link": "https://nationalpost.com/news/what-we-know-about-canadas-secret-gift-for-americas-250th-birthday",
-          "pubDate": "2026-07-02 17:43:48",
-          "source": "National Post"
-        },
-        {
-          "title": "Randall Denley: Ontario is an ‘economic powerhouse’ with an empathy deficit",
-          "link": "https://nationalpost.com/opinion/ontario-is-an-economic-powerhouse-with-an-empathy-deficit",
-          "pubDate": "2026-07-02 17:34:20",
-          "source": "National Post"
-        },
-        {
-          "title": "RCMP arrest two in Montreal human smuggling investigation that allegedly involved migrants crossing both directions",
-          "link": "https://nationalpost.com/news/canada/rcmp-montreal-human-smuggling-investigation",
-          "pubDate": "2026-07-02 17:08:49",
-          "source": "National Post"
-        },
-        {
-          "title": "Man who allegedly strangled his girlfriend died of a heart attack while dumping her body: authorities",
-          "link": "https://nationalpost.com/news/world/man-who-allegedly-strangled-his-girlfriend-died-of-a-heart-attack-while-dumping-her-body-authorities",
-          "pubDate": "2026-07-02 16:47:21",
+          "pubDate": "2026-07-02T17:43:48Z",
           "source": "National Post"
         }
       ]
@@ -1696,31 +1882,31 @@ var DASHBOARD_CACHE = {
         {
           "title": "Venezuela quake survivor pulled out alive after eight days",
           "link": "https://www.bbc.co.uk/news/articles/ce375v12z0qo?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-07-02 16:11:24",
+          "pubDate": "2026-07-02T16:11:24Z",
           "source": "BBC World"
         },
         {
-          "title": "'Most massive' Russian attack on Kyiv kills at least 22",
+          "title": "'Most massive' Russian attack on Kyiv kills at least 25",
           "link": "https://www.bbc.co.uk/news/articles/c4gyv05gk4do?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-07-02 17:49:48",
+          "pubDate": "2026-07-02T18:35:36Z",
           "source": "BBC World"
         },
         {
-          "title": "People smuggler convicted in France found by BBC living in UK and seeking asylum",
-          "link": "https://www.bbc.co.uk/news/articles/clye9zn0y1ro?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-07-02 05:00:03",
+          "title": "Bomb blast at Damascus cafe kills six, Syrian state media say",
+          "link": "https://www.bbc.co.uk/news/articles/cn0vwxyz40zo?at_medium=RSS&at_campaign=rss",
+          "pubDate": "2026-07-02T17:56:18Z",
           "source": "BBC World"
         },
         {
           "title": "Vatican excommunicates followers of global Catholic sect",
           "link": "https://www.bbc.co.uk/news/articles/c5yz95188jjo?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-07-02 17:27:36",
+          "pubDate": "2026-07-02T17:27:36Z",
           "source": "BBC World"
         },
         {
           "title": "China says pilot crashed small plane into skyscraper for 'personal reasons'",
           "link": "https://www.bbc.co.uk/news/articles/cr47129ky6do?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-07-02 09:21:31",
+          "pubDate": "2026-07-02T09:21:31Z",
           "source": "BBC World"
         }
       ]
@@ -1729,33 +1915,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
+          "title": "The last time Iran held a funeral for the Supreme Leader",
+          "link": "https://www.aljazeera.com/video/newsfeed/2026/7/2/the-last-time-iran-held-a-funeral-for-the-supreme-leader?traffic_source=rss",
+          "pubDate": "2026-07-02T19:11:16Z",
+          "source": "Al Jazeera"
+        },
+        {
+          "title": "Fears of new massacre in Sudan’s el-Obeid: What do we know?",
+          "link": "https://www.aljazeera.com/editorial/2026/7/2/fears-of-new-massacre-in-sudans-el-obeid-what-do-we-know?traffic_source=rss",
+          "pubDate": "2026-07-02T18:59:41Z",
+          "source": "Al Jazeera"
+        },
+        {
+          "title": "UK’s likely next PM Andy Burnham faces defence funding gap",
+          "link": "https://www.aljazeera.com/news/2026/7/2/uk-leader-hopeful-andy-burnham-faces-defence-funding-gap?traffic_source=rss",
+          "pubDate": "2026-07-02T18:59:33Z",
+          "source": "Al Jazeera"
+        },
+        {
+          "title": "‘Miracle’: Trapped man rescued eight days after Venezuela earthquakes",
+          "link": "https://www.aljazeera.com/news/2026/7/2/miracle-trapped-man-rescued-eight-days-after-venezuela-earthquakes?traffic_source=rss",
+          "pubDate": "2026-07-02T18:12:54Z",
+          "source": "Al Jazeera"
+        },
+        {
           "title": "How the North American heatwave could impact the FIFA World Cup",
           "link": "https://www.aljazeera.com/news/2026/7/2/how-the-north-american-heatwave-could-impact-the-fifa-world-cup?traffic_source=rss",
-          "pubDate": "2026-07-02 17:55:42",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "Deadly blast at Damascus cafe leaves 6 dead, 22 injured",
-          "link": "https://www.aljazeera.com/video/newsfeed/2026/7/2/deadly-blast-at-damascus-cafe-leaves-6-dead-22-injured?traffic_source=rss",
-          "pubDate": "2026-07-02 17:36:49",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "Rally for Luxembourg teacher fired over pro-Gaza posts",
-          "link": "https://www.aljazeera.com/video/newsfeed/2026/7/2/rally-for-luxembourg-teacher-fired-over-pro-gaza-posts?traffic_source=rss",
-          "pubDate": "2026-07-02 17:35:37",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "Amid the World Cup, the new pan-Africanism is conditional",
-          "link": "https://www.aljazeera.com/opinions/2026/7/2/amid-the-world-cup-the-new-pan-africanism-is-conditional?traffic_source=rss",
-          "pubDate": "2026-07-02 17:35:14",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "How US-Iran war may push Gulf countries to ‘diversify’ security alliances",
-          "link": "https://www.aljazeera.com/news/2026/7/2/how-us-iran-war-may-push-gulf-countries-to-diversify-security-alliances?traffic_source=rss",
-          "pubDate": "2026-07-02 17:34:42",
+          "pubDate": "2026-07-02T17:55:42Z",
           "source": "Al Jazeera"
         }
       ]
@@ -1764,33 +1950,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
-          "title": "Trump is avoiding the World Cup because it’s packed with good things he doesn’t like | Barney Ronay",
-          "link": "https://www.theguardian.com/football/2026/jul/02/donald-trump-world-cup-fifa",
-          "pubDate": "2026-07-02 14:31:43",
+          "title": "Spain v Austria: World Cup 2026 last 32 – live",
+          "link": "https://www.theguardian.com/football/live/2026/jul/02/spain-v-austria-world-cup-2026-last-32-live",
+          "pubDate": "2026-07-02T19:24:36Z",
           "source": "Guardian"
         },
         {
-          "title": "South Africa has long been a symbol of liberal progress. This week’s anti-immigrant protests end that | Zanele Mji",
-          "link": "https://www.theguardian.com/commentisfree/2026/jul/02/south-africa-symbol-liberal-progress-anti-immigrant-protests",
-          "pubDate": "2026-07-02 16:08:19",
+          "title": "Conflicts of interest? Trump only has one interest: himself | Robert Reich",
+          "link": "https://www.theguardian.com/commentisfree/2026/jul/02/trump-crypto-conflict-of-interest",
+          "pubDate": "2026-07-02T18:20:55Z",
           "source": "Guardian"
         },
         {
           "title": "‘It was a massacre’: Haiti gangs carry out mass killings across the country",
           "link": "https://www.theguardian.com/global-development/2026/jul/02/it-was-a-massacre-haiti-gangs-carry-out-mass-killings-across-the-country",
-          "pubDate": "2026-07-02 13:00:13",
+          "pubDate": "2026-07-02T13:00:13Z",
           "source": "Guardian"
         },
         {
-          "title": "Breaking hearts and blowing minds:​ Robyn’s 20 greatest songs – ranked!",
-          "link": "https://www.theguardian.com/music/2026/jul/02/robyn-greatest-songs-ranked",
-          "pubDate": "2026-07-02 14:17:36",
+          "title": "My job provides financial stability but my passion has gone. What do I do? | Leading questions",
+          "link": "https://www.theguardian.com/lifeandstyle/2026/jul/03/my-job-provides-financial-stability-but-my-passion-has-gone",
+          "pubDate": "2026-07-02T15:00:05Z",
           "source": "Guardian"
         },
         {
           "title": "Ethnicity pain gap: the epidural failed and no one believed me – I could feel everything",
           "link": "https://www.theguardian.com/world/2026/jul/02/maternity-neonatal-care-childbirth-womens-health-minority-groups",
-          "pubDate": "2026-07-02 16:03:38",
+          "pubDate": "2026-07-02T16:03:38Z",
           "source": "Guardian"
         }
       ]
@@ -1799,33 +1985,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
+          "title": "Vatican excommunicates six ultraconservative bishops over ordination",
+          "link": "https://www.france24.com/en/vatican-excommunicates-six-ultraconservative-bishops-over-ordination",
+          "pubDate": "2026-07-02T19:04:32Z",
+          "source": "France24"
+        },
+        {
+          "title": "'A clear sense in Israel that Israel hasn't won anything'",
+          "link": "https://www.france24.com/en/a-clear-sense-in-israel-that-israel-hasn-t-won-anything",
+          "pubDate": "2026-07-02T18:41:32Z",
+          "source": "France24"
+        },
+        {
           "title": "Ukraine will retaliate for Russian attack on Kyiv: Zelensky",
           "link": "https://www.france24.com/en/ukraine-will-retaliate-for-russian-attack-on-kyiv-zelensky",
-          "pubDate": "2026-07-02 18:12:37",
+          "pubDate": "2026-07-02T18:12:37Z",
           "source": "France24"
         },
         {
           "title": "Unprecedented images show how Russia is using drones from the war in Ukraine in Africa",
           "link": "https://www.france24.com/en/africa/20260702-unprecedented-images-russia-using-drones-war-ukraine-africa",
-          "pubDate": "2026-07-02 16:17:50",
+          "pubDate": "2026-07-02T16:17:50Z",
           "source": "France24"
         },
         {
           "title": "Paris des Arts: Special edition in Fez, Morocco",
           "link": "https://www.france24.com/en/tv-shows/paris-des-arts/20260702-paris-des-arts-special-edition-in-fez-morocco",
-          "pubDate": "2026-07-02 16:04:22",
-          "source": "France24"
-        },
-        {
-          "title": "Algeria votes for new parliament with turnout and cost-of-living in focus",
-          "link": "https://www.france24.com/en/algeria-votes-for-new-parliament-with-turnout-and-cost-of-living-in-focus",
-          "pubDate": "2026-07-02 15:45:08",
-          "source": "France24"
-        },
-        {
-          "title": "Schismatic Catholic society sees six bishops excommunicated by Pope",
-          "link": "https://www.france24.com/en/schismatic-catholic-society-sees-six-bishops-excommunicated-by-pope",
-          "pubDate": "2026-07-02 15:42:38",
+          "pubDate": "2026-07-02T16:04:22Z",
           "source": "France24"
         }
       ]
@@ -1836,33 +2022,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
-          "title": "From baseball's best pitcher to a 3-time batting c...",
-          "link": "https://www.espn.com/mlb/story/_/id/49239776/mlb-2026-deadline-one-player-trade-away-july-all-30-teams",
-          "pubDate": "2026-07-02 13:23:28",
-          "source": "ESPN"
-        },
-        {
-          "title": "MLB Power Rankings: Rays, Marlins bring Florida he...",
-          "link": "https://www.espn.com/mlb/story/_/id/49238551/mlb-2026-power-rankings-week-14-dodgers-brewers-rays-braves-yankees-marlins",
-          "pubDate": "2026-07-02 13:23:28",
+          "title": "Follow live: Spain take on Austria in round-of-32 ...",
+          "link": "https://www.espn.com/soccer/story/_/id/49244994/world-cup-daily-spain-portugal-action-round-32-continues",
+          "pubDate": "2026-07-02T20:10:00Z",
           "source": "ESPN"
         },
         {
           "title": "Fever's Clark, Boston, Mitchell named ASG starters...",
           "link": "https://www.espn.com/wnba/story/_/id/49249692/fever-clark-boston-mitchell-start-wnba-all-star-game",
-          "pubDate": "2026-07-02 14:11:29",
+          "pubDate": "2026-07-02T19:54:36Z",
           "source": "ESPN"
         },
         {
           "title": "Judge grants access to Tiger's medical records",
           "link": "https://www.espn.com/espn/story/_/id/49249519/prosecutors-review-tiger-woods-medical-records-dui-case",
-          "pubDate": "2026-07-02 14:11:29",
+          "pubDate": "2026-07-02T19:54:36Z",
+          "source": "ESPN"
+        },
+        {
+          "title": "Sources: Simons agrees with revamped 76ers",
+          "link": "https://www.espn.com/nba/story/_/id/49250070/sources-anfernee-simons-agrees-deal-revamped-76ers",
+          "pubDate": "2026-07-02T19:54:36Z",
           "source": "ESPN"
         },
         {
           "title": "Ovechkin returning for 22nd season with Capitals",
           "link": "https://www.espn.com/nhl/story/_/id/49249307/ovechkin-returning-22nd-season-capitals-1-year-deal",
-          "pubDate": "2026-07-02 14:11:29",
+          "pubDate": "2026-07-02T19:54:36Z",
           "source": "ESPN"
         }
       ]
@@ -1873,31 +2059,31 @@ var DASHBOARD_CACHE = {
         {
           "title": "Home Page Featured",
           "link": "https://www.sportsnet.ca/?sn-collection=top-collection-july-2",
-          "pubDate": "2025-07-02 10:34:53",
+          "pubDate": "2025-07-02T14:34:53Z",
           "source": "Sportsnet"
         },
         {
           "title": "Five Raptors thoughts as dust on Kawhi Leonard trade settles",
           "link": "https://www.sportsnet.ca/nba/article/five-raptors-thoughts-as-dust-on-kawhi-leonard-trade-settles/",
-          "pubDate": "2026-07-02 11:51:42",
+          "pubDate": "2026-07-02T15:51:42Z",
           "source": "Sportsnet"
         },
         {
           "title": "Capitals icon Alex Ovechkin re-signs on one-year deal",
           "link": "https://www.sportsnet.ca/nhl/article/capitals-icon-alex-ovechkin-re-signs-on-one-year-deal/",
-          "pubDate": "2026-07-02 12:34:45",
+          "pubDate": "2026-07-02T16:34:45Z",
           "source": "Sportsnet"
         },
         {
           "title": "NHL’s top 10 UFAs still available: Latest rumours",
           "link": "https://www.sportsnet.ca/nhl/article/nhls-top-10-ufas-still-available-latest-rumours/",
-          "pubDate": "2026-07-02 09:27:33",
+          "pubDate": "2026-07-02T13:27:33Z",
           "source": "Sportsnet"
         },
         {
-          "title": "How Raptors’ cap, roster picture will look after Kawhi Leonard acquisition",
-          "link": "https://www.sportsnet.ca/nba/article/how-raptors-cap-roster-picture-look-after-kawhi-leonard-acquisition/",
-          "pubDate": "2026-07-01 21:37:37",
+          "title": "Flames bring in character, leadership by acquiring Middleton in Coleman trade",
+          "link": "https://www.sportsnet.ca/nhl/article/flames-bring-in-character-leadership-by-acquiring-middleton-in-coleman-trade/",
+          "pubDate": "2026-07-02T18:49:32Z",
           "source": "Sportsnet"
         }
       ]
@@ -1906,33 +2092,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
+          "title": "4 CFL Fantasy waiver wire pickups for Week 5",
+          "link": "https://www.cfl.ca/2026/07/02/4-cfl-fantasy-waiver-wire-pickups-for-week-5/",
+          "pubDate": "2026-07-02T19:31:45Z",
+          "source": "CFL.ca"
+        },
+        {
+          "title": "3 keys to victory for Saskatchewan, Ottawa on FanDuel Canada Day Weekend",
+          "link": "https://www.cfl.ca/2026/07/02/3-keys-to-victory-for-saskatchewan-ottawa-on-fanduel-canada-day-weekend/",
+          "pubDate": "2026-07-02T19:31:45Z",
+          "source": "CFL.ca"
+        },
+        {
           "title": "A position-by-position look at the CFL’s Canadian talent",
           "link": "https://www.cfl.ca/2026/07/02/a-position-by-position-look-at-the-cfls-canadian-talent/",
-          "pubDate": "2026-07-02 18:17:44",
+          "pubDate": "2026-07-02T19:31:45Z",
           "source": "CFL.ca"
         },
         {
           "title": "8 players who could decide FanDuel Canada Day Weekend",
           "link": "https://www.cfl.ca/2026/07/02/8-players-who-could-decide-fanduel-canada-day-weekend/",
-          "pubDate": "2026-07-02 18:17:44",
+          "pubDate": "2026-07-02T19:31:45Z",
           "source": "CFL.ca"
         },
         {
           "title": "6 CFL Fantasy trades to upgrade your roster in Week 5",
           "link": "https://www.cfl.ca/2026/07/02/6-cfl-fantasy-trades-to-upgrade-your-roster-in-week-5/",
-          "pubDate": "2026-07-02 18:17:44",
-          "source": "CFL.ca"
-        },
-        {
-          "title": "5 Most Canadian things to watch on FanDuel Canada Day Weekend",
-          "link": "https://www.cfl.ca/2026/07/02/5-most-canadian-things-to-watch-on-fanduel-canada-day-weekend/",
-          "pubDate": "2026-07-02 18:17:44",
-          "source": "CFL.ca"
-        },
-        {
-          "title": "CFL.ca Game Notes: What are the numbers saying ahead of FanDuel Canada Day Weekend?",
-          "link": "https://www.cfl.ca/2026/07/02/cfl-ca-game-notes-what-are-the-numbers-saying-ahead-of-fanduel-canada-day-weekend/",
-          "pubDate": "2026-07-02 18:17:44",
+          "pubDate": "2026-07-02T19:31:45Z",
           "source": "CFL.ca"
         }
       ]
@@ -1943,31 +2129,31 @@ var DASHBOARD_CACHE = {
         {
           "title": "Overpowering ace once again sits atop Starting Pitcher Power Rankings",
           "link": "https://www.mlb.com/news/mlb-seventh-starting-pitcher-power-rankings-2026",
-          "pubDate": "2026-07-02 04:18:26",
+          "pubDate": "2026-07-02T04:18:26Z",
           "source": "MLB.com"
         },
         {
           "title": "How will the logjam in AL postseason race impact Trade Deadline?",
           "link": "https://www.mlb.com/news/biggest-trade-deadline-questions-for-american-league-teams",
-          "pubDate": "2026-07-02 04:28:40",
+          "pubDate": "2026-07-02T04:28:40Z",
           "source": "MLB.com"
         },
         {
           "title": "With voting over, here’s how the All-Star teams are selected",
           "link": "https://www.mlb.com/news/all-star-game-roster-rules-faq-c239654292",
-          "pubDate": "2026-07-02 16:00:00",
+          "pubDate": "2026-07-02T16:00:00Z",
           "source": "MLB.com"
         },
         {
           "title": "The mystery behind Vlad Jr.'s career-worst slump",
           "link": "https://www.mlb.com/news/the-mystery-behind-vladimir-guerrero-jrs-career-worst-slump",
-          "pubDate": "2026-07-02 13:14:00",
+          "pubDate": "2026-07-02T18:26:00Z",
           "source": "MLB.com"
         },
         {
-          "title": "Our hero! Prospect nicknamed 'Captain America' comes to aid of fainting child",
-          "link": "https://www.mlb.com/news/walker-jenkins-captain-america-comes-to-aid-of-fainting-child",
-          "pubDate": "2026-07-01 23:47:18",
+          "title": "England soccer fans form Michael Harris II fan club out of nowhere, complete with chants",
+          "link": "https://www.mlb.com/news/england-world-cup-fans-root-for-michael-harris-ii-at-braves-game",
+          "pubDate": "2026-07-02T04:02:23Z",
           "source": "MLB.com"
         }
       ]
@@ -2039,7 +2225,113 @@ var DASHBOARD_CACHE = {
       "status": "No game"
     }
   ],
-  "updated": "2026-07-02T18:17:44.586192+00:00"
+  "stocks": {
+    "XEQT.TO": {
+      "chart": {
+        "result": [
+          {
+            "meta": {
+              "symbol": "XEQT.TO",
+              "regularMarketPrice": 44.88,
+              "chartPreviousClose": 45.1
+            }
+          }
+        ]
+      }
+    },
+    "VFV.TO": {
+      "chart": {
+        "result": [
+          {
+            "meta": {
+              "symbol": "VFV.TO",
+              "regularMarketPrice": 187.35,
+              "chartPreviousClose": 188.37
+            }
+          }
+        ]
+      }
+    },
+    "AAPL": {
+      "chart": {
+        "result": [
+          {
+            "meta": {
+              "symbol": "AAPL",
+              "regularMarketPrice": 307.79,
+              "chartPreviousClose": 294.38
+            }
+          }
+        ]
+      }
+    },
+    "TSLA": {
+      "chart": {
+        "result": [
+          {
+            "meta": {
+              "symbol": "TSLA",
+              "regularMarketPrice": 391.14,
+              "chartPreviousClose": 425.3
+            }
+          }
+        ]
+      }
+    },
+    "MSFT": {
+      "chart": {
+        "result": [
+          {
+            "meta": {
+              "symbol": "MSFT",
+              "regularMarketPrice": 391.0,
+              "chartPreviousClose": 384.28
+            }
+          }
+        ]
+      }
+    },
+    "NVDA": {
+      "chart": {
+        "result": [
+          {
+            "meta": {
+              "symbol": "NVDA",
+              "regularMarketPrice": 193.225,
+              "chartPreviousClose": 197.58
+            }
+          }
+        ]
+      }
+    },
+    "AMZN": {
+      "chart": {
+        "result": [
+          {
+            "meta": {
+              "symbol": "AMZN",
+              "regularMarketPrice": 244.05,
+              "chartPreviousClose": 241.7
+            }
+          }
+        ]
+      }
+    },
+    "GOOGL": {
+      "chart": {
+        "result": [
+          {
+            "meta": {
+              "symbol": "GOOGL",
+              "regularMarketPrice": 358.89,
+              "chartPreviousClose": 361.21
+            }
+          }
+        ]
+      }
+    }
+  },
+  "updated": "2026-07-02T19:31:47.108284+00:00"
 };
 // ── DIAGNOSTIC TEST FOR FETCH/API SUPPORT ──
 (function() {
@@ -2090,16 +2382,31 @@ function httpGet(url) {
     return Promise.race([request, timeout]);
   }
 
-  // First, check if this is cached weather data (embedded in HTML)
+  // Check embedded weather / forecast cache
   if (url.includes('api.open-meteo.com')) {
-    console.log('Weather URL detected:', url);
-    console.log('DASHBOARD_CACHE exists:', !!DASHBOARD_CACHE);
-    console.log('DASHBOARD_CACHE.weather:', DASHBOARD_CACHE && DASHBOARD_CACHE.weather);
-    if (DASHBOARD_CACHE && DASHBOARD_CACHE.weather && DASHBOARD_CACHE.weather.current) {
-      console.log('✓ Using embedded weather cache:', DASHBOARD_CACHE.weather.current.temperature_2m + '°C');
-      return Promise.resolve(DASHBOARD_CACHE.weather);
+    if (url.includes('daily=')) {
+      // Forecast endpoint
+      if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.forecast && DASHBOARD_CACHE.forecast.daily) {
+        return Promise.resolve(DASHBOARD_CACHE.forecast);
+      }
+    } else {
+      // Current-weather endpoint
+      if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.weather && DASHBOARD_CACHE.weather.current) {
+        return Promise.resolve(DASHBOARD_CACHE.weather);
+      }
     }
-    console.log('✗ No embedded weather cache - trying direct API');
+    return tryDirectRequest();
+  }
+
+  // Serve stock quotes from embedded cache to avoid CORS failures
+  if (url.includes('finance.yahoo.com')) {
+    var symMatch = url.match(/chart\/([^?]+)/);
+    if (symMatch && typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.stocks) {
+      var cachedSym = decodeURIComponent(symMatch[1]);
+      if (DASHBOARD_CACHE.stocks[cachedSym]) {
+        return Promise.resolve(DASHBOARD_CACHE.stocks[cachedSym]);
+      }
+    }
     return tryDirectRequest();
   }
 
@@ -2191,6 +2498,25 @@ function loadWeatherForCoords() {
       if (liveTemp) liveTemp.textContent = tempC + '°C';
       if (liveIcon) liveIcon.innerHTML = icon;
       if (liveDesc) liveDesc.textContent = getWeatherDescription(data.current.weather_code);
+
+      var nowTemp = document.getElementById('wx-now-temp');
+      var nowIcon = document.getElementById('wx-now-icon');
+      var nowDesc = document.getElementById('wx-now-desc');
+      if (nowTemp) nowTemp.textContent = tempC + '°C';
+      if (nowIcon) nowIcon.innerHTML = icon;
+      if (nowDesc) nowDesc.textContent = getWeatherDescription(data.current.weather_code);
+
+      // Extra metrics render only when the cache carries them (older caches won't)
+      var metaRow = document.getElementById('wx-meta-row');
+      if (metaRow) {
+        var metas = '';
+        function metaChip(label, val) { return '<div class="wx-meta"><span class="wm-l">' + label + '</span><span class="wm-v">' + val + '</span></div>'; }
+        if (data.current.apparent_temperature != null) metas += metaChip('Feels like', Math.round(data.current.apparent_temperature) + '°C');
+        if (data.current.relative_humidity_2m != null) metas += metaChip('Humidity', Math.round(data.current.relative_humidity_2m) + '%');
+        if (data.current.wind_speed_10m != null) metas += metaChip('Wind', Math.round(data.current.wind_speed_10m) + ' km/h');
+        metaRow.innerHTML = metas;
+        metaRow.style.display = metas ? '' : 'none';
+      }
 
       if (settings.themeMode === 'auto') { setAutoTheme(data.current.is_day === 1); syncThemeModeButtons(); }
       setTimeout(renderLiveStocks, 100);
@@ -2325,7 +2651,7 @@ function createBookmarkSvg(filled) {
 function renderFeed(items, id) {
   var el = document.getElementById(id);
   if (!items || !items.length) {
-    el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">Network unavailable</div><div style="font-size:11px;color:var(--t3)">External APIs cannot be accessed in the Tesla browser</div></div>';
+    el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">No stories right now</div><div style="font-size:11px;color:var(--t3)">Headlines refresh automatically every 4 hours — check back soon</div></div>';
     return;
   }
   var html = '';
@@ -2338,7 +2664,9 @@ function renderFeed(items, id) {
         var ms = Date.now() - new Date(item.pubDate.replace(' ', 'T')).getTime();
         if (!isNaN(ms) && ms > 0) {
           var mins = Math.floor(ms / 60000);
-          timeStr = mins < 60 ? mins + 'm ago' : Math.floor(mins / 60) + 'h ago';
+          if (mins < 60) timeStr = mins + 'm ago';
+          else if (mins < 1440) timeStr = Math.floor(mins / 60) + 'h ago';
+          else timeStr = Math.floor(mins / 1440) + 'd ago';
         }
       } catch(e) {}
     }
@@ -2421,37 +2749,25 @@ function loadFeeds(configs, targetId) {
 }
 
 // News split into Local (BC) / National (Canada) / World, switchable via sub-tabs.
-// Significantly expanded with 20+ diverse outlets across regions and types.
+// Lists mirror NEWS_FEEDS in .github/scripts/update_cache.py — only feeds that
+// the Actions job pre-fetches into DASHBOARD_CACHE are worth requesting here
+// (uncached rss2json URLs fast-fail by design). Add feeds in both places.
 newsCategories = {
   local: [
     {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Fbc%2Ffeed%2F', key:'n_loc_gbc', source:'Global BC'},
-    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-canada-britishcolumbia', key:'n_loc_cbc', source:'CBC BC'},
-    {url:RSS+'https%3A%2F%2Fwww.vancouvermagazine.com%2Ffeed%2F', key:'n_loc_vm', source:'Vancouver Mag'},
-    {url:RSS+'https%3A%2F%2Fwww.biv.com%2Ffeed%2F', key:'n_loc_biv', source:'BIV'}
+    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-canada-britishcolumbia', key:'n_loc_cbc', source:'CBC BC'}
   ],
   national: [
     {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-topstories', key:'n_nat_cbc', source:'CBC News'},
     {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Ffeed%2F', key:'n_nat_gn', source:'Global News'},
-    {url:RSS+'https%3A%2F%2Fwww.ctv.ca%2Fctvnews%2Frss%2F', key:'n_nat_ctv', source:'CTV News'},
-    {url:RSS+'https%3A%2F%2Fwww.thestar.com%2Ffeeds%2F', key:'n_nat_ts', source:'Toronto Star'},
-    {url:RSS+'https%3A%2F%2Fwww.theglobeandmail.com%2Ffeeds%2Fnews%2F', key:'n_nat_gm', source:'Globe & Mail'},
-    {url:RSS+'https%3A%2F%2Fnationalpost.com%2Ffeed%2F', key:'n_nat_np', source:'National Post'},
-    {url:RSS+'https%3A%2F%2Fwww.macleans.ca%2Ffeed%2F', key:'n_nat_mac', source:'MacLeans'},
-    {url:RSS+'https%3A%2F%2Fwww.huffingtonpost.ca%2Ffeed%2F', key:'n_nat_huff', source:'HuffPost Canada'}
+    {url:RSS+'https%3A%2F%2Fnationalpost.com%2Ffeed%2F', key:'n_nat_np', source:'National Post'}
   ],
   world: [
     {url:RSS+'https%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Fworld%2Frss.xml', key:'n_wld_bbc', source:'BBC World'},
-    {url:RSS+'https%3A%2F%2Fapnews.com%2Fapf-services%2Fapnewsapi%2Frss%2Fworld.rss', key:'n_wld_ap', source:'AP World'},
-    {url:RSS+'https%3A%2F%2Fwww.reutersagency.com%2Frss%2Fworld-news%2F', key:'n_wld_reu', source:'Reuters World'},
     {url:RSS+'https%3A%2F%2Fwww.aljazeera.com%2Fxml%2Frss%2Fall.xml', key:'n_wld_aje', source:'Al Jazeera'},
     {url:RSS+'https%3A%2F%2Fwww.theguardian.com%2Finternational%2Frss', key:'n_wld_grd', source:'Guardian'},
     {url:RSS+'https%3A%2F%2Fwww.dw.com%2Fen%2Fxml%2Frss%2Fxml_en_all', key:'n_wld_dw', source:'DW'},
-    {url:RSS+'https%3A%2F%2Fwww.france24.com%2Fen%2Frss', key:'n_wld_f24', source:'France24'},
-    {url:RSS+'https%3A%2F%2Fwww.independent.co.uk%2Fen%2Frss', key:'n_wld_ind', source:'The Independent'},
-    {url:RSS+'https%3A%2F%2Ffeeds.bloomberg.com%2Fmarkets%2Fnews.rss', key:'n_wld_bb', source:'Bloomberg'},
-    {url:RSS+'https%3A%2F%2Ffeeds.cnbc.com%2Fid%2F100003114%2Fbasic%2Ffeed.rss', key:'n_wld_cnbc', source:'CNBC'},
-    {url:RSS+'https%3A%2F%2Ffeeds.washingtonpost.com%2Frss%2Fworld', key:'n_wld_wp', source:'Washington Post'},
-    {url:RSS+'https%3A%2F%2Fnyt.com%2Fsvc%2Fxml%2Frss%2Fnyt%2FWorld.xml', key:'n_wld_nyt', source:'New York Times'}
+    {url:RSS+'https%3A%2F%2Fwww.france24.com%2Fen%2Frss', key:'n_wld_f24', source:'France24'}
   ]
 };
 function showNews(cat) { loadFeeds(newsCategories[cat] || newsCategories.local, 'news-feed'); }
@@ -2466,22 +2782,12 @@ document.querySelectorAll('.ntab').forEach(function(b) {
 });
 showNews('local');
 
+// Mirrors SPORTS_FEEDS in .github/scripts/update_cache.py (see note above).
 loadFeeds([
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnews', key:'s_espn', source:'ESPN'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.sportsnet.ca%2Ffeed%2F', key:'s_snet', source:'Sportsnet'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.tsn.ca%2Frss%2Ffeed', key:'s_tsn', source:'TSN'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.yahoo.com%2Fv2%2Fsports%2F', key:'s_yahoo', source:'Yahoo Sports'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Frss.slashsports.com%2Fcombined%2F', key:'s_slash', source:'Slash Sports'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fbleacherreport.com%2Frss%2Ffeeds%2Fnow.xml', key:'s_br', source:'Bleacher Report'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nbcsports.com%2Frss%2Fxml%2Fnbcsports%2Fnbcsports.xml', key:'s_nbc', source:'NBC Sports'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.foxsports.com%2Frss', key:'s_fox', source:'Fox Sports'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.thescore.com%2Frss%2F', key:'s_score', source:'The Score'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmlb.com%2Ffeed%2Frss.xml', key:'s_mlb', source:'MLB.com'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nba.com%2Frss%2Fnba_rss.xml', key:'s_nba', source:'NBA.com'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nhl.com%2Fnews%2Frss.xml', key:'s_nhl', source:'NHL.com'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.cfl.ca%2Frss%2F', key:'s_cfl', source:'CFL.ca'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nfl.com%2Frss', key:'s_nfl', source:'NFL.com'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.skysports.com%2Frss%2Fxml%2Fnews.xml', key:'s_sky', source:'Sky Sports'}
+  {url:RSS+'https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnews', key:'s_espn', source:'ESPN'},
+  {url:RSS+'https%3A%2F%2Fwww.sportsnet.ca%2Ffeed%2F', key:'s_snet', source:'Sportsnet'},
+  {url:RSS+'https%3A%2F%2Fwww.cfl.ca%2Frss%2F', key:'s_cfl', source:'CFL.ca'},
+  {url:RSS+'https%3A%2F%2Fwww.mlb.com%2Ffeeds%2Fnews%2Frss.xml', key:'s_mlb', source:'MLB.com'}
 ], 'sports-feed');
 
 // ── MY TEAMS TRACKER ──
@@ -2618,6 +2924,21 @@ document.addEventListener('click', function(e) {
     dropdown.classList.remove('open');
   }
 });
+
+// ── ENTER-KEY SHORTCUTS (fewer taps: submit from the keyboard directly) ──
+document.getElementById('task-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addTask(); }
+});
+document.getElementById('stocks-dropdown-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addStock(); }
+});
+document.getElementById('link-url').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addLink(); }
+});
+
+// DASHBOARD_CACHE wasn't defined yet when the first clock tick ran — paint the
+// freshness chip now that the whole script (cache included) has executed.
+renderFreshness();
 </script>
 </body>
 </html>

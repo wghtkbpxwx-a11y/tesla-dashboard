@@ -41,6 +41,8 @@ SPORTS_FEEDS = {
 
 # "My Teams" — the scores box on the Live panel. ESPN site API, team schedule
 # endpoint per team. `path` is the sport/league, `id` is the ESPN team id/abbr.
+DEFAULT_STOCKS = ["XEQT.TO", "VFV.TO", "AAPL", "TSLA", "MSFT", "NVDA", "AMZN", "GOOGL"]
+
 MY_TEAMS = [
     {"name": "Blue Jays", "league": "MLB", "path": "baseball/mlb",  "id": "tor"},
     {"name": "Canucks",   "league": "NHL", "path": "hockey/nhl",    "id": "van"},
@@ -138,13 +140,13 @@ def parse_rss(content: bytes, source: str) -> list[dict]:
             pub = txt("pubDate")
             if not title or not link:
                 continue
-            # Normalise pubDate to "YYYY-MM-DD HH:MM:SS"
+            # Normalise pubDate to UTC ISO-8601 with Z suffix
             try:
                 from email.utils import parsedate_to_datetime
-                dt = parsedate_to_datetime(pub)
-                pub = dt.strftime("%Y-%m-%d %H:%M:%S")
+                dt = parsedate_to_datetime(pub).astimezone(timezone.utc)
+                pub = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
             except Exception:
-                pub = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+                pub = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             items.append({"title": title, "link": link, "pubDate": pub, "source": source})
 
         # Atom
@@ -160,10 +162,10 @@ def parse_rss(content: bytes, source: str) -> list[dict]:
                 if not title or not link:
                     continue
                 try:
-                    dt = datetime.fromisoformat(pub.rstrip("Z"))
-                    pub = dt.strftime("%Y-%m-%d %H:%M:%S")
+                    dt = datetime.fromisoformat(pub.rstrip("Z")).replace(tzinfo=timezone.utc)
+                    pub = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
                 except Exception:
-                    pub = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+                    pub = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
                 items.append({"title": title, "link": link, "pubDate": pub, "source": source})
     except Exception as e:
         print(f"  XML parse error: {e}", file=sys.stderr)
@@ -190,7 +192,7 @@ def fetch_weather() -> dict | None:
     url = (
         f"https://api.open-meteo.com/v1/forecast"
         f"?latitude={LAT}&longitude={LON}"
-        f"&current=temperature_2m,weather_code,is_day"
+        f"&current=temperature_2m,weather_code,is_day,apparent_temperature,relative_humidity_2m,wind_speed_10m"
     )
     try:
         resp = requests.get(url, timeout=TIMEOUT)
@@ -203,11 +205,34 @@ def fetch_weather() -> dict | None:
         return None
 
 
+def fetch_stocks() -> dict:
+    """Fetch latest quote for each default stock; returns {sym: chart_response}."""
+    out = {}
+    for sym in DEFAULT_STOCKS:
+        try:
+            url = f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}?interval=1d&range=1d"
+            resp = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+            data = resp.json()
+            meta = data["chart"]["result"][0]["meta"]
+            # Store only the fields the dashboard actually reads
+            out[sym] = {"chart": {"result": [{"meta": {
+                "symbol": meta.get("symbol", sym),
+                "regularMarketPrice": meta.get("regularMarketPrice"),
+                "chartPreviousClose": meta.get("chartPreviousClose"),
+            }}]}}
+            print(f"  ✓ {sym}: ${meta.get('regularMarketPrice')}")
+        except Exception as e:
+            print(f"  ✗ {sym}: {e}")
+    return out
+
+
 def fetch_forecast() -> dict | None:
     url = (
         f"https://api.open-meteo.com/v1/forecast"
         f"?latitude={LAT}&longitude={LON}"
-        f"&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto"
+        f"&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,sunrise,sunset"
+        f"&timezone=auto"
     )
     try:
         resp = requests.get(url, timeout=TIMEOUT)
@@ -245,6 +270,9 @@ def main():
     print("Fetching My Teams scores...")
     scores = fetch_scores()
 
+    print("Fetching stock quotes...")
+    stocks = fetch_stocks()
+
     # Read current index.html
     with open("index.html", "r", encoding="utf-8") as f:
         html = f.read()
@@ -265,6 +293,7 @@ def main():
         "news": news if news else existing.get("news", {}),
         "sports": sports if sports else existing.get("sports", {}),
         "scores": scores if scores else existing.get("scores", []),
+        "stocks": stocks if stocks else existing.get("stocks", {}),
         "updated": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -281,7 +310,7 @@ def main():
         f.write(html)
 
     forecast_days = len((cache.get("forecast") or {}).get("daily", {}).get("weather_code", []))
-    print(f"Done. news={len(cache['news'])} sources, sports={len(cache['sports'])} sources, scores={len(cache['scores'])} teams, forecast={forecast_days} days")
+    print(f"Done. news={len(cache['news'])} sources, sports={len(cache['sports'])} sources, scores={len(cache['scores'])} teams, forecast={forecast_days} days, stocks={len(cache['stocks'])} tickers")
 
 
 if __name__ == "__main__":
