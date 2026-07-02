@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Updated: 2026-06-24 Liquid Glass + Stocks Dropdown v2 -->
+<!-- Updated: 2026-07-02 Glanceable revamp: freshness chip, hero forecast strip, driving-friendly touch targets -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -60,9 +60,24 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #main::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
 
 /* LIVE PANEL HERO LAYOUT */
-.live-hero{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;margin-bottom:28px;display:flex;flex-direction:column;gap:16px}
-.live-hero-time{display:flex;align-items:flex-end;gap:48px}
+.live-hero{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px;margin-bottom:28px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow-sm)}
+.live-hero-time{display:flex;align-items:flex-end;gap:48px;flex-wrap:wrap}
 .live-hero-clock{font-size:48px;font-weight:700;line-height:1;letter-spacing:-1px}
+.live-hero-date{font-size:14px;font-weight:500;color:var(--t2);margin-top:8px}
+.fresh-chip{margin-left:auto;display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--surface);border:1px solid var(--line);border-radius:100px;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;white-space:nowrap;transition:all .2s;text-transform:uppercase;letter-spacing:.3px}
+.fresh-chip:hover{background:var(--surface2);color:var(--t1);border-color:var(--line2)}
+.fresh-chip .fresh-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.fresh-chip.stale .fresh-dot{background:#ffd60a}
+.fresh-chip.old .fresh-dot{background:var(--red)}
+.live-forecast-row{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.live-forecast-row::-webkit-scrollbar{height:3px}
+.live-forecast-row::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+.fc-mini{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:11px;font-weight:600;color:var(--t2);white-space:nowrap;flex-shrink:0;cursor:pointer;transition:all .2s}
+.fc-mini:hover{background:var(--surface2)}
+.fc-mini.today{border-color:var(--accent);background:rgba(59,130,246,.1)}
+.fc-mini .fc-day{text-transform:uppercase;letter-spacing:.3px;color:var(--t3);font-size:10px}
+.fc-mini .fc-ico{font-size:18px;color:var(--t1);display:flex}
+.fc-mini .fc-temps{color:var(--t1)}
 .live-hero-weather{display:flex;align-items:center;gap:8px;cursor:pointer}
 .live-hero-temp{font-size:22px;font-weight:600}
 .live-hero-icon{font-size:28px}
@@ -81,7 +96,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
 
 /* DOCK */
-#dock{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:16px;border:1px solid var(--line);box-shadow:none;z-index:200;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+#dock{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:200;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
 #dock::-webkit-scrollbar{display:none}
 .dock-btn{display:flex;align-items:center;gap:5px;padding:10px 18px;border-radius:10px;color:var(--t2);font-size:14px;font-weight:600;transition:all .2s cubic-bezier(.34,.69,.66,1);white-space:nowrap;cursor:grab;background:transparent;user-select:none;position:relative}
 .dock-btn:hover{background:var(--surface);color:var(--t1);transform:translateY(-1px)}
@@ -93,7 +108,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* DOCK SUBMENU (fixed + sibling of #dock so it escapes the dock's overflow clipping) */
 .dock-submenu-trigger::after{content:'▼';margin-left:3px;font-size:9px;display:inline-block;transition:transform .2s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu-trigger.open::after{transform:rotate(180deg)}
-.dock-submenu{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(10px) scale(0.96);opacity:0;pointer-events:none;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:14px;border:1px solid var(--line);box-shadow:none;padding:6px 6px 12px 6px;min-width:180px;max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:250;transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
+.dock-submenu{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(10px) scale(0.96);opacity:0;pointer-events:none;background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:6px 6px 12px 6px;min-width:180px;max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:250;transition:opacity .2s cubic-bezier(.34,.69,.66,1),transform .2s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu.open{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0) scale(1)}
 .dock-submenu-item{display:flex;align-items:center;width:100%;padding:10px 16px;border-radius:8px;color:var(--t2);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s cubic-bezier(.34,.69,.66,1)}
 .dock-submenu-item:hover{background:var(--surface);color:var(--t1)}
@@ -122,7 +137,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* COMPONENTS */
 .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--t3);margin:0 0 16px 2px;display:flex;align-items:center;gap:10px;opacity:0.8}
-.cardgroup{background:var(--glass2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:28px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:none;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+.cardgroup{background:var(--glass2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:28px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow-sm);transition:all .3s cubic-bezier(.34,.69,.66,1)}
 .row{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);gap:14px;transition:all .2s cubic-bezier(.34,.69,.66,1);min-height:64px;cursor:pointer}
 .row:last-child{border-bottom:none}
 .row:hover{background:var(--glass-hover)}
@@ -156,14 +171,14 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* FEEDS */
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite ease-in-out}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
-.feed-box{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow-y:auto;transition:all .3s cubic-bezier(.34,.69,.66,1)}
+.feed-box{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow-y:auto;transition:all .3s cubic-bezier(.34,.69,.66,1);box-shadow:var(--shadow-sm)}
 .feed-box::-webkit-scrollbar{width:5px}
 .feed-box::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
 .feed-item{display:block;padding:16px 20px;border-bottom:1px solid var(--line);transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
 .feed-item:last-child{border-bottom:none}
 .feed-item:hover{background:var(--glass-hover)}
 .feed-item:active{background:var(--surface2)}
-.bookmark-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--line);padding:0;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);flex-shrink:0;color:var(--t3)}
+.bookmark-btn{width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--line);padding:0;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);flex-shrink:0;color:var(--t3)}
 .bookmark-btn:hover{background:var(--surface);transform:scale(1.1);color:var(--t1)}
 .bookmark-btn.saved{color:var(--accent)}
 .bookmark-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5}
@@ -171,7 +186,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .feed-m{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
 .feed-src{color:var(--accent)}
 .news-tabs{margin-left:auto;display:flex;gap:4px}
-.ntab{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;color:var(--t3);background:var(--surface);border:1px solid var(--line);text-transform:uppercase;letter-spacing:.3px;transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
+.ntab{padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;color:var(--t3);background:var(--surface);border:1px solid var(--line);text-transform:uppercase;letter-spacing:.3px;transition:all .2s cubic-bezier(.34,.69,.66,1);cursor:pointer}
 .ntab:hover{background:var(--surface2);color:var(--t1)}
 .ntab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .ntab:not(.on):active{background:var(--surface2)}
@@ -199,7 +214,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .noterow:last-child{border-bottom:none}
 .n-time{font-size:11px;color:var(--t3);font-weight:600;white-space:nowrap;padding-top:2px;text-transform:uppercase;letter-spacing:.2px}
 .n-txt{font-size:14px;color:var(--t1);line-height:1.6;flex:1}
-.n-del{font-size:16px;color:var(--t3);padding:4px 6px;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);border-radius:4px}
+.n-del{font-size:20px;color:var(--t3);padding:10px 14px;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);border-radius:8px}
 .n-del:hover{background:rgba(255,69,58,.12);color:var(--red)}
 .n-del:active{transform:scale(.95)}
 
@@ -253,7 +268,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 .theme-mode-btn.active{background:var(--accent);color:#fff;border:none}
 
 /* STOCKS DROPDOWN */
-#stocks-dropdown{position:fixed;bottom:180px;left:50%;margin-left:-160px;width:320px;background:var(--glass2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:14px;box-shadow:none;z-index:260;transform:translateY(12px) scale(.96);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,.69,.66,1);max-height:500px;display:flex;flex-direction:column}
+#stocks-dropdown{position:fixed;bottom:180px;left:50%;margin-left:-160px;width:320px;background:var(--glass2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);z-index:260;transform:translateY(12px) scale(.96);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,.69,.66,1);max-height:500px;display:flex;flex-direction:column}
 #stocks-dropdown.open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
 .stocks-dropdown-header{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;gap:6px}
 .stocks-dropdown-header input{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--t1);font-size:13px;font-family:var(--f);outline:none;transition:all .2s cubic-bezier(.34,.69,.66,1);text-transform:uppercase}
@@ -274,8 +289,8 @@ input[type="color"]:hover{border-color:var(--line2)}
 .stock-chg{font-weight:700;min-width:45px;text-align:right;font-size:13px}
 .stock-chg.up{color:var(--green)}
 .stock-chg.down{color:var(--red)}
-.stock-remove{background:transparent;color:var(--t3);font-size:14px;padding:0;cursor:pointer;transition:color .2s ease;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
-.stock-remove:hover{color:var(--accent)}
+.stock-remove{background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--t3);font-size:18px;padding:0;cursor:pointer;transition:all .2s ease;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stock-remove:hover{color:var(--red);background:var(--red-bg);border-color:var(--red)}
 .stocks-dropdown-footer{padding:8px 12px;border-top:1px solid var(--line);font-size:11px;color:var(--t3);text-align:center;background:var(--surface);text-transform:uppercase;letter-spacing:.2px}
 
 /* RESPONSIVE (phones / portrait) */
@@ -295,7 +310,6 @@ input[type="color"]:hover{border-color:var(--line2)}
   #dock{gap:4px;padding:8px 12px;bottom:16px}.dock-btn{padding:8px 14px;font-size:13px}
 }
 </style>
-<script src="dashboard-cache.js"></script>
 </head>
 <body>
 
@@ -330,7 +344,10 @@ input[type="color"]:hover{border-color:var(--line2)}
     <!-- Hero: Time + Weather -->
     <div class="live-hero">
       <div class="live-hero-time">
-        <div class="live-hero-clock" id="live-clock">--:--</div>
+        <div>
+          <div class="live-hero-clock" id="live-clock">--:--</div>
+          <div class="live-hero-date" id="live-date">—</div>
+        </div>
         <div class="live-hero-weather" onclick="goPanel('weather')" title="View full forecast">
           <div>
             <div class="live-hero-temp" id="live-temp">--°C</div>
@@ -338,7 +355,12 @@ input[type="color"]:hover{border-color:var(--line2)}
           </div>
           <div class="live-hero-icon" id="live-icon">🌤</div>
         </div>
+        <button class="fresh-chip" id="fresh-chip" onclick="location.reload()" title="Data refreshes automatically every 4 hours — tap to reload now">
+          <span class="fresh-dot"></span><span id="fresh-chip-txt">Checking data…</span><span style="font-size:13px">⟳</span>
+        </button>
       </div>
+      <!-- Glanceable 5-day forecast strip (no tap needed) -->
+      <div class="live-forecast-row" id="live-forecast-row"></div>
       <!-- Top Stocks Chip Row -->
       <div class="live-stocks-row" id="live-stocks-row">
         <div class="muted" style="padding:8px;font-size:12px">Loading stocks…</div>
@@ -669,10 +691,21 @@ input[type="color"]:hover{border-color:var(--line2)}
 
   <!-- WEATHER FORECAST PANEL -->
   <section class="panel" id="p-weather">
+    <div class="sec-title">Current Conditions</div>
+    <div class="cardgroup" style="max-width:420px">
+      <div style="display:flex;align-items:center;gap:20px;padding:22px 24px">
+        <div id="wx-now-icon" style="font-size:44px;color:var(--t1);display:flex">—</div>
+        <div style="flex:1">
+          <div id="wx-now-temp" style="font-size:34px;font-weight:700;line-height:1">--°C</div>
+          <div id="wx-now-desc" style="font-size:14px;color:var(--t2);margin-top:5px">Loading…</div>
+        </div>
+      </div>
+    </div>
     <div class="sec-title">7-Day Forecast</div>
     <div id="forecast-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
       <div class="muted">Loading forecast...</div>
     </div>
+    <div id="wx-updated" style="margin-top:16px;font-size:12px;color:var(--t3)"></div>
   </section>
 
   <!-- QUICK LINKS PANEL -->
@@ -774,17 +807,51 @@ function updateClock() {
   document.getElementById('s-date').textContent = d.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric'});
   var liveClockEl = document.getElementById('live-clock');
   if (liveClockEl) liveClockEl.textContent = h + ':' + m + ' ' + ampm;
+  var liveDateEl = document.getElementById('live-date');
+  if (liveDateEl) liveDateEl.textContent = d.toLocaleDateString('en-CA', {weekday:'long', month:'long', day:'numeric'});
+  renderFreshness();
   if (settings.themeMode === 'auto') applyAutoTheme();
+}
+
+// ── DATA FRESHNESS (from DASHBOARD_CACHE.updated, refreshed every 4 h by Actions) ──
+function cacheAgeMinutes() {
+  try {
+    if (typeof DASHBOARD_CACHE === 'undefined' || !DASHBOARD_CACHE || !DASHBOARD_CACHE.updated) return null;
+    var ms = Date.now() - new Date(DASHBOARD_CACHE.updated).getTime();
+    if (isNaN(ms) || ms < 0) return null;
+    return Math.floor(ms / 60000);
+  } catch(e) { return null; }
+}
+function cacheAgeText() {
+  var mins = cacheAgeMinutes();
+  if (mins === null) return null;
+  if (mins < 60) return mins + 'm ago';
+  var hrs = Math.floor(mins / 60);
+  if (hrs < 48) return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+function renderFreshness() {
+  var chip = document.getElementById('fresh-chip');
+  var txt = document.getElementById('fresh-chip-txt');
+  if (!chip || !txt) return;
+  var age = cacheAgeText();
+  var mins = cacheAgeMinutes();
+  if (age === null) { txt.textContent = 'Live data'; return; }
+  txt.textContent = 'Updated ' + age;
+  chip.classList.remove('stale', 'old');
+  // Green under 6 h (normal 4-hourly refresh), yellow under 24 h, red beyond
+  if (mins >= 1440) chip.classList.add('old');
+  else if (mins >= 360) chip.classList.add('stale');
 }
 
 function renderLiveStocks() {
   var el = document.getElementById('live-stocks-row');
   if (!watchlist || !watchlist.length) { el.innerHTML = '<div class="muted" style="padding:8px;font-size:12px">Add stocks via More › Stocks</div>'; return; }
-  Promise.all(watchlist.slice(0, 4).map(function(sym) {
+  Promise.all(watchlist.slice(0, 6).map(function(sym) {
     return fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=1d', 'stk_live_' + sym, 5);
   })).then(function(results) {
     var html = '';
-    watchlist.slice(0, 4).forEach(function(sym, i) {
+    watchlist.slice(0, 6).forEach(function(sym, i) {
       var data = results[i];
       if (data && data.chart && data.chart.result) {
         var meta = data.chart.result[0].meta;
@@ -1196,7 +1263,7 @@ function saveBookmark(title, link, source) {
   if (exists >= 0) {
     bookmarks.splice(exists, 1);
   } else {
-    bookmarks.unshift({title: title, link: link, source: source, date: new Date().toLocaleDateString()});
+    bookmarks.unshift({title: title, link: link, source: source, date: new Date().toISOString()});
     if (bookmarks.length > 100) bookmarks = bookmarks.slice(0, 100);
   }
   saveLS('bookmarks_v1', bookmarks);
@@ -1211,6 +1278,15 @@ function deleteBookmark(idx) {
     renderBookmarks();
   }
 }
+// Renders any stored date (ISO from new saves, locale strings from old ones)
+// in the same "Thu, Jun 25" style used across the dashboard.
+function formatSavedDate(d) {
+  try {
+    var dt = new Date(d);
+    if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric'});
+  } catch(e) {}
+  return d || '';
+}
 function renderBookmarks() {
   var el = document.getElementById('bookmarks-list');
   if (!bookmarks.length) { el.innerHTML = '<div class="muted">No saved articles. Tap the bookmark icon on any story.</div>'; return; }
@@ -1219,7 +1295,7 @@ function renderBookmarks() {
     html += '<div style="display:flex;align-items:stretch;gap:12px;padding:0;border:none">'
       + '<a class="feed-item" href="' + escHtml(b.link) + '" target="_blank" rel="noopener" style="flex:1;padding:20px 24px">'
       + '<div class="feed-t">' + escHtml(b.title) + '</div>'
-      + '<div class="feed-m"><span class="feed-src">' + escHtml(b.source) + '</span><span>' + b.date + '</span></div>'
+      + '<div class="feed-m"><span class="feed-src">' + escHtml(b.source) + '</span><span>Saved ' + escHtml(formatSavedDate(b.date)) + '</span></div>'
       + '</a>'
       + '<button class="bookmark-btn saved" onclick="deleteBookmark(' + i + ')" title="Remove bookmark" style="border-left:1px solid var(--line)">' + createBookmarkSvg(true) + '</button>'
       + '</div>';
@@ -1250,6 +1326,9 @@ function deleteTask(idx) {
   renderTasks();
 }
 function clearCompletedTasks() {
+  var done = tasks.filter(function(t) { return t.done; }).length;
+  if (!done) return;
+  if (!confirm('Delete ' + done + ' completed task' + (done === 1 ? '' : 's') + '?')) return;
   tasks = tasks.filter(function(t) { return !t.done; });
   saveLS('tasks_v1', tasks);
   renderTasks();
@@ -1275,11 +1354,11 @@ function renderTasks() {
 // Common stocks/securities for autocomplete
 var commonStocks = ['AAPL','MSFT','GOOGL','GOOG','AMZN','TSLA','META','NVDA','NFLX','AMD','INTC','CRM','ADBE','CSCO','ASML','AVGO','AXP','BA','BKNG','COST','DLTR','EBAY','GILD','HD','HSIC','IBM','INFY','JPM','KO','LRCX','MA','MCHP','MU','NXPI','ORCL','PAYC','PEP','QCOM','SBUX','SCHW','SNAP','SNPS','SNOW','SQ','TEAM','TMDX','TNDM','TTD','UUUU','V','VZ','WDAY','XOM','XEQT.TO','VFV.TO','VSP.TO','XIC.TO','VCN.TO','BNS.TO','TD.TO','RY.TO','BMO.TO','BCE.TO','ENB.TO','CNQ.TO','TRP.TO','MG.TO','WFT.TO','WN.TO','BAM.A','AC.TO','POW.TO','SCR.TO','GRT.U','FLT.TO','DOL.TO','AQN.TO','GDMK.U','SRU.U'];
 
-// Seed with XEQT.TO on first run (no saved key yet); respect a deliberately-cleared list.
+// Seed with pre-cached tickers on first run (no saved key yet); respect a deliberately-cleared list.
 try {
   var _wl = localStorage.getItem('stocks_watchlist_v1');
-  watchlist = _wl ? JSON.parse(_wl) : ['XEQT.TO'];
-} catch(e) { watchlist = ['XEQT.TO']; }
+  watchlist = _wl ? JSON.parse(_wl) : ['XEQT.TO', 'VFV.TO', 'TSLA', 'AAPL'];
+} catch(e) { watchlist = ['XEQT.TO', 'VFV.TO', 'TSLA', 'AAPL']; }
 
 function searchStocks(query) {
   var q = query.toUpperCase().trim();
@@ -1371,6 +1450,7 @@ function loadForecast() {
       return;
     }
     var html = '';
+    var miniHtml = '';
     var now = new Date();
     for (var i = 0; i < 7; i++) {
       var date = new Date(now);
@@ -1378,14 +1458,29 @@ function loadForecast() {
       var code = data.daily.weather_code[i];
       var hi = Math.round(data.daily.temperature_2m_max[i]);
       var lo = Math.round(data.daily.temperature_2m_min[i]);
-      var day = date.toLocaleDateString('en-US', {weekday:'short'});
-      html += '<div style="background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">'
-        + '<div style="font-size:14px;color:var(--t2);margin-bottom:6px">' + day + '</div>'
+      var day = i === 0 ? 'Today' : date.toLocaleDateString('en-US', {weekday:'short'});
+      var todayStyle = i === 0 ? 'border-color:var(--accent);background:rgba(59,130,246,.08)' : '';
+      html += '<div style="background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;' + todayStyle + '">'
+        + '<div style="font-size:14px;color:' + (i === 0 ? 'var(--accent)' : 'var(--t2)') + ';font-weight:600;margin-bottom:6px">' + day + '</div>'
         + '<div style="font-size:26px;margin:6px 0;color:var(--t1)">' + weatherIcon(code) + '</div>'
         + '<div style="font-size:13px;color:var(--t1)"><span style="color:var(--green)">' + hi + '°</span> / <span style="color:var(--t3)">' + lo + '°</span></div>'
         + '</div>';
+      if (i < 5) {
+        miniHtml += '<div class="fc-mini' + (i === 0 ? ' today' : '') + '" onclick="goPanel(\'weather\')">'
+          + '<span class="fc-day">' + day + '</span>'
+          + '<span class="fc-ico">' + weatherIcon(code) + '</span>'
+          + '<span class="fc-temps">' + hi + '°/' + lo + '°</span>'
+          + '</div>';
+      }
     }
     if (el) el.innerHTML = html;
+    var mini = document.getElementById('live-forecast-row');
+    if (mini) mini.innerHTML = miniHtml;
+    var stamp = document.getElementById('wx-updated');
+    if (stamp) {
+      var age = cacheAgeText();
+      stamp.textContent = 'Forecast for Surrey / Vancouver, BC' + (age ? ' · updated ' + age + ' · auto-refreshes every 4 hours' : '');
+    }
   }
   // Use embedded cache first (refreshed every 4 h by GitHub Actions)
   if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE.forecast && DASHBOARD_CACHE.forecast.daily) {
@@ -2313,6 +2408,13 @@ function loadWeatherForCoords() {
       if (liveIcon) liveIcon.innerHTML = icon;
       if (liveDesc) liveDesc.textContent = getWeatherDescription(data.current.weather_code);
 
+      var nowTemp = document.getElementById('wx-now-temp');
+      var nowIcon = document.getElementById('wx-now-icon');
+      var nowDesc = document.getElementById('wx-now-desc');
+      if (nowTemp) nowTemp.textContent = tempC + '°C';
+      if (nowIcon) nowIcon.innerHTML = icon;
+      if (nowDesc) nowDesc.textContent = getWeatherDescription(data.current.weather_code);
+
       if (settings.themeMode === 'auto') { setAutoTheme(data.current.is_day === 1); syncThemeModeButtons(); }
       setTimeout(renderLiveStocks, 100);
     } else if (!data) {
@@ -2446,7 +2548,7 @@ function createBookmarkSvg(filled) {
 function renderFeed(items, id) {
   var el = document.getElementById(id);
   if (!items || !items.length) {
-    el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">Network unavailable</div><div style="font-size:11px;color:var(--t3)">External APIs cannot be accessed in the Tesla browser</div></div>';
+    el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">No stories right now</div><div style="font-size:11px;color:var(--t3)">Headlines refresh automatically every 4 hours — check back soon</div></div>';
     return;
   }
   var html = '';
@@ -2459,7 +2561,9 @@ function renderFeed(items, id) {
         var ms = Date.now() - new Date(item.pubDate.replace(' ', 'T')).getTime();
         if (!isNaN(ms) && ms > 0) {
           var mins = Math.floor(ms / 60000);
-          timeStr = mins < 60 ? mins + 'm ago' : Math.floor(mins / 60) + 'h ago';
+          if (mins < 60) timeStr = mins + 'm ago';
+          else if (mins < 1440) timeStr = Math.floor(mins / 60) + 'h ago';
+          else timeStr = Math.floor(mins / 1440) + 'd ago';
         }
       } catch(e) {}
     }
@@ -2542,37 +2646,25 @@ function loadFeeds(configs, targetId) {
 }
 
 // News split into Local (BC) / National (Canada) / World, switchable via sub-tabs.
-// Significantly expanded with 20+ diverse outlets across regions and types.
+// Lists mirror NEWS_FEEDS in .github/scripts/update_cache.py — only feeds that
+// the Actions job pre-fetches into DASHBOARD_CACHE are worth requesting here
+// (uncached rss2json URLs fast-fail by design). Add feeds in both places.
 newsCategories = {
   local: [
     {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Fbc%2Ffeed%2F', key:'n_loc_gbc', source:'Global BC'},
-    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-canada-britishcolumbia', key:'n_loc_cbc', source:'CBC BC'},
-    {url:RSS+'https%3A%2F%2Fwww.vancouvermagazine.com%2Ffeed%2F', key:'n_loc_vm', source:'Vancouver Mag'},
-    {url:RSS+'https%3A%2F%2Fwww.biv.com%2Ffeed%2F', key:'n_loc_biv', source:'BIV'}
+    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-canada-britishcolumbia', key:'n_loc_cbc', source:'CBC BC'}
   ],
   national: [
     {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-topstories', key:'n_nat_cbc', source:'CBC News'},
     {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Ffeed%2F', key:'n_nat_gn', source:'Global News'},
-    {url:RSS+'https%3A%2F%2Fwww.ctv.ca%2Fctvnews%2Frss%2F', key:'n_nat_ctv', source:'CTV News'},
-    {url:RSS+'https%3A%2F%2Fwww.thestar.com%2Ffeeds%2F', key:'n_nat_ts', source:'Toronto Star'},
-    {url:RSS+'https%3A%2F%2Fwww.theglobeandmail.com%2Ffeeds%2Fnews%2F', key:'n_nat_gm', source:'Globe & Mail'},
-    {url:RSS+'https%3A%2F%2Fnationalpost.com%2Ffeed%2F', key:'n_nat_np', source:'National Post'},
-    {url:RSS+'https%3A%2F%2Fwww.macleans.ca%2Ffeed%2F', key:'n_nat_mac', source:'MacLeans'},
-    {url:RSS+'https%3A%2F%2Fwww.huffingtonpost.ca%2Ffeed%2F', key:'n_nat_huff', source:'HuffPost Canada'}
+    {url:RSS+'https%3A%2F%2Fnationalpost.com%2Ffeed%2F', key:'n_nat_np', source:'National Post'}
   ],
   world: [
     {url:RSS+'https%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Fworld%2Frss.xml', key:'n_wld_bbc', source:'BBC World'},
-    {url:RSS+'https%3A%2F%2Fapnews.com%2Fapf-services%2Fapnewsapi%2Frss%2Fworld.rss', key:'n_wld_ap', source:'AP World'},
-    {url:RSS+'https%3A%2F%2Fwww.reutersagency.com%2Frss%2Fworld-news%2F', key:'n_wld_reu', source:'Reuters World'},
     {url:RSS+'https%3A%2F%2Fwww.aljazeera.com%2Fxml%2Frss%2Fall.xml', key:'n_wld_aje', source:'Al Jazeera'},
     {url:RSS+'https%3A%2F%2Fwww.theguardian.com%2Finternational%2Frss', key:'n_wld_grd', source:'Guardian'},
     {url:RSS+'https%3A%2F%2Fwww.dw.com%2Fen%2Fxml%2Frss%2Fxml_en_all', key:'n_wld_dw', source:'DW'},
-    {url:RSS+'https%3A%2F%2Fwww.france24.com%2Fen%2Frss', key:'n_wld_f24', source:'France24'},
-    {url:RSS+'https%3A%2F%2Fwww.independent.co.uk%2Fen%2Frss', key:'n_wld_ind', source:'The Independent'},
-    {url:RSS+'https%3A%2F%2Ffeeds.bloomberg.com%2Fmarkets%2Fnews.rss', key:'n_wld_bb', source:'Bloomberg'},
-    {url:RSS+'https%3A%2F%2Ffeeds.cnbc.com%2Fid%2F100003114%2Fbasic%2Ffeed.rss', key:'n_wld_cnbc', source:'CNBC'},
-    {url:RSS+'https%3A%2F%2Ffeeds.washingtonpost.com%2Frss%2Fworld', key:'n_wld_wp', source:'Washington Post'},
-    {url:RSS+'https%3A%2F%2Fnyt.com%2Fsvc%2Fxml%2Frss%2Fnyt%2FWorld.xml', key:'n_wld_nyt', source:'New York Times'}
+    {url:RSS+'https%3A%2F%2Fwww.france24.com%2Fen%2Frss', key:'n_wld_f24', source:'France24'}
   ]
 };
 function showNews(cat) { loadFeeds(newsCategories[cat] || newsCategories.local, 'news-feed'); }
@@ -2587,22 +2679,12 @@ document.querySelectorAll('.ntab').forEach(function(b) {
 });
 showNews('local');
 
+// Mirrors SPORTS_FEEDS in .github/scripts/update_cache.py (see note above).
 loadFeeds([
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnews', key:'s_espn', source:'ESPN'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.sportsnet.ca%2Ffeed%2F', key:'s_snet', source:'Sportsnet'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.tsn.ca%2Frss%2Ffeed', key:'s_tsn', source:'TSN'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.yahoo.com%2Fv2%2Fsports%2F', key:'s_yahoo', source:'Yahoo Sports'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Frss.slashsports.com%2Fcombined%2F', key:'s_slash', source:'Slash Sports'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fbleacherreport.com%2Frss%2Ffeeds%2Fnow.xml', key:'s_br', source:'Bleacher Report'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nbcsports.com%2Frss%2Fxml%2Fnbcsports%2Fnbcsports.xml', key:'s_nbc', source:'NBC Sports'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.foxsports.com%2Frss', key:'s_fox', source:'Fox Sports'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.thescore.com%2Frss%2F', key:'s_score', source:'The Score'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmlb.com%2Ffeed%2Frss.xml', key:'s_mlb', source:'MLB.com'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nba.com%2Frss%2Fnba_rss.xml', key:'s_nba', source:'NBA.com'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nhl.com%2Fnews%2Frss.xml', key:'s_nhl', source:'NHL.com'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.cfl.ca%2Frss%2F', key:'s_cfl', source:'CFL.ca'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.nfl.com%2Frss', key:'s_nfl', source:'NFL.com'},
-  {url:'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.skysports.com%2Frss%2Fxml%2Fnews.xml', key:'s_sky', source:'Sky Sports'}
+  {url:RSS+'https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnews', key:'s_espn', source:'ESPN'},
+  {url:RSS+'https%3A%2F%2Fwww.sportsnet.ca%2Ffeed%2F', key:'s_snet', source:'Sportsnet'},
+  {url:RSS+'https%3A%2F%2Fwww.cfl.ca%2Frss%2F', key:'s_cfl', source:'CFL.ca'},
+  {url:RSS+'https%3A%2F%2Fwww.mlb.com%2Ffeeds%2Fnews%2Frss.xml', key:'s_mlb', source:'MLB.com'}
 ], 'sports-feed');
 
 // ── MY TEAMS TRACKER ──
@@ -2739,6 +2821,10 @@ document.addEventListener('click', function(e) {
     dropdown.classList.remove('open');
   }
 });
+
+// DASHBOARD_CACHE wasn't defined yet when the first clock tick ran — paint the
+// freshness chip now that the whole script (cache included) has executed.
+renderFreshness();
 </script>
 </body>
 </html>
