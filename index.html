@@ -23,6 +23,7 @@
   --shadow-xs: 0 1px 4px rgba(0,0,0,0.15);
   --t1: #f5f5f7; --t2: #a1a1a6; --t3: #777779;
   --accent: #3b82f6;
+  --accent-soft: rgba(59,130,246,0.16);
   --red: #ff453a; --red-bg: rgba(255,69,58,0.12); --green: #34c759;
   --r: 20px;
   --f: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
@@ -36,7 +37,7 @@ html.light{
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{background:var(--bg)}
-body{font-family:var(--f);color:var(--t1);min-height:100vh;overflow:hidden;background:linear-gradient(180deg,var(--bg),var(--bg2));display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+body{font-family:var(--f);color:var(--t1);min-height:100vh;overflow:hidden;background:radial-gradient(1100px 500px at 15% -8%,var(--accent-soft),transparent 65%),linear-gradient(180deg,var(--bg),var(--bg2));display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--f);cursor:pointer;border:none;background:none}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -69,6 +70,12 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .fresh-chip .fresh-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
 .fresh-chip.stale .fresh-dot{background:#ffd60a}
 .fresh-chip.old .fresh-dot{background:var(--red)}
+.live-hero-desc{font-size:13px;color:var(--t3);margin-top:2px}
+.live-hero-greet{font-size:15px;font-weight:600;color:var(--accent);margin-bottom:6px;letter-spacing:-.1px}
+.wx-meta-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 24px 20px}
+.wx-meta{display:flex;flex-direction:column;gap:2px;padding:10px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:86px}
+.wx-meta .wm-l{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px}
+.wx-meta .wm-v{font-size:16px;font-weight:600;color:var(--t1)}
 .live-forecast-row{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
 .live-forecast-row::-webkit-scrollbar{height:3px}
 .live-forecast-row::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
@@ -100,7 +107,7 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #dock::-webkit-scrollbar{display:none}
 .dock-btn{display:flex;align-items:center;gap:5px;padding:10px 18px;border-radius:10px;color:var(--t2);font-size:14px;font-weight:600;transition:all .2s cubic-bezier(.34,.69,.66,1);white-space:nowrap;cursor:grab;background:transparent;user-select:none;position:relative}
 .dock-btn:hover{background:var(--surface);color:var(--t1);transform:translateY(-1px)}
-.dock-btn.on{background:var(--accent);color:#fff}
+.dock-btn.on{background:var(--accent);color:#fff;box-shadow:0 4px 16px var(--accent-soft)}
 .dock-btn:active{cursor:grabbing}
 .dock-btn.drag-over{opacity:0.5;transform:scale(0.95)}
 .dock-sep{width:1px;height:20px;background:var(--line);margin:0 3px;opacity:0.5}
@@ -345,6 +352,7 @@ input[type="color"]:hover{border-color:var(--line2)}
     <div class="live-hero">
       <div class="live-hero-time">
         <div>
+          <div class="live-hero-greet" id="live-greet"></div>
           <div class="live-hero-clock" id="live-clock">--:--</div>
           <div class="live-hero-date" id="live-date">—</div>
         </div>
@@ -692,19 +700,21 @@ input[type="color"]:hover{border-color:var(--line2)}
   <!-- WEATHER FORECAST PANEL -->
   <section class="panel" id="p-weather">
     <div class="sec-title">Current Conditions</div>
-    <div class="cardgroup" style="max-width:420px">
-      <div style="display:flex;align-items:center;gap:20px;padding:22px 24px">
+    <div class="cardgroup" style="max-width:560px">
+      <div style="display:flex;align-items:center;gap:20px;padding:22px 24px 16px">
         <div id="wx-now-icon" style="font-size:44px;color:var(--t1);display:flex">—</div>
         <div style="flex:1">
           <div id="wx-now-temp" style="font-size:34px;font-weight:700;line-height:1">--°C</div>
           <div id="wx-now-desc" style="font-size:14px;color:var(--t2);margin-top:5px">Loading…</div>
         </div>
       </div>
+      <div class="wx-meta-row" id="wx-meta-row"></div>
     </div>
     <div class="sec-title">7-Day Forecast</div>
     <div id="forecast-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
       <div class="muted">Loading forecast...</div>
     </div>
+    <div id="wx-sun-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"></div>
     <div id="wx-updated" style="margin-top:16px;font-size:12px;color:var(--t3)"></div>
   </section>
 
@@ -809,6 +819,11 @@ function updateClock() {
   if (liveClockEl) liveClockEl.textContent = h + ':' + m + ' ' + ampm;
   var liveDateEl = document.getElementById('live-date');
   if (liveDateEl) liveDateEl.textContent = d.toLocaleDateString('en-CA', {weekday:'long', month:'long', day:'numeric'});
+  var greetEl = document.getElementById('live-greet');
+  if (greetEl) {
+    var hr24 = d.getHours();
+    greetEl.textContent = hr24 < 5 ? 'Good night' : hr24 < 12 ? 'Good morning' : hr24 < 17 ? 'Good afternoon' : 'Good evening';
+  }
   renderFreshness();
   if (settings.themeMode === 'auto') applyAutoTheme();
 }
@@ -984,13 +999,14 @@ function applyAutoTheme() {
 }
 // Clean line-style weather icon (replaces emoji). Scales to the container's font-size.
 function weatherIcon(code) {
-  var p;
-  if (code === 0) p = '<circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="21.5"/><line x1="4.4" y1="4.4" x2="5.8" y2="5.8"/><line x1="18.2" y1="18.2" x2="19.6" y2="19.6"/><line x1="2.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="21.5" y2="12"/><line x1="4.4" y1="19.6" x2="5.8" y2="18.2"/><line x1="18.2" y1="5.8" x2="19.6" y2="4.4"/>';
-  else if (code <= 48) p = '<path d="M17.5 18a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 18h11z"/>';
-  else if (code <= 67) p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="18" x2="8" y2="21"/><line x1="12" y1="18.5" x2="12" y2="22"/><line x1="16" y1="18" x2="16" y2="21"/>';
-  else if (code <= 77) p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="19" x2="8.01" y2="19"/><line x1="12" y1="20.5" x2="12.01" y2="20.5"/><line x1="16" y1="19" x2="16.01" y2="19"/>';
-  else p = '<path d="M17.5 13.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 13.5h11z"/><polyline points="12.5 12.5 9.5 18 13.5 18 10.5 23"/>';
-  return '<svg class="wx-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em">' + p + '</svg>';
+  var p, color;
+  if (code === 0) { p = '<circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="21.5"/><line x1="4.4" y1="4.4" x2="5.8" y2="5.8"/><line x1="18.2" y1="18.2" x2="19.6" y2="19.6"/><line x1="2.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="21.5" y2="12"/><line x1="4.4" y1="19.6" x2="5.8" y2="18.2"/><line x1="18.2" y1="5.8" x2="19.6" y2="4.4"/>'; color = '#ffd60a'; }
+  else if (code <= 48) { p = '<path d="M17.5 18a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 18h11z"/>'; color = ''; }
+  else if (code <= 67) { p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="18" x2="8" y2="21"/><line x1="12" y1="18.5" x2="12" y2="22"/><line x1="16" y1="18" x2="16" y2="21"/>'; color = '#4da6ff'; }
+  else if (code <= 77) { p = '<path d="M17.5 14.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 14.5h11z"/><line x1="8" y1="19" x2="8.01" y2="19"/><line x1="12" y1="20.5" x2="12.01" y2="20.5"/><line x1="16" y1="19" x2="16.01" y2="19"/>'; color = '#9edcff'; }
+  else { p = '<path d="M17.5 13.5a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.6 1.6A4 4 0 0 0 6.5 13.5h11z"/><polyline points="12.5 12.5 9.5 18 13.5 18 10.5 23"/>'; color = '#a78bfa'; }
+  // Clouds keep currentColor so they adapt to the theme; the rest get a hint of color
+  return '<svg class="wx-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"' + (color ? ' style="color:' + color + '"' : '') + '>' + p + '</svg>';
 }
 function getWeatherDescription(code) {
   if (code === 0) return 'Clear';
@@ -1024,6 +1040,13 @@ function applyColors() {
   try {
     var accent = settings.accentColor || themePresets.default.accent;
     document.documentElement.style.setProperty('--accent', accent);
+    // Derive the soft tint (glows, background wash) from the accent hex
+    var hex = /^#?([0-9a-f]{6})$/i.exec(accent);
+    if (hex) {
+      var n = parseInt(hex[1], 16);
+      document.documentElement.style.setProperty('--accent-soft',
+        'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',0.16)');
+    }
     var picker = document.getElementById('accent-picker');
     if (picker) picker.value = accent;
     var presets = document.querySelectorAll('.theme-preset');
@@ -1339,10 +1362,15 @@ function renderTasks() {
   document.getElementById('task-count').textContent = done + ' of ' + total + ' completed';
   var el = document.getElementById('tasks-list');
   if (!total) { el.innerHTML = '<div class="muted">No tasks. Add one to get started!</div>'; return; }
+  // Show active tasks first, completed at the bottom; keep original indices
+  // so toggle/delete keep pointing at the right entry
+  var ordered = tasks.map(function(t, i) { return {t: t, i: i}; })
+    .sort(function(a, b) { return (a.t.done ? 1 : 0) - (b.t.done ? 1 : 0); });
   var html = '';
-  tasks.forEach(function(t, i) {
+  ordered.forEach(function(o) {
+    var t = o.t, i = o.i;
     html += '<div class="noterow" style="align-items:center">'
-      + '<input type="checkbox" onclick="toggleTask(' + i + ')" ' + (t.done ? 'checked' : '') + ' style="width:20px;height:20px;cursor:pointer">'
+      + '<input type="checkbox" onclick="toggleTask(' + i + ')" ' + (t.done ? 'checked' : '') + ' style="width:24px;height:24px;cursor:pointer">'
       + '<div class="n-txt" style="' + (t.done ? 'text-decoration:line-through;opacity:0.6;' : '') + '">' + escHtml(t.text) + '</div>'
       + '<button class="n-del" onclick="deleteTask(' + i + ')">×</button>'
       + '</div>';
@@ -1459,23 +1487,50 @@ function loadForecast() {
       var hi = Math.round(data.daily.temperature_2m_max[i]);
       var lo = Math.round(data.daily.temperature_2m_min[i]);
       var day = i === 0 ? 'Today' : date.toLocaleDateString('en-US', {weekday:'short'});
-      var todayStyle = i === 0 ? 'border-color:var(--accent);background:rgba(59,130,246,.08)' : '';
+      var todayStyle = i === 0 ? 'border-color:var(--accent);background:var(--accent-soft)' : '';
+      var precip = (data.daily.precipitation_probability_max && data.daily.precipitation_probability_max[i] != null)
+        ? data.daily.precipitation_probability_max[i] : null;
       html += '<div style="background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;' + todayStyle + '">'
         + '<div style="font-size:14px;color:' + (i === 0 ? 'var(--accent)' : 'var(--t2)') + ';font-weight:600;margin-bottom:6px">' + day + '</div>'
         + '<div style="font-size:26px;margin:6px 0;color:var(--t1)">' + weatherIcon(code) + '</div>'
         + '<div style="font-size:13px;color:var(--t1)"><span style="color:var(--green)">' + hi + '°</span> / <span style="color:var(--t3)">' + lo + '°</span></div>'
+        + (precip !== null ? '<div style="font-size:11px;font-weight:600;color:' + (precip >= 40 ? '#4da6ff' : 'var(--t3)') + ';margin-top:5px">💧 ' + precip + '%</div>' : '')
         + '</div>';
       if (i < 5) {
         miniHtml += '<div class="fc-mini' + (i === 0 ? ' today' : '') + '" onclick="goPanel(\'weather\')">'
           + '<span class="fc-day">' + day + '</span>'
           + '<span class="fc-ico">' + weatherIcon(code) + '</span>'
           + '<span class="fc-temps">' + hi + '°/' + lo + '°</span>'
+          + (precip !== null && precip >= 30 ? '<span style="font-size:10px;color:#4da6ff;font-weight:700">💧' + precip + '%</span>' : '')
           + '</div>';
       }
     }
     if (el) el.innerHTML = html;
     var mini = document.getElementById('live-forecast-row');
     if (mini) mini.innerHTML = miniHtml;
+    // Sunrise / sunset for today (only present in newer caches)
+    var sunRow = document.getElementById('wx-sun-row');
+    if (sunRow) {
+      var sun = '';
+      function fmtSun(iso) {
+        try {
+          var t = new Date(iso);
+          if (isNaN(t.getTime())) return null;
+          var hh = t.getHours() % 12 || 12;
+          return hh + ':' + String(t.getMinutes()).padStart(2, '0') + (t.getHours() >= 12 ? ' PM' : ' AM');
+        } catch(e) { return null; }
+      }
+      if (data.daily.sunrise && data.daily.sunrise[0]) {
+        var sr = fmtSun(data.daily.sunrise[0]);
+        if (sr) sun += '<div class="wx-meta" style="min-width:110px"><span class="wm-l">🌅 Sunrise</span><span class="wm-v">' + sr + '</span></div>';
+      }
+      if (data.daily.sunset && data.daily.sunset[0]) {
+        var ss = fmtSun(data.daily.sunset[0]);
+        if (ss) sun += '<div class="wx-meta" style="min-width:110px"><span class="wm-l">🌇 Sunset</span><span class="wm-v">' + ss + '</span></div>';
+      }
+      sunRow.innerHTML = sun;
+      sunRow.style.display = sun ? '' : 'none';
+    }
     var stamp = document.getElementById('wx-updated');
     if (stamp) {
       var age = cacheAgeText();
@@ -2415,6 +2470,18 @@ function loadWeatherForCoords() {
       if (nowIcon) nowIcon.innerHTML = icon;
       if (nowDesc) nowDesc.textContent = getWeatherDescription(data.current.weather_code);
 
+      // Extra metrics render only when the cache carries them (older caches won't)
+      var metaRow = document.getElementById('wx-meta-row');
+      if (metaRow) {
+        var metas = '';
+        function metaChip(label, val) { return '<div class="wx-meta"><span class="wm-l">' + label + '</span><span class="wm-v">' + val + '</span></div>'; }
+        if (data.current.apparent_temperature != null) metas += metaChip('Feels like', Math.round(data.current.apparent_temperature) + '°C');
+        if (data.current.relative_humidity_2m != null) metas += metaChip('Humidity', Math.round(data.current.relative_humidity_2m) + '%');
+        if (data.current.wind_speed_10m != null) metas += metaChip('Wind', Math.round(data.current.wind_speed_10m) + ' km/h');
+        metaRow.innerHTML = metas;
+        metaRow.style.display = metas ? '' : 'none';
+      }
+
       if (settings.themeMode === 'auto') { setAutoTheme(data.current.is_day === 1); syncThemeModeButtons(); }
       setTimeout(renderLiveStocks, 100);
     } else if (!data) {
@@ -2820,6 +2887,17 @@ document.addEventListener('click', function(e) {
   if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
     dropdown.classList.remove('open');
   }
+});
+
+// ── ENTER-KEY SHORTCUTS (fewer taps: submit from the keyboard directly) ──
+document.getElementById('task-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addTask(); }
+});
+document.getElementById('stocks-dropdown-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addStock(); }
+});
+document.getElementById('link-url').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addLink(); }
 });
 
 // DASHBOARD_CACHE wasn't defined yet when the first clock tick ran — paint the

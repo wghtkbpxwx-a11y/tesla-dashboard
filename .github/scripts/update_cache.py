@@ -192,7 +192,7 @@ def fetch_weather() -> dict | None:
     url = (
         f"https://api.open-meteo.com/v1/forecast"
         f"?latitude={LAT}&longitude={LON}"
-        f"&current=temperature_2m,weather_code,is_day"
+        f"&current=temperature_2m,weather_code,is_day,apparent_temperature,relative_humidity_2m,wind_speed_10m"
     )
     try:
         resp = requests.get(url, timeout=TIMEOUT)
@@ -231,7 +231,8 @@ def fetch_forecast() -> dict | None:
     url = (
         f"https://api.open-meteo.com/v1/forecast"
         f"?latitude={LAT}&longitude={LON}"
-        f"&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto"
+        f"&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,sunrise,sunset"
+        f"&timezone=auto"
     )
     try:
         resp = requests.get(url, timeout=TIMEOUT)
