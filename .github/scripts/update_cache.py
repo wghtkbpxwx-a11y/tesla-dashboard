@@ -41,7 +41,26 @@ SPORTS_FEEDS = {
 
 # "My Teams" — the scores box on the Live panel. ESPN site API, team schedule
 # endpoint per team. `path` is the sport/league, `id` is the ESPN team id/abbr.
-DEFAULT_STOCKS = ["XEQT.TO", "VFV.TO", "AAPL", "TSLA", "MSFT", "NVDA", "AMZN", "GOOGL"]
+DEFAULT_STOCKS = ["XEQT.TO", "VFV.TO", "AAPL", "TSLA", "MSFT", "NVDA", "AMZN", "GOOGL",
+                  # Market indices + CAD/USD for the Live panel markets strip
+                  "^GSPTSE", "^GSPC", "^IXIC", "CADUSD=X"]
+
+# DriveBC webcams for the Traffic panel, in display order. The Actions job keeps
+# only cameras the API doesn't flag as stale. Images themselves are hotlinked
+# live from drivebc.ca; just the metadata is cached.
+PREFERRED_CAMERAS = [
+    (275, "Port Mann Bridge E"),
+    (292, "Port Mann Bridge W"),
+    (91,  "Alex Fraser Bridge N"),
+    (92,  "Alex Fraser Bridge S"),
+    (30,  "Massey Tunnel (Deas)"),
+    (18,  "Lions Gate North"),
+    (72,  "Ironworkers Midspan"),
+    (82,  "Hwy 10 at 152 St W"),
+    (79,  "Hwy 10 at 152 St N"),
+    (477, "Hwy 15 at 8 Ave N"),
+]
+MAX_CAMERAS = 8
 
 MY_TEAMS = [
     {"name": "Blue Jays", "league": "MLB", "path": "baseball/mlb",  "id": "tor"},
@@ -205,6 +224,51 @@ def fetch_weather() -> dict | None:
         return None
 
 
+def fetch_air() -> dict | None:
+    """Current air quality (US AQI + PM2.5) from open-meteo's air-quality API."""
+    url = (
+        f"https://air-quality-api.open-meteo.com/v1/air-quality"
+        f"?latitude={LAT}&longitude={LON}"
+        f"&current=us_aqi,pm2_5"
+    )
+    try:
+        resp = requests.get(url, timeout=TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+        print(f"  ✓ Air quality: AQI {data.get('current', {}).get('us_aqi')}")
+        return data
+    except Exception as e:
+        print(f"  ✗ Air quality: {e}")
+        return None
+
+
+def fetch_cameras() -> list[dict]:
+    """DriveBC webcam metadata for the preferred crossings, skipping stale cams."""
+    try:
+        resp = requests.get("https://www.drivebc.ca/api/webcams/", timeout=TIMEOUT,
+                            headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        by_id = {c["id"]: c for c in resp.json()}
+    except Exception as e:
+        print(f"  ✗ Cameras: {e}")
+        return []
+    out = []
+    for cam_id, label in PREFERRED_CAMERAS:
+        cam = by_id.get(cam_id)
+        if not cam or cam.get("marked_stale") or cam.get("marked_delayed"):
+            continue
+        out.append({
+            "id": cam_id,
+            "name": label,
+            "caption": (cam.get("caption") or "")[:120],
+            "url": f"https://www.drivebc.ca/images/{cam_id}.jpg",
+        })
+        if len(out) >= MAX_CAMERAS:
+            break
+    print(f"  ✓ Cameras: {len(out)} live")
+    return out
+
+
 def fetch_stocks() -> dict:
     """Fetch latest quote for each default stock; returns {sym: chart_response}."""
     out = {}
@@ -231,7 +295,7 @@ def fetch_forecast() -> dict | None:
     url = (
         f"https://api.open-meteo.com/v1/forecast"
         f"?latitude={LAT}&longitude={LON}"
-        f"&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,sunrise,sunset"
+        f"&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,sunrise,sunset,uv_index_max"
         f"&timezone=auto"
     )
     try:
@@ -273,6 +337,12 @@ def main():
     print("Fetching stock quotes...")
     stocks = fetch_stocks()
 
+    print("Fetching air quality...")
+    air = fetch_air()
+
+    print("Fetching traffic cameras...")
+    cameras = fetch_cameras()
+
     # Read current index.html
     with open("index.html", "r", encoding="utf-8") as f:
         html = f.read()
@@ -294,6 +364,8 @@ def main():
         "sports": sports if sports else existing.get("sports", {}),
         "scores": scores if scores else existing.get("scores", []),
         "stocks": stocks if stocks else existing.get("stocks", {}),
+        "air": air or existing.get("air"),
+        "cameras": cameras if cameras else existing.get("cameras", []),
         "updated": datetime.now(timezone.utc).isoformat(),
     }
 

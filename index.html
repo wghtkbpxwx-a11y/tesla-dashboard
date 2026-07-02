@@ -300,6 +300,61 @@ input[type="color"]:hover{border-color:var(--line2)}
 .stock-remove:hover{color:var(--red);background:var(--red-bg);border-color:var(--red)}
 .stocks-dropdown-footer{padding:8px 12px;border-top:1px solid var(--line);font-size:11px;color:var(--t3);text-align:center;background:var(--surface);text-transform:uppercase;letter-spacing:.2px}
 
+/* SUBMENU GROUPS */
+.dock-submenu{min-width:300px}
+.dock-submenu-head{padding:10px 16px 4px;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px}
+.dock-submenu-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:0 4px}
+
+/* MARKETS STRIP */
+.live-indices{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;font-weight:600;color:var(--t3)}
+.idx-item{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.idx-item .idx-l{color:var(--t3);text-transform:uppercase;letter-spacing:.3px;font-size:11px}
+.idx-item .idx-v{color:var(--t1)}
+.idx-item .idx-c.up{color:var(--green)}
+.idx-item .idx-c.down{color:var(--red)}
+
+/* TRAFFIC CAMERAS */
+.cam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.cam-card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
+.cam-card img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;background:var(--surface)}
+.cam-name{padding:12px 16px;font-size:14px;font-weight:600;color:var(--t1);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cam-name span:last-child{font-size:11px;color:var(--t3);font-weight:500}
+
+/* TIMER */
+.timer-wrap{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:32px 24px;max-width:520px;text-align:center;box-shadow:var(--shadow-sm)}
+.timer-display{font-size:88px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-2px;line-height:1;margin:12px 0 24px}
+.timer-display.done{color:var(--red);animation:rec-pulse 1s infinite}
+.timer-presets{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.timer-preset{padding:14px 22px;border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--t1);font-size:16px;font-weight:600;cursor:pointer;transition:all .2s}
+.timer-preset:hover{background:var(--surface2);border-color:var(--accent)}
+.timer-actions{display:flex;gap:10px;justify-content:center}
+
+/* GAMES */
+.game-tabs{display:flex;gap:6px;margin-bottom:20px}
+.g2048-board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;width:min(420px,92vw);margin:0 auto;touch-action:none}
+.g2048-cell{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;background:var(--surface2);color:var(--t1);transition:transform .1s}
+.wordle-board{display:grid;grid-template-rows:repeat(6,1fr);gap:6px;width:min(320px,80vw);margin:0 auto 18px}
+.wordle-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.wordle-tile{aspect-ratio:1;border:2px solid var(--line2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;text-transform:uppercase;color:var(--t1)}
+.wordle-tile.hit{background:var(--green);border-color:var(--green);color:#fff}
+.wordle-tile.near{background:#d29922;border-color:#d29922;color:#fff}
+.wordle-tile.miss{background:var(--surface2);border-color:var(--surface2);color:var(--t3)}
+.wordle-kb{display:flex;flex-direction:column;gap:6px;align-items:center}
+.wordle-kb-row{display:flex;gap:5px}
+.wkey{min-width:32px;padding:14px 8px;border-radius:8px;background:var(--surface);border:1px solid var(--line);color:var(--t1);font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase}
+.wkey:hover{background:var(--surface2)}
+.wkey.hit{background:var(--green);color:#fff;border-color:var(--green)}
+.wkey.near{background:#d29922;color:#fff;border-color:#d29922}
+.wkey.miss{background:var(--surface2);color:var(--t3)}
+.wkey.wide{padding:14px 14px}
+
+/* CONVERTER */
+.conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.conv-row input{flex:1;min-width:110px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--t1);font-size:15px;font-family:var(--f);outline:none}
+.conv-row input:focus{border-color:var(--accent)}
+.conv-row select{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--t1);font-size:14px;font-family:var(--f);outline:none;cursor:pointer}
+.conv-out{font-size:17px;font-weight:600;color:var(--accent);min-width:130px}
+
 /* RESPONSIVE (phones / portrait) */
 @media (max-width:760px){
   html,body{height:auto;overflow:visible}
@@ -373,6 +428,8 @@ input[type="color"]:hover{border-color:var(--line2)}
       <div class="live-stocks-row" id="live-stocks-row">
         <div class="muted" style="padding:8px;font-size:12px">Loading stocks…</div>
       </div>
+      <!-- Markets strip: indices + CAD/USD -->
+      <div class="live-indices" id="live-indices"></div>
     </div>
 
     <!-- News, Scores, Fantasy in tabbed layout -->
@@ -456,6 +513,33 @@ input[type="color"]:hover{border-color:var(--line2)}
         </a>
       </div>
     </div>
+    <div class="sec-title" style="margin-top:28px">Social & Google</div>
+    <div class="split">
+      <div class="cardgroup">
+        <a class="row" href="https://www.reddit.com" target="_blank" rel="noopener">
+          <div class="appicon" style="background:#FF4500"><svg viewBox="0 0 24 24" fill="#fff"><path d="M14.5 15.41c.17.17.17.45 0 .62-.76.76-1.94.9-2.5.9s-1.74-.14-2.5-.9a.44.44 0 0 1 0-.62c.17-.17.45-.17.62 0 .48.48 1.35.65 1.88.65s1.4-.17 1.88-.65c.17-.17.45-.17.62 0zm-4.25-2.66a1 1 0 1 0-2 0 1 1 0 0 0 2 0zm5.5-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm6.25.25c0 .96-.54 1.8-1.33 2.22.03.2.05.41.05.62 0 3.18-3.7 5.76-8.25 5.76s-8.25-2.58-8.25-5.76c0-.21.02-.42.05-.63A2.5 2.5 0 0 1 3.5 9.5a2.5 2.5 0 0 1 4.23-1.81c1.4-.92 3.24-1.5 5.27-1.57l1.13-5.03 3.53.8a1.75 1.75 0 1 1-.21.98l-2.82-.64-.94 4.19c1.94.1 3.69.68 5.03 1.57a2.5 2.5 0 0 1 4.28 1.81z"/></svg></div>
+          <div class="rl"><div class="rl-t">Reddit</div><div class="rl-s">Communities</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://x.com" target="_blank" rel="noopener">
+          <div class="appicon" style="background:#000"><svg viewBox="0 0 24 24" fill="#fff"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.24 6.93 6.07-6.93zm-1.29 19.5h2.04L6.49 3.24H4.3l13.31 17.41z"/></svg></div>
+          <div class="rl"><div class="rl-t">X</div><div class="rl-s">Latest posts</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+      <div class="cardgroup">
+        <a class="row" href="https://calendar.google.com" target="_blank" rel="noopener">
+          <div class="appicon" style="background:#fff"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2.5" fill="#fff" stroke="#e0e0e0" stroke-width=".6"/><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5V9H3z" fill="#1a73e8"/><text x="12" y="18" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="700" fill="#1a73e8">31</text></svg></div>
+          <div class="rl"><div class="rl-t">Google Calendar</div><div class="rl-s">Schedule & events</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://maps.google.com" target="_blank" rel="noopener">
+          <div class="appicon" style="background:#fff"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/><circle cx="12" cy="9" r="2.5" fill="#fff"/></svg></div>
+          <div class="rl"><div class="rl-t">Google Maps</div><div class="rl-s">Places & directions</div></div>
+          <span class="chev">›</span>
+        </a>
+      </div>
+    </div>
   </section>
 
   <!-- APPLE PANEL -->
@@ -532,6 +616,23 @@ input[type="color"]:hover{border-color:var(--line2)}
             <button class="calc-key calc-eq" onclick="calcEqual()">=</button>
           </div>
         </div>
+        <div class="sec-title" style="margin-top:28px">Unit Converter</div>
+        <div class="calc-wrap" style="margin-bottom:0">
+          <div class="conv-row">
+            <input type="number" id="conv-in" placeholder="Value" inputmode="decimal">
+            <select id="conv-type">
+              <option value="kmmi">km → miles</option>
+              <option value="mikm">miles → km</option>
+              <option value="cf">°C → °F</option>
+              <option value="fc">°F → °C</option>
+              <option value="l100">L/100km → mpg (US)</option>
+              <option value="mpg">mpg (US) → L/100km</option>
+              <option value="kglb">kg → lb</option>
+              <option value="lbkg">lb → kg</option>
+            </select>
+            <span class="conv-out" id="conv-out">—</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -556,6 +657,16 @@ input[type="color"]:hover{border-color:var(--line2)}
         <a class="row" href="https://tv.apple.com" target="_blank" rel="noopener">
           <div class="appicon ic-appletv"><svg viewBox="0 0 24 24" fill="#fff"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg></div>
           <div class="rl"><div class="rl-t">Apple TV+</div><div class="rl-s">Apple Originals</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://www.youtube.com" target="_blank" rel="noopener">
+          <div class="appicon" style="background:#f00"><svg viewBox="0 0 24 24" fill="#fff"><path d="M10 15.5v-7l6 3.5-6 3.5zM21.8 8s-.2-1.4-.8-2c-.75-.8-1.6-.8-2-.85C16.2 5 12 5 12 5h-.01s-4.19 0-6.99.15c-.4.05-1.24.05-2 .85-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.76.8 1.75.78 2.2.86 1.6.15 6.8.2 6.8.2s4.2-.01 7-.16c.4-.05 1.25-.05 2-.85.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5c0-1.6-.2-3.2-.2-3.2z"/></svg></div>
+          <div class="rl"><div class="rl-t">YouTube</div><div class="rl-s">Videos & live</div></div>
+          <span class="chev">›</span>
+        </a>
+        <a class="row" href="https://open.spotify.com" target="_blank" rel="noopener">
+          <div class="appicon" style="background:#121212"><svg viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.5 17.3a.75.75 0 0 1-1.03.25c-2.82-1.72-6.37-2.11-10.55-1.16a.75.75 0 1 1-.33-1.46c4.57-1.04 8.5-.59 11.66 1.34.35.22.46.68.25 1.03zm1.47-3.27a.94.94 0 0 1-1.29.31c-3.23-1.98-8.15-2.56-11.97-1.4a.94.94 0 1 1-.55-1.79c4.37-1.33 9.79-.68 13.5 1.6.44.27.58.85.31 1.28zm.13-3.4C15.24 8.33 8.94 8.12 5.25 9.24a1.13 1.13 0 1 1-.65-2.15c4.24-1.29 11.28-1.04 15.72 1.6a1.13 1.13 0 0 1-1.15 1.94z"/></svg></div>
+          <div class="rl"><div class="rl-t">Spotify</div><div class="rl-s">Music & podcasts</div></div>
           <span class="chev">›</span>
         </a>
       </div>
@@ -673,6 +784,18 @@ input[type="color"]:hover{border-color:var(--line2)}
         <div class="set-label"><div class="set-t">Saved</div><div class="set-s">Bookmarked articles</div></div>
         <button class="toggle" data-set="saved" aria-label="Toggle Saved module"></button>
       </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Traffic Cameras</div><div class="set-s">DriveBC bridge & highway cams</div></div>
+        <button class="toggle" data-set="traffic" aria-label="Toggle Traffic module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Timer</div><div class="set-s">Parking & charging countdown</div></div>
+        <button class="toggle" data-set="timer" aria-label="Toggle Timer module"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Games</div><div class="set-s">Wordle & 2048 for charging stops</div></div>
+        <button class="toggle" data-set="games" aria-label="Toggle Games module"></button>
+      </div>
     </div>
     <button class="btn btn-gh" onclick="resetSettings()">Reset to defaults</button>
   </section>
@@ -729,6 +852,56 @@ input[type="color"]:hover{border-color:var(--line2)}
     <div class="split" id="links-list"><div class="muted">No links yet. Add your favorites!</div></div>
   </section>
 
+  <!-- TRAFFIC CAMERAS PANEL -->
+  <section class="panel" id="p-traffic">
+    <div class="sec-title"><div class="live-dot"></div> Traffic Cameras
+      <button class="ntab" style="margin-left:auto" onclick="renderCameras(true)">Refresh images</button>
+    </div>
+    <div class="cam-grid" id="cam-grid"><div class="muted">Loading cameras…</div></div>
+    <div style="margin-top:16px;font-size:12px;color:var(--t3)">Live images from DriveBC — updated every few minutes. Tap "Refresh images" for the latest frame.</div>
+  </section>
+
+  <!-- TIMER PANEL -->
+  <section class="panel" id="p-timer">
+    <div class="sec-title">Timer</div>
+    <div class="timer-wrap">
+      <div style="font-size:13px;color:var(--t3)" id="timer-label">Parking meter, charging stop, or anything else</div>
+      <div class="timer-display" id="timer-display">00:00</div>
+      <div class="timer-presets">
+        <button class="timer-preset" onclick="timerStart(15)">15 min</button>
+        <button class="timer-preset" onclick="timerStart(20)">20 min</button>
+        <button class="timer-preset" onclick="timerStart(30)">30 min</button>
+        <button class="timer-preset" onclick="timerStart(45)">45 min</button>
+        <button class="timer-preset" onclick="timerStart(60)">1 hour</button>
+        <button class="timer-preset" onclick="timerStart(120)">2 hours</button>
+      </div>
+      <div class="timer-actions">
+        <button class="btn btn-pri" id="timer-plus" onclick="timerAdd(5)">+5 min</button>
+        <button class="btn btn-gh" onclick="timerStop()">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAMES PANEL (for charging stops) -->
+  <section class="panel" id="p-games">
+    <div class="sec-title">Charging-Stop Games</div>
+    <div class="game-tabs">
+      <button class="ntab on" id="gtab-wordle" onclick="showGame('wordle')">Wordle</button>
+      <button class="ntab" id="gtab-2048" onclick="showGame('2048')">2048</button>
+    </div>
+    <div id="game-wordle">
+      <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:14px" id="wordle-msg">Guess the 5-letter word — new word daily</div>
+      <div class="wordle-board" id="wordle-board"></div>
+      <div class="wordle-kb" id="wordle-kb"></div>
+      <div style="text-align:center;margin-top:16px"><button class="btn btn-gh" onclick="wordleNew()">New word</button></div>
+    </div>
+    <div id="game-2048" style="display:none">
+      <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:14px">Swipe or use arrow keys to merge tiles · Score: <strong id="g2048-score" style="color:var(--t1)">0</strong></div>
+      <div class="g2048-board" id="g2048-board"></div>
+      <div style="text-align:center;margin-top:16px"><button class="btn btn-gh" onclick="g2048New()">New game</button></div>
+    </div>
+  </section>
+
 </main>
 
 <nav id="dock">
@@ -738,18 +911,31 @@ input[type="color"]:hover{border-color:var(--line2)}
   <button class="dock-btn" data-p="set" draggable="true" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
 </nav>
 
-<!-- Submenu lives outside #dock so it isn't clipped by the dock's overflow / transform -->
+<!-- Submenu lives outside #dock so it isn't clipped by the dock's overflow / transform.
+     Grouped by intent: what's happening / get things done / open apps. -->
 <div class="dock-submenu" id="dock-submenu">
-  <button class="dock-submenu-item" data-p="sports">Sports</button>
-  <button class="dock-submenu-item" data-p="apple">Apple</button>
-  <button class="dock-submenu-item" data-p="cap">Capture</button>
-  <button class="dock-submenu-item" data-p="stream">Streaming</button>
-  <button class="dock-submenu-item" data-p="learn">Learning</button>
-  <button class="dock-submenu-item" data-p="saved">Saved</button>
-  <button class="dock-submenu-item" data-p="tasks">Tasks</button>
-  <button class="dock-submenu-item" data-p="stocks">Stocks</button>
-  <button class="dock-submenu-item" data-p="weather">Weather</button>
-  <button class="dock-submenu-item" data-p="links">Links</button>
+  <div class="dock-submenu-head">Info</div>
+  <div class="dock-submenu-grid">
+    <button class="dock-submenu-item" data-p="sports">Sports</button>
+    <button class="dock-submenu-item" data-p="weather">Weather</button>
+    <button class="dock-submenu-item" data-p="traffic">Traffic</button>
+    <button class="dock-submenu-item" data-p="saved">Saved</button>
+  </div>
+  <div class="dock-submenu-head">Tools</div>
+  <div class="dock-submenu-grid">
+    <button class="dock-submenu-item" data-p="tasks">Tasks</button>
+    <button class="dock-submenu-item" data-p="cap">Capture</button>
+    <button class="dock-submenu-item" data-p="timer">Timer</button>
+    <button class="dock-submenu-item" data-p="stocks">Stocks</button>
+    <button class="dock-submenu-item" data-p="links">Links</button>
+    <button class="dock-submenu-item" data-p="games">Games</button>
+  </div>
+  <div class="dock-submenu-head">Apps</div>
+  <div class="dock-submenu-grid">
+    <button class="dock-submenu-item" data-p="apple">Apple</button>
+    <button class="dock-submenu-item" data-p="stream">Streaming</button>
+    <button class="dock-submenu-item" data-p="learn">Learning</button>
+  </div>
 </div>
 
 <!-- External-link modal: opens links in-place so the dashboard is never lost -->
@@ -781,7 +967,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 <script>
 // ── VARIABLES (declared early to avoid undefined reference errors) ──
 var SETTINGS_KEY = 'dash_settings_v1';
-var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, tasks:true, links:true, saved:true}};
+var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, tasks:true, links:true, saved:true, traffic:true, timer:true, games:true}};
 var settings;
 var themePresets = {default: {accent:'#3a82f6'}, cyberpunk: {accent:'#ff006e'}, sunset: {accent:'#ff6b35'}, forest: {accent:'#22c55e'}, lavender: {accent:'#a78bfa'}};
 var draggedBtn = null;
@@ -2514,6 +2700,22 @@ function loadWeatherForCoords() {
         if (data.current.apparent_temperature != null) metas += metaChip('Feels like', Math.round(data.current.apparent_temperature) + '°C');
         if (data.current.relative_humidity_2m != null) metas += metaChip('Humidity', Math.round(data.current.relative_humidity_2m) + '%');
         if (data.current.wind_speed_10m != null) metas += metaChip('Wind', Math.round(data.current.wind_speed_10m) + ' km/h');
+        // Air quality (US AQI) from the embedded air cache — colored by band
+        try {
+          var aqi = DASHBOARD_CACHE.air && DASHBOARD_CACHE.air.current && DASHBOARD_CACHE.air.current.us_aqi;
+          if (aqi != null) {
+            var band = aqi <= 50 ? ['Good', 'var(--green)'] : aqi <= 100 ? ['Moderate', '#ffd60a'] : aqi <= 150 ? ['Poor', '#ff9f0a'] : ['Unhealthy', 'var(--red)'];
+            metas += '<div class="wx-meta"><span class="wm-l">Air (AQI)</span><span class="wm-v" style="color:' + band[1] + '">' + Math.round(aqi) + ' ' + band[0] + '</span></div>';
+          }
+        } catch(e) {}
+        // Today's max UV from the forecast cache
+        try {
+          var uv = DASHBOARD_CACHE.forecast && DASHBOARD_CACHE.forecast.daily && DASHBOARD_CACHE.forecast.daily.uv_index_max && DASHBOARD_CACHE.forecast.daily.uv_index_max[0];
+          if (uv != null) {
+            var uvBand = uv < 3 ? 'Low' : uv < 6 ? 'Moderate' : uv < 8 ? 'High' : 'Very high';
+            metas += metaChip('UV index', Math.round(uv) + ' ' + uvBand);
+          }
+        } catch(e) {}
         metaRow.innerHTML = metas;
         metaRow.style.display = metas ? '' : 'none';
       }
@@ -2924,6 +3126,285 @@ document.addEventListener('click', function(e) {
     dropdown.classList.remove('open');
   }
 });
+
+// ── MARKETS STRIP (indices + CAD/USD from the embedded stocks cache) ──
+function renderIndices() {
+  var el = document.getElementById('live-indices');
+  if (!el || typeof DASHBOARD_CACHE === 'undefined' || !DASHBOARD_CACHE || !DASHBOARD_CACHE.stocks) return;
+  var defs = [
+    {sym: '^GSPTSE', label: 'TSX'},
+    {sym: '^GSPC', label: 'S&P 500'},
+    {sym: '^IXIC', label: 'NASDAQ'},
+    {sym: 'CADUSD=X', label: 'CAD', fx: true}
+  ];
+  var html = '';
+  defs.forEach(function(d) {
+    var data = DASHBOARD_CACHE.stocks[d.sym];
+    if (!data || !data.chart || !data.chart.result) return;
+    var meta = data.chart.result[0].meta;
+    var px = parseFloat(meta.regularMarketPrice);
+    var prev = parseFloat(meta.chartPreviousClose);
+    if (isNaN(px) || isNaN(prev)) return;
+    var pct = ((px - prev) / prev * 100).toFixed(1);
+    var cls = px >= prev ? 'up' : 'down';
+    var val = d.fx ? '$' + px.toFixed(3) + ' USD' : px.toLocaleString('en-CA', {maximumFractionDigits: 0});
+    html += '<span class="idx-item"><span class="idx-l">' + d.label + '</span>'
+      + '<span class="idx-v">' + val + '</span>'
+      + '<span class="idx-c ' + cls + '">' + (px >= prev ? '+' : '') + pct + '%</span></span>';
+  });
+  el.innerHTML = html;
+  el.style.display = html ? '' : 'none';
+}
+renderIndices();
+
+// ── TRAFFIC CAMERAS (metadata cached; images hotlinked live from DriveBC) ──
+function renderCameras(bust) {
+  var el = document.getElementById('cam-grid');
+  if (!el) return;
+  var cams = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.cameras) || [];
+  if (!cams.length) {
+    el.innerHTML = '<div class="muted">Camera list unavailable — it refreshes with the data cache every 4 hours.</div>';
+    return;
+  }
+  var t = Date.now();
+  var html = '';
+  cams.forEach(function(c) {
+    html += '<div class="cam-card">'
+      + '<img src="' + escHtml(c.url) + '?t=' + t + '" alt="' + escHtml(c.name) + '" loading="lazy" onerror="this.closest(\'.cam-card\').style.display=\'none\'">'
+      + '<div class="cam-name"><span>' + escHtml(c.name) + '</span><span>DriveBC</span></div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+renderCameras(false);
+
+// ── TIMER (persists across reloads via the stored end timestamp) ──
+var timerBeeped = false;
+function timerEnd() {
+  try { return parseInt(localStorage.getItem('timer_end_v1'), 10) || 0; } catch(e) { return 0; }
+}
+function timerStart(mins) {
+  try { localStorage.setItem('timer_end_v1', String(Date.now() + mins * 60000)); } catch(e) {}
+  timerBeeped = false;
+  timerTick();
+}
+function timerAdd(mins) {
+  var end = timerEnd();
+  var base = end > Date.now() ? end : Date.now();
+  try { localStorage.setItem('timer_end_v1', String(base + mins * 60000)); } catch(e) {}
+  timerBeeped = false;
+  timerTick();
+}
+function timerStop() {
+  try { localStorage.removeItem('timer_end_v1'); } catch(e) {}
+  timerBeeped = false;
+  timerTick();
+}
+function timerBeep() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    for (var i = 0; i < 3; i++) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.5);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.5 + 0.35);
+      osc.start(ctx.currentTime + i * 0.5);
+      osc.stop(ctx.currentTime + i * 0.5 + 0.4);
+    }
+  } catch(e) {}
+}
+function timerTick() {
+  var disp = document.getElementById('timer-display');
+  if (!disp) return;
+  var end = timerEnd();
+  if (!end) { disp.textContent = '00:00'; disp.classList.remove('done'); return; }
+  var left = end - Date.now();
+  if (left <= 0) {
+    disp.textContent = '00:00';
+    disp.classList.add('done');
+    if (!timerBeeped) { timerBeeped = true; timerBeep(); }
+    return;
+  }
+  disp.classList.remove('done');
+  var s = Math.ceil(left / 1000);
+  var hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = s % 60;
+  disp.textContent = (hh ? hh + ':' + String(mm).padStart(2, '0') : String(mm).padStart(2, '0')) + ':' + String(ss).padStart(2, '0');
+}
+setInterval(timerTick, 1000);
+timerTick();
+
+// ── UNIT CONVERTER ──
+function convUpdate() {
+  var v = parseFloat(document.getElementById('conv-in').value);
+  var out = document.getElementById('conv-out');
+  if (isNaN(v)) { out.textContent = '—'; return; }
+  var t = document.getElementById('conv-type').value, r, unit;
+  if (t === 'kmmi') { r = v * 0.621371; unit = ' mi'; }
+  else if (t === 'mikm') { r = v * 1.609344; unit = ' km'; }
+  else if (t === 'cf') { r = v * 9 / 5 + 32; unit = ' °F'; }
+  else if (t === 'fc') { r = (v - 32) * 5 / 9; unit = ' °C'; }
+  else if (t === 'l100') { r = v > 0 ? 235.215 / v : 0; unit = ' mpg'; }
+  else if (t === 'mpg') { r = v > 0 ? 235.215 / v : 0; unit = ' L/100km'; }
+  else if (t === 'kglb') { r = v * 2.204623; unit = ' lb'; }
+  else { r = v / 2.204623; unit = ' kg'; }
+  out.textContent = '= ' + parseFloat(r.toFixed(2)) + unit;
+}
+document.getElementById('conv-in').addEventListener('input', convUpdate);
+document.getElementById('conv-type').addEventListener('change', convUpdate);
+
+// ── GAMES ──
+function showGame(g) {
+  document.getElementById('game-wordle').style.display = g === 'wordle' ? '' : 'none';
+  document.getElementById('game-2048').style.display = g === '2048' ? '' : 'none';
+  document.getElementById('gtab-wordle').classList.toggle('on', g === 'wordle');
+  document.getElementById('gtab-2048').classList.toggle('on', g === '2048');
+}
+
+// Wordle — daily word by default, "New word" picks randomly
+var WORDLE_WORDS = ['about','above','abuse','actor','adapt','admit','adopt','after','again','agent','agree','ahead','alarm','album','alert','alike','alive','allow','alone','along','alter','anger','angle','angry','apart','apple','apply','arena','argue','arise','armor','array','arrow','aside','asset','audio','audit','avoid','awake','award','aware','badge','baker','basic','beach','beast','began','begin','being','below','bench','berry','birth','black','blade','blame','blank','blast','blaze','blend','bless','blind','block','blood','bloom','board','boast','bonus','boost','booth','bound','brain','brake','brand','brave','bread','break','breed','brick','bride','brief','bring','broad','brown','brush','build','bunch','burst','buyer','cabin','cable','candy','cargo','carry','catch','cause','chain','chair','chaos','charm','chart','chase','cheap','check','chess','chest','chief','child','chill','choir','chose','civic','civil','claim','clash','class','clean','clear','clerk','click','cliff','climb','clock','close','cloth','cloud','coach','coast','color','couch','could','count','court','cover','crack','craft','crane','crash','crazy','cream','crime','crisp','cross','crowd','crown','curve','cycle','daily','dairy','dance','death','debut','decay','delay','dense','depth','devil','diary','dirty','dodge','doubt','dozen','draft','drain','drama','dream','dress','drink','drive','eager','eagle','early','earth','eight','elbow','elder','elect','elite','empty','enemy','enjoy','enter','entry','equal','error','event','every','exact','exist','extra','faith','false','fancy','fatal','fault','favor','feast','fence','fever','fiber','field','fifth','fifty','fight','final','first','flame','flash','fleet','flesh','float','flood','floor','flour','fluid','focus','force','forge','forth','forty','forum','found','frame','fraud','fresh','front','frost','fruit','fully','funny','ghost','giant','given','glass','globe','glory','glove','grace','grade','grain','grand','grant','grape','grasp','grass','grave','great','green','greet','grief','grill','gross','group','grove','guard','guess','guest','guide','habit','happy','harsh','haste','heart','heavy','hedge','hello','hence','honey','honor','horse','hotel','house','human','humor','hurry','ideal','image','imply','index','inner','input','issue','ivory','jeans','joint','judge','juice','knife','knock','known','label','labor','large','laser','later','laugh','layer','learn','lease','least','leave','legal','lemon','level','light','limit','local','logic','loose','lower','loyal','lucky','lunch','magic','major','maker','maple','march','match','maybe','mayor','medal','media','mercy','merge','merit','metal','meter','might','minor','mixed','model','money','month','moral','motor','mount','mouse','mouth','movie','music','naval','nerve','never','night','noble','noise','north','novel','nurse','ocean','offer','often','olive','onion','opera','orbit','order','organ','other','ought','ounce','outer','owner','paint','panel','paper','party','pasta','patch','pause','peace','pearl','phase','phone','photo','piano','piece','pilot','pitch','pizza','place','plain','plane','plant','plate','plaza','point','pound','power','press','price','pride','prime','print','prior','prize','proof','proud','prove','pulse','punch','pupil','queen','quick','quiet','quite','quote','radar','radio','raise','rally','ranch','range','rapid','ratio','reach','react','ready','realm','rebel','refer','relax','reply','rider','ridge','rifle','right','rigid','risky','rival','river','robot','rocky','roast','rough','round','route','royal','rural','salad','sauce','scale','scare','scene','scope','score','sense','serve','seven','shade','shake','shall','shame','shape','share','sharp','sheep','sheet','shelf','shell','shift','shine','shirt','shock','shoot','shore','short','shout','sight','silly','since','sixty','skill','skirt','sleep','slice','slide','slope','small','smart','smell','smile','smoke','snake','solar','solid','solve','sorry','sound','south','space','spare','spark','speak','speed','spell','spend','spice','spike','spine','spite','split','sport','spray','staff','stage','stain','stair','stake','stand','stare','start','state','steak','steal','steam','steel','steep','steer','stick','stiff','still','stock','stone','store','storm','story','stove','strip','study','stuff','style','sugar','suite','sunny','super','sweet','swift','swing','sword','table','taste','teach','thank','theme','there','these','thick','thing','think','third','those','three','throw','thumb','tiger','tight','title','toast','today','token','tooth','topic','torch','total','touch','tough','tower','trace','track','trade','trail','train','trait','trash','treat','trend','trial','tribe','trick','truck','truly','trunk','trust','truth','twice','uncle','under','union','unite','unity','until','upper','upset','urban','usage','usual','vague','valid','value','vapor','video','virus','visit','vital','vivid','vocal','voice','waste','watch','water','weird','whale','wheat','wheel','where','which','while','white','whole','width','witch','woman','world','worry','worse','worst','worth','would','wound','wrist','write','wrong','yield','young','youth'];
+var wordleAnswer = '', wordleGuess = '', wordleRow = 0, wordleOver = false;
+function wordleNew(daily) {
+  if (daily) {
+    var seed = Math.floor(Date.now() / 86400000);
+    wordleAnswer = WORDLE_WORDS[seed % WORDLE_WORDS.length];
+  } else {
+    wordleAnswer = WORDLE_WORDS[Math.floor(Math.random() * WORDLE_WORDS.length)];
+  }
+  wordleGuess = ''; wordleRow = 0; wordleOver = false;
+  document.getElementById('wordle-msg').textContent = 'Guess the 5-letter word' + (daily ? ' — new word daily' : '');
+  var board = document.getElementById('wordle-board');
+  var html = '';
+  for (var r = 0; r < 6; r++) {
+    html += '<div class="wordle-row">';
+    for (var c = 0; c < 5; c++) html += '<div class="wordle-tile" id="wt-' + r + '-' + c + '"></div>';
+    html += '</div>';
+  }
+  board.innerHTML = html;
+  var kb = document.getElementById('wordle-kb');
+  var rows = ['qwertyuiop', 'asdfghjkl', '#zxcvbnm<'];
+  html = '';
+  rows.forEach(function(row) {
+    html += '<div class="wordle-kb-row">';
+    row.split('').forEach(function(k) {
+      if (k === '#') html += '<button class="wkey wide" onclick="wordleKey(\'enter\')">Enter</button>';
+      else if (k === '<') html += '<button class="wkey wide" onclick="wordleKey(\'back\')">⌫</button>';
+      else html += '<button class="wkey" id="wk-' + k + '" onclick="wordleKey(\'' + k + '\')">' + k + '</button>';
+    });
+    html += '</div>';
+  });
+  kb.innerHTML = html;
+}
+function wordleKey(k) {
+  if (wordleOver) return;
+  var msg = document.getElementById('wordle-msg');
+  if (k === 'back') { wordleGuess = wordleGuess.slice(0, -1); }
+  else if (k === 'enter') {
+    if (wordleGuess.length !== 5) { msg.textContent = 'Need 5 letters'; return; }
+    var res = [];
+    var ans = wordleAnswer.split('');
+    // First pass: exact hits consume answer letters
+    for (var i = 0; i < 5; i++) { if (wordleGuess[i] === ans[i]) { res[i] = 'hit'; ans[i] = null; } }
+    for (var i = 0; i < 5; i++) {
+      if (res[i]) continue;
+      var j = ans.indexOf(wordleGuess[i]);
+      if (j >= 0) { res[i] = 'near'; ans[j] = null; } else { res[i] = 'miss'; }
+    }
+    for (var i = 0; i < 5; i++) {
+      document.getElementById('wt-' + wordleRow + '-' + i).classList.add(res[i]);
+      var key = document.getElementById('wk-' + wordleGuess[i]);
+      if (key && !key.classList.contains('hit')) {
+        if (res[i] === 'hit') { key.classList.remove('near', 'miss'); key.classList.add('hit'); }
+        else if (res[i] === 'near' && !key.classList.contains('near')) { key.classList.remove('miss'); key.classList.add('near'); }
+        else if (res[i] === 'miss' && !key.classList.contains('near')) key.classList.add('miss');
+      }
+    }
+    if (wordleGuess === wordleAnswer) { msg.textContent = '🎉 Solved in ' + (wordleRow + 1) + '!'; wordleOver = true; return; }
+    wordleRow++;
+    wordleGuess = '';
+    if (wordleRow >= 6) { msg.textContent = 'The word was "' + wordleAnswer.toUpperCase() + '"'; wordleOver = true; }
+    return;
+  } else if (wordleGuess.length < 5) { wordleGuess += k; }
+  for (var i = 0; i < 5; i++) {
+    document.getElementById('wt-' + wordleRow + '-' + i).textContent = wordleGuess[i] || '';
+  }
+}
+wordleNew(true);
+
+// 2048
+var g2048Grid = [], g2048Score = 0;
+function g2048New() {
+  g2048Grid = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+  g2048Score = 0;
+  g2048Spawn(); g2048Spawn(); g2048Render();
+}
+function g2048Spawn() {
+  var empty = [];
+  for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) if (!g2048Grid[r][c]) empty.push([r, c]);
+  if (!empty.length) return;
+  var p = empty[Math.floor(Math.random() * empty.length)];
+  g2048Grid[p[0]][p[1]] = Math.random() < 0.9 ? 2 : 4;
+}
+function g2048Render() {
+  var el = document.getElementById('g2048-board');
+  if (!el) return;
+  var colors = {2:'#3a3a3e',4:'#4a4a52',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e'};
+  var html = '';
+  for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) {
+    var v = g2048Grid[r][c];
+    html += '<div class="g2048-cell" style="' + (v ? 'background:' + (colors[v] || '#3c3a32') + ';color:' + (v <= 4 ? 'var(--t1)' : '#1d1d1f') : '') + '">' + (v || '') + '</div>';
+  }
+  el.innerHTML = html;
+  document.getElementById('g2048-score').textContent = g2048Score;
+}
+function g2048Move(dir) { // 0=left 1=up 2=right 3=down
+  var moved = false;
+  function slide(line) {
+    var vals = line.filter(function(v) { return v; });
+    for (var i = 0; i < vals.length - 1; i++) {
+      if (vals[i] === vals[i + 1]) { vals[i] *= 2; g2048Score += vals[i]; vals.splice(i + 1, 1); }
+    }
+    while (vals.length < 4) vals.push(0);
+    return vals;
+  }
+  for (var i = 0; i < 4; i++) {
+    var line = [];
+    for (var j = 0; j < 4; j++) {
+      line.push(dir === 0 ? g2048Grid[i][j] : dir === 2 ? g2048Grid[i][3 - j] : dir === 1 ? g2048Grid[j][i] : g2048Grid[3 - j][i]);
+    }
+    var out = slide(line);
+    for (var j = 0; j < 4; j++) {
+      var v = out[j], oldV;
+      if (dir === 0) { oldV = g2048Grid[i][j]; g2048Grid[i][j] = v; }
+      else if (dir === 2) { oldV = g2048Grid[i][3 - j]; g2048Grid[i][3 - j] = v; }
+      else if (dir === 1) { oldV = g2048Grid[j][i]; g2048Grid[j][i] = v; }
+      else { oldV = g2048Grid[3 - j][i]; g2048Grid[3 - j][i] = v; }
+      if (oldV !== v) moved = true;
+    }
+  }
+  if (moved) { g2048Spawn(); g2048Render(); }
+}
+document.addEventListener('keydown', function(e) {
+  var panel = document.getElementById('p-games');
+  if (!panel || !panel.classList.contains('on')) return;
+  if (document.getElementById('game-2048').style.display === 'none') return;
+  var map = {ArrowLeft: 0, ArrowUp: 1, ArrowRight: 2, ArrowDown: 3};
+  if (map[e.key] !== undefined) { e.preventDefault(); g2048Move(map[e.key]); }
+});
+(function() {
+  var board = document.getElementById('g2048-board');
+  if (!board) return;
+  var sx = 0, sy = 0;
+  board.addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive: true});
+  board.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
+    if (Math.abs(dx) > Math.abs(dy)) g2048Move(dx > 0 ? 2 : 0);
+    else g2048Move(dy > 0 ? 3 : 1);
+  }, {passive: true});
+})();
+g2048New();
 
 // ── ENTER-KEY SHORTCUTS (fewer taps: submit from the keyboard directly) ──
 document.getElementById('task-input').addEventListener('keydown', function(e) {
