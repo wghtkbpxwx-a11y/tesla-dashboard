@@ -5125,8 +5125,9 @@ function monRenderGrid() {
 }
 
 // ── Turn logic (state changes; the render loop animates them) ──
-function monHitFx(onEnemy) {
+function monHitFx(onEnemy, dmg, note) {
   if (onEnemy) { monView.flashE = 1; monView.shakeE = 9; } else { monView.flashP = 1; monView.shakeP = 9; }
+  if (dmg != null) { monView.dmgPops = monView.dmgPops || []; monView.dmgPops.push({target: onEnemy ? 'E' : 'P', dmg: dmg, note: note || '', f: 0}); }
 }
 function monUseMove(k) {
   if (!monB || monB.over || monBusy) return;
@@ -5147,7 +5148,7 @@ function monUseMove(k) {
     note = eff > 1 ? ' Super effective!' : eff < 1 ? ' Not very effective…' : '';
   }
   monB.ehp = Math.max(0, monB.ehp - dmg);
-  setTimeout(function() { monHitFx(true); }, 240);
+  setTimeout(function() { monHitFx(true, dmg, note); }, 240);
   monLog(pm.n + ' used ' + pm.mv[k] + '! (' + dmg + ' dmg)' + note);
   setTimeout(function() {
     if (monB.ehp <= 0) {
@@ -5176,7 +5177,7 @@ function monEnemyTurn() {
   var note = '';
   if (strong) { var eff = monEff(en.t, pm.t); dmg = Math.round(dmg * 1.25 * eff); note = eff > 1 ? ' Super effective!' : eff < 1 ? ' Not very effective…' : ''; }
   monB.php = Math.max(0, monB.php - dmg);
-  setTimeout(function() { monHitFx(false); }, 240);
+  setTimeout(function() { monHitFx(false, dmg, note); }, 240);
   monLog('Wild ' + en.n + ' used ' + en.mv[k] + '! (' + dmg + ' dmg)' + note);
   setTimeout(function() {
     if (monB.php <= 0) { monB.over = 'lost'; monLog(pm.n + ' fainted! Head back to camp to recover.'); }
@@ -5342,16 +5343,32 @@ function monRoundRect(ctx, x, y, w, h, r) {
   ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
-function monHpBox(ctx, x, y, w, name, lv, shown, max) {
-  ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.strokeStyle = '#2b3a44'; ctx.lineWidth = 2;
-  monRoundRect(ctx, x, y, w, 40, 8); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#1d1d1f'; ctx.font = '700 13px Inter, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText(name, x + 10, y + 13);
-  ctx.textAlign = 'right'; ctx.fillText('Lv.' + lv, x + w - 10, y + 13);
-  var bx = x + 10, bw = w - 20, pct = Math.max(0, shown / max);
-  ctx.fillStyle = '#d0d5da'; monRoundRect(ctx, bx, y + 24, bw, 8, 4); ctx.fill();
-  ctx.fillStyle = pct > 0.5 ? '#34c759' : pct > 0.25 ? '#ffcc00' : '#ff3b30';
-  monRoundRect(ctx, bx, y + 24, bw * pct, 8, 4); ctx.fill();
+function monHpBox(ctx, x, y, w, name, lv, shown, max, type, isPlayer) {
+  var h = 46;
+  // card with soft drop shadow
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.32)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 3;
+  var bg = ctx.createLinearGradient(0, y, 0, y + h);
+  bg.addColorStop(0, 'rgba(255,255,255,.98)'); bg.addColorStop(1, 'rgba(236,240,245,.98)');
+  ctx.fillStyle = bg; monRoundRect(ctx, x, y, w, h, 10); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(43,58,68,.9)'; ctx.lineWidth = 2; monRoundRect(ctx, x, y, w, h, 10); ctx.stroke();
+  // name + level (top row)
+  ctx.fillStyle = '#1d1d1f'; ctx.font = '800 14px Inter, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText(name, x + 12, y + 14);
+  ctx.textAlign = 'right'; ctx.font = '700 12px Inter, sans-serif'; ctx.fillStyle = '#55606a';
+  ctx.fillText((isPlayer ? '★ Lv.' : 'Lv.') + lv, x + w - 12, y + 14);
+  // type badge (bottom-left)
+  var tc = monTypeCol(type), label = (type || '').toUpperCase();
+  ctx.font = '800 9px Inter, sans-serif'; var tw = ctx.measureText(label).width + 12;
+  ctx.fillStyle = tc; monRoundRect(ctx, x + 12, y + 24, tw, 14, 7); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, x + 12 + tw / 2, y + 31.5);
+  // hp bar (bottom, right of badge)
+  var bx = x + 12 + tw + 8, bw = w - (12 + tw + 8) - 12, by = y + 27, pct = Math.max(0, Math.min(1, shown / max));
+  ctx.fillStyle = '#cfd4da'; monRoundRect(ctx, bx, by, bw, 9, 4.5); ctx.fill();
+  ctx.fillStyle = pct > 0.5 ? '#30c05a' : pct > 0.22 ? '#ffc21f' : '#ff3b30';
+  monRoundRect(ctx, bx, by, Math.max(0, bw * pct), 9, 4.5); ctx.fill();
+  if (pct > 0.02) { ctx.fillStyle = 'rgba(255,255,255,.4)'; monRoundRect(ctx, bx + 1, by + 1.5, Math.max(0, bw * pct - 2), 3, 1.5); ctx.fill(); }
 }
 // ── Original creature sprites, drawn procedurally (no third-party art) ──
 var CRDEF = [
@@ -5574,6 +5591,48 @@ function monDrawCapsule(ctx, x, y, r, rot) {
   ctx.strokeStyle = '#b9902a'; ctx.stroke();
   ctx.restore();
 }
+// ── Battle-scene visual polish (all original, procedural) ──
+var MON_TYPE_COL = {
+  spark:'#f5c518', ember:'#f0863c', aqua:'#43a7e0', leaf:'#5fb84e',
+  frost:'#5db8d8', light:'#e0b93c', gale:'#7fa8dc', rock:'#a9824f'
+};
+function monTypeCol(t) { return MON_TYPE_COL[t] || '#c9b48c'; }
+function monBattleBg(ctx, W, H, cave) {
+  var sky = ctx.createLinearGradient(0, 0, 0, H);
+  if (cave) { sky.addColorStop(0, '#211934'); sky.addColorStop(0.6, '#2c2342'); sky.addColorStop(1, '#3b2c50'); }
+  else { sky.addColorStop(0, '#bfe6ff'); sky.addColorStop(0.55, '#e8f5cf'); sky.addColorStop(1, '#a9dd72'); }
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  if (cave) {
+    ctx.fillStyle = 'rgba(126,96,176,.30)';
+    for (var i = 0; i < 5; i++) { var bx = W * (0.12 + i * 0.19), bw = W * 0.085; ctx.beginPath(); ctx.moveTo(bx - bw, H * 0.64); ctx.lineTo(bx, H * (0.30 + (i % 2) * 0.06)); ctx.lineTo(bx + bw, H * 0.64); ctx.fill(); }
+    ctx.fillStyle = 'rgba(24,16,38,.7)';
+    for (var s = 0; s < 8; s++) { var sx = W * (0.04 + s * 0.13); ctx.beginPath(); ctx.moveTo(sx - 7, 0); ctx.lineTo(sx + 7, 0); ctx.lineTo(sx, 22 + (s % 3) * 16); ctx.fill(); }
+  } else {
+    var sun = ctx.createRadialGradient(W * 0.82, H * 0.15, 2, W * 0.82, H * 0.15, H * 0.34);
+    sun.addColorStop(0, 'rgba(255,250,222,.9)'); sun.addColorStop(1, 'rgba(255,250,222,0)');
+    ctx.fillStyle = sun; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(150,205,110,.5)'; ctx.beginPath(); ctx.moveTo(0, H * 0.5);
+    ctx.quadraticCurveTo(W * 0.25, H * 0.4, W * 0.5, H * 0.5); ctx.quadraticCurveTo(W * 0.75, H * 0.6, W, H * 0.47);
+    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
+  }
+  ctx.fillStyle = cave ? 'rgba(52,40,72,.92)' : 'rgba(120,190,90,.6)';
+  ctx.beginPath(); ctx.moveTo(0, H * 0.62); ctx.lineTo(W, H * 0.55); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
+}
+function monPlatform(ctx, x, y, rx, ry, cave) {
+  ctx.fillStyle = 'rgba(0,0,0,.16)';
+  ctx.beginPath(); ctx.ellipse(x, y + ry * 0.5, rx * 1.02, ry * 0.9, 0, 0, 7); ctx.fill();
+  var g = ctx.createRadialGradient(x, y - ry * 0.4, ry * 0.2, x, y, rx);
+  if (cave) { g.addColorStop(0, '#6a5688'); g.addColorStop(1, 'rgba(44,32,64,.25)'); }
+  else { g.addColorStop(0, '#98d86e'); g.addColorStop(1, 'rgba(96,158,72,.2)'); }
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = cave ? 'rgba(180,150,220,.45)' : 'rgba(255,255,255,.45)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+}
+function monContactShadow(ctx, x, groundY, r, lift) {
+  var a = Math.max(0.08, 0.24 - lift * 0.02);
+  ctx.fillStyle = 'rgba(0,0,0,' + a + ')';
+  ctx.beginPath(); ctx.ellipse(x, groundY, r * (1 - lift * 0.015), r * 0.34, 0, 0, 7); ctx.fill();
+}
 var monLoopOn = false;
 function monLoopStart() { if (monLoopOn) return; monLoopOn = true; requestAnimationFrame(monLoop); }
 function monLoop() {
@@ -5587,16 +5646,25 @@ function monLoop() {
   v.shakeE *= 0.85; v.shakeP *= 0.85; v.flashE *= 0.88; v.flashP *= 0.88;
   v.lungeE = Math.max(0, v.lungeE - 0.05); v.lungeP = Math.max(0, v.lungeP - 0.05);
   if (v.intro > 0) v.intro = Math.max(0, v.intro - 0.04);
-  // background
-  var sky = ctx.createLinearGradient(0, 0, 0, H);
-  sky.addColorStop(0, '#bfe3ff'); sky.addColorStop(0.62, '#e7f5cf'); sky.addColorStop(1, '#9fd66a');
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = 'rgba(120,190,90,.55)'; ctx.beginPath(); ctx.moveTo(0, H * 0.62); ctx.lineTo(W, H * 0.55); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
+  // background (area-aware: sunny Meadow vs. Crystal Cave)
+  var cave = monArea === 'cave';
+  monBattleBg(ctx, W, H, cave);
+  // ambient particles — pollen drifting up in the meadow, glinting motes in the cave
+  v.amb = v.amb || [];
+  while (v.amb.length < 20) v.amb.push({x: Math.random() * W, y: Math.random() * H, sp: 0.15 + Math.random() * 0.5, r: 0.8 + Math.random() * 1.8, ph: Math.random() * 7});
+  for (var ap = 0; ap < v.amb.length; ap++) {
+    var pt = v.amb[ap]; pt.y -= pt.sp; pt.x += Math.sin(v.bob + pt.ph) * 0.3;
+    if (pt.y < -4) { pt.y = H + 4; pt.x = Math.random() * W; }
+    var tw = 0.4 + 0.6 * Math.abs(Math.sin(v.bob * 1.4 + pt.ph));
+    ctx.globalAlpha = (cave ? 0.8 : 0.5) * tw;
+    ctx.fillStyle = cave ? '#c8a6ff' : '#fff6c8';
+    ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, 7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
   // platforms
   var eP = {x: W * 0.72, y: H * 0.46}, pP = {x: W * 0.27, y: H * 0.82};
-  ctx.fillStyle = 'rgba(90,150,70,.4)';
-  ctx.beginPath(); ctx.ellipse(eP.x, eP.y + H * 0.09, W * 0.17, H * 0.045, 0, 0, 7); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(pP.x, pP.y + H * 0.07, W * 0.20, H * 0.05, 0, 0, 7); ctx.fill();
+  monPlatform(ctx, eP.x, eP.y + H * 0.085, W * 0.18, H * 0.05, cave);
+  monPlatform(ctx, pP.x, pP.y + H * 0.06, W * 0.22, H * 0.055, cave);
   var cap = v.capsule;
   // enemy creature (slides in on intro; hidden while sucked into capsule)
   var eScale = 1;
@@ -5608,16 +5676,35 @@ function monLoop() {
   var eLunge = v.lungeE * -Math.sin(v.lungeE * Math.PI) * (W * 0.06);
   var eBob = Math.sin(v.bob) * 3;
   var eIntroDx = v.intro * W * 0.25;
-  if (eScale > 0.02) monCreature(ctx, eP.x + eLunge + eIntroDx, eP.y + eBob, H * 0.26, monB.ei, v.shakeE, v.flashE, eScale);
+  if (eScale > 0.02) {
+    monContactShadow(ctx, eP.x + eLunge + eIntroDx, eP.y + H * 0.085, H * 0.15 * eScale, 3 + eBob);
+    monCreature(ctx, eP.x + eLunge + eIntroDx, eP.y + eBob, H * 0.26, monB.ei, v.shakeE, v.flashE, eScale);
+  }
   // Bree's creature (back-ish view, lunges toward enemy)
   var pLunge = v.lungeP * Math.sin(v.lungeP * Math.PI) * (W * 0.06);
   var pBob = Math.sin(v.bob + 1) * 3;
+  monContactShadow(ctx, pP.x + pLunge, pP.y + H * 0.06, H * 0.18, 3 + pBob);
   monCreature(ctx, pP.x + pLunge, pP.y + pBob, H * 0.30, monB.pi, v.shakeP, v.flashP, 1);
   // Bree, standing at the near corner
   drawBree(ctx, W * 0.08, H * 0.9, H * 0.26, 'up', monTrainer());
   // HP boxes
-  monHpBox(ctx, W * 0.56, H * 0.06, W * 0.4, MONSTERS[monB.ei].n, monB.elv, v.ehpS, monB.emax);
-  monHpBox(ctx, W * 0.04, H * 0.6, W * 0.4, MONSTERS[monB.pi].n + ' ✦', monB.plv, v.phpS, monB.pmax);
+  monHpBox(ctx, W * 0.54, H * 0.05, W * 0.42, MONSTERS[monB.ei].n, monB.elv, v.ehpS, monB.emax, MONSTERS[monB.ei].t, false);
+  monHpBox(ctx, W * 0.04, H * 0.58, W * 0.42, MONSTERS[monB.pi].n, monB.plv, v.phpS, monB.pmax, MONSTERS[monB.pi].t, true);
+  // floating damage numbers
+  v.dmgPops = v.dmgPops || [];
+  for (var dp = v.dmgPops.length - 1; dp >= 0; dp--) {
+    var dn = v.dmgPops[dp]; dn.f++;
+    var base = dn.target === 'E' ? eP : pP;
+    var dy = base.y - H * 0.15 - dn.f * 0.9, al = Math.max(0, 1 - dn.f / 46);
+    var big = /Super/.test(dn.note);
+    ctx.globalAlpha = al; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '800 ' + (big ? 26 : 21) + 'px Inter, sans-serif';
+    ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.55)';
+    ctx.fillStyle = big ? '#ffd23f' : /Not very/.test(dn.note) ? '#cfd3da' : '#ffffff';
+    ctx.strokeText('-' + dn.dmg, base.x, dy); ctx.fillText('-' + dn.dmg, base.x, dy);
+    ctx.globalAlpha = 1;
+    if (dn.f > 48) v.dmgPops.splice(dp, 1);
+  }
   // capsule animation
   if (cap) {
     cap.f++;
