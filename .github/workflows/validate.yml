@@ -1,0 +1,28 @@
+name: Validate
+
+# Safety net: the whole dashboard is one inline <script>, so a single syntax
+# error or a corrupted DASHBOARD_CACHE would ship a blank screen to the car.
+# This runs the verification trio (JS parses · cache is valid JSON · Python
+# compiles) on every change and fails the check if anything is broken.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run pre-deploy checks
+        run: python3 .github/scripts/validate.py

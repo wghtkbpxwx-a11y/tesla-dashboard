@@ -24,10 +24,11 @@ the board — it improves load time, reliability, *and* developer velocity at on
 The whole app is one inline `<script>`. **A single JS error on init blanks the entire
 dashboard** — in the car, mid-drive. There is currently no automated guard.
 
-1. **CI smoke test on every push** **[S] ⭐⭐⭐**
-   Add a job that headless-loads the built page and fails if `window.onerror` fires or
-   `node --check` fails. This is exactly the harness pattern already used by hand during
-   this session — promote it to `.github/workflows`. Catches the class of bug that hurts most.
+1. **CI validation on every push** ✅ **shipped** — `.github/workflows/validate.yml` runs
+   `.github/scripts/validate.py` (JS parses · cache is valid JSON · Python compiles) and
+   fails the check on any breakage. *Next step to make it truly blocking:* turn on branch
+   protection for `main` requiring the "Validate" check (a one-click repo setting). A future
+   enhancement is a full headless-load check that also catches runtime/init errors.
 2. **Cache schema assertion in the hourly job** **[S] ⭐⭐**
    Before committing, assert the new cache has the expected top-level keys and non-empty
    `weather`/`forecast`; otherwise keep the previous block. Stops a bad API day from
