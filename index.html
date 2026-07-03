@@ -374,6 +374,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 .mon-thumb{display:block;margin:0 auto 2px}
 .mon-slot .mon-thumb{width:58px;height:58px}
 .mon-start-card .mon-thumb{width:96px;height:96px;margin-bottom:6px}
+.mon-start-card .trainer-thumb{width:96px;height:96px;margin:0 auto 6px;display:block}
 
 /* CONVERTER */
 .conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
@@ -926,9 +927,18 @@ input[type="color"]:hover{border-color:var(--line2)}
       <div style="text-align:center;margin-top:16px"><button class="btn btn-gh" onclick="shootNew()">New round</button></div>
     </div>
     <div id="game-mon" style="display:none">
+      <div id="mon-trainer-view">
+        <div style="text-align:center;margin-bottom:6px;font-size:20px;font-weight:800;color:var(--t1)">Welcome to Critterra!</div>
+        <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:18px">Choose your trainer.</div>
+        <div class="mon-start-grid">
+          <div class="mon-start-card"><canvas class="trainer-thumb" width="96" height="96" data-idx="0"></canvas><div class="sn">Bree</div><div class="st">Trailblazer</div><button class="btn btn-pri" onclick="monChooseTrainer(0)">Choose Bree</button></div>
+          <div class="mon-start-card"><canvas class="trainer-thumb" width="96" height="96" data-idx="1"></canvas><div class="sn">Nova</div><div class="st">Explorer</div><button class="btn btn-pri" onclick="monChooseTrainer(1)">Choose Nova</button></div>
+          <div class="mon-start-card"><canvas class="trainer-thumb" width="96" height="96" data-idx="2"></canvas><div class="sn">Kai</div><div class="st">Ranger</div><button class="btn btn-pri" onclick="monChooseTrainer(2)">Choose Kai</button></div>
+        </div>
+      </div>
       <div id="mon-start-view">
         <div style="text-align:center;margin-bottom:6px;font-size:20px;font-weight:800;color:var(--t1)">Welcome to Critterra!</div>
-        <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:18px">Trainer <strong style="color:var(--t1)">Bree</strong> — choose your first Critter to begin your journey.</div>
+        <div id="mon-start-sub" style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:18px">Choose your first Critter to begin.</div>
         <div class="mon-start-grid">
           <div class="mon-start-card"><canvas class="mon-thumb" width="96" height="96" data-idx="1"></canvas><div class="sn">Embercub</div><div class="st">Ember type</div><button class="btn btn-pri" onclick="monChooseStarter(1)">Choose Embercub</button></div>
           <div class="mon-start-card"><canvas class="mon-thumb" width="96" height="96" data-idx="2"></canvas><div class="sn">Aquafin</div><div class="st">Aqua type</div><button class="btn btn-pri" onclick="monChooseStarter(2)">Choose Aquafin</button></div>
@@ -936,7 +946,7 @@ input[type="color"]:hover{border-color:var(--line2)}
         </div>
       </div>
       <div id="mon-map-view">
-        <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:12px">Guide <strong style="color:var(--t1)">Bree</strong> through the tall grass to find wild Critters · arrows or D-pad</div>
+        <div id="mon-map-sub" style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:12px">Guide Bree through the tall grass to find wild Critters · arrows or D-pad</div>
         <canvas id="mon-map-canvas"></canvas>
         <div class="mon-dpad">
           <span></span><button onclick="monMove(0,-1)">▲</button><span></span>
@@ -945,6 +955,9 @@ input[type="color"]:hover{border-color:var(--line2)}
         </div>
         <div style="text-align:center;margin-top:14px">
           <span id="mon-count" style="font-size:13px;color:var(--t2);font-weight:600"></span>
+        </div>
+        <div style="text-align:center;margin-top:10px">
+          <button class="btn btn-gh" onclick="monResetGame()" style="font-size:12px;padding:10px 18px">Reset game</button>
         </div>
         <div class="mon-grid" id="mon-grid" style="max-width:720px;margin:16px auto 0"></div>
       </div>
@@ -4755,25 +4768,38 @@ var monInBattle = false;
 function monTile(x, y) { return (MON_MAP[y] || '')[x] || 'T'; }
 
 // Pixel-art sprite of Bree (female trainer). cx,cy = centre; s = height.
-function drawBree(ctx, cx, cy, s, dir) {
+var TRAINERS = [
+  {name:'Bree', hair:'#6b4423', coat:'#e0567a'},
+  {name:'Nova', hair:'#2a2a35', coat:'#2aa9a0'},
+  {name:'Kai',  hair:'#caa24a', coat:'#3a6ea5'}
+];
+function monTrainer() {
+  try { var i = parseInt(localStorage.getItem('mon_trainer_v1'), 10); if (i >= 0 && i < TRAINERS.length) return TRAINERS[i]; } catch(e) {}
+  return TRAINERS[0];
+}
+function monTrainerChosen() {
+  try { return localStorage.getItem('mon_trainer_v1') !== null; } catch(e) { return false; }
+}
+function drawBree(ctx, cx, cy, s, dir, pal) {
+  pal = pal || TRAINERS[0];
   var u = s / 10, back = dir === 'up';
   function px(dx, dy, w, h, c) { ctx.fillStyle = c; ctx.fillRect(cx + dx * u, cy + dy * u, w * u, h * u); }
   // legs
   px(-1.7, 2.2, 1.4, 2.6, '#33405a'); px(0.3, 2.2, 1.4, 2.6, '#33405a');
   // jacket / body
-  px(-2.3, -0.4, 4.6, 3.0, '#e0567a');
+  px(-2.3, -0.4, 4.6, 3.0, pal.coat);
   // arms
   px(-3.0, -0.2, 0.9, 2.2, '#f0c49a'); px(2.1, -0.2, 0.9, 2.2, '#f0c49a');
   // head
   px(-1.8, -4.2, 3.6, 3.8, '#f6cda2');
   // hair cap
-  px(-2.2, -4.8, 4.4, 1.8, '#6b4423');
-  px(-2.2, -4.0, 0.7, 2.4, '#6b4423'); px(1.5, -4.0, 0.7, 2.4, '#6b4423');
+  px(-2.2, -4.8, 4.4, 1.8, pal.hair);
+  px(-2.2, -4.0, 0.7, 2.4, pal.hair); px(1.5, -4.0, 0.7, 2.4, pal.hair);
   // ponytail to the side (personality)
-  if (dir === 'left') px(1.9, -3.8, 1.0, 3.0, '#6b4423');
-  else if (dir === 'right') px(-2.9, -3.8, 1.0, 3.0, '#6b4423');
-  else px(-0.6, -5.4, 1.2, 1.1, '#6b4423');
-  if (back) { px(-1.8, -4.2, 3.6, 2.2, '#6b4423'); return; } // back of head
+  if (dir === 'left') px(1.9, -3.8, 1.0, 3.0, pal.hair);
+  else if (dir === 'right') px(-2.9, -3.8, 1.0, 3.0, pal.hair);
+  else px(-0.6, -5.4, 1.2, 1.1, pal.hair);
+  if (back) { px(-1.8, -4.2, 3.6, 2.2, pal.hair); return; } // back of head
   // face
   var ex = dir === 'left' ? -0.6 : dir === 'right' ? 0.6 : 0;
   px(-1.1 + ex, -2.9, 0.7, 0.7, '#2a2a2a'); px(0.4 + ex, -2.9, 0.7, 0.7, '#2a2a2a');
@@ -4801,7 +4827,7 @@ function monDrawMap() {
       }
     } else if (t === '~' && (x + y) % 2 === 0) { ctx.font = (TILE - 18) + 'px serif'; ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillText('〜', x * TILE + TILE/2, y * TILE + TILE/2); }
   }
-  drawBree(ctx, monP.x * TILE + TILE/2, monP.y * TILE + TILE/2 + 3, TILE - 4, monP.dir);
+  drawBree(ctx, monP.x * TILE + TILE/2, monP.y * TILE + TILE/2 + 3, TILE - 4, monP.dir, monTrainer());
 }
 function monMove(dx, dy) {
   if (monInBattle) return;
@@ -4937,9 +4963,11 @@ function monEnemyTurn() {
 function monCatch() {
   if (!monB || monB.over || monBusy) return;
   monBusy = true; monRenderControls();
-  var p = 0.15 + 0.75 * (1 - monB.ehp / monB.emax);
+  var hpFactor = 1 - monB.ehp / monB.emax;
+  var lvFactor = Math.max(0, (12 - monB.elv) / 12);
+  var p = Math.min(0.95, 0.1 + 0.5 * hpFactor + 0.32 * lvFactor);
   monView.capsule = {f:0, phase:'throw', success:Math.random() < p, done:false};
-  monLog('Bree hurls a Capsule…');
+  monLog(monTrainer().name + ' hurls a Capsule…');
 }
 function monAfterCatch(success) {
   var en = MONSTERS[monB.ei];
@@ -4957,7 +4985,7 @@ function monAfterCatch(success) {
 }
 function monRun() {
   if (!monB || monB.over || monBusy) return;
-  monB.over = 'fled'; monLog('Bree got away safely.'); monRenderControls();
+  monB.over = 'fled'; monLog(monTrainer().name + ' got away safely.'); monRenderControls();
 }
 function monBackToMap() {
   monB = null; monView = null; monInBattle = false; monBusy = false;
@@ -4972,19 +5000,46 @@ function monStarted() {
   return Object.keys(monParty).length > 0;
 }
 function monShowEntry() {
+  var tr = document.getElementById('mon-trainer-view');
   var start = document.getElementById('mon-start-view');
   var map = document.getElementById('mon-map-view');
   var bat = document.getElementById('mon-battle-view');
-  if (bat) bat.style.display = 'none';
+  function show(el, on) { if (el) el.style.display = on ? '' : 'none'; }
+  show(bat, false);
+  var nm = monTrainer().name;
+  var sub = document.getElementById('mon-start-sub'); if (sub) sub.innerHTML = 'Trainer <strong style="color:var(--t1)">' + nm + '</strong> — choose your first Critter to begin.';
+  var msub = document.getElementById('mon-map-sub'); if (msub) msub.innerHTML = 'Guide <strong style="color:var(--t1)">' + nm + '</strong> through the tall grass to find wild Critters · arrows or D-pad';
   if (monStarted()) {
-    if (start) start.style.display = 'none';
-    if (map) map.style.display = '';
+    show(tr, false); show(start, false); show(map, true);
     monInBattle = false; monDrawMap();
+  } else if (monTrainerChosen()) {
+    show(tr, false); show(start, true); show(map, false);
   } else {
-    if (start) start.style.display = '';
-    if (map) map.style.display = 'none';
+    show(tr, true); show(start, false); show(map, false);
   }
+  monPaintTrainers();
   monRenderGrid();
+}
+function monPaintTrainers() {
+  var list = document.querySelectorAll('#game-mon .trainer-thumb');
+  for (var i = 0; i < list.length; i++) {
+    var cv = list[i];
+    if (cv.getAttribute('data-painted')) continue;
+    var idx = parseInt(cv.getAttribute('data-idx'), 10);
+    var ctx = cv.getContext('2d'); ctx.clearRect(0, 0, cv.width, cv.height);
+    drawBree(ctx, cv.width / 2, cv.height * 0.62, cv.height * 0.74, 'down', TRAINERS[idx]);
+    cv.setAttribute('data-painted', '1');
+  }
+}
+function monChooseTrainer(idx) {
+  try { localStorage.setItem('mon_trainer_v1', String(idx)); } catch(e) {}
+  monShowEntry();
+}
+function monResetGame() {
+  if (!confirm('Reset Critterra? This clears your trainer, party and collection.')) return;
+  ['monsters_v1', 'mon_party_v1', 'mon_started_v1', 'mon_trainer_v1'].forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
+  monParty = {}; monCaught = {}; monB = null; monView = null; monInBattle = false; monBusy = false;
+  monShowEntry();
 }
 function monChooseStarter(idx) {
   monParty = {}; monParty[idx] = 5;
@@ -5258,8 +5313,12 @@ function monDrawCapsule(ctx, x, y, r, rot) {
   ctx.beginPath(); ctx.ellipse(pP.x, pP.y + H * 0.07, W * 0.20, H * 0.05, 0, 0, 7); ctx.fill();
   var cap = v.capsule;
   // enemy creature (slides in on intro; hidden while sucked into capsule)
-  var eScale = (cap && (cap.phase === 'suck' || cap.phase === 'wobble' || cap.phase === 'caught')) ? Math.max(0, 1 - cap.f / 16) : 1;
-  if (cap && cap.phase === 'break') eScale = Math.min(1, cap.f / 14);
+  var eScale = 1;
+  if (cap) {
+    if (cap.phase === 'suck') eScale = Math.max(0, 1 - cap.f / 16);
+    else if (cap.phase === 'break') eScale = Math.min(1, cap.f / 14);
+    else if (cap.phase !== 'throw') eScale = 0; // drop / wobble / caught / rest: it is inside the Capsule
+  }
   var eLunge = v.lungeE * -Math.sin(v.lungeE * Math.PI) * (W * 0.06);
   var eBob = Math.sin(v.bob) * 3;
   var eIntroDx = v.intro * W * 0.25;
@@ -5269,10 +5328,10 @@ function monDrawCapsule(ctx, x, y, r, rot) {
   var pBob = Math.sin(v.bob + 1) * 3;
   monCreature(ctx, pP.x + pLunge, pP.y + pBob, H * 0.30, monB.pi, v.shakeP, v.flashP, 1);
   // Bree, standing at the near corner
-  drawBree(ctx, W * 0.08, H * 0.9, H * 0.26, 'up');
+  drawBree(ctx, W * 0.08, H * 0.9, H * 0.26, 'up', monTrainer());
   // HP boxes
-  monHpBox(ctx, W * 0.04, H * 0.06, W * 0.4, MONSTERS[monB.ei].n, monB.elv, v.ehpS, monB.emax);
-  monHpBox(ctx, W * 0.56, H * 0.6, W * 0.4, MONSTERS[monB.pi].n + ' ✦', monB.plv, v.phpS, monB.pmax);
+  monHpBox(ctx, W * 0.56, H * 0.06, W * 0.4, MONSTERS[monB.ei].n, monB.elv, v.ehpS, monB.emax);
+  monHpBox(ctx, W * 0.04, H * 0.6, W * 0.4, MONSTERS[monB.pi].n + ' ✦', monB.plv, v.phpS, monB.pmax);
   // capsule animation
   if (cap) {
     cap.f++;
@@ -5299,8 +5358,11 @@ function monDrawCapsule(ctx, x, y, r, rot) {
         else { cap.phase = 'break'; cap.f = 0; }
       }
     } else if (cap.phase === 'caught') {
-      monDrawCapsule(ctx, eP.x, eP.y + H * 0.09, 15, 0);
-      if (cap.f > 34 && !cap.done) { cap.done = true; v.capsule = null; monAfterCatch(true); }
+      var settle = Math.sin(cap.f * 0.45) * Math.max(0, 0.3 - cap.f / 80);
+      monDrawCapsule(ctx, eP.x, eP.y + H * 0.09, 15, settle);
+      if (cap.f > 30 && !cap.done) { cap.done = true; monAfterCatch(true); cap.phase = 'rest'; cap.f = 0; }
+    } else if (cap.phase === 'rest') {
+      monDrawCapsule(ctx, eP.x, eP.y + H * 0.09, 15, Math.sin(cap.f * 0.14) * 0.05); // caught — resting Capsule with a gentle bob
     } else if (cap.phase === 'break') {
       if (cap.f > 16 && !cap.done) { cap.done = true; v.capsule = null; monAfterCatch(false); }
     }

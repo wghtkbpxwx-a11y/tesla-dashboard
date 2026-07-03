@@ -124,8 +124,12 @@ driven by a requestAnimationFrame loop reading `monB` (state) + `monView`
 flash + shake, and a full capsule throw -> suck -> drop -> wobble ->
 catch/break animation with a star burst. Type chart in `MON_EFF` / `monEff()`
 (move 2 = the Critter element w/ 1.25x STAB + effectiveness; move 1 neutral).
-`monBusy` gates input during animations. Same localStorage keys
-(`monsters_v1`, `mon_party_v1`).
+`monBusy` gates input during animations (dims `#mon-controls`). Trainer
+select (3 trainers, `mon_trainer_v1`, `drawBree(pal)`) precedes starter
+select; `monResetGame()` clears all keys. Battle HP: trainer LEFT / wild
+RIGHT. Caught Critter stays in the Capsule (`rest` phase, idle bob).
+Catch odds rise as wild HP AND level drop. Keys: `monsters_v1`,
+`mon_party_v1`, `mon_started_v1`, `mon_trainer_v1`.
 
 v2 shipped: tile overworld (15×10, `MON_MAP` strings: `.` walk, `,` tall
 grass w/ 22% encounters, `T`/`~` block, `=` path), D-pad + arrow movement,
