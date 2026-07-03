@@ -366,6 +366,11 @@ input[type="color"]:hover{border-color:var(--line2)}
 .mon-slot{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;font-size:12px;color:var(--t3)}
 .mon-slot .me{font-size:34px;display:block;margin-bottom:4px}
 .mon-slot.caught{border-color:var(--green);color:var(--t1)}
+.mon-start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:640px;margin:0 auto}
+.mon-start-card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:22px 16px;text-align:center;box-shadow:var(--shadow-sm)}
+.mon-start-card .se{font-size:56px;line-height:1.1}
+.mon-start-card .sn{font-size:18px;font-weight:700;margin:8px 0 2px}
+.mon-start-card .st{font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:14px}
 
 /* CONVERTER */
 .conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
@@ -387,7 +392,7 @@ input[type="color"]:hover{border-color:var(--line2)}
   #dock{gap:4px;padding:8px 12px;bottom:16px}.dock-btn{padding:10px 16px;font-size:14px}
   #stocks-dropdown{width:calc(100vw - 24px);left:12px;margin-left:0}
   .cam-page{grid-template-columns:1fr}
-  .mon-wrap{grid-template-columns:1fr}
+  .mon-start-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -918,6 +923,15 @@ input[type="color"]:hover{border-color:var(--line2)}
       <div style="text-align:center;margin-top:16px"><button class="btn btn-gh" onclick="shootNew()">New round</button></div>
     </div>
     <div id="game-mon" style="display:none">
+      <div id="mon-start-view">
+        <div style="text-align:center;margin-bottom:6px;font-size:20px;font-weight:800;color:var(--t1)">Welcome to Critterra!</div>
+        <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:18px">Trainer <strong style="color:var(--t1)">Bree</strong> — choose your first Critter to begin your journey.</div>
+        <div class="mon-start-grid">
+          <div class="mon-start-card"><div class="se">🔥</div><div class="sn">Embercub</div><div class="st">Ember type</div><button class="btn btn-pri" onclick="monChooseStarter(1)">Choose Embercub</button></div>
+          <div class="mon-start-card"><div class="se">💧</div><div class="sn">Aquafin</div><div class="st">Aqua type</div><button class="btn btn-pri" onclick="monChooseStarter(2)">Choose Aquafin</button></div>
+          <div class="mon-start-card"><div class="se">🌿</div><div class="sn">Thornpup</div><div class="st">Leaf type</div><button class="btn btn-pri" onclick="monChooseStarter(3)">Choose Thornpup</button></div>
+        </div>
+      </div>
       <div id="mon-map-view">
         <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:12px">Guide <strong style="color:var(--t1)">Bree</strong> through the tall grass to find wild Critters · arrows or D-pad</div>
         <canvas id="mon-map-canvas"></canvas>
@@ -4410,6 +4424,7 @@ function showGame(g) {
     document.getElementById('game-' + k).style.display = k === g ? '' : 'none';
     document.getElementById('gtab-' + k).classList.toggle('on', k === g);
   });
+  if (g === 'mon' && !monInBattle) monShowEntry();
 }
 
 // Wordle — daily word by default, "New word" picks randomly
@@ -4835,7 +4850,7 @@ function monRenderGrid() {
     return '<div class="mon-slot' + (got ? ' caught' : '') + '"><span class="me">' + (got ? mm.e : '❓') + '</span>' + (got ? mm.n + lv : '???') + '</div>';
   }).join('');
   var n = Object.keys(monCaught).length, c = document.getElementById('mon-count');
-  if (c) c.textContent = 'Caught ' + n + ' / ' + MONSTERS.length + ' · Bree uses ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()];
+  if (c) c.textContent = monStarted() ? ('Caught ' + n + ' / ' + MONSTERS.length + ' · Bree uses ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()]) : 'Choose your first Critter to begin!';
 }
 
 // ── Turn logic (state changes; the render loop animates them) ──
@@ -4918,6 +4933,34 @@ function monBackToMap() {
   document.getElementById('mon-battle-view').style.display = 'none';
   document.getElementById('mon-map-view').style.display = '';
   monDrawMap(); monRenderGrid();
+}
+
+// ── Starter selection (shown before the map on first play) ──
+function monStarted() {
+  try { if (localStorage.getItem('mon_started_v1') === '1') return true; } catch(e) {}
+  return Object.keys(monParty).length > 0;
+}
+function monShowEntry() {
+  var start = document.getElementById('mon-start-view');
+  var map = document.getElementById('mon-map-view');
+  var bat = document.getElementById('mon-battle-view');
+  if (bat) bat.style.display = 'none';
+  if (monStarted()) {
+    if (start) start.style.display = 'none';
+    if (map) map.style.display = '';
+    monInBattle = false; monDrawMap();
+  } else {
+    if (start) start.style.display = '';
+    if (map) map.style.display = 'none';
+  }
+  monRenderGrid();
+}
+function monChooseStarter(idx) {
+  monParty = {}; monParty[idx] = 5;
+  monCaught = {}; monCaught[idx] = 1;
+  saveLS('mon_party_v1', monParty); saveLS('monsters_v1', monCaught);
+  try { localStorage.setItem('mon_started_v1', '1'); } catch(e) {}
+  monShowEntry();
 }
 
 // ── Battle render loop (animated scene) ──
@@ -5041,8 +5084,7 @@ function monDrawCapsule(ctx, x, y, r, rot) {
 })();
 window.addEventListener('resize', function() { if (monInBattle) monBattleSize(); });
 
-monDrawMap();
-monRenderGrid();
+monShowEntry();
 
 // ── COPY HELPERS (paste into Apple Notes / Reminders — no public Apple API exists) ──
 function copyText(txt, btnLabel) {
