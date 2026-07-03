@@ -371,6 +371,9 @@ input[type="color"]:hover{border-color:var(--line2)}
 .mon-start-card .se{font-size:56px;line-height:1.1}
 .mon-start-card .sn{font-size:18px;font-weight:700;margin:8px 0 2px}
 .mon-start-card .st{font-size:12px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:14px}
+.mon-thumb{display:block;margin:0 auto 2px}
+.mon-slot .mon-thumb{width:58px;height:58px}
+.mon-start-card .mon-thumb{width:96px;height:96px;margin-bottom:6px}
 
 /* CONVERTER */
 .conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
@@ -927,9 +930,9 @@ input[type="color"]:hover{border-color:var(--line2)}
         <div style="text-align:center;margin-bottom:6px;font-size:20px;font-weight:800;color:var(--t1)">Welcome to Critterra!</div>
         <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:18px">Trainer <strong style="color:var(--t1)">Bree</strong> — choose your first Critter to begin your journey.</div>
         <div class="mon-start-grid">
-          <div class="mon-start-card"><div class="se">🔥</div><div class="sn">Embercub</div><div class="st">Ember type</div><button class="btn btn-pri" onclick="monChooseStarter(1)">Choose Embercub</button></div>
-          <div class="mon-start-card"><div class="se">💧</div><div class="sn">Aquafin</div><div class="st">Aqua type</div><button class="btn btn-pri" onclick="monChooseStarter(2)">Choose Aquafin</button></div>
-          <div class="mon-start-card"><div class="se">🌿</div><div class="sn">Thornpup</div><div class="st">Leaf type</div><button class="btn btn-pri" onclick="monChooseStarter(3)">Choose Thornpup</button></div>
+          <div class="mon-start-card"><canvas class="mon-thumb" width="96" height="96" data-idx="1"></canvas><div class="sn">Embercub</div><div class="st">Ember type</div><button class="btn btn-pri" onclick="monChooseStarter(1)">Choose Embercub</button></div>
+          <div class="mon-start-card"><canvas class="mon-thumb" width="96" height="96" data-idx="2"></canvas><div class="sn">Aquafin</div><div class="st">Aqua type</div><button class="btn btn-pri" onclick="monChooseStarter(2)">Choose Aquafin</button></div>
+          <div class="mon-start-card"><canvas class="mon-thumb" width="96" height="96" data-idx="3"></canvas><div class="sn">Thornpup</div><div class="st">Leaf type</div><button class="btn btn-pri" onclick="monChooseStarter(3)">Choose Thornpup</button></div>
         </div>
       </div>
       <div id="mon-map-view">
@@ -4847,8 +4850,10 @@ function monRenderGrid() {
   var grid = document.getElementById('mon-grid');
   if (grid) grid.innerHTML = MONSTERS.map(function(mm, ii) {
     var got = monCaught[ii], lv = monParty[ii] ? ' Lv.' + monParty[ii] : '';
-    return '<div class="mon-slot' + (got ? ' caught' : '') + '"><span class="me">' + (got ? mm.e : '❓') + '</span>' + (got ? mm.n + lv : '???') + '</div>';
+    var icon = got ? '<canvas class="mon-thumb" width="58" height="58" data-idx="' + ii + '"></canvas>' : '<span class="me">❓</span>';
+    return '<div class="mon-slot' + (got ? ' caught' : '') + '">' + icon + '<div>' + (got ? mm.n + lv : '???') + '</div></div>';
   }).join('');
+  monPaintThumbs();
   var n = Object.keys(monCaught).length, c = document.getElementById('mon-count');
   if (c) c.textContent = monStarted() ? ('Caught ' + n + ' / ' + MONSTERS.length + ' · Bree uses ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()]) : 'Choose your first Critter to begin!';
 }
@@ -4981,15 +4986,215 @@ function monHpBox(ctx, x, y, w, name, lv, shown, max) {
   ctx.fillStyle = pct > 0.5 ? '#34c759' : pct > 0.25 ? '#ffcc00' : '#ff3b30';
   monRoundRect(ctx, bx, y + 24, bw * pct, 8, 4); ctx.fill();
 }
-function monCreature(ctx, cx, cy, size, emoji, shake, flash, scale) {
+// ── Original creature sprites, drawn procedurally (no third-party art) ──
+var CRDEF = [
+  {body:'#f4c530', belly:'#fff2b8', accent:'#e39a1e', ears:'tri', eartip:'#e39a1e', tail:'bolt', cheeks:'#ff8a8a', sc:0.86, shape:'round', mood:'happy'},
+  {body:'#f0863c', belly:'#ffd9a8', accent:'#d95f2a', ears:'round', tail:'flame', sc:1.0, shape:'round', mood:'cute'},
+  {body:'#43a7e0', belly:'#d5f0ff', accent:'#2b74b0', fin:true, tail:'fish', sc:0.9, shape:'tall', mood:'cute'},
+  {body:'#5fb84e', belly:'#dff5cf', accent:'#3c8a34', ears:'tri', eartip:'#3c8a34', horn:'leaf', sc:0.95, shape:'round', mood:'happy'},
+  {body:'#8a6bd0', belly:'#d9ccf5', accent:'#6a4bb0', wings:'bat', ears:'tri', eartip:'#6a4bb0', sc:0.92, shape:'round', mood:'mischief'},
+  {body:'#cfe9f7', belly:'#ffffff', accent:'#7fbfe0', ears:'tri', eartip:'#7fbfe0', tail:'puff', sc:0.98, shape:'tall', mood:'cool'},
+  {body:'#c9a6e8', belly:'#efe0fb', accent:'#f0d060', wings:'moth', antennae:true, sc:1.02, shape:'round', mood:'sleepy'},
+  {body:'#e0563c', belly:'#ffd0c0', accent:'#b03a26', claws:true, sc:1.04, shape:'wide', mood:'fierce'},
+  {body:'#eaf3f7', belly:'#ffffff', accent:'#7fc7c0', wings:'feather', beak:true, sc:0.94, shape:'tall', mood:'cute'},
+  {body:'#9c7b57', belly:'#d8c3a3', accent:'#6f5638', ears:'round', sc:1.22, shape:'wide', mood:'fierce'},
+  {body:'#3fb9ad', belly:'#cfeee9', accent:'#2a7f78', wings:'bat', horn:'spike', tail:'drake', sc:1.16, shape:'tall', mood:'fierce'},
+  {body:'#a06bd8', belly:'#e8d6f7', accent:'#6f3fb0', ears:'tuft', tail:'cat', sc:1.06, shape:'tall', mood:'cool'}
+];
+function crEgg(ctx, R, top, bot, shape) {
+  var rx = 0.72, ry = 0.82;
+  if (shape === 'tall') { rx = 0.62; ry = 0.9; } else if (shape === 'wide') { rx = 0.88; ry = 0.66; }
+  ctx.fillStyle = top; ctx.beginPath(); ctx.ellipse(0, 0, R * rx, R * ry, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = bot; ctx.beginPath(); ctx.ellipse(0, R * ry * 0.26, R * rx * 0.64, R * ry * 0.62, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = Math.max(1, R * 0.04);
+  ctx.beginPath(); ctx.ellipse(0, 0, R * rx, R * ry, 0, 0, 7); ctx.stroke();
+}
+function crFeet(ctx, R, c) {
+  ctx.fillStyle = c;
+  ctx.beginPath(); ctx.ellipse(-R * 0.32, R * 0.78, R * 0.2, R * 0.12, 0, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(R * 0.32, R * 0.78, R * 0.2, R * 0.12, 0, 0, 7); ctx.fill();
+}
+function crEyes(ctx, R, spread, y, mood, bodyCol) {
+  for (var s = -1; s <= 1; s += 2) {
+    var ex = s * R * spread;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(ex, y, R * 0.15, R * 0.19, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(ex, y + R * 0.02, R * 0.09, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex - R * 0.03, y - R * 0.04, R * 0.03, 0, 7); ctx.fill();
+    if (mood === 'cool' || mood === 'sleepy') {
+      ctx.fillStyle = bodyCol; ctx.fillRect(ex - R * 0.17, y - R * 0.22, R * 0.34, R * (mood === 'sleepy' ? 0.25 : 0.2));
+    }
+    if (mood === 'fierce' || mood === 'mischief') {
+      ctx.strokeStyle = '#3a2a2a'; ctx.lineWidth = R * 0.06; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(ex - s * R * 0.17, y - R * 0.27); ctx.lineTo(ex + s * R * 0.12, y - R * 0.1); ctx.stroke();
+    }
+  }
+}
+function crMouth(ctx, R, y, mood) {
+  ctx.strokeStyle = '#5a3a2a'; ctx.lineWidth = Math.max(1, R * 0.04); ctx.lineCap = 'round';
+  if (mood === 'happy') {
+    ctx.fillStyle = '#7a3b2a'; ctx.beginPath(); ctx.arc(0, y - R * 0.02, R * 0.15, 0.08 * Math.PI, 0.92 * Math.PI); ctx.fill();
+    ctx.fillStyle = '#ff7a8a'; ctx.beginPath(); ctx.arc(0, y + R * 0.09, R * 0.07, 0, Math.PI); ctx.fill();
+  } else if (mood === 'cool') {
+    ctx.beginPath(); ctx.moveTo(-R * 0.1, y + R * 0.02); ctx.lineTo(R * 0.1, y + R * 0.02); ctx.stroke();
+  } else if (mood === 'sleepy') {
+    ctx.beginPath(); ctx.arc(0, y, R * 0.08, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+  } else if (mood === 'fierce' || mood === 'mischief') {
+    ctx.beginPath(); ctx.arc(0, y + R * 0.16, R * 0.13, 1.15 * Math.PI, 1.85 * Math.PI); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.beginPath();
+    ctx.moveTo(-R * 0.08, y + R * 0.03); ctx.lineTo(-R * 0.02, y + R * 0.03); ctx.lineTo(-R * 0.05, y + R * 0.13); ctx.closePath(); ctx.fill();
+  } else {
+    ctx.beginPath(); ctx.arc(0, y, R * 0.12, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+  }
+}
+function crCheeks(ctx, R, c) {
+  ctx.fillStyle = c; ctx.globalAlpha = 0.8;
+  for (var s = -1; s <= 1; s += 2) { ctx.beginPath(); ctx.arc(s * R * 0.44, R * 0.1, R * 0.1, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1;
+}
+function crEarsTri(ctx, R, col, tip, tall) {
+  var h = tall ? 1.25 : 1.05;
+  for (var s = -1; s <= 1; s += 2) {
+    ctx.fillStyle = col; ctx.beginPath();
+    ctx.moveTo(s * R * 0.4, -R * 0.6); ctx.lineTo(s * R * 0.24, -R * h); ctx.lineTo(s * R * 0.62, -R * 0.72); ctx.closePath(); ctx.fill();
+    if (tip) { ctx.fillStyle = tip; ctx.beginPath(); ctx.moveTo(s * R * 0.29, -R * (h - 0.12)); ctx.lineTo(s * R * 0.24, -R * h); ctx.lineTo(s * R * 0.44, -R * (h - 0.18)); ctx.closePath(); ctx.fill(); }
+  }
+}
+function crEarsRound(ctx, R, col) {
+  for (var s = -1; s <= 1; s += 2) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(s * R * 0.5, -R * 0.64, R * 0.22, 0, 7); ctx.fill(); }
+}
+function crWingsBat(ctx, R, col) {
+  for (var s = -1; s <= 1; s += 2) {
+    ctx.fillStyle = col; ctx.beginPath();
+    ctx.moveTo(s * R * 0.45, -R * 0.2);
+    ctx.quadraticCurveTo(s * R * 1.35, -R * 0.55, s * R * 1.15, R * 0.35);
+    ctx.lineTo(s * R * 0.9, R * 0.08); ctx.lineTo(s * R * 0.92, R * 0.4);
+    ctx.lineTo(s * R * 0.68, R * 0.12); ctx.lineTo(s * R * 0.7, R * 0.45);
+    ctx.lineTo(s * R * 0.45, R * 0.15); ctx.closePath(); ctx.fill();
+  }
+}
+function crWingsFeather(ctx, R, col) {
+  for (var s = -1; s <= 1; s += 2) { ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(s * R * 0.85, -R * 0.05, R * 0.5, R * 0.26, s * 0.5, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = R * 0.03; ctx.stroke(); }
+}
+function crWingsMoth(ctx, R, col, acc) {
+  for (var s = -1; s <= 1; s += 2) {
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.ellipse(s * R * 0.72, -R * 0.12, R * 0.55, R * 0.42, 0, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(s * R * 0.6, R * 0.42, R * 0.4, R * 0.3, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(s * R * 0.82, -R * 0.12, R * 0.13, 0, 7); ctx.fill();
+  }
+}
+function crTailBolt(ctx, R, col) {
+  ctx.fillStyle = col; ctx.beginPath();
+  ctx.moveTo(R * 0.58, R * 0.15); ctx.lineTo(R * 1.02, -R * 0.15); ctx.lineTo(R * 0.85, R * 0.06);
+  ctx.lineTo(R * 1.18, R * 0.02); ctx.lineTo(R * 0.8, R * 0.5); ctx.lineTo(R * 0.92, R * 0.18);
+  ctx.lineTo(R * 0.6, R * 0.32); ctx.closePath(); ctx.fill();
+}
+function crTailFlame(ctx, R) {
+  var g = ctx.createLinearGradient(R * 0.55, R * 0.2, R * 0.95, -R * 0.6);
+  g.addColorStop(0, '#ffcf40'); g.addColorStop(1, '#f0592a');
+  ctx.fillStyle = g; ctx.beginPath();
+  ctx.moveTo(R * 0.5, R * 0.25); ctx.quadraticCurveTo(R * 1.15, -R * 0.05, R * 0.86, -R * 0.62);
+  ctx.quadraticCurveTo(R * 0.98, -R * 0.05, R * 0.5, -R * 0.02); ctx.closePath(); ctx.fill();
+}
+function crTailPuff(ctx, R, col, tip) {
+  ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(R * 0.82, R * 0.05, R * 0.42, R * 0.22, -0.5, 0, 7); ctx.fill();
+  ctx.fillStyle = tip; ctx.beginPath(); ctx.arc(R * 1.12, -R * 0.16, R * 0.15, 0, 7); ctx.fill();
+}
+function crTailDrake(ctx, R, col) {
+  ctx.fillStyle = col; ctx.beginPath();
+  ctx.moveTo(R * 0.5, R * 0.3); ctx.quadraticCurveTo(R * 1.25, R * 0.1, R * 1.0, -R * 0.45);
+  ctx.quadraticCurveTo(R * 0.92, R * 0.1, R * 0.5, R * 0.15); ctx.closePath(); ctx.fill();
+}
+function crTailCat(ctx, R, col) {
+  ctx.strokeStyle = col; ctx.lineWidth = R * 0.14; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(R * 0.6, R * 0.35); ctx.quadraticCurveTo(R * 1.25, R * 0.0, R * 1.0, -R * 0.5); ctx.stroke();
+}
+function crTailFish(ctx, R, col) {
+  ctx.fillStyle = col; ctx.beginPath();
+  ctx.moveTo(R * 0.55, 0); ctx.lineTo(R * 1.0, -R * 0.28); ctx.lineTo(R * 1.0, R * 0.28); ctx.closePath(); ctx.fill();
+}
+function crHorn(ctx, R, col) {
+  ctx.fillStyle = col; ctx.beginPath();
+  ctx.moveTo(-R * 0.12, -R * 0.74); ctx.lineTo(0, -R * 1.16); ctx.lineTo(R * 0.12, -R * 0.74); ctx.closePath(); ctx.fill();
+}
+function crLeaf(ctx, R) {
+  ctx.strokeStyle = '#2f7d2f'; ctx.lineWidth = R * 0.04;
+  ctx.beginPath(); ctx.moveTo(0, -R * 0.66); ctx.lineTo(0, -R * 1.2); ctx.stroke();
+  ctx.fillStyle = '#4fae3e'; ctx.beginPath(); ctx.ellipse(0, -R * 0.98, R * 0.13, R * 0.3, 0, 0, 7); ctx.fill();
+}
+function crBeak(ctx, R) {
+  ctx.fillStyle = '#f0a83c'; ctx.beginPath();
+  ctx.moveTo(-R * 0.12, R * 0.06); ctx.lineTo(R * 0.34, R * 0.16); ctx.lineTo(-R * 0.12, R * 0.28); ctx.closePath(); ctx.fill();
+}
+function crFin(ctx, R, col) {
+  ctx.fillStyle = col; ctx.beginPath();
+  ctx.moveTo(0, -R * 0.66); ctx.lineTo(-R * 0.16, -R * 1.12); ctx.lineTo(R * 0.22, -R * 0.72); ctx.closePath(); ctx.fill();
+}
+function crClaws(ctx, R, col) {
+  for (var s = -1; s <= 1; s += 2) {
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(s * R * 0.88, R * 0.22, R * 0.24, R * 0.17, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff5f0'; ctx.beginPath();
+    ctx.moveTo(s * R * 1.05, R * 0.12); ctx.lineTo(s * R * 0.72, R * 0.22); ctx.lineTo(s * R * 1.05, R * 0.3); ctx.closePath(); ctx.fill();
+  }
+}
+function crAntennae(ctx, R) {
+  ctx.strokeStyle = '#5a3a6a'; ctx.lineWidth = R * 0.03; ctx.fillStyle = '#5a3a6a';
+  for (var s = -1; s <= 1; s += 2) {
+    ctx.beginPath(); ctx.moveTo(s * R * 0.1, -R * 0.68); ctx.quadraticCurveTo(s * R * 0.4, -R * 1.2, s * R * 0.56, -R * 1.02); ctx.stroke();
+    ctx.beginPath(); ctx.arc(s * R * 0.56, -R * 1.02, R * 0.06, 0, 7); ctx.fill();
+  }
+}
+function drawCritter(ctx, cx, cy, size, idx) {
+  var d = CRDEF[idx] || CRDEF[0], R = size * 0.5 * (d.sc || 1);
+  ctx.save(); ctx.translate(cx, cy);
+  // behind body
+  if (d.wings === 'moth') crWingsMoth(ctx, R, d.body, d.accent);
+  if (d.wings === 'bat') crWingsBat(ctx, R, d.accent);
+  if (d.wings === 'feather') crWingsFeather(ctx, R, d.body);
+  if (d.tail === 'bolt') crTailBolt(ctx, R, d.body);
+  if (d.tail === 'flame') crTailFlame(ctx, R);
+  if (d.tail === 'puff') crTailPuff(ctx, R, d.body, d.accent);
+  if (d.tail === 'drake') crTailDrake(ctx, R, d.body);
+  if (d.tail === 'cat') crTailCat(ctx, R, d.body);
+  if (d.tail === 'fish') crTailFish(ctx, R, d.accent);
+  // body + feet
+  crEgg(ctx, R, d.body, d.belly, d.shape);
+  crFeet(ctx, R, d.accent);
+  if (d.claws) crClaws(ctx, R, d.body);
+  // head features
+  if (d.ears === 'tri') crEarsTri(ctx, R, d.body, d.eartip);
+  else if (d.ears === 'round') crEarsRound(ctx, R, d.body);
+  else if (d.ears === 'tuft') crEarsTri(ctx, R, d.body, '#3a3a3a', true);
+  if (d.horn === 'spike') crHorn(ctx, R, d.accent);
+  else if (d.horn === 'leaf') crLeaf(ctx, R);
+  if (d.fin) crFin(ctx, R, d.accent);
+  if (d.antennae) crAntennae(ctx, R);
+  // face
+  crEyes(ctx, R, 0.34, -R * 0.12, d.mood, d.body);
+  if (d.beak) crBeak(ctx, R); else crMouth(ctx, R, R * 0.18, d.mood);
+  if (d.cheeks) crCheeks(ctx, R, d.cheeks);
+  ctx.restore();
+}
+function monPaintThumbs() {
+  var list = document.querySelectorAll('#game-mon .mon-thumb');
+  for (var i = 0; i < list.length; i++) {
+    var cv = list[i];
+    if (cv.getAttribute('data-painted')) continue;
+    var idx = parseInt(cv.getAttribute('data-idx'), 10);
+    var ctx = cv.getContext('2d'); ctx.clearRect(0, 0, cv.width, cv.height);
+    drawCritter(ctx, cv.width / 2, cv.height / 2 + cv.height * 0.06, cv.height * 0.8, idx);
+    cv.setAttribute('data-painted', '1');
+  }
+}
+function monCreature(ctx, cx, cy, size, idx, shake, flash, scale) {
   var sx = cx + (Math.random() * 2 - 1) * shake;
-  // shadow
   ctx.fillStyle = 'rgba(0,0,0,.18)';
-  ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.48, size * 0.42, size * 0.13, 0, 0, 7); ctx.fill();
-  ctx.font = Math.round(size * scale) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(emoji, sx, cy);
-  if (flash > 0) { ctx.save(); ctx.globalAlpha = flash * 0.6; ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(sx, cy, size * 0.45, 0, 7); ctx.fill(); ctx.restore(); }
+  ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.5, size * 0.42, size * 0.13, 0, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(sx, cy); ctx.scale(scale, scale);
+  drawCritter(ctx, 0, 0, size, idx);
+  ctx.restore();
+  if (flash > 0) { ctx.save(); ctx.globalAlpha = flash * 0.55; ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(sx, cy, size * 0.5, 0, 7); ctx.fill(); ctx.restore(); }
 }
 function monDrawCapsule(ctx, x, y, r, rot) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
@@ -5032,11 +5237,11 @@ function monDrawCapsule(ctx, x, y, r, rot) {
   var eLunge = v.lungeE * -Math.sin(v.lungeE * Math.PI) * (W * 0.06);
   var eBob = Math.sin(v.bob) * 3;
   var eIntroDx = v.intro * W * 0.25;
-  if (eScale > 0.02) monCreature(ctx, eP.x + eLunge + eIntroDx, eP.y + eBob, H * 0.24, MONSTERS[monB.ei].e, v.shakeE, v.flashE, eScale);
+  if (eScale > 0.02) monCreature(ctx, eP.x + eLunge + eIntroDx, eP.y + eBob, H * 0.26, monB.ei, v.shakeE, v.flashE, eScale);
   // Bree's creature (back-ish view, lunges toward enemy)
   var pLunge = v.lungeP * Math.sin(v.lungeP * Math.PI) * (W * 0.06);
   var pBob = Math.sin(v.bob + 1) * 3;
-  monCreature(ctx, pP.x + pLunge, pP.y + pBob, H * 0.27, MONSTERS[monB.pi].e, v.shakeP, v.flashP, 1);
+  monCreature(ctx, pP.x + pLunge, pP.y + pBob, H * 0.30, monB.pi, v.shakeP, v.flashP, 1);
   // Bree, standing at the near corner
   drawBree(ctx, W * 0.08, H * 0.9, H * 0.26, 'up');
   // HP boxes
