@@ -344,7 +344,7 @@ def fetch_cameras() -> list[dict]:
         print("  ✗ Cameras: all attempts failed, will reuse cached list")
         return []
     out = []
-    always = {275, 292, 251}  # Port Mann + Pennask Summit — keep even when flagged stale
+    always = {275, 292, 251, 685, 686, 2, 161, 58, 41, 497}  # Port Mann + full Coquihalla/Connector — keep even when flagged stale
     for cam_id, label in PREFERRED_CAMERAS:
         cam = by_id.get(cam_id)
         if not cam:
