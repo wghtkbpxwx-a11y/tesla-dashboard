@@ -354,31 +354,18 @@ input[type="color"]:hover{border-color:var(--line2)}
 /* SHOOTOUT */
 #shoot-canvas{display:block;margin:0 auto;border-radius:16px;border:1px solid var(--line);background:#e8eef5;touch-action:manipulation;max-width:100%;cursor:crosshair}
 
-/* TRAIL MONSTERS */
-.mon-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:960px;margin:0 auto}
-.mon-card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:24px;text-align:center;box-shadow:var(--shadow-sm)}
-.mon-emoji{font-size:90px;line-height:1.15}
-.mon-name{font-size:22px;font-weight:700;margin-top:4px}
-.mon-hpbar{height:16px;background:var(--surface2);border-radius:8px;overflow:hidden;margin:12px auto;max-width:280px;border:1px solid var(--line)}
-.mon-hpfill{height:100%;background:var(--green);transition:width .3s ease,background .3s ease}
-.mon-log{min-height:44px;font-size:15px;color:var(--t2);margin:10px 0;line-height:1.4}
-.mon-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+/* CRITTERRA — original creature-collector game (Bree) */
+#mon-map-canvas{display:block;margin:0 auto;border-radius:14px;border:1px solid var(--line);max-width:100%;image-rendering:pixelated;touch-action:manipulation;box-shadow:var(--shadow-sm)}
+.mon-dpad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;justify-content:center;margin:16px auto 0}
+.mon-dpad button{border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--t1);font-size:24px;cursor:pointer}
+.mon-dpad button:active{background:var(--accent);color:#fff}
+#mon-battle-canvas{display:block;margin:0 auto;border-radius:14px;border:1px solid var(--line);max-width:100%;box-shadow:var(--shadow-sm)}
+.mon-log{min-height:44px;font-size:15px;color:var(--t1);margin:12px auto;line-height:1.4;max-width:720px;text-align:center;font-weight:600}
+.mon-moves{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;max-width:720px;margin:0 auto}
 .mon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .mon-slot{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;font-size:12px;color:var(--t3)}
 .mon-slot .me{font-size:34px;display:block;margin-bottom:4px}
 .mon-slot.caught{border-color:var(--green);color:var(--t1)}
-
-/* TRAIL MONSTERS — overworld + battle */
-#mon-map-canvas{display:block;margin:0 auto;border-radius:14px;border:1px solid var(--line);max-width:100%;image-rendering:pixelated;touch-action:manipulation}
-.mon-dpad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;justify-content:center;margin:16px auto 0}
-.mon-dpad button{border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--t1);font-size:24px;cursor:pointer}
-.mon-dpad button:active{background:var(--accent);color:#fff}
-.mon-battle-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:720px;margin:0 auto 16px}
-.mon-fighter{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:18px;text-align:center}
-.mon-fighter .mf-emoji{font-size:64px;line-height:1.1}
-.mon-fighter .mf-name{font-size:17px;font-weight:700;margin-top:4px}
-.mon-fighter .mf-lv{font-size:12px;color:var(--t3);font-weight:600}
-.mon-moves{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;max-width:720px;margin:0 auto}
 
 /* CONVERTER */
 .conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
@@ -912,7 +899,7 @@ input[type="color"]:hover{border-color:var(--line2)}
       <button class="ntab on" id="gtab-wordle" onclick="showGame('wordle')">Wordle</button>
       <button class="ntab" id="gtab-2048" onclick="showGame('2048')">2048</button>
       <button class="ntab" id="gtab-shoot" onclick="showGame('shoot')">Canucks Shootout</button>
-      <button class="ntab" id="gtab-mon" onclick="showGame('mon')">Trail Monsters</button>
+      <button class="ntab" id="gtab-mon" onclick="showGame('mon')">Critterra</button>
     </div>
     <div id="game-wordle">
       <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:14px" id="wordle-msg">Guess the 5-letter word — new word daily</div>
@@ -932,7 +919,7 @@ input[type="color"]:hover{border-color:var(--line2)}
     </div>
     <div id="game-mon" style="display:none">
       <div id="mon-map-view">
-        <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:12px">Walk through tall grass to find wild monsters · arrows or D-pad</div>
+        <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:12px">Guide <strong style="color:var(--t1)">Bree</strong> through the tall grass to find wild Critters · arrows or D-pad</div>
         <canvas id="mon-map-canvas"></canvas>
         <div class="mon-dpad">
           <span></span><button onclick="monMove(0,-1)">▲</button><span></span>
@@ -945,26 +932,11 @@ input[type="color"]:hover{border-color:var(--line2)}
         <div class="mon-grid" id="mon-grid" style="max-width:720px;margin:16px auto 0"></div>
       </div>
       <div id="mon-battle-view" style="display:none">
-        <div class="mon-battle-grid">
-          <div class="mon-fighter">
-            <div class="mf-lv">WILD</div>
-            <div class="mf-emoji" id="mon-emoji">❓</div>
-            <div class="mf-name" id="mon-name">—</div>
-            <div class="mf-lv" id="mon-elv"></div>
-            <div class="mon-hpbar"><div class="mon-hpfill" id="mon-hpfill" style="width:100%"></div></div>
-          </div>
-          <div class="mon-fighter">
-            <div class="mf-lv">YOUR MONSTER</div>
-            <div class="mf-emoji" id="mon-pemoji">❓</div>
-            <div class="mf-name" id="mon-pname">—</div>
-            <div class="mf-lv" id="mon-plv"></div>
-            <div class="mon-hpbar"><div class="mon-hpfill" id="mon-phpfill" style="width:100%"></div></div>
-          </div>
-        </div>
-        <div class="mon-log" id="mon-log" style="text-align:center;max-width:720px;margin:0 auto"></div>
+        <canvas id="mon-battle-canvas"></canvas>
+        <div class="mon-log" id="mon-log"></div>
         <div class="mon-moves" id="mon-moves"></div>
         <div class="mon-moves" style="margin-top:10px">
-          <button class="btn btn-pri" id="mon-orb" onclick="monCatch()" style="background:var(--green)">Throw Orb</button>
+          <button class="btn btn-pri" id="mon-orb" onclick="monCatch()" style="background:var(--green)">◉ Throw Capsule</button>
           <button class="btn btn-gh" onclick="monRun()">Run</button>
           <button class="btn btn-gh" id="mon-back" onclick="monBackToMap()" style="display:none">Back to map</button>
         </div>
@@ -4688,29 +4660,42 @@ function shootNew() {
   requestAnimationFrame(step);
 })();
 
-// ── TRAIL MONSTERS — original creature RPG (Pokémon-inspired mechanics,
-//    all creatures/names/art original). Overworld map with tall-grass
-//    encounters, turn-based battles, catching, levels, persistent party. ──
+// ── CRITTERRA — an original creature-collector RPG (genre-inspired mechanics,
+//    all creatures / names / art / capture "Capsules" are original; trainer
+//    Bree). Overworld map with tall-grass encounters, an animated turn-based
+//    battle scene, type effectiveness, catching, levels and a persistent party.
 var MONSTERS = [
-  {n: 'Sparkit',   e: '⚡', hp: 38, r: 5, mv: ['Tackle', 'Spark Jolt']},
-  {n: 'Embercub',  e: '🔥', hp: 42, r: 5, mv: ['Scratch', 'Flame Puff']},
-  {n: 'Aquafin',   e: '💧', hp: 40, r: 5, mv: ['Tackle', 'Bubble Jet']},
-  {n: 'Thornpup',  e: '🌿', hp: 40, r: 5, mv: ['Bite', 'Vine Snap']},
-  {n: 'Boltbat',   e: '🦇', hp: 46, r: 4, mv: ['Wing Slap', 'Static Screech']},
-  {n: 'Frostfox',  e: '🦊', hp: 48, r: 4, mv: ['Pounce', 'Ice Nip']},
-  {n: 'Glowmoth',  e: '🦋', hp: 44, r: 4, mv: ['Dust Flap', 'Lumen Beam']},
-  {n: 'Tidecrab',  e: '🦀', hp: 52, r: 3, mv: ['Pinch', 'Tide Slam']},
-  {n: 'Zephyrbird',e: '🕊️', hp: 50, r: 3, mv: ['Peck', 'Gale Dive']},
-  {n: 'Rumblebear',e: '🐻', hp: 60, r: 2, mv: ['Maul', 'Quake Stomp']},
-  {n: 'Stormdrake',e: '🐉', hp: 70, r: 1, mv: ['Talon Rake', 'Thunder Roar']},
-  {n: 'Auroralynx',e: '🐆', hp: 66, r: 1, mv: ['Shadow Claw', 'Aurora Burst']}
+  {n:'Sparkit',   e:'⚡', hp:38, r:5, t:'spark', mv:['Tackle','Spark Jolt']},
+  {n:'Embercub',  e:'🔥', hp:42, r:5, t:'ember', mv:['Scratch','Flame Puff']},
+  {n:'Aquafin',   e:'💧', hp:40, r:5, t:'aqua',  mv:['Tackle','Bubble Jet']},
+  {n:'Thornpup',  e:'🌿', hp:40, r:5, t:'leaf',  mv:['Bite','Vine Snap']},
+  {n:'Boltbat',   e:'🦇', hp:46, r:4, t:'spark', mv:['Wing Slap','Static Screech']},
+  {n:'Frostfox',  e:'🦊', hp:48, r:4, t:'frost', mv:['Pounce','Ice Nip']},
+  {n:'Glowmoth',  e:'🦋', hp:44, r:4, t:'light', mv:['Dust Flap','Lumen Beam']},
+  {n:'Tidecrab',  e:'🦀', hp:52, r:3, t:'aqua',  mv:['Pinch','Tide Slam']},
+  {n:'Zephyrbird',e:'🕊️', hp:50, r:3, t:'gale',  mv:['Peck','Gale Dive']},
+  {n:'Rumblebear',e:'🐻', hp:60, r:2, t:'rock',  mv:['Maul','Quake Stomp']},
+  {n:'Stormdrake',e:'🐉', hp:70, r:1, t:'gale',  mv:['Talon Rake','Thunder Roar']},
+  {n:'Auroralynx',e:'🐆', hp:66, r:1, t:'light', mv:['Shadow Claw','Aurora Burst']}
 ];
+var MON_EFF = {
+  ember:{leaf:2, frost:2, aqua:0.5, rock:0.5},
+  aqua:{ember:2, rock:2, leaf:0.5, spark:0.5},
+  leaf:{aqua:2, rock:2, ember:0.5, gale:0.5},
+  spark:{aqua:2, gale:2, rock:0.5},
+  frost:{leaf:2, gale:2, ember:0.5},
+  gale:{leaf:2, rock:0.5, spark:0.5, frost:0.5},
+  rock:{ember:2, spark:2, gale:2, frost:2, aqua:0.5, leaf:0.5},
+  light:{gale:2, rock:0.5}
+};
+function monEff(atk, def) { return (MON_EFF[atk] && MON_EFF[atk][def]) || 1; }
+
 var monCaught = {}, monParty = {};
 try { monCaught = JSON.parse(localStorage.getItem('monsters_v1') || '{}'); } catch(e) { monCaught = {}; }
 try { monParty = JSON.parse(localStorage.getItem('mon_party_v1') || '{}'); } catch(e) { monParty = {}; }
 
-// ── Overworld ──
-// . walkable  , tall grass (encounters)  T tree  ~ water  = path
+// ── Overworld map ──
+// . grass  , tall grass (encounters)  T tree  ~ water  = path
 var MON_MAP = [
   'TTTTTTTTTTTTTTT',
   'T,,,..~~~..,,,T',
@@ -4724,33 +4709,64 @@ var MON_MAP = [
   'TTTTTTTTTTTTTTT'
 ];
 var TILE = 34, MW = MON_MAP[0].length, MH = MON_MAP.length;
-var monP = {x: 7, y: 6};
+var monP = {x:7, y:6, dir:'down'};
 var monInBattle = false;
 function monTile(x, y) { return (MON_MAP[y] || '')[x] || 'T'; }
+
+// Pixel-art sprite of Bree (female trainer). cx,cy = centre; s = height.
+function drawBree(ctx, cx, cy, s, dir) {
+  var u = s / 10, back = dir === 'up';
+  function px(dx, dy, w, h, c) { ctx.fillStyle = c; ctx.fillRect(cx + dx * u, cy + dy * u, w * u, h * u); }
+  // legs
+  px(-1.7, 2.2, 1.4, 2.6, '#33405a'); px(0.3, 2.2, 1.4, 2.6, '#33405a');
+  // jacket / body
+  px(-2.3, -0.4, 4.6, 3.0, '#e0567a');
+  // arms
+  px(-3.0, -0.2, 0.9, 2.2, '#f0c49a'); px(2.1, -0.2, 0.9, 2.2, '#f0c49a');
+  // head
+  px(-1.8, -4.2, 3.6, 3.8, '#f6cda2');
+  // hair cap
+  px(-2.2, -4.8, 4.4, 1.8, '#6b4423');
+  px(-2.2, -4.0, 0.7, 2.4, '#6b4423'); px(1.5, -4.0, 0.7, 2.4, '#6b4423');
+  // ponytail to the side (personality)
+  if (dir === 'left') px(1.9, -3.8, 1.0, 3.0, '#6b4423');
+  else if (dir === 'right') px(-2.9, -3.8, 1.0, 3.0, '#6b4423');
+  else px(-0.6, -5.4, 1.2, 1.1, '#6b4423');
+  if (back) { px(-1.8, -4.2, 3.6, 2.2, '#6b4423'); return; } // back of head
+  // face
+  var ex = dir === 'left' ? -0.6 : dir === 'right' ? 0.6 : 0;
+  px(-1.1 + ex, -2.9, 0.7, 0.7, '#2a2a2a'); px(0.4 + ex, -2.9, 0.7, 0.7, '#2a2a2a');
+  px(-0.7 + ex, -1.7, 1.4, 0.5, '#c46a6a'); // smile
+}
+
 function monDrawMap() {
   var cv = document.getElementById('mon-map-canvas');
   if (!cv) return;
   cv.width = MW * TILE; cv.height = MH * TILE;
   cv.style.width = Math.min(560, window.innerWidth - 40) + 'px';
   var ctx = cv.getContext('2d');
-  var colors = {'.': '#7ec850', ',': '#4ea339', 'T': '#2f6b2f', '~': '#3f8fd2', '=': '#d8c58c'};
+  var colors = {'.':'#7ec850', ',':'#5bb043', 'T':'#2f6b2f', '~':'#3f8fd2', '=':'#d8c58c'};
   for (var y = 0; y < MH; y++) for (var x = 0; x < MW; x++) {
     var t = monTile(x, y);
     ctx.fillStyle = colors[t] || '#7ec850';
     ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
-    ctx.font = (TILE - 8) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (t === 'T') ctx.fillText('🌲', x * TILE + TILE / 2, y * TILE + TILE / 2 + 2);
-    if (t === ',') { ctx.fillStyle = 'rgba(0,60,0,.35)'; ctx.font = (TILE - 16) + 'px serif'; ctx.fillText('𝑤𝑤', x * TILE + TILE / 2, y * TILE + TILE / 2 + 3); }
-    if (t === '~' && (x + y) % 2 === 0) { ctx.font = (TILE - 18) + 'px serif'; ctx.fillText('〜', x * TILE + TILE / 2, y * TILE + TILE / 2); }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (t === 'T') { ctx.font = (TILE - 8) + 'px serif'; ctx.fillText('🌲', x * TILE + TILE/2, y * TILE + TILE/2 + 2); }
+    else if (t === ',') { // tall-grass blades
+      ctx.strokeStyle = '#2f7d2f'; ctx.lineWidth = 2;
+      for (var b = 0; b < 3; b++) {
+        var bx = x * TILE + 8 + b * 9;
+        ctx.beginPath(); ctx.moveTo(bx, y * TILE + TILE - 5); ctx.lineTo(bx - 2, y * TILE + TILE - 15); ctx.stroke();
+      }
+    } else if (t === '~' && (x + y) % 2 === 0) { ctx.font = (TILE - 18) + 'px serif'; ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillText('〜', x * TILE + TILE/2, y * TILE + TILE/2); }
   }
-  ctx.font = (TILE - 6) + 'px serif';
-  ctx.fillText('🧢', monP.x * TILE + TILE / 2, monP.y * TILE + TILE / 2 + 1);
+  drawBree(ctx, monP.x * TILE + TILE/2, monP.y * TILE + TILE/2 + 3, TILE - 4, monP.dir);
 }
 function monMove(dx, dy) {
   if (monInBattle) return;
-  var nx = monP.x + dx, ny = monP.y + dy;
-  var t = monTile(nx, ny);
-  if (t === 'T' || t === '~') return;
+  monP.dir = dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down';
+  var nx = monP.x + dx, ny = monP.y + dy, t = monTile(nx, ny);
+  if (t === 'T' || t === '~') { monDrawMap(); return; }
   monP.x = nx; monP.y = ny;
   monDrawMap();
   if (t === ',' && Math.random() < 0.22) monEncounter();
@@ -4759,139 +4775,272 @@ document.addEventListener('keydown', function(e) {
   var panel = document.getElementById('p-games');
   if (!panel || !panel.classList.contains('on')) return;
   if (document.getElementById('game-mon').style.display === 'none') return;
-  var map = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]};
-  if (map[e.key] && !monInBattle) { e.preventDefault(); monMove(map[e.key][0], map[e.key][1]); }
+  var m = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1]};
+  if (m[e.key] && !monInBattle) { e.preventDefault(); monMove(m[e.key][0], m[e.key][1]); }
 });
 
 // ── Party helpers ──
 function monActive() {
   var best = null;
-  Object.keys(monParty).forEach(function(i) {
-    if (!best || monParty[i] > monParty[best]) best = i;
-  });
-  if (best === null) { monParty[0] = 3; saveLS('mon_party_v1', monParty); best = 0; }  // starter Sparkit Lv.3
+  Object.keys(monParty).forEach(function(i) { if (best === null || monParty[i] > monParty[best]) best = i; });
+  if (best === null) { monParty[0] = 3; saveLS('mon_party_v1', monParty); best = 0; } // starter Sparkit Lv.3
   return parseInt(best, 10);
 }
 function monMaxHp(idx, lvl) { return MONSTERS[idx].hp + 4 * (lvl - 1); }
 
-// ── Battle ──
-var monB = null;
+// ── Battle state ──
+var monB = null, monBusy = false;
+var monView = null;
+function monBattleSize() {
+  var cv = document.getElementById('mon-battle-canvas');
+  if (!cv) return;
+  var w = Math.min(720, ((document.getElementById('game-mon') || {}).clientWidth || window.innerWidth) - 16);
+  w = Math.max(300, w); cv.width = w; cv.height = Math.round(w * 0.56);
+}
 function monEncounter() {
   var pool = [];
   MONSTERS.forEach(function(m, i) { for (var k = 0; k < m.r; k++) pool.push(i); });
   var i = pool[Math.floor(Math.random() * pool.length)];
-  var pi = monActive();
-  var plv = monParty[pi];
+  var pi = monActive(), plv = monParty[pi];
   var elv = Math.max(1, plv + Math.floor(Math.random() * 3) - 1);
-  monB = {ei: i, elv: elv, ehp: monMaxHp(i, elv), emax: monMaxHp(i, elv),
-          pi: pi, plv: plv, php: monMaxHp(pi, plv), pmax: monMaxHp(pi, plv), over: false};
-  monInBattle = true;
+  monB = {ei:i, elv:elv, ehp:monMaxHp(i, elv), emax:monMaxHp(i, elv),
+          pi:pi, plv:plv, php:monMaxHp(pi, plv), pmax:monMaxHp(pi, plv), over:false};
+  monView = {ehpS:monB.emax, phpS:monB.pmax, shakeE:0, shakeP:0, flashE:0, flashP:0,
+             lungeE:0, lungeP:0, bob:0, scaleE:1, capsule:null, stars:[], intro:1};
+  monBusy = true; monInBattle = true;
   document.getElementById('mon-map-view').style.display = 'none';
   document.getElementById('mon-battle-view').style.display = '';
+  monBattleSize();
   monLog('A wild ' + MONSTERS[i].n + ' (Lv.' + elv + ') appeared!');
-  monRenderBattle();
+  monRenderControls();
+  setTimeout(function() { monBusy = false; monRenderControls(); }, 700);
 }
 function monLog(t) { var el = document.getElementById('mon-log'); if (el) el.textContent = t; }
-function monBar(id, hp, max) {
-  var el = document.getElementById(id);
-  var pct = Math.max(0, hp / max * 100);
-  el.style.width = pct + '%';
-  el.style.background = pct > 50 ? 'var(--green)' : pct > 25 ? '#ffd60a' : 'var(--red)';
-}
-function monRenderBattle() {
+function monRenderControls() {
   if (!monB) return;
-  var e = MONSTERS[monB.ei], pm = MONSTERS[monB.pi];
-  document.getElementById('mon-emoji').textContent = monB.over === 'fled' ? '💨' : e.e;
-  document.getElementById('mon-name').textContent = e.n + (monCaught[monB.ei] ? ' ✓' : '');
-  document.getElementById('mon-elv').textContent = 'Lv.' + monB.elv;
-  document.getElementById('mon-pemoji').textContent = pm.e;
-  document.getElementById('mon-pname').textContent = pm.n;
-  document.getElementById('mon-plv').textContent = 'Lv.' + monB.plv;
-  monBar('mon-hpfill', monB.ehp, monB.emax);
-  monBar('mon-phpfill', monB.php, monB.pmax);
+  var pm = MONSTERS[monB.pi];
   var mv = document.getElementById('mon-moves');
+  var lock = monBusy || monB.over;
   mv.innerHTML = pm.mv.map(function(name, k) {
-    return '<button class="btn btn-pri" onclick="monUseMove(' + k + ')"' + (monB.over ? ' disabled' : '') + '>' + name + '</button>';
+    return '<button class="btn btn-pri" onclick="monUseMove(' + k + ')"' + (lock ? ' disabled' : '') + '>' + name + '</button>';
   }).join('');
-  document.getElementById('mon-orb').disabled = !!monB.over;
+  document.getElementById('mon-orb').disabled = lock;
   document.getElementById('mon-back').style.display = monB.over ? '' : 'none';
   monRenderGrid();
 }
 function monRenderGrid() {
   var grid = document.getElementById('mon-grid');
   if (grid) grid.innerHTML = MONSTERS.map(function(mm, ii) {
-    var got = monCaught[ii];
-    var lv = monParty[ii] ? ' Lv.' + monParty[ii] : '';
+    var got = monCaught[ii], lv = monParty[ii] ? ' Lv.' + monParty[ii] : '';
     return '<div class="mon-slot' + (got ? ' caught' : '') + '"><span class="me">' + (got ? mm.e : '❓') + '</span>' + (got ? mm.n + lv : '???') + '</div>';
   }).join('');
-  var n = Object.keys(monCaught).length;
-  var c = document.getElementById('mon-count');
-  if (c) c.textContent = 'Caught ' + n + ' / ' + MONSTERS.length + ' · Active: ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()];
+  var n = Object.keys(monCaught).length, c = document.getElementById('mon-count');
+  if (c) c.textContent = 'Caught ' + n + ' / ' + MONSTERS.length + ' · Bree uses ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()];
 }
-function monEnemyTurn() {
-  if (!monB || monB.over) return;
-  var e = MONSTERS[monB.ei];
-  var dmg = 8 + Math.floor(Math.random() * 10) + monB.elv * 2;
-  monB.php -= dmg;
-  var mvName = e.mv[Math.floor(Math.random() * e.mv.length)];
-  if (monB.php <= 0) {
-    monB.php = 0; monB.over = 'lost';
-    monLog(e.n + ' used ' + mvName + ' for ' + dmg + '! Your ' + MONSTERS[monB.pi].n + ' fainted… it will recover back at camp.');
-  } else {
-    monLog(e.n + ' used ' + mvName + ' for ' + dmg + '!');
-  }
-  monRenderBattle();
+
+// ── Turn logic (state changes; the render loop animates them) ──
+function monHitFx(onEnemy) {
+  if (onEnemy) { monView.flashE = 1; monView.shakeE = 9; } else { monView.flashP = 1; monView.shakeP = 9; }
 }
 function monUseMove(k) {
-  if (!monB || monB.over) return;
-  var pm = MONSTERS[monB.pi];
+  if (!monB || monB.over || monBusy) return;
+  monBusy = true; monRenderControls();
+  var pm = MONSTERS[monB.pi], en = MONSTERS[monB.ei];
+  monView.lungeP = 1;
   var strong = k === 1;
-  if (strong && Math.random() < 0.15) {
-    monLog(pm.n + "'s " + pm.mv[k] + ' missed!');
-    setTimeout(monEnemyTurn, 650);
+  if (strong && Math.random() < 0.12) {
+    monLog(pm.n + ' used ' + pm.mv[k] + ' — but it missed!');
+    setTimeout(monEnemyTurn, 750);
     return;
   }
   var dmg = (strong ? 16 : 11) + Math.floor(Math.random() * (strong ? 14 : 9)) + monB.plv;
-  monB.ehp -= dmg;
-  if (monB.ehp <= 0) {
-    monB.ehp = 0; monB.over = 'won';
-    monParty[monB.pi] = monB.plv + 1;
-    saveLS('mon_party_v1', monParty);
-    monLog(pm.mv[k] + ' hits for ' + dmg + '! Wild ' + MONSTERS[monB.ei].n + ' fainted — ' + pm.n + ' grew to Lv.' + monParty[monB.pi] + '!');
-  } else {
-    monLog(pm.mv[k] + ' hits for ' + dmg + '! Weaker monsters are easier to catch.');
-    setTimeout(monEnemyTurn, 650);
+  var note = '';
+  if (strong) {
+    var eff = monEff(pm.t, en.t);
+    dmg = Math.round(dmg * 1.25 * eff);
+    note = eff > 1 ? ' Super effective!' : eff < 1 ? ' Not very effective…' : '';
   }
-  monRenderBattle();
+  monB.ehp = Math.max(0, monB.ehp - dmg);
+  setTimeout(function() { monHitFx(true); }, 240);
+  monLog(pm.n + ' used ' + pm.mv[k] + '! (' + dmg + ' dmg)' + note);
+  setTimeout(function() {
+    if (monB.ehp <= 0) {
+      monB.over = 'won';
+      monParty[monB.pi] = monB.plv + 1; saveLS('mon_party_v1', monParty);
+      monLog('Wild ' + en.n + ' fainted! ' + pm.n + ' grew to Lv.' + monParty[monB.pi] + '.');
+      monBusy = false; monRenderControls();
+    } else { monEnemyTurn(); }
+  }, 780);
+}
+function monEnemyTurn() {
+  if (!monB || monB.over) return;
+  var en = MONSTERS[monB.ei], pm = MONSTERS[monB.pi];
+  monView.lungeE = 1;
+  var k = Math.floor(Math.random() * 2), strong = k === 1;
+  var dmg = (strong ? 12 : 8) + Math.floor(Math.random() * 9) + monB.elv * 2;
+  var note = '';
+  if (strong) { var eff = monEff(en.t, pm.t); dmg = Math.round(dmg * 1.25 * eff); note = eff > 1 ? ' Super effective!' : eff < 1 ? ' Not very effective…' : ''; }
+  monB.php = Math.max(0, monB.php - dmg);
+  setTimeout(function() { monHitFx(false); }, 240);
+  monLog('Wild ' + en.n + ' used ' + en.mv[k] + '! (' + dmg + ' dmg)' + note);
+  setTimeout(function() {
+    if (monB.php <= 0) { monB.over = 'lost'; monLog(pm.n + ' fainted! Head back to camp to recover.'); }
+    monBusy = false; monRenderControls();
+  }, 780);
 }
 function monCatch() {
-  if (!monB || monB.over) return;
+  if (!monB || monB.over || monBusy) return;
+  monBusy = true; monRenderControls();
   var p = 0.15 + 0.75 * (1 - monB.ehp / monB.emax);
-  if (Math.random() < p) {
+  monView.capsule = {f:0, phase:'throw', success:Math.random() < p, done:false};
+  monLog('Bree hurls a Capsule…');
+}
+function monAfterCatch(success) {
+  var en = MONSTERS[monB.ei];
+  if (success) {
     monCaught[monB.ei] = (monCaught[monB.ei] || 0) + 1;
     if (!monParty[monB.ei] || monB.elv > monParty[monB.ei]) monParty[monB.ei] = monB.elv;
-    saveLS('monsters_v1', monCaught);
-    saveLS('mon_party_v1', monParty);
+    saveLS('monsters_v1', monCaught); saveLS('mon_party_v1', monParty);
     monB.over = 'caught';
-    monLog('Gotcha! ' + MONSTERS[monB.ei].n + ' (Lv.' + monB.elv + ') was caught! 🎉');
+    monLog('Gotcha! ' + en.n + ' (Lv.' + monB.elv + ') was caught!');
+    monBusy = false; monRenderControls();
   } else {
-    monLog('So close! It broke free…');
-    setTimeout(monEnemyTurn, 650);
+    monLog('Oh no — ' + en.n + ' broke free!');
+    setTimeout(monEnemyTurn, 600);
   }
-  monRenderBattle();
 }
 function monRun() {
-  if (!monB || monB.over) return;
-  monB.over = 'fled';
-  monLog('Got away safely!');
-  monRenderBattle();
+  if (!monB || monB.over || monBusy) return;
+  monB.over = 'fled'; monLog('Bree got away safely.'); monRenderControls();
 }
 function monBackToMap() {
-  monB = null; monInBattle = false;
+  monB = null; monView = null; monInBattle = false; monBusy = false;
   document.getElementById('mon-battle-view').style.display = 'none';
   document.getElementById('mon-map-view').style.display = '';
   monDrawMap(); monRenderGrid();
 }
+
+// ── Battle render loop (animated scene) ──
+function monRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  if (ctx.roundRect) { ctx.roundRect(x, y, w, h, r); return; }
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function monHpBox(ctx, x, y, w, name, lv, shown, max) {
+  ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.strokeStyle = '#2b3a44'; ctx.lineWidth = 2;
+  monRoundRect(ctx, x, y, w, 40, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#1d1d1f'; ctx.font = '700 13px Inter, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText(name, x + 10, y + 13);
+  ctx.textAlign = 'right'; ctx.fillText('Lv.' + lv, x + w - 10, y + 13);
+  var bx = x + 10, bw = w - 20, pct = Math.max(0, shown / max);
+  ctx.fillStyle = '#d0d5da'; monRoundRect(ctx, bx, y + 24, bw, 8, 4); ctx.fill();
+  ctx.fillStyle = pct > 0.5 ? '#34c759' : pct > 0.25 ? '#ffcc00' : '#ff3b30';
+  monRoundRect(ctx, bx, y + 24, bw * pct, 8, 4); ctx.fill();
+}
+function monCreature(ctx, cx, cy, size, emoji, shake, flash, scale) {
+  var sx = cx + (Math.random() * 2 - 1) * shake;
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,.18)';
+  ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.48, size * 0.42, size * 0.13, 0, 0, 7); ctx.fill();
+  ctx.font = Math.round(size * scale) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, sx, cy);
+  if (flash > 0) { ctx.save(); ctx.globalAlpha = flash * 0.6; ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(sx, cy, size * 0.45, 0, 7); ctx.fill(); ctx.restore(); }
+}
+function monDrawCapsule(ctx, x, y, r, rot) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  ctx.fillStyle = '#46c2b8'; ctx.beginPath(); ctx.arc(0, 0, r, Math.PI, 0); ctx.fill();       // top teal
+  ctx.fillStyle = '#eef2f5'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI); ctx.fill();        // bottom light
+  ctx.fillStyle = '#2b3a44'; ctx.fillRect(-r, -2.5, r * 2, 5);                                  // band
+  ctx.strokeStyle = '#2b3a44'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.stroke();
+  ctx.fillStyle = '#ffd54a'; ctx.beginPath(); ctx.arc(0, 0, r * 0.28, 0, 7); ctx.fill();        // button
+  ctx.strokeStyle = '#b9902a'; ctx.stroke();
+  ctx.restore();
+}
+(function monLoop() {
+  requestAnimationFrame(monLoop);
+  var cv = document.getElementById('mon-battle-canvas');
+  if (!cv || !monB || !monView) return;
+  var panel = document.getElementById('p-games');
+  if (!panel || !panel.classList.contains('on')) return;
+  if (document.getElementById('mon-battle-view').style.display === 'none') return;
+  var ctx = cv.getContext('2d'), W = cv.width, H = cv.height, v = monView;
+  v.bob += 0.06;
+  v.ehpS += (monB.ehp - v.ehpS) * 0.16;
+  v.phpS += (monB.php - v.phpS) * 0.16;
+  v.shakeE *= 0.85; v.shakeP *= 0.85; v.flashE *= 0.88; v.flashP *= 0.88;
+  v.lungeE = Math.max(0, v.lungeE - 0.05); v.lungeP = Math.max(0, v.lungeP - 0.05);
+  if (v.intro > 0) v.intro = Math.max(0, v.intro - 0.04);
+  // background
+  var sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, '#bfe3ff'); sky.addColorStop(0.62, '#e7f5cf'); sky.addColorStop(1, '#9fd66a');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(120,190,90,.55)'; ctx.beginPath(); ctx.moveTo(0, H * 0.62); ctx.lineTo(W, H * 0.55); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
+  // platforms
+  var eP = {x: W * 0.72, y: H * 0.46}, pP = {x: W * 0.27, y: H * 0.82};
+  ctx.fillStyle = 'rgba(90,150,70,.4)';
+  ctx.beginPath(); ctx.ellipse(eP.x, eP.y + H * 0.09, W * 0.17, H * 0.045, 0, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(pP.x, pP.y + H * 0.07, W * 0.20, H * 0.05, 0, 0, 7); ctx.fill();
+  var cap = v.capsule;
+  // enemy creature (slides in on intro; hidden while sucked into capsule)
+  var eScale = (cap && (cap.phase === 'suck' || cap.phase === 'wobble' || cap.phase === 'caught')) ? Math.max(0, 1 - cap.f / 16) : 1;
+  if (cap && cap.phase === 'break') eScale = Math.min(1, cap.f / 14);
+  var eLunge = v.lungeE * -Math.sin(v.lungeE * Math.PI) * (W * 0.06);
+  var eBob = Math.sin(v.bob) * 3;
+  var eIntroDx = v.intro * W * 0.25;
+  if (eScale > 0.02) monCreature(ctx, eP.x + eLunge + eIntroDx, eP.y + eBob, H * 0.24, MONSTERS[monB.ei].e, v.shakeE, v.flashE, eScale);
+  // Bree's creature (back-ish view, lunges toward enemy)
+  var pLunge = v.lungeP * Math.sin(v.lungeP * Math.PI) * (W * 0.06);
+  var pBob = Math.sin(v.bob + 1) * 3;
+  monCreature(ctx, pP.x + pLunge, pP.y + pBob, H * 0.27, MONSTERS[monB.pi].e, v.shakeP, v.flashP, 1);
+  // Bree, standing at the near corner
+  drawBree(ctx, W * 0.08, H * 0.9, H * 0.26, 'up');
+  // HP boxes
+  monHpBox(ctx, W * 0.04, H * 0.06, W * 0.4, MONSTERS[monB.ei].n, monB.elv, v.ehpS, monB.emax);
+  monHpBox(ctx, W * 0.56, H * 0.6, W * 0.4, MONSTERS[monB.pi].n + ' ✦', monB.plv, v.phpS, monB.pmax);
+  // capsule animation
+  if (cap) {
+    cap.f++;
+    var start = {x: W * 0.14, y: H * 0.86};
+    if (cap.phase === 'throw') {
+      var tt = Math.min(1, cap.f / 26);
+      var cxp = start.x + (eP.x - start.x) * tt;
+      var cyp = start.y + (eP.y - start.y) * tt - Math.sin(tt * Math.PI) * H * 0.35;
+      monDrawCapsule(ctx, cxp, cyp, 15, tt * 6);
+      if (tt >= 1) { cap.phase = 'suck'; cap.f = 0; }
+    } else if (cap.phase === 'suck') {
+      monDrawCapsule(ctx, eP.x, eP.y, 15, 0);
+      if (cap.f > 18) { cap.phase = 'drop'; cap.f = 0; }
+    } else if (cap.phase === 'drop') {
+      var dt = Math.min(1, cap.f / 12);
+      monDrawCapsule(ctx, eP.x, eP.y + (eP.y + H * 0.09 - eP.y) * dt, 15, 0);
+      if (dt >= 1) { cap.phase = 'wobble'; cap.f = 0; }
+    } else if (cap.phase === 'wobble') {
+      var wob = Math.sin(cap.f * 0.35) * Math.max(0, 0.5 - cap.f / 200);
+      monDrawCapsule(ctx, eP.x, eP.y + H * 0.09, 15, wob);
+      if (cap.f > 96) {
+        if (cap.success) { cap.phase = 'caught'; cap.f = 0;
+          for (var s = 0; s < 14; s++) v.stars.push({x:eP.x, y:eP.y + H*0.09, a:Math.random()*7, sp:2+Math.random()*3, life:1}); }
+        else { cap.phase = 'break'; cap.f = 0; }
+      }
+    } else if (cap.phase === 'caught') {
+      monDrawCapsule(ctx, eP.x, eP.y + H * 0.09, 15, 0);
+      if (cap.f > 34 && !cap.done) { cap.done = true; v.capsule = null; monAfterCatch(true); }
+    } else if (cap.phase === 'break') {
+      if (cap.f > 16 && !cap.done) { cap.done = true; v.capsule = null; monAfterCatch(false); }
+    }
+  }
+  // catch stars
+  for (var i = v.stars.length - 1; i >= 0; i--) {
+    var st = v.stars[i]; st.x += Math.cos(st.a) * st.sp; st.y += Math.sin(st.a) * st.sp - 1; st.life -= 0.03;
+    if (st.life <= 0) { v.stars.splice(i, 1); continue; }
+    ctx.globalAlpha = st.life; ctx.fillStyle = '#ffd54a'; ctx.font = '16px serif'; ctx.textAlign = 'center';
+    ctx.fillText('✦', st.x, st.y); ctx.globalAlpha = 1;
+  }
+})();
+window.addEventListener('resize', function() { if (monInBattle) monBattleSize(); });
+
 monDrawMap();
 monRenderGrid();
 

@@ -113,7 +113,19 @@ camera list is reused and fresh events still attach via stored lat/lon.
 `monsters_v1`, `geo_coords_v1`, plus feed caches (`n_*`, `s_*`, `wx*`,
 `stk_*`). `saveLS()` evicts feed caches on QuotaExceededError.
 
-## Trail Monsters roadmap (for the next session)
+## Critterra (creature game) roadmap (for the next session)
+
+Renamed Trail Monsters -> **Critterra**; trainer is **Bree** (pixel sprite,
+`drawBree()`), capture items are **Capsules** (original teal/gold design,
+`monDrawCapsule()`), creatures are **Critters** (still emoji-faced, original
+names). Battle is now an animated `<canvas id="mon-battle-canvas">` scene
+driven by a requestAnimationFrame loop reading `monB` (state) + `monView`
+(animation): sliding intro, HP boxes with tweened bars, attack lunge +
+flash + shake, and a full capsule throw -> suck -> drop -> wobble ->
+catch/break animation with a star burst. Type chart in `MON_EFF` / `monEff()`
+(move 2 = the Critter element w/ 1.25x STAB + effectiveness; move 1 neutral).
+`monBusy` gates input during animations. Same localStorage keys
+(`monsters_v1`, `mon_party_v1`).
 
 v2 shipped: tile overworld (15×10, `MON_MAP` strings: `.` walk, `,` tall
 grass w/ 22% encounters, `T`/`~` block, `=` path), D-pad + arrow movement,
