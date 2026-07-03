@@ -20,16 +20,23 @@ NEWS_FEEDS = {
     # Local (BC)
     "https://globalnews.ca/bc/feed/": "Global BC",
     "https://www.cbc.ca/cmlink/rss-canada-britishcolumbia": "CBC BC",
+    "https://vancouver.citynews.ca/feed/": "CityNews Van",
+    "https://dailyhive.com/feed/vancouver": "Daily Hive",
+    "https://vancouversun.com/feed": "Vancouver Sun",
     # National
     "https://www.cbc.ca/cmlink/rss-topstories": "CBC News",
     "https://globalnews.ca/feed/": "Global News",
     "https://nationalpost.com/feed/": "National Post",
+    "https://financialpost.com/feed": "Financial Post",
+    "https://www.cbc.ca/cmlink/rss-politics": "CBC Politics",
     # World
     "https://feeds.bbci.co.uk/news/world/rss.xml": "BBC World",
     "https://www.aljazeera.com/xml/rss/all.xml": "Al Jazeera",
     "https://www.theguardian.com/international/rss": "Guardian",
-    "https://www.dw.com/en/xml/rss/xml_en_all": "DW",
     "https://www.france24.com/en/rss": "France24",
+    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml": "NYT World",
+    "https://feeds.skynews.com/feeds/rss/world.xml": "Sky News",
+    "https://www.cbc.ca/cmlink/rss-world": "CBC World",
 }
 
 SPORTS_FEEDS = {
@@ -37,6 +44,11 @@ SPORTS_FEEDS = {
     "https://www.sportsnet.ca/feed/": "Sportsnet",
     "https://www.cfl.ca/rss/": "CFL.ca",
     "https://www.mlb.com/feeds/news/rss.xml": "MLB.com",
+    "https://www.cbc.ca/cmlink/rss-sports": "CBC Sports",
+    "https://sports.yahoo.com/rss/": "Yahoo Sports",
+    "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/sports/": "Globe Sports",
+    "https://www.espn.com/espn/rss/nhl/news": "ESPN NHL",
+    "https://www.espn.com/espn/rss/mlb/news": "ESPN MLB",
 }
 
 # "My Teams" — the scores box on the Live panel. ESPN site API, team schedule
@@ -47,20 +59,31 @@ DEFAULT_STOCKS = ["XEQT.TO", "VFV.TO", "AAPL", "TSLA", "MSFT", "NVDA", "AMZN", "
 
 # DriveBC webcams for the Traffic panel, in display order. The Actions job keeps
 # only cameras the API doesn't flag as stale. Images themselves are hotlinked
-# live from drivebc.ca; just the metadata is cached.
+# live from drivebc.ca; just the metadata is cached. The client shows 4 per
+# page with user-favourited cams on page 1.
 PREFERRED_CAMERAS = [
     (275, "Port Mann Bridge E"),
     (292, "Port Mann Bridge W"),
     (91,  "Alex Fraser Bridge N"),
     (92,  "Alex Fraser Bridge S"),
     (30,  "Massey Tunnel (Deas)"),
-    (18,  "Lions Gate North"),
-    (72,  "Ironworkers Midspan"),
+    (33,  "Hwy 99 at 17A Overpass"),
+    (313, "Hwy 99 at Mud Bay"),
+    (258, "King George at 132 St"),
+    (103, "Hwy 10 at King George E"),
     (82,  "Hwy 10 at 152 St W"),
     (79,  "Hwy 10 at 152 St N"),
     (477, "Hwy 15 at 8 Ave N"),
+    (279, "Hwy 1 at 232 St E"),
+    (212, "Hwy 99 at 8 Ave (White Rock)"),
+    (18,  "Lions Gate North"),
+    (72,  "Ironworkers Midspan"),
 ]
-MAX_CAMERAS = 8
+MAX_CAMERAS = 16
+# Lower Mainland bounding box for traffic events (lon_min, lat_min, lon_max, lat_max)
+EVENTS_BBOX = "-123.40,48.95,-121.60,49.55"
+EVENTS_PER_CAM = 2
+EVENT_MATCH_KM = 8.0
 
 MY_TEAMS = [
     {"name": "Blue Jays", "league": "MLB", "path": "baseball/mlb",  "id": "tor"},
@@ -242,31 +265,121 @@ def fetch_air() -> dict | None:
         return None
 
 
-def fetch_cameras() -> list[dict]:
-    """DriveBC webcam metadata for the preferred crossings, skipping stale cams."""
+def _haversine_km(lat1, lon1, lat2, lon2):
+    import math
+    r = 6371.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp, dl = math.radians(lat2 - lat1), math.radians(lon2 - lon1)
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * r * math.asin(math.sqrt(a))
+
+
+def fetch_traffic_events() -> list[dict]:
+    """Active DriveBC (Open511) events in the Lower Mainland — the same feed
+    that powers @DriveBC posts on X, with per-event updated timestamps."""
+    url = f"https://api.open511.gov.bc.ca/events?status=ACTIVE&bbox={EVENTS_BBOX}&limit=300&format=json"
     try:
-        resp = requests.get("https://www.drivebc.ca/api/webcams/", timeout=TIMEOUT,
-                            headers={"User-Agent": "Mozilla/5.0"})
+        resp = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
-        by_id = {c["id"]: c for c in resp.json()}
+        events = resp.json().get("events", [])
     except Exception as e:
-        print(f"  ✗ Cameras: {e}")
+        print(f"  ✗ Traffic events: {e}")
         return []
     out = []
+    for e in events:
+        geo = e.get("geography") or {}
+        coords = geo.get("coordinates")
+        if geo.get("type") == "Point" and coords:
+            lon, lat = coords[0], coords[1]
+        elif geo.get("type") in ("LineString", "MultiPoint") and coords:
+            lon, lat = coords[0][0], coords[0][1]
+        else:
+            continue
+        road = ""
+        roads = e.get("roads") or []
+        if roads:
+            road = roads[0].get("name") or ""
+            if roads[0].get("from"):
+                road += " " + roads[0]["from"]
+        out.append({
+            "type": (e.get("event_type") or "").title(),
+            "severity": e.get("severity") or "UNKNOWN",
+            "road": road[:80],
+            "desc": (e.get("description") or e.get("headline") or "")[:220],
+            "updated": e.get("updated") or e.get("created") or "",
+            "lat": lat, "lon": lon,
+        })
+    print(f"  ✓ Traffic events: {len(out)} active in Lower Mainland")
+    return out
+
+
+def fetch_cameras() -> list[dict]:
+    """DriveBC webcam metadata for the preferred crossings, skipping stale cams.
+    drivebc.ca is slow from GitHub's runners, so retry with growing timeouts.
+    Returns [] on total failure; main() then reuses the cached list and still
+    re-attaches fresh events (cam lat/lon is stored for exactly that reason)."""
+    by_id = None
+    for attempt, tmo in enumerate((20, 30, 45), 1):
+        try:
+            resp = requests.get("https://www.drivebc.ca/api/webcams/", timeout=tmo,
+                                headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+            by_id = {c["id"]: c for c in resp.json()}
+            break
+        except Exception as e:
+            print(f"  … cameras attempt {attempt} failed: {e}")
+    if by_id is None:
+        print("  ✗ Cameras: all attempts failed, will reuse cached list")
+        return []
+    out = []
+    always = {275, 292}  # Port Mann — keep even when flagged stale
     for cam_id, label in PREFERRED_CAMERAS:
         cam = by_id.get(cam_id)
-        if not cam or cam.get("marked_stale") or cam.get("marked_delayed"):
+        if not cam:
             continue
-        out.append({
+        flagged = cam.get("marked_stale") or cam.get("marked_delayed")
+        if flagged and cam_id not in always:
+            continue
+        rec = {
             "id": cam_id,
             "name": label,
             "caption": (cam.get("caption") or "")[:120],
             "url": f"https://www.drivebc.ca/images/{cam_id}.jpg",
-        })
+        }
+        if flagged:
+            rec["stale"] = True
+        loc = (cam.get("location") or {}).get("coordinates")
+        if loc:
+            rec["lon"], rec["lat"] = loc[0], loc[1]
+        out.append(rec)
         if len(out) >= MAX_CAMERAS:
             break
     print(f"  ✓ Cameras: {len(out)} live")
     return out
+
+
+def attach_events(cams: list[dict], events: list[dict]) -> None:
+    """Attach the nearest active events (within EVENT_MATCH_KM) to each camera
+    that carries coordinates. Works on freshly fetched or cached camera lists."""
+    for rec in cams:
+        rec.pop("events", None)
+        if not events or rec.get("lat") is None:
+            continue
+        near = []
+        for ev in events:
+            km = _haversine_km(rec["lat"], rec["lon"], ev["lat"], ev["lon"])
+            if km <= EVENT_MATCH_KM:
+                near.append((km, ev))
+        # Live incidents and MAJOR events beat weeks-old minor construction
+        near.sort(key=lambda x: (x[1]["type"] != "Incident",
+                                 x[1]["severity"] != "MAJOR", x[0]))
+        rec["events"] = [
+            {"type": ev["type"], "severity": ev["severity"], "road": ev["road"],
+             "desc": ev["desc"], "updated": ev["updated"], "km": round(km, 1)}
+            for km, ev in near[:EVENTS_PER_CAM]
+        ]
+    with_ev = sum(1 for c in cams if c.get("events"))
+    print(f"  ✓ Events attached: {with_ev}/{len(cams)} cameras")
 
 
 def fetch_stocks() -> dict:
@@ -340,6 +453,9 @@ def main():
     print("Fetching air quality...")
     air = fetch_air()
 
+    print("Fetching traffic events...")
+    traffic_events = fetch_traffic_events()
+
     print("Fetching traffic cameras...")
     cameras = fetch_cameras()
 
@@ -365,9 +481,11 @@ def main():
         "scores": scores if scores else existing.get("scores", []),
         "stocks": stocks if stocks else existing.get("stocks", {}),
         "air": air or existing.get("air"),
-        "cameras": cameras if cameras else existing.get("cameras", []),
+        "cameras": cameras if cameras else existing.get("cameras", []),  # events attached below
         "updated": datetime.now(timezone.utc).isoformat(),
     }
+
+    attach_events(cache["cameras"] or [], traffic_events)
 
     cache_json = json.dumps(cache, ensure_ascii=False, indent=2)
     new_block = f"var DASHBOARD_CACHE = {cache_json};\n"

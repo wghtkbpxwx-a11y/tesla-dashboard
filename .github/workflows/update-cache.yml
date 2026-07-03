@@ -2,7 +2,7 @@ name: Update Dashboard Cache
 
 on:
   schedule:
-    - cron: '0 */4 * * *'   # every 4 hours
+    - cron: '0 * * * *'      # hourly — keeps traffic events current
   workflow_dispatch:         # allow manual trigger
 
 jobs:
