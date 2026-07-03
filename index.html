@@ -3754,13 +3754,11 @@ function httpGet(url) {
         var feedData = (DASHBOARD_CACHE.news && DASHBOARD_CACHE.news[decodedFeed]) ||
                        (DASHBOARD_CACHE.sports && DASHBOARD_CACHE.sports[decodedFeed]);
         if (feedData && feedData.items && feedData.items.length > 0) {
-          console.log('✓ Using embedded cache from:', decodedFeed, '(' + feedData.items.length + ' items)');
           return Promise.resolve(feedData);
         }
       }
       // Feed not in embedded cache — return null immediately rather than hanging
       // on live API calls that will timeout in Tesla browser environments
-      console.log('✗ Feed not in embedded cache, skipping network:', url);
       return Promise.resolve(null);
     }
     return tryDirectRequest();
@@ -3804,8 +3802,6 @@ try {
   var cached = localStorage.getItem('geo_coords_v1');
   if (cached) { geoCoords = JSON.parse(cached); }
 } catch(e) {}
-
-console.log('Initialized geoCoords:', geoCoords);
 
 function loadWeatherForCoords() {
   var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + geoCoords.lat + '&longitude=' + geoCoords.lon + '&current=temperature_2m,weather_code,is_day';
@@ -3882,19 +3878,16 @@ function loadWeatherForCoords() {
 }
 
 // Load weather and forecast immediately with default coords
-console.log('Loading weather immediately with geoCoords:', geoCoords);
 loadWeatherForCoords();
 loadForecast();
 
 // Then try to get better location if available
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(function(pos) {
-    console.log('Geolocation succeeded:', pos.coords);
     geoCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
     saveLS('geo_coords_v1', geoCoords);
     loadWeatherForCoords();
   }, function(err) {
-    console.log('Geolocation denied/failed:', err.message);
   });
 }
 
@@ -4016,8 +4009,6 @@ function loadFeeds(configs, targetId) {
 
   Promise.all(configs.map(function(c) { return fetchCached(c.url, c.key, 10); }))
     .then(function(results) {
-      var successCount = results.filter(function(r) { return r !== null; }).length;
-      console.log('Feed results: ' + successCount + '/' + results.length + ' sources loaded for ' + targetId);
       var bySource = {};
       // Organize articles by source and limit to 3 per source for diversity
       results.forEach(function(r, i) {
