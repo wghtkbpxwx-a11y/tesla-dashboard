@@ -1464,8 +1464,11 @@ function applyDockOrder() {
     // Reuse any promoted buttons already in the dock (keeps their listeners)
     var existing = {};
     dock.querySelectorAll('.dock-btn[data-p]').forEach(function(b) { if (isPromotable(b.dataset.p)) existing[b.dataset.p] = b; });
-    // Show every submenu item, then hide the ones we're pinning
-    document.querySelectorAll('.dock-submenu-item').forEach(function(it) { it.style.display = ''; });
+    // Reset submenu visibility, but respect module toggles (an Off panel stays
+    // hidden from More); pinned panels are hidden again in the loop below.
+    document.querySelectorAll('.dock-submenu-item').forEach(function(it) {
+      it.style.display = settings.modules[it.getAttribute('data-p')] === false ? 'none' : '';
+    });
     // Fixed layout: Live, Messages, pinned…, More, Settings
     dock.innerHTML = '';
     if (live) dock.appendChild(live);
