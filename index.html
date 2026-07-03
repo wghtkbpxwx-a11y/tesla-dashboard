@@ -300,6 +300,11 @@ input[type="color"]:hover{border-color:var(--line2)}
 
 /* MARKETS STRIP */
 .live-indices{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;font-weight:600;color:var(--t3)}
+.live-quote{margin-top:16px;padding:16px 20px;background:var(--glass2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:14px;position:relative}
+.live-quote .lq-text{font-size:16px;font-style:italic;color:var(--t1);line-height:1.55}
+.live-quote .lq-text::before{content:'“';color:var(--accent);font-weight:700;margin-right:2px}
+.live-quote .lq-text::after{content:'”';color:var(--accent);font-weight:700;margin-left:1px}
+.live-quote .lq-author{margin-top:6px;font-size:12px;color:var(--t3);font-weight:600;text-align:right}
 .idx-item{display:flex;align-items:center;gap:5px;white-space:nowrap}
 .idx-item .idx-l{color:var(--t3);text-transform:uppercase;letter-spacing:.3px;font-size:11px}
 .idx-item .idx-v{color:var(--t1)}
@@ -485,6 +490,12 @@ input[type="color"]:hover{border-color:var(--line2)}
       </div>
       <!-- Markets strip: indices + CAD/USD -->
       <div class="live-indices" id="live-indices"></div>
+    </div>
+
+    <!-- Daily inspirational quote -->
+    <div class="live-quote" id="live-quote">
+      <div class="lq-text" id="lq-text"></div>
+      <div class="lq-author" id="lq-author"></div>
     </div>
 
     <!-- News, Scores, Fantasy in tabbed layout -->
@@ -1138,6 +1149,42 @@ function renderLiveStocks() {
   updateClock();
   setTimeout(tickClock, (60 - new Date().getSeconds()) * 1000 + 50);
 })();
+
+// ── DAILY QUOTE (short, well-worn sayings & proverbs; rotates once per day) ──
+var DAILY_QUOTES = [
+  ['It always seems impossible until it is done.', 'Nelson Mandela'],
+  ['Whether you think you can, or you think you cannot — you are right.', 'Henry Ford'],
+  ['The journey of a thousand miles begins with a single step.', 'Lao Tzu'],
+  ['Do what you can, with what you have, where you are.', 'Theodore Roosevelt'],
+  ['Well done is better than well said.', 'Benjamin Franklin'],
+  ['Quality is not an act, it is a habit.', 'Aristotle'],
+  ['He who has a why to live can bear almost any how.', 'Friedrich Nietzsche'],
+  ['Fall seven times, stand up eight.', 'Japanese proverb'],
+  ['Fortune favours the bold.', 'Virgil'],
+  ['The secret of getting ahead is getting started.', 'Mark Twain'],
+  ['A smooth sea never made a skilled sailor.', 'Proverb'],
+  ['Little by little, one travels far.', 'Spanish proverb'],
+  ['Believe you can and you are halfway there.', 'Theodore Roosevelt'],
+  ['Knowing yourself is the beginning of all wisdom.', 'Aristotle'],
+  ['Energy and persistence conquer all things.', 'Benjamin Franklin'],
+  ['The future belongs to those who believe in the beauty of their dreams.', 'Eleanor Roosevelt'],
+  ['Keep your face always toward the sunshine, and shadows will fall behind you.', 'Walt Whitman'],
+  ['The best way out is always through.', 'Robert Frost'],
+  ['Great things are done by a series of small things brought together.', 'Vincent van Gogh'],
+  ['Start where you are. Use what you have. Do what you can.', 'Arthur Ashe'],
+  ['What we think, we become.', 'Buddha'],
+  ['The man who moves a mountain begins by carrying away small stones.', 'Confucius']
+];
+function setDailyQuote() {
+  var txt = document.getElementById('lq-text'), auth = document.getElementById('lq-author');
+  if (!txt || !auth) return;
+  var d = new Date();
+  var day = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000); // day-of-year
+  var q = DAILY_QUOTES[day % DAILY_QUOTES.length];
+  txt.textContent = q[0];
+  auth.textContent = '— ' + q[1];
+}
+setDailyQuote();
 
 // ── DOCK ──
 function goPanel(p) {
