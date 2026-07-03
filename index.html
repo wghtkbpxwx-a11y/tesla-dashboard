@@ -4395,10 +4395,13 @@ function toggleVoice() {
 // ── STOCKS DROPDOWN CLICK-OUTSIDE LISTENER ──
 document.addEventListener('click', function(e) {
   var dropdown = document.getElementById('stocks-dropdown');
-  var btn = document.querySelector('.dock-submenu-item[data-p="stocks"]');
-  if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
-    dropdown.classList.remove('open');
-  }
+  if (!dropdown || !dropdown.classList.contains('open')) return;
+  if (dropdown.contains(e.target)) return;
+  // Ignore clicks on any Stocks trigger — the More submenu item OR a pinned
+  // dock button (both carry data-p="stocks"); otherwise the same click that
+  // opens the dropdown immediately closes it again.
+  if (e.target.closest && e.target.closest('[data-p="stocks"]')) return;
+  dropdown.classList.remove('open');
 });
 
 // ── MARKETS STRIP (indices + CAD/USD from the embedded stocks cache) ──
