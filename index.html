@@ -355,7 +355,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 #shoot-canvas{display:block;margin:0 auto;border-radius:16px;border:1px solid var(--line);background:#e8eef5;touch-action:manipulation;max-width:100%;cursor:crosshair}
 
 /* CRITTERRA — original creature-collector game (Bree) */
-#mon-map-canvas{display:block;margin:0 auto;border-radius:14px;border:1px solid var(--line);max-width:100%;image-rendering:pixelated;touch-action:manipulation;box-shadow:var(--shadow-sm)}
+#mon-map-canvas{display:block;margin:0 auto;border-radius:14px;border:1px solid var(--line);max-width:100%;image-rendering:pixelated;touch-action:manipulation;box-shadow:var(--shadow-sm);cursor:pointer}
 .mon-dpad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;justify-content:center;margin:16px auto 0}
 .mon-dpad button{border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--t1);font-size:24px;cursor:pointer}
 .mon-dpad button:active{background:var(--accent);color:#fff}
@@ -369,6 +369,17 @@ input[type="color"]:hover{border-color:var(--line2)}
 .mmt-opt:disabled{cursor:default}
 .mon-attack{min-width:180px;min-height:48px}
 .mon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.critterdex{max-width:560px;margin:18px auto 0;background:var(--accent);border-radius:26px;padding:14px 16px 18px;box-shadow:0 10px 30px var(--accent-soft),var(--shadow);position:relative;overflow:hidden}
+.critterdex::before{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(180deg,rgba(255,255,255,.18),transparent);pointer-events:none}
+.cdex-head{display:flex;align-items:center;gap:8px;padding:2px 4px 12px;position:relative}
+.cdex-light{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #d8f6ff, #46c2f0);border:2px solid rgba(255,255,255,.85);box-shadow:0 0 10px #7fdfff;flex-shrink:0}
+.cdex-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:inset 0 0 2px rgba(0,0,0,.3)}
+.cdex-title{font-size:15px;font-weight:800;letter-spacing:2.5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);margin-left:6px}
+.cdex-sub{font-size:12px;font-weight:600;color:rgba(255,255,255,.92);text-align:center;margin:0 0 12px}
+.cdex-screen{background:#0d1117;border-radius:16px;padding:14px;border:3px solid rgba(0,0,0,.3);box-shadow:inset 0 2px 12px rgba(0,0,0,.55)}
+.cdex-screen .mon-grid{margin:0}
+.cdex-screen .mon-slot{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.09);color:#c9c9cf}
+.cdex-screen .mon-slot.caught{border-color:var(--green);color:#fff}
 .mon-slot{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;font-size:12px;color:var(--t3)}
 .mon-slot .me{font-size:34px;display:block;margin-bottom:4px}
 .mon-slot.caught{border-color:var(--green);color:var(--t1)}
@@ -952,20 +963,27 @@ input[type="color"]:hover{border-color:var(--line2)}
         </div>
       </div>
       <div id="mon-map-view">
-        <div id="mon-map-sub" style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:12px">Guide Bree through the tall grass to find wild Critters · arrows or D-pad</div>
+        <div id="mon-map-sub" style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:12px">Guide Bree through the tall grass — tap the map or use the D-pad to move</div>
         <canvas id="mon-map-canvas"></canvas>
         <div class="mon-dpad">
           <span></span><button onclick="monMove(0,-1)">▲</button><span></span>
           <button onclick="monMove(-1,0)">◀</button><span></span><button onclick="monMove(1,0)">▶</button>
           <span></span><button onclick="monMove(0,1)">▼</button><span></span>
         </div>
-        <div style="text-align:center;margin-top:14px">
-          <span id="mon-count" style="font-size:13px;color:var(--t2);font-weight:600"></span>
+        <div class="critterdex">
+          <div class="cdex-head">
+            <span class="cdex-light"></span>
+            <span class="cdex-dot" style="background:#ff5f57"></span>
+            <span class="cdex-dot" style="background:#ffbd2e"></span>
+            <span class="cdex-dot" style="background:#28c93f"></span>
+            <span class="cdex-title">CRITTERDEX</span>
+          </div>
+          <div class="cdex-sub" id="mon-count"></div>
+          <div class="cdex-screen"><div class="mon-grid" id="mon-grid"></div></div>
         </div>
-        <div style="text-align:center;margin-top:10px">
+        <div style="text-align:center;margin-top:12px">
           <button class="btn btn-gh" onclick="monResetGame()" style="font-size:12px;padding:10px 18px">Reset game</button>
         </div>
-        <div class="mon-grid" id="mon-grid" style="max-width:720px;margin:16px auto 0"></div>
       </div>
       <div id="mon-battle-view" style="display:none">
         <canvas id="mon-battle-canvas"></canvas>
@@ -4879,7 +4897,22 @@ function monDrawMap() {
     }
     else if (t === '~' && (x + y) % 2 === 0) { ctx.font = (TILE - 18) + 'px serif'; ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillText('〜', x * TILE + TILE/2, y * TILE + TILE/2); }
   }
+  // depth vignette
+  var vg = ctx.createRadialGradient(cv.width/2, cv.height/2, cv.height*0.28, cv.width/2, cv.height/2, cv.height*0.72);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, cave ? 'rgba(0,0,0,0.42)' : 'rgba(0,0,0,0.2)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, cv.width, cv.height);
+  // soft shadow under the trainer
+  ctx.fillStyle = 'rgba(0,0,0,.22)';
+  ctx.beginPath(); ctx.ellipse(monP.x*TILE+TILE/2, monP.y*TILE+TILE-3, TILE*0.32, TILE*0.12, 0, 0, 7); ctx.fill();
   drawBree(ctx, monP.x * TILE + TILE/2, monP.y * TILE + TILE/2 + 3, TILE - 4, monP.dir, monTrainer());
+  // area name badge
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  var label = cave ? 'CRYSTAL CAVE' : 'MEADOW';
+  ctx.font = '700 12px Inter, sans-serif';
+  var bw = ctx.measureText(label).width + 22;
+  ctx.fillStyle = 'rgba(0,0,0,.5)';
+  if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(8, 8, bw, 24, 8); ctx.fill(); } else ctx.fillRect(8, 8, bw, 24);
+  ctx.fillStyle = cave ? '#c9a6ff' : '#a8f0a0'; ctx.fillText(label, 19, 21);
 }
 function monMove(dx, dy) {
   if (monInBattle) return;
@@ -4888,7 +4921,7 @@ function monMove(dx, dy) {
   if (t === 'T' || t === '~' || t === '#') { monDrawMap(); return; }
   if (t === 'C') { // travel between the field and the cave
     if (monArea === 'field') { monArea = 'cave'; monP.x = 1; monP.y = 4; monP.dir = 'right'; monLog2('You enter the Crystal Cave — stronger Critters lurk here.'); }
-    else { monArea = 'field'; monP.x = 13; monP.y = 5; monP.dir = 'left'; monLog2('Guide ' + monTrainer().name + ' through the tall grass to find wild Critters · arrows or D-pad'); }
+    else { monArea = 'field'; monP.x = 13; monP.y = 5; monP.dir = 'left'; monLog2('Guide ' + monTrainer().name + ' through the tall grass — tap the map or use the D-pad to move'); }
     monDrawMap();
     return;
   }
@@ -4909,6 +4942,22 @@ document.addEventListener('keydown', function(e) {
   var m = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1]};
   if (m[e.key] && !monInBattle) { e.preventDefault(); monMove(m[e.key][0], m[e.key][1]); }
 });
+// Tap-to-move: tap anywhere on the map and Bree steps toward it (touch-first)
+(function() {
+  var cv = document.getElementById('mon-map-canvas');
+  if (!cv) return;
+  cv.addEventListener('click', function(e) {
+    if (monInBattle) return;
+    var r = cv.getBoundingClientRect();
+    if (!r.width) return;
+    var tx = Math.floor((e.clientX - r.left) * (cv.width / r.width) / TILE);
+    var ty = Math.floor((e.clientY - r.top) * (cv.height / r.height) / TILE);
+    var dx = tx - monP.x, dy = ty - monP.y;
+    if (!dx && !dy) return;
+    if (Math.abs(dx) >= Math.abs(dy)) monMove(dx > 0 ? 1 : -1, 0);
+    else monMove(0, dy > 0 ? 1 : -1);
+  });
+})();
 
 // ── Party helpers ──
 function monActive() {
@@ -5164,7 +5213,7 @@ function monShowEntry() {
   show(bat, false);
   var nm = monTrainer().name;
   var sub = document.getElementById('mon-start-sub'); if (sub) sub.innerHTML = 'Trainer <strong style="color:var(--t1)">' + nm + '</strong> — choose your first Critter to begin.';
-  var msub = document.getElementById('mon-map-sub'); if (msub) msub.innerHTML = 'Guide <strong style="color:var(--t1)">' + nm + '</strong> through the tall grass to find wild Critters · arrows or D-pad';
+  var msub = document.getElementById('mon-map-sub'); if (msub) msub.innerHTML = 'Guide <strong style="color:var(--t1)">' + nm + '</strong> through the tall grass — tap the map or use the D-pad to move';
   if (monStarted()) {
     show(tr, false); show(start, false); show(map, true);
     monInBattle = false; monDrawMap();
