@@ -866,6 +866,14 @@ input[type="color"]:hover{border-color:var(--line2)}
         <button class="toggle" data-set="games" aria-label="Toggle Games module"></button>
       </div>
     </div>
+    <div class="sec-title">Dock Shortcuts</div>
+    <div class="set-group">
+      <div class="set-row col-dir" style="align-items:stretch">
+        <div class="set-label" style="width:100%"><div class="set-t">Pin to bottom bar</div><div class="set-s">Move a “More” item into the dock for one-tap access (up to 5)</div></div>
+        <div id="dock-shortcut-hint" style="opacity:0;transition:opacity .25s;font-size:12px;color:var(--red);font-weight:600;margin-top:8px">Dock is full — remove one first (max 5).</div>
+      </div>
+      <div id="dock-shortcut-rows"></div>
+    </div>
     <button class="btn btn-gh" onclick="resetSettings()">Reset to defaults</button>
   </section>
 
@@ -1343,8 +1351,8 @@ function resetSettings() {
   settings.accentColor = themePresets.default.accent;
   settings.themeMode = 'manual';
   settings.dockOrder = null;
-  saveDockOrder();
-  saveSettings(); applyTheme(); applyModules(); syncToggles(); applyColors(); applyDockOrder(); initDragAndDrop();
+  setPromoted([]);
+  saveSettings(); applyTheme(); applyModules(); syncToggles(); applyColors(); applyDockOrder(); initDragAndDrop(); syncDockToggles();
 }
 document.querySelectorAll('.toggle[data-set]').forEach(function(t) {
   t.addEventListener('click', function() {
@@ -1388,79 +1396,144 @@ document.getElementById('accent-picker').addEventListener('input', function(e) {
   saveSettings(); applyColors();
 });
 
-// ── DOCK REORDERING ──
+// ── DOCK REORDERING & SHORTCUTS ──
+// Panels that live under "More" but can be pinned into the bottom dock.
+var DOCK_PROMOTABLE = [
+  {p:'sports',  label:'Sports'},
+  {p:'weather', label:'Weather'},
+  {p:'traffic', label:'Traffic'},
+  {p:'saved',   label:'Saved'},
+  {p:'cap',     label:'Productivity'},
+  {p:'stocks',  label:'Stocks'},
+  {p:'links',   label:'Links'},
+  {p:'games',   label:'Games'},
+  {p:'apple',   label:'Apple'},
+  {p:'stream',  label:'Streaming'},
+  {p:'learn',   label:'Learning'}
+];
+var MAX_DOCK_PROMOTED = 5;  // keep the dock reachable without inner scrolling
+function isPromotable(p) { return DOCK_PROMOTABLE.some(function(x) { return x.p === p; }); }
+function dockLabel(p) {
+  for (var i = 0; i < DOCK_PROMOTABLE.length; i++) if (DOCK_PROMOTABLE[i].p === p) return DOCK_PROMOTABLE[i].label;
+  return p;
+}
+function getPromoted() {
+  try {
+    var o = JSON.parse(localStorage.getItem('dock_order_v1'));
+    return Array.isArray(o) ? o.filter(isPromotable) : [];  // ignore legacy live/msg/set entries
+  } catch(e) { return []; }
+}
+function setPromoted(list) { saveLS('dock_order_v1', list); }
 function saveDockOrder() {
-  var order = Array.from(document.querySelectorAll('.dock-btn[data-p]')).map(function(b) { return b.dataset.p; });
-  saveLS('dock_order_v1', order);
+  // Persist the current dock order of pinned (promotable) panels only
+  var order = Array.from(document.querySelectorAll('#dock .dock-btn[data-p]'))
+    .map(function(b) { return b.dataset.p; }).filter(isPromotable);
+  setPromoted(order);
+}
+// Create a real dock button for a pinned "More" panel.
+function makeDockButton(p) {
+  var btn = document.createElement('button');
+  btn.className = 'dock-btn';
+  btn.setAttribute('data-p', p);
+  btn.setAttribute('draggable', 'true');
+  btn.textContent = dockLabel(p);
+  btn.addEventListener('click', function() {
+    if (p === 'stocks') toggleStocksDropdown(); else goPanel(p);
+  });
+  attachDockDrag(btn);
+  return btn;
 }
 function applyDockOrder() {
   try {
-    var order = JSON.parse(localStorage.getItem('dock_order_v1'));
-    if (!order || !Array.isArray(order)) return;
     var dock = document.getElementById('dock');
-    var btns = {};
-    dock.querySelectorAll('.dock-btn[data-p]').forEach(function(b) { btns[b.dataset.p] = b; });
-    var seps = Array.from(dock.children).filter(function(c) { return c.classList && c.classList.contains('dock-sep'); });
-    var extras = Array.from(dock.children).filter(function(c) { return !c.dataset.p && !(c.classList && c.classList.contains('dock-sep')); });
+    if (!dock) return;
+    var promoted = getPromoted().slice(0, MAX_DOCK_PROMOTED);
+    var live = dock.querySelector('.dock-btn[data-p="live"]');
+    var msg  = dock.querySelector('.dock-btn[data-p="msg"]');
+    var more = document.getElementById('dock-more-btn');
+    var setb = dock.querySelector('.dock-btn[data-p="set"]');
+    // Reuse any promoted buttons already in the dock (keeps their listeners)
+    var existing = {};
+    dock.querySelectorAll('.dock-btn[data-p]').forEach(function(b) { if (isPromotable(b.dataset.p)) existing[b.dataset.p] = b; });
+    // Show every submenu item, then hide the ones we're pinning
+    document.querySelectorAll('.dock-submenu-item').forEach(function(it) { it.style.display = ''; });
+    // Fixed layout: Live, Messages, pinned…, More, Settings
     dock.innerHTML = '';
-    order.forEach(function(p) {
-      if (btns[p]) dock.appendChild(btns[p]);
-      else if (p === 'sep' && seps.length > 0) dock.appendChild(seps.shift());
+    if (live) dock.appendChild(live);
+    if (msg)  dock.appendChild(msg);
+    promoted.forEach(function(p) {
+      dock.appendChild(existing[p] || makeDockButton(p));
+      var it = document.querySelector('.dock-submenu-item[data-p="' + p + '"]');
+      if (it) it.style.display = 'none';
     });
-    extras.forEach(function(el) { dock.appendChild(el); });
-  } catch(e) {}
+    if (more) dock.appendChild(more);
+    if (setb) dock.appendChild(setb);
+  } catch(e) { console.warn('applyDockOrder error:', e); }
+}
+function promoteToDock(p) {
+  if (!isPromotable(p)) return false;
+  var list = getPromoted();
+  if (list.indexOf(p) >= 0) return true;
+  if (list.length >= MAX_DOCK_PROMOTED) return false;
+  list.push(p); setPromoted(list); applyDockOrder(); initDragAndDrop(); syncDockToggles();
+  return true;
+}
+function demoteFromDock(p) {
+  setPromoted(getPromoted().filter(function(x) { return x !== p; }));
+  applyDockOrder(); initDragAndDrop(); syncDockToggles();
+}
+// Dock button drag handlers (reorder + drag out to More) — idempotent per button
+function attachDockDrag(btn) {
+  if (btn._dragBound) return;
+  btn._dragBound = true;
+  btn.draggable = true;
+  btn.addEventListener('dragstart', function(e) {
+    draggedBtn = btn;
+    btn.style.opacity = '0.5';
+    e.dataTransfer.setData('text/html', btn.innerHTML);
+    e.dataTransfer.setData('source', 'dock');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  btn.addEventListener('dragend', function(e) {
+    document.querySelectorAll('.dock-btn, .dock-submenu-item').forEach(function(b) { b.classList.remove('drag-over'); b.style.opacity = ''; });
+    draggedBtn = null;
+  });
+  btn.addEventListener('dragover', function(e) {
+    if (draggedBtn && btn !== draggedBtn && btn.classList.contains('dock-btn')) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      btn.classList.add('drag-over');
+      var dock = document.getElementById('dock');
+      var allBtns = Array.from(dock.querySelectorAll('.dock-btn'));
+      var dragIdx = allBtns.indexOf(draggedBtn);
+      var dropIdx = allBtns.indexOf(btn);
+      if (dragIdx >= 0 && dropIdx >= 0) {
+        if (dragIdx < dropIdx) {
+          btn.parentNode.insertBefore(draggedBtn, btn.nextSibling);
+        } else {
+          btn.parentNode.insertBefore(draggedBtn, btn);
+        }
+      }
+    }
+  });
+  btn.addEventListener('dragleave', function(e) {
+    btn.classList.remove('drag-over');
+  });
+  btn.addEventListener('drop', function(e) {
+    e.preventDefault();
+    saveDockOrder();
+  });
 }
 var dockDragListenersInitialized = false;
 function initDragAndDrop() {
-  // Skip if already initialized to prevent duplicate listeners
+  // Make sure every dock button (including newly pinned ones) is drag-wired
+  document.querySelectorAll('.dock-btn').forEach(attachDockDrag);
+  // Skip the one-time submenu/drop-zone wiring if already done
   if (dockDragListenersInitialized) {
-    // Just update draggable state on any new buttons
-    document.querySelectorAll('.dock-btn, .dock-submenu-item').forEach(function(el) {
-      el.draggable = true;
-    });
+    document.querySelectorAll('.dock-submenu-item').forEach(function(el) { el.draggable = true; });
     return;
   }
   dockDragListenersInitialized = true;
-
-  // Dock button drag handlers (reorder + drag out to More)
-  document.querySelectorAll('.dock-btn').forEach(function(btn) {
-    btn.addEventListener('dragstart', function(e) {
-      draggedBtn = btn;
-      btn.style.opacity = '0.5';
-      e.dataTransfer.setData('text/html', btn.innerHTML);
-      e.dataTransfer.setData('source', 'dock');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    btn.addEventListener('dragend', function(e) {
-      document.querySelectorAll('.dock-btn, .dock-submenu-item').forEach(function(b) { b.classList.remove('drag-over'); b.style.opacity = ''; });
-      draggedBtn = null;
-    });
-    btn.addEventListener('dragover', function(e) {
-      if (draggedBtn && btn !== draggedBtn && btn.classList.contains('dock-btn')) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        btn.classList.add('drag-over');
-        var dock = document.getElementById('dock');
-        var allBtns = Array.from(dock.querySelectorAll('.dock-btn'));
-        var dragIdx = allBtns.indexOf(draggedBtn);
-        var dropIdx = allBtns.indexOf(btn);
-        if (dragIdx >= 0 && dropIdx >= 0) {
-          if (dragIdx < dropIdx) {
-            btn.parentNode.insertBefore(draggedBtn, btn.nextSibling);
-          } else {
-            btn.parentNode.insertBefore(draggedBtn, btn);
-          }
-        }
-      }
-    });
-    btn.addEventListener('dragleave', function(e) {
-      btn.classList.remove('drag-over');
-    });
-    btn.addEventListener('drop', function(e) {
-      e.preventDefault();
-      saveDockOrder();
-    });
-  });
 
   // Submenu item drag handlers (drag to dock)
   document.querySelectorAll('.dock-submenu-item').forEach(function(item) {
@@ -1528,26 +1601,39 @@ function initDragAndDrop() {
   });
 }
 
-function addToDock(panelId) {
-  try {
-    var dockOrder = JSON.parse(localStorage.getItem('dock_order_v1') || '["live","msg"]');
-    if (!dockOrder.includes(panelId)) {
-      dockOrder.push(panelId);
-      saveLS('dock_order_v1', dockOrder);
-      applyDockOrder();
-      initDragAndDrop();
-    }
-  } catch(e) {}
-}
+// Drag-and-drop entry points delegate to the shared pin/unpin logic
+function addToDock(panelId) { promoteToDock(panelId); }
+function removeFromDock(panelId) { demoteFromDock(panelId); }
 
-function removeFromDock(panelId) {
-  try {
-    var dockOrder = JSON.parse(localStorage.getItem('dock_order_v1') || '["live","msg"]');
-    dockOrder = dockOrder.filter(function(p) { return p !== panelId; });
-    saveLS('dock_order_v1', dockOrder);
-    applyDockOrder();
-    initDragAndDrop();
-  } catch(e) {}
+// Settings "Dock Shortcuts" — render one toggle per pinnable panel
+function renderDockShortcuts() {
+  var host = document.getElementById('dock-shortcut-rows');
+  if (!host) return;
+  host.innerHTML = DOCK_PROMOTABLE.map(function(x) {
+    return '<div class="set-row"><div class="set-label"><div class="set-t">' + x.label + '</div></div>'
+      + '<button class="toggle" data-dock="' + x.p + '" aria-label="Pin ' + x.label + ' to dock"></button></div>';
+  }).join('');
+  host.querySelectorAll('.toggle[data-dock]').forEach(function(t) {
+    t.addEventListener('click', function() {
+      var p = t.dataset.dock;
+      if (getPromoted().indexOf(p) >= 0) demoteFromDock(p);
+      else if (!promoteToDock(p)) flashDockCap();
+    });
+  });
+  syncDockToggles();
+}
+function syncDockToggles() {
+  var promoted = getPromoted();
+  document.querySelectorAll('.toggle[data-dock]').forEach(function(t) {
+    t.classList.toggle('on', promoted.indexOf(t.dataset.dock) >= 0);
+  });
+}
+function flashDockCap() {
+  var h = document.getElementById('dock-shortcut-hint');
+  if (!h) return;
+  h.style.opacity = '1';
+  clearTimeout(flashDockCap._t);
+  flashDockCap._t = setTimeout(function() { h.style.opacity = '0'; }, 2600);
 }
 
 try {
@@ -1557,6 +1643,7 @@ try {
   applyColors();
   applyDockOrder();
   initDragAndDrop();
+  renderDockShortcuts();
 } catch(e) { console.error('Init error:', e.message); }
 
 // ── BOOKMARKS ──
