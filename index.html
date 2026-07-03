@@ -363,6 +363,11 @@ input[type="color"]:hover{border-color:var(--line2)}
 #mon-champ-canvas{display:block;margin:0 auto;border-radius:14px;border:1px solid var(--line);max-width:100%;box-shadow:var(--shadow-sm)}
 .mon-log{min-height:44px;font-size:15px;color:var(--t1);margin:12px auto;line-height:1.4;max-width:720px;text-align:center;font-weight:600}
 .mon-moves{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;max-width:720px;margin:0 auto}
+.mon-move-toggle{display:inline-flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:5px}
+.mmt-opt{padding:12px 22px;border-radius:10px;background:transparent;border:none;color:var(--t2);font-family:var(--f);font-size:15px;font-weight:600;cursor:pointer;min-height:48px;transition:all .15s ease}
+.mmt-opt.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px var(--accent-soft)}
+.mmt-opt:disabled{cursor:default}
+.mon-attack{min-width:180px;min-height:48px}
 .mon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .mon-slot{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;font-size:12px;color:var(--t3)}
 .mon-slot .me{font-size:34px;display:block;margin-bottom:4px}
@@ -4901,6 +4906,7 @@ function monMaxHp(idx, lvl) { return MONSTERS[idx].hp + 4 * (lvl - 1); }
 
 // ── Battle state ──
 var monB = null, monBusy = false;
+var monSelMove = 0;
 var monView = null;
 function monBattleSize() {
   var cv = document.getElementById('mon-battle-canvas');
@@ -4925,24 +4931,36 @@ function monEncounter() {
           pi:pi, plv:plv, php:monMaxHp(pi, plv), pmax:monMaxHp(pi, plv), over:false};
   monView = {ehpS:monB.emax, phpS:monB.pmax, shakeE:0, shakeP:0, flashE:0, flashP:0,
              lungeE:0, lungeP:0, bob:0, scaleE:1, capsule:null, stars:[], intro:1};
+  monSelMove = 0;
   monBusy = true; monInBattle = true;
   monLoopStart();
   document.getElementById('mon-map-view').style.display = 'none';
   document.getElementById('mon-battle-view').style.display = '';
   monBattleSize();
+  monSelMove = 0;
   monLog('A wild ' + MONSTERS[i].n + ' (Lv.' + elv + ') appeared!');
   monRenderControls();
   setTimeout(function() { monBusy = false; monRenderControls(); }, 700);
 }
 function monLog(t) { var el = document.getElementById('mon-log'); if (el) el.textContent = t; }
+function monSelectMove(k) {
+  if (monBusy || !monB || monB.over) return;
+  monSelMove = k;
+  monRenderControls();
+}
 function monRenderControls() {
   if (!monB) return;
   var pm = MONSTERS[monB.pi];
   var mv = document.getElementById('mon-moves');
   var lock = monBusy || monB.over;
-  mv.innerHTML = pm.mv.map(function(name, k) {
-    return '<button class="btn btn-pri" onclick="monUseMove(' + k + ')"' + (lock ? ' disabled' : '') + '>' + name + '</button>';
+  if (monSelMove >= pm.mv.length) monSelMove = 0;
+  var toggle = pm.mv.map(function(name, k) {
+    return '<button class="mmt-opt' + (monSelMove === k ? ' on' : '') + '" onclick="monSelectMove(' + k + ')"' + (lock ? ' disabled' : '') + '>' + name + '</button>';
   }).join('');
+  mv.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">'
+    + '<div class="mon-move-toggle">' + toggle + '</div>'
+    + '<button class="btn btn-pri mon-attack" onclick="monUseMove(monSelMove)"' + (lock ? ' disabled' : '') + '>Attack</button>'
+    + '</div>';
   document.getElementById('mon-orb').disabled = lock;
   document.getElementById('mon-back').style.display = monB.over ? '' : 'none';
   // Visual feedback + hard input block while an animation plays (monBusy)
