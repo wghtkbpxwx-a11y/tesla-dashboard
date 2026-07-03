@@ -54,6 +54,8 @@ SPORTS_FEEDS = {
 # "My Teams" — the scores box on the Live panel. ESPN site API, team schedule
 # endpoint per team. `path` is the sport/league, `id` is the ESPN team id/abbr.
 DEFAULT_STOCKS = ["XEQT.TO", "VFV.TO", "AAPL", "TSLA", "MSFT", "NVDA", "AMZN", "GOOGL",
+                  # Popular Canadian ETFs so watchlist adds work offline in-car
+                  "XGRO.TO", "VGRO.TO", "XBAL.TO", "VBAL.TO", "ZSP.TO", "XIC.TO",
                   # Market indices + CAD/USD for the Live panel markets strip
                   "^GSPTSE", "^GSPC", "^IXIC", "CADUSD=X"]
 
@@ -78,10 +80,20 @@ PREFERRED_CAMERAS = [
     (212, "Hwy 99 at 8 Ave (White Rock)"),
     (18,  "Lions Gate North"),
     (72,  "Ironworkers Midspan"),
+    # Coquihalla (Hwy 5) + Okanagan Connector (Hwy 97C)
+    (685, "Coquihalla Summit N"),
+    (686, "Coquihalla Summit S"),
+    (2,   "Great Bear Snowshed N"),
+    (161, "Coquihalla Lakes N"),
+    (58,  "Larson Hill N"),
+    (251, "Pennask Summit W (97C)"),
+    (41,  "Elkhart W (97C)"),
+    (497, "Brenda Mine W (97C)"),
 ]
-MAX_CAMERAS = 16
-# Lower Mainland bounding box for traffic events (lon_min, lat_min, lon_max, lat_max)
-EVENTS_BBOX = "-123.40,48.95,-121.60,49.55"
+MAX_CAMERAS = 24
+# Lower Mainland + Coquihalla/Connector corridor for traffic events
+# (lon_min, lat_min, lon_max, lat_max)
+EVENTS_BBOX = "-123.40,48.95,-119.30,50.40"
 EVENTS_PER_CAM = 2
 EVENT_MATCH_KM = 8.0
 
@@ -277,7 +289,7 @@ def _haversine_km(lat1, lon1, lat2, lon2):
 def fetch_traffic_events() -> list[dict]:
     """Active DriveBC (Open511) events in the Lower Mainland — the same feed
     that powers @DriveBC posts on X, with per-event updated timestamps."""
-    url = f"https://api.open511.gov.bc.ca/events?status=ACTIVE&bbox={EVENTS_BBOX}&limit=300&format=json"
+    url = f"https://api.open511.gov.bc.ca/events?status=ACTIVE&bbox={EVENTS_BBOX}&limit=500&format=json"
     try:
         resp = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
@@ -332,7 +344,7 @@ def fetch_cameras() -> list[dict]:
         print("  ✗ Cameras: all attempts failed, will reuse cached list")
         return []
     out = []
-    always = {275, 292}  # Port Mann — keep even when flagged stale
+    always = {275, 292, 251}  # Port Mann + Pennask Summit — keep even when flagged stale
     for cam_id, label in PREFERRED_CAMERAS:
         cam = by_id.get(cam_id)
         if not cam:
