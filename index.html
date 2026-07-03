@@ -951,11 +951,13 @@ input[type="color"]:hover{border-color:var(--line2)}
       <div id="mon-battle-view" style="display:none">
         <canvas id="mon-battle-canvas"></canvas>
         <div class="mon-log" id="mon-log"></div>
-        <div class="mon-moves" id="mon-moves"></div>
-        <div class="mon-moves" style="margin-top:10px">
-          <button class="btn btn-pri" id="mon-orb" onclick="monCatch()" style="background:var(--green)">◉ Throw Capsule</button>
-          <button class="btn btn-gh" onclick="monRun()">Run</button>
-          <button class="btn btn-gh" id="mon-back" onclick="monBackToMap()" style="display:none">Back to map</button>
+        <div id="mon-controls" style="transition:opacity .15s ease">
+          <div class="mon-moves" id="mon-moves"></div>
+          <div class="mon-moves" style="margin-top:10px">
+            <button class="btn btn-pri" id="mon-orb" onclick="monCatch()" style="background:var(--green)">◉ Throw Capsule</button>
+            <button class="btn btn-gh" onclick="monRun()">Run</button>
+            <button class="btn btn-gh" id="mon-back" onclick="monBackToMap()" style="display:none">Back to map</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1531,7 +1533,10 @@ function deleteBookmark(idx) {
 // in the same "Thu, Jun 25" style used across the dashboard.
 function formatSavedDate(d) {
   try {
-    var dt = new Date(d);
+    // WebKit (Tesla) won't parse "2025-06-25 14:30"; convert space to T unless
+    // it's already an ISO string that contains T
+    var raw = (typeof d === 'string' && d.indexOf('T') === -1) ? d.replace(' ', 'T') : d;
+    var dt = new Date(raw);
     if (!isNaN(dt.getTime())) return dt.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric'});
   } catch(e) {}
   return d || '';
@@ -1822,7 +1827,6 @@ function renderLinks() {
 renderBookmarks(); renderTasks(); renderLinks(); fetchStocks();
 
 // ── EMBEDDED CACHED DATA (refreshed by GitHub Actions) ──
-console.log('=== DASHBOARD INITIALIZATION ===');
 var DASHBOARD_CACHE = {
   "weather": {
     "latitude": 49.18432,
@@ -3634,6 +3638,7 @@ var DASHBOARD_CACHE = {
 };
 // ── DIAGNOSTIC TEST FOR FETCH/API SUPPORT ──
 (function() {
+  if (!location.search.includes('diag=1')) return;
   console.log('=== TESLA BROWSER DIAGNOSTICS ===');
   console.log('User Agent:', navigator.userAgent);
   console.log('Fetch available:', typeof fetch !== 'undefined');
@@ -3684,13 +3689,15 @@ function httpGet(url) {
   // Check embedded weather / forecast cache
   if (url.includes('api.open-meteo.com')) {
     if (url.includes('daily=')) {
-      // Forecast endpoint
-      if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.forecast && DASHBOARD_CACHE.forecast.daily) {
+      // Forecast endpoint — serve whatever cache exists (even a partial run's
+      // shape); the renderer degrades gracefully. Never fall through to a live
+      // request that would hang on CORS in the Tesla browser.
+      if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.forecast) {
         return Promise.resolve(DASHBOARD_CACHE.forecast);
       }
     } else {
-      // Current-weather endpoint
-      if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.weather && DASHBOARD_CACHE.weather.current) {
+      // Current-weather endpoint — same defensive check
+      if (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.weather) {
         return Promise.resolve(DASHBOARD_CACHE.weather);
       }
     }
@@ -4844,6 +4851,9 @@ function monRenderControls() {
   }).join('');
   document.getElementById('mon-orb').disabled = lock;
   document.getElementById('mon-back').style.display = monB.over ? '' : 'none';
+  // Visual feedback + hard input block while an animation plays (monBusy)
+  var ctrl = document.getElementById('mon-controls');
+  if (ctrl) { ctrl.style.opacity = monBusy ? '0.5' : ''; ctrl.style.pointerEvents = monBusy ? 'none' : ''; }
   monRenderGrid();
 }
 function monRenderGrid() {
