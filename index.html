@@ -4988,41 +4988,63 @@ function monHpBox(ctx, x, y, w, name, lv, shown, max) {
 }
 // ── Original creature sprites, drawn procedurally (no third-party art) ──
 var CRDEF = [
-  {body:'#f4c530', belly:'#fff2b8', accent:'#e39a1e', ears:'tri', eartip:'#e39a1e', tail:'bolt', cheeks:'#ff8a8a'},
-  {body:'#f0863c', belly:'#ffd9a8', accent:'#d95f2a', ears:'round', tail:'flame'},
-  {body:'#43a7e0', belly:'#d5f0ff', accent:'#2b74b0', fin:true, tail:'fish'},
-  {body:'#5fb84e', belly:'#dff5cf', accent:'#3c8a34', ears:'tri', eartip:'#3c8a34', horn:'leaf'},
-  {body:'#8a6bd0', belly:'#d9ccf5', accent:'#6a4bb0', wings:'bat', ears:'tri', eartip:'#6a4bb0'},
-  {body:'#cfe9f7', belly:'#ffffff', accent:'#7fbfe0', ears:'tri', eartip:'#7fbfe0', tail:'puff'},
-  {body:'#c9a6e8', belly:'#efe0fb', accent:'#f0d060', wings:'moth', antennae:true},
-  {body:'#e0563c', belly:'#ffd0c0', accent:'#b03a26', claws:true},
-  {body:'#eaf3f7', belly:'#ffffff', accent:'#7fc7c0', wings:'feather', beak:true},
-  {body:'#9c7b57', belly:'#d8c3a3', accent:'#6f5638', ears:'round'},
-  {body:'#3fb9ad', belly:'#cfeee9', accent:'#2a7f78', wings:'bat', horn:'spike', tail:'drake'},
-  {body:'#a06bd8', belly:'#e8d6f7', accent:'#6f3fb0', ears:'tuft', tail:'cat'}
+  {body:'#f4c530', belly:'#fff2b8', accent:'#e39a1e', ears:'tri', eartip:'#e39a1e', tail:'bolt', cheeks:'#ff8a8a', sc:0.86, shape:'round', mood:'happy'},
+  {body:'#f0863c', belly:'#ffd9a8', accent:'#d95f2a', ears:'round', tail:'flame', sc:1.0, shape:'round', mood:'cute'},
+  {body:'#43a7e0', belly:'#d5f0ff', accent:'#2b74b0', fin:true, tail:'fish', sc:0.9, shape:'tall', mood:'cute'},
+  {body:'#5fb84e', belly:'#dff5cf', accent:'#3c8a34', ears:'tri', eartip:'#3c8a34', horn:'leaf', sc:0.95, shape:'round', mood:'happy'},
+  {body:'#8a6bd0', belly:'#d9ccf5', accent:'#6a4bb0', wings:'bat', ears:'tri', eartip:'#6a4bb0', sc:0.92, shape:'round', mood:'mischief'},
+  {body:'#cfe9f7', belly:'#ffffff', accent:'#7fbfe0', ears:'tri', eartip:'#7fbfe0', tail:'puff', sc:0.98, shape:'tall', mood:'cool'},
+  {body:'#c9a6e8', belly:'#efe0fb', accent:'#f0d060', wings:'moth', antennae:true, sc:1.02, shape:'round', mood:'sleepy'},
+  {body:'#e0563c', belly:'#ffd0c0', accent:'#b03a26', claws:true, sc:1.04, shape:'wide', mood:'fierce'},
+  {body:'#eaf3f7', belly:'#ffffff', accent:'#7fc7c0', wings:'feather', beak:true, sc:0.94, shape:'tall', mood:'cute'},
+  {body:'#9c7b57', belly:'#d8c3a3', accent:'#6f5638', ears:'round', sc:1.22, shape:'wide', mood:'fierce'},
+  {body:'#3fb9ad', belly:'#cfeee9', accent:'#2a7f78', wings:'bat', horn:'spike', tail:'drake', sc:1.16, shape:'tall', mood:'fierce'},
+  {body:'#a06bd8', belly:'#e8d6f7', accent:'#6f3fb0', ears:'tuft', tail:'cat', sc:1.06, shape:'tall', mood:'cool'}
 ];
-function crEgg(ctx, R, top, bot) {
-  ctx.fillStyle = top; ctx.beginPath(); ctx.ellipse(0, 0, R * 0.72, R * 0.82, 0, 0, 7); ctx.fill();
-  ctx.fillStyle = bot; ctx.beginPath(); ctx.ellipse(0, R * 0.2, R * 0.46, R * 0.55, 0, 0, 7); ctx.fill();
+function crEgg(ctx, R, top, bot, shape) {
+  var rx = 0.72, ry = 0.82;
+  if (shape === 'tall') { rx = 0.62; ry = 0.9; } else if (shape === 'wide') { rx = 0.88; ry = 0.66; }
+  ctx.fillStyle = top; ctx.beginPath(); ctx.ellipse(0, 0, R * rx, R * ry, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = bot; ctx.beginPath(); ctx.ellipse(0, R * ry * 0.26, R * rx * 0.64, R * ry * 0.62, 0, 0, 7); ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = Math.max(1, R * 0.04);
-  ctx.beginPath(); ctx.ellipse(0, 0, R * 0.72, R * 0.82, 0, 0, 7); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, 0, R * rx, R * ry, 0, 0, 7); ctx.stroke();
 }
 function crFeet(ctx, R, c) {
   ctx.fillStyle = c;
   ctx.beginPath(); ctx.ellipse(-R * 0.32, R * 0.78, R * 0.2, R * 0.12, 0, 0, 7); ctx.fill();
   ctx.beginPath(); ctx.ellipse(R * 0.32, R * 0.78, R * 0.2, R * 0.12, 0, 0, 7); ctx.fill();
 }
-function crEyes(ctx, R, spread, y) {
+function crEyes(ctx, R, spread, y, mood, bodyCol) {
   for (var s = -1; s <= 1; s += 2) {
     var ex = s * R * spread;
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(ex, y, R * 0.15, R * 0.19, 0, 0, 7); ctx.fill();
     ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(ex, y + R * 0.02, R * 0.09, 0, 7); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex - R * 0.03, y - R * 0.04, R * 0.03, 0, 7); ctx.fill();
+    if (mood === 'cool' || mood === 'sleepy') {
+      ctx.fillStyle = bodyCol; ctx.fillRect(ex - R * 0.17, y - R * 0.22, R * 0.34, R * (mood === 'sleepy' ? 0.25 : 0.2));
+    }
+    if (mood === 'fierce' || mood === 'mischief') {
+      ctx.strokeStyle = '#3a2a2a'; ctx.lineWidth = R * 0.06; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(ex - s * R * 0.17, y - R * 0.27); ctx.lineTo(ex + s * R * 0.12, y - R * 0.1); ctx.stroke();
+    }
   }
 }
-function crMouth(ctx, R, y) {
-  ctx.strokeStyle = '#5a3a2a'; ctx.lineWidth = Math.max(1, R * 0.04);
-  ctx.beginPath(); ctx.arc(0, y, R * 0.12, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+function crMouth(ctx, R, y, mood) {
+  ctx.strokeStyle = '#5a3a2a'; ctx.lineWidth = Math.max(1, R * 0.04); ctx.lineCap = 'round';
+  if (mood === 'happy') {
+    ctx.fillStyle = '#7a3b2a'; ctx.beginPath(); ctx.arc(0, y - R * 0.02, R * 0.15, 0.08 * Math.PI, 0.92 * Math.PI); ctx.fill();
+    ctx.fillStyle = '#ff7a8a'; ctx.beginPath(); ctx.arc(0, y + R * 0.09, R * 0.07, 0, Math.PI); ctx.fill();
+  } else if (mood === 'cool') {
+    ctx.beginPath(); ctx.moveTo(-R * 0.1, y + R * 0.02); ctx.lineTo(R * 0.1, y + R * 0.02); ctx.stroke();
+  } else if (mood === 'sleepy') {
+    ctx.beginPath(); ctx.arc(0, y, R * 0.08, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+  } else if (mood === 'fierce' || mood === 'mischief') {
+    ctx.beginPath(); ctx.arc(0, y + R * 0.16, R * 0.13, 1.15 * Math.PI, 1.85 * Math.PI); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.beginPath();
+    ctx.moveTo(-R * 0.08, y + R * 0.03); ctx.lineTo(-R * 0.02, y + R * 0.03); ctx.lineTo(-R * 0.05, y + R * 0.13); ctx.closePath(); ctx.fill();
+  } else {
+    ctx.beginPath(); ctx.arc(0, y, R * 0.12, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+  }
 }
 function crCheeks(ctx, R, c) {
   ctx.fillStyle = c; ctx.globalAlpha = 0.8;
@@ -5123,7 +5145,7 @@ function crAntennae(ctx, R) {
   }
 }
 function drawCritter(ctx, cx, cy, size, idx) {
-  var d = CRDEF[idx] || CRDEF[0], R = size * 0.5;
+  var d = CRDEF[idx] || CRDEF[0], R = size * 0.5 * (d.sc || 1);
   ctx.save(); ctx.translate(cx, cy);
   // behind body
   if (d.wings === 'moth') crWingsMoth(ctx, R, d.body, d.accent);
@@ -5136,7 +5158,7 @@ function drawCritter(ctx, cx, cy, size, idx) {
   if (d.tail === 'cat') crTailCat(ctx, R, d.body);
   if (d.tail === 'fish') crTailFish(ctx, R, d.accent);
   // body + feet
-  crEgg(ctx, R, d.body, d.belly);
+  crEgg(ctx, R, d.body, d.belly, d.shape);
   crFeet(ctx, R, d.accent);
   if (d.claws) crClaws(ctx, R, d.body);
   // head features
@@ -5148,8 +5170,8 @@ function drawCritter(ctx, cx, cy, size, idx) {
   if (d.fin) crFin(ctx, R, d.accent);
   if (d.antennae) crAntennae(ctx, R);
   // face
-  crEyes(ctx, R, 0.34, -R * 0.12);
-  if (d.beak) crBeak(ctx, R); else crMouth(ctx, R, R * 0.18);
+  crEyes(ctx, R, 0.34, -R * 0.12, d.mood, d.body);
+  if (d.beak) crBeak(ctx, R); else crMouth(ctx, R, R * 0.18, d.mood);
   if (d.cheeks) crCheeks(ctx, R, d.cheeks);
   ctx.restore();
 }
