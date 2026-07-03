@@ -922,7 +922,8 @@ input[type="color"]:hover{border-color:var(--line2)}
     <div id="game-2048" style="display:none">
       <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:14px">Swipe or use arrow keys to merge tiles · Score: <strong id="g2048-score" style="color:var(--t1)">0</strong></div>
       <div class="g2048-board" id="g2048-board"></div>
-      <div style="text-align:center;margin-top:16px"><button class="btn btn-gh" onclick="g2048New()">New game</button></div>
+      <div id="g2048-msg" style="text-align:center;margin-top:14px;font-size:15px;font-weight:700;min-height:20px"></div>
+      <div style="text-align:center;margin-top:8px"><button class="btn btn-gh" onclick="g2048New()">New game</button></div>
     </div>
     <div id="game-shoot" style="display:none">
       <div style="text-align:center;font-size:14px;color:var(--t3);margin-bottom:14px" id="shoot-msg">Shootout at Rogers Arena — tap where you want to shoot. 5 pucks per round.</div>
@@ -4588,11 +4589,21 @@ function wordleKey(k) {
 wordleNew(true);
 
 // 2048
-var g2048Grid = [], g2048Score = 0;
+var g2048Grid = [], g2048Score = 0, g2048Over = false, g2048Won = false;
 function g2048New() {
   g2048Grid = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
-  g2048Score = 0;
+  g2048Score = 0; g2048Over = false; g2048Won = false;
+  var msg = document.getElementById('g2048-msg'); if (msg) msg.textContent = '';
   g2048Spawn(); g2048Spawn(); g2048Render();
+}
+// Any legal move left? (an empty cell, or two equal orthogonal neighbours)
+function g2048HasMoves() {
+  for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) {
+    if (!g2048Grid[r][c]) return true;
+    if (c < 3 && g2048Grid[r][c] === g2048Grid[r][c + 1]) return true;
+    if (r < 3 && g2048Grid[r][c] === g2048Grid[r + 1][c]) return true;
+  }
+  return false;
 }
 function g2048Spawn() {
   var empty = [];
@@ -4614,6 +4625,7 @@ function g2048Render() {
   document.getElementById('g2048-score').textContent = g2048Score;
 }
 function g2048Move(dir) { // 0=left 1=up 2=right 3=down
+  if (g2048Over) return;
   var moved = false;
   function slide(line) {
     var vals = line.filter(function(v) { return v; });
@@ -4638,7 +4650,17 @@ function g2048Move(dir) { // 0=left 1=up 2=right 3=down
       if (oldV !== v) moved = true;
     }
   }
-  if (moved) { g2048Spawn(); g2048Render(); }
+  if (moved) {
+    g2048Spawn(); g2048Render();
+    var msg = document.getElementById('g2048-msg');
+    if (!g2048Won && g2048Grid.some(function(row) { return row.indexOf(2048) >= 0; })) {
+      g2048Won = true;
+      if (msg) { msg.textContent = '🎉 You hit 2048! Keep going for a higher score.'; msg.style.color = 'var(--green)'; }
+    } else if (!g2048HasMoves()) {
+      g2048Over = true;
+      if (msg) { msg.textContent = 'Game over — score ' + g2048Score + '. Tap New game.'; msg.style.color = 'var(--red)'; }
+    }
+  }
 }
 document.addEventListener('keydown', function(e) {
   var panel = document.getElementById('p-games');
