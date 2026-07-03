@@ -938,8 +938,8 @@ input[type="color"]:hover{border-color:var(--line2)}
         <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:18px">Choose your trainer.</div>
         <div class="mon-start-grid">
           <div class="mon-start-card"><canvas class="trainer-thumb" width="96" height="96" data-idx="0"></canvas><div class="sn">Bree</div><div class="st">Trailblazer</div><button class="btn btn-pri" onclick="monChooseTrainer(0)">Choose Bree</button></div>
-          <div class="mon-start-card"><canvas class="trainer-thumb" width="96" height="96" data-idx="1"></canvas><div class="sn">Nova</div><div class="st">Explorer</div><button class="btn btn-pri" onclick="monChooseTrainer(1)">Choose Nova</button></div>
-          <div class="mon-start-card"><canvas class="trainer-thumb" width="96" height="96" data-idx="2"></canvas><div class="sn">Kai</div><div class="st">Ranger</div><button class="btn btn-pri" onclick="monChooseTrainer(2)">Choose Kai</button></div>
+          <div class="mon-start-card"><canvas class="trainer-thumb" width="96" height="96" data-idx="1"></canvas><div class="sn">Harper</div><div class="st">Explorer</div><button class="btn btn-pri" onclick="monChooseTrainer(1)">Choose Harper</button></div>
+          <div class="mon-start-card"><canvas class="trainer-thumb" width="96" height="96" data-idx="2"></canvas><div class="sn">Henry</div><div class="st">Ranger</div><button class="btn btn-pri" onclick="monChooseTrainer(2)">Choose Henry</button></div>
         </div>
       </div>
       <div id="mon-start-view">
@@ -4802,9 +4802,9 @@ function monLog2(t) { var el = document.getElementById('mon-map-sub'); if (el) e
 
 // Pixel-art sprite of Bree (female trainer). cx,cy = centre; s = height.
 var TRAINERS = [
-  {name:'Bree', hair:'#6b4423', coat:'#e0567a'},
-  {name:'Nova', hair:'#2a2a35', coat:'#2aa9a0'},
-  {name:'Kai',  hair:'#caa24a', coat:'#3a6ea5'}
+  {name:'Bree',   hair:'#6b4423', coat:'#e0567a'},
+  {name:'Harper', hair:'#2a2a35', coat:'#2aa9a0'},
+  {name:'Henry',  hair:'#caa24a', coat:'#3a6ea5', male:true}
 ];
 function monTrainer() {
   try { var i = parseInt(localStorage.getItem('mon_trainer_v1'), 10); if (i >= 0 && i < TRAINERS.length) return TRAINERS[i]; } catch(e) {}
@@ -4828,10 +4828,12 @@ function drawBree(ctx, cx, cy, s, dir, pal) {
   // hair cap
   px(-2.2, -4.8, 4.4, 1.8, pal.hair);
   px(-2.2, -4.0, 0.7, 2.4, pal.hair); px(1.5, -4.0, 0.7, 2.4, pal.hair);
-  // ponytail to the side (personality)
-  if (dir === 'left') px(1.9, -3.8, 1.0, 3.0, pal.hair);
-  else if (dir === 'right') px(-2.9, -3.8, 1.0, 3.0, pal.hair);
-  else px(-0.6, -5.4, 1.2, 1.1, pal.hair);
+  // ponytail to the side (skipped for short-haired trainers)
+  if (!pal.male) {
+    if (dir === 'left') px(1.9, -3.8, 1.0, 3.0, pal.hair);
+    else if (dir === 'right') px(-2.9, -3.8, 1.0, 3.0, pal.hair);
+    else px(-0.6, -5.4, 1.2, 1.1, pal.hair);
+  }
   if (back) { px(-1.8, -4.2, 3.6, 2.2, pal.hair); return; } // back of head
   // face
   var ex = dir === 'left' ? -0.6 : dir === 'right' ? 0.6 : 0;
