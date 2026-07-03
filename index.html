@@ -4803,8 +4803,8 @@ function monLog2(t) { var el = document.getElementById('mon-map-sub'); if (el) e
 // Pixel-art sprite of Bree (female trainer). cx,cy = centre; s = height.
 var TRAINERS = [
   {name:'Bree',   hair:'#6b4423', coat:'#e0567a'},
-  {name:'Harper', hair:'#2a2a35', coat:'#2aa9a0'},
-  {name:'Henry',  hair:'#caa24a', coat:'#3a6ea5', male:true}
+  {name:'Harper', hair:'#e8c65c', coat:'#2aa9a0', motif:'puppy'},
+  {name:'Henry',  hair:'#5a3a1a', coat:'#3a6ea5', male:true, motif:'hockey'}
 ];
 function monTrainer() {
   try { var i = parseInt(localStorage.getItem('mon_trainer_v1'), 10); if (i >= 0 && i < TRAINERS.length) return TRAINERS[i]; } catch(e) {}
@@ -4821,6 +4821,19 @@ function drawBree(ctx, cx, cy, s, dir, pal) {
   px(-1.7, 2.2, 1.4, 2.6, '#33405a'); px(0.3, 2.2, 1.4, 2.6, '#33405a');
   // jacket / body
   px(-2.3, -0.4, 4.6, 3.0, pal.coat);
+  // shirt motif (front only)
+  if (!back && pal.motif === 'puppy') {
+    px(-0.75, 0.55, 1.5, 1.25, '#f5e6c8');                                   // puppy face
+    px(-1.05, 0.45, 0.5, 0.6, '#8a5a2a'); px(0.55, 0.45, 0.5, 0.6, '#8a5a2a'); // ears
+    px(-0.42, 0.95, 0.28, 0.28, '#2a2a2a'); px(0.14, 0.95, 0.28, 0.28, '#2a2a2a'); // eyes
+    px(-0.14, 1.28, 0.28, 0.22, '#2a2a2a');                                  // nose
+  } else if (!back && pal.motif === 'hockey') {
+    var mx = cx, my = cy + 1.0 * u;                                          // crossed sticks + puck
+    ctx.strokeStyle = '#f0e0c0'; ctx.lineWidth = Math.max(1.5, 0.34 * u); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(mx - 1.1 * u, my + 0.9 * u); ctx.lineTo(mx + 1.1 * u, my - 0.9 * u); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mx + 1.1 * u, my + 0.9 * u); ctx.lineTo(mx - 1.1 * u, my - 0.9 * u); ctx.stroke();
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.ellipse(mx, my, 0.42 * u, 0.28 * u, 0, 0, 7); ctx.fill();
+  }
   // arms
   px(-3.0, -0.2, 0.9, 2.2, '#f0c49a'); px(2.1, -0.2, 0.9, 2.2, '#f0c49a');
   // head
