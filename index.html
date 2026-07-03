@@ -479,7 +479,7 @@ input[type="color"]:hover{border-color:var(--line2)}
           </div>
           <div class="live-hero-icon" id="live-icon">🌤</div>
         </div>
-        <button class="fresh-chip" id="fresh-chip" onclick="location.reload()" title="Data refreshes automatically every 4 hours — tap to reload now">
+        <button class="fresh-chip" id="fresh-chip" onclick="location.reload()" title="Data refreshes automatically every hour — tap to reload now">
           <span class="fresh-dot"></span><span id="fresh-chip-txt">Checking data…</span><span style="font-size:13px">⟳</span>
         </button>
       </div>
@@ -1112,7 +1112,7 @@ function renderFreshness() {
   if (age === null) { txt.textContent = 'Live data'; return; }
   txt.textContent = 'Updated ' + age;
   chip.classList.remove('stale', 'old');
-  // Green under 6 h (normal 4-hourly refresh), yellow under 24 h, red beyond
+  // Green under 6 h (comfortably within the hourly refresh), yellow under 24 h, red beyond
   if (mins >= 1440) chip.classList.add('old');
   else if (mins >= 360) chip.classList.add('stale');
 }
@@ -1973,7 +1973,7 @@ function loadForecast() {
     var stamp = document.getElementById('wx-updated');
     if (stamp) {
       var age = cacheAgeText();
-      stamp.textContent = 'Forecast for Surrey / Vancouver, BC' + (age ? ' · updated ' + age + ' · auto-refreshes every 4 hours' : '');
+      stamp.textContent = 'Forecast for Surrey / Vancouver, BC' + (age ? ' · updated ' + age + ' · auto-refreshes hourly' : '');
     }
   }
   // Use embedded cache first (refreshed every 4 h by GitHub Actions)
@@ -4117,7 +4117,7 @@ function createBookmarkSvg(filled) {
 function renderFeed(items, id) {
   var el = document.getElementById(id);
   if (!items || !items.length) {
-    el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">No stories right now</div><div style="font-size:11px;color:var(--t3)">Headlines refresh automatically every 4 hours — check back soon</div></div>';
+    el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">No stories right now</div><div style="font-size:11px;color:var(--t3)">Headlines refresh automatically every hour — check back soon</div></div>';
     return;
   }
   var html = '';
