@@ -300,12 +300,28 @@ input[type="color"]:hover{border-color:var(--line2)}
 .idx-item .idx-c.up{color:var(--green)}
 .idx-item .idx-c.down{color:var(--red)}
 
-/* TRAFFIC CAMERAS */
-.cam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
-.cam-card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
+/* TRAFFIC CAMERAS — swipeable pages of 4 with events under each cam */
+.cam-pager{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:24px;padding-bottom:12px;-webkit-overflow-scrolling:touch}
+.cam-pager::-webkit-scrollbar{height:10px}
+.cam-pager::-webkit-scrollbar-thumb{background:var(--line2);border-radius:5px}
+.cam-pager::-webkit-scrollbar-track{background:var(--surface);border-radius:5px}
+.cam-page{min-width:100%;scroll-snap-align:start;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-content:start}
+.cam-card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}
 .cam-card img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;background:var(--surface)}
-.cam-name{padding:12px 16px;font-size:14px;font-weight:600;color:var(--t1);display:flex;justify-content:space-between;align-items:center;gap:8px}
-.cam-name span:last-child{font-size:11px;color:var(--t3);font-weight:500}
+.cam-name{padding:12px 16px;font-size:16px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:10px}
+.cam-name .cam-src{margin-left:auto;font-size:11px;color:var(--t3);font-weight:500}
+.cam-star{font-size:24px;line-height:1;color:var(--t3);padding:6px 8px;border-radius:8px;cursor:pointer;transition:all .2s;flex-shrink:0}
+.cam-star:hover{background:var(--surface)}
+.cam-star.fav{color:#ffd60a}
+.cam-events{border-top:1px solid var(--line);padding:4px 0}
+.cam-ev{display:flex;gap:10px;padding:10px 16px;align-items:flex-start}
+.cam-ev + .cam-ev{border-top:1px solid var(--line)}
+.cam-ev-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.cam-ev-body{flex:1;min-width:0}
+.cam-ev-head{font-size:13px;font-weight:700;color:var(--t1)}
+.cam-ev-desc{font-size:12px;color:var(--t2);line-height:1.45;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cam-ev-time{font-size:11px;color:var(--t3);margin-top:4px;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+.cam-noev{padding:12px 16px;font-size:12px;color:var(--t3)}
 
 /* TIMER */
 .timer-wrap{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:32px 24px;max-width:520px;text-align:center;box-shadow:var(--shadow-sm)}
@@ -318,22 +334,22 @@ input[type="color"]:hover{border-color:var(--line2)}
 
 /* GAMES */
 .game-tabs{display:flex;gap:6px;margin-bottom:20px}
-.g2048-board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;width:min(420px,92vw);margin:0 auto;touch-action:none}
-.g2048-cell{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;background:var(--surface2);color:var(--t1);transition:transform .1s}
-.wordle-board{display:grid;grid-template-rows:repeat(6,1fr);gap:6px;width:min(320px,80vw);margin:0 auto 18px}
+.g2048-board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;width:min(640px,92vw,72vh);margin:0 auto;touch-action:none}
+.g2048-cell{aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:700;background:var(--surface2);color:var(--t1);transition:transform .1s}
+.wordle-board{display:grid;grid-template-rows:repeat(6,1fr);gap:8px;width:min(460px,88vw,52vh);margin:0 auto 22px}
 .wordle-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.wordle-tile{aspect-ratio:1;border:2px solid var(--line2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;text-transform:uppercase;color:var(--t1)}
+.wordle-tile{aspect-ratio:1;border:2px solid var(--line2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:700;text-transform:uppercase;color:var(--t1)}
 .wordle-tile.hit{background:var(--green);border-color:var(--green);color:#fff}
 .wordle-tile.near{background:#d29922;border-color:#d29922;color:#fff}
 .wordle-tile.miss{background:var(--surface2);border-color:var(--surface2);color:var(--t3)}
 .wordle-kb{display:flex;flex-direction:column;gap:6px;align-items:center}
-.wordle-kb-row{display:flex;gap:5px}
-.wkey{min-width:32px;padding:14px 8px;border-radius:8px;background:var(--surface);border:1px solid var(--line);color:var(--t1);font-size:14px;font-weight:600;cursor:pointer;text-transform:uppercase}
+.wordle-kb-row{display:flex;gap:7px}
+.wkey{min-width:52px;padding:20px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--t1);font-size:19px;font-weight:600;cursor:pointer;text-transform:uppercase}
 .wkey:hover{background:var(--surface2)}
 .wkey.hit{background:var(--green);color:#fff;border-color:var(--green)}
 .wkey.near{background:#d29922;color:#fff;border-color:#d29922}
 .wkey.miss{background:var(--surface2);color:var(--t3)}
-.wkey.wide{padding:14px 14px}
+.wkey.wide{padding:20px 20px}
 
 /* CONVERTER */
 .conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
@@ -354,6 +370,7 @@ input[type="color"]:hover{border-color:var(--line2)}
   .rl-t{font-size:17px}.appicon{width:52px;height:52px}.appicon svg{width:32px;height:32px}
   #dock{gap:4px;padding:8px 12px;bottom:16px}.dock-btn{padding:10px 16px;font-size:14px}
   #stocks-dropdown{width:calc(100vw - 24px);left:12px;margin-left:0}
+  .cam-page{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -568,11 +585,43 @@ input[type="color"]:hover{border-color:var(--line2)}
           <button class="btn btn-gh" onclick="document.getElementById('cap-input').value=''">Clear</button>
           <button class="btn btn-gh btn-voice" id="voice-btn" onclick="toggleVoice()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>Dictate</span></button>
         </div>
-        <div class="sec-title" style="margin-top:28px">Saved Thoughts</div>
+        <div class="sec-title" style="margin-top:28px">Saved Thoughts
+          <button class="ntab" style="margin-left:auto" onclick="copyNotes()">Copy all</button>
+        </div>
         <div class="cardgroup" id="notes-list"></div>
+        <div style="margin-top:28px"></div>
+    <div class="sec-title">Tasks
+          <button class="ntab" style="margin-left:auto" onclick="copyTasks()">Copy all</button>
+        </div>
+    <div style="margin-bottom:24px">
+      <input type="text" id="task-input" placeholder="Add a new task..." class="capbox" style="min-height:50px;margin-bottom:10px">
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-pri" onclick="addTask()">Add Task</button>
+        <button class="btn btn-gh" onclick="clearCompletedTasks()">Clear Done</button>
+      </div>
+      <div style="margin-top:14px;font-size:13px;color:var(--t3)" id="task-count"></div>
+    </div>
+    <div class="cardgroup" id="tasks-list"><div class="muted">No tasks. Add one to get started!</div></div>
       </div>
       <div>
-        <div class="sec-title">Calculator</div>
+    <div class="sec-title">Timer</div>
+    <div class="timer-wrap">
+      <div style="font-size:13px;color:var(--t3)" id="timer-label">Parking meter, charging stop, or anything else</div>
+      <div class="timer-display" id="timer-display">00:00</div>
+      <div class="timer-presets">
+        <button class="timer-preset" onclick="timerStart(15)">15 min</button>
+        <button class="timer-preset" onclick="timerStart(20)">20 min</button>
+        <button class="timer-preset" onclick="timerStart(30)">30 min</button>
+        <button class="timer-preset" onclick="timerStart(45)">45 min</button>
+        <button class="timer-preset" onclick="timerStart(60)">1 hour</button>
+        <button class="timer-preset" onclick="timerStart(120)">2 hours</button>
+      </div>
+      <div class="timer-actions">
+        <button class="btn btn-pri" id="timer-plus" onclick="timerAdd(5)">+5 min</button>
+        <button class="btn btn-gh" onclick="timerStop()">Cancel</button>
+      </div>
+    </div>
+        <div class="sec-title" style="margin-top:28px">Calculator</div>
         <div class="calc-wrap">
           <div class="calc-display">
             <div class="calc-expr" id="calc-expr"></div>
@@ -646,11 +695,6 @@ input[type="color"]:hover{border-color:var(--line2)}
         <a class="row" href="https://www.youtube.com" target="_blank" rel="noopener">
           <div class="appicon" style="background:#f00"><svg viewBox="0 0 24 24" fill="#fff"><path d="M10 15.5v-7l6 3.5-6 3.5zM21.8 8s-.2-1.4-.8-2c-.75-.8-1.6-.8-2-.85C16.2 5 12 5 12 5h-.01s-4.19 0-6.99.15c-.4.05-1.24.05-2 .85-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.76.8 1.75.78 2.2.86 1.6.15 6.8.2 6.8.2s4.2-.01 7-.16c.4-.05 1.25-.05 2-.85.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5c0-1.6-.2-3.2-.2-3.2z"/></svg></div>
           <div class="rl"><div class="rl-t">YouTube</div><div class="rl-s">Videos & live</div></div>
-          <span class="chev">›</span>
-        </a>
-        <a class="row" href="https://open.spotify.com" target="_blank" rel="noopener">
-          <div class="appicon" style="background:#121212"><svg viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.5 17.3a.75.75 0 0 1-1.03.25c-2.82-1.72-6.37-2.11-10.55-1.16a.75.75 0 1 1-.33-1.46c4.57-1.04 8.5-.59 11.66 1.34.35.22.46.68.25 1.03zm1.47-3.27a.94.94 0 0 1-1.29.31c-3.23-1.98-8.15-2.56-11.97-1.4a.94.94 0 1 1-.55-1.79c4.37-1.33 9.79-.68 13.5 1.6.44.27.58.85.31 1.28zm.13-3.4C15.24 8.33 8.94 8.12 5.25 9.24a1.13 1.13 0 1 1-.65-2.15c4.24-1.29 11.28-1.04 15.72 1.6a1.13 1.13 0 0 1-1.15 1.94z"/></svg></div>
-          <div class="rl"><div class="rl-t">Spotify</div><div class="rl-s">Music & podcasts</div></div>
           <span class="chev">›</span>
         </a>
       </div>
@@ -741,8 +785,8 @@ input[type="color"]:hover{border-color:var(--line2)}
         <button class="toggle" data-set="apple" aria-label="Toggle Apple module"></button>
       </div>
       <div class="set-row">
-        <div class="set-label"><div class="set-t">Capture</div><div class="set-s">Quick notes & calculator</div></div>
-        <button class="toggle" data-set="cap" aria-label="Toggle Capture module"></button>
+        <div class="set-label"><div class="set-t">Productivity</div><div class="set-s">Notes, tasks, timer, calculator & converter</div></div>
+        <button class="toggle" data-set="cap" aria-label="Toggle Productivity module"></button>
       </div>
       <div class="set-row">
         <div class="set-label"><div class="set-t">Streaming</div><div class="set-s">Theater mode shortcuts</div></div>
@@ -757,10 +801,6 @@ input[type="color"]:hover{border-color:var(--line2)}
         <button class="toggle" data-set="weather" aria-label="Toggle Weather module"></button>
       </div>
       <div class="set-row">
-        <div class="set-label"><div class="set-t">Tasks</div><div class="set-s">Personal to-do list</div></div>
-        <button class="toggle" data-set="tasks" aria-label="Toggle Tasks module"></button>
-      </div>
-      <div class="set-row">
         <div class="set-label"><div class="set-t">Quick Links</div><div class="set-s">Favorite link shortcuts</div></div>
         <button class="toggle" data-set="links" aria-label="Toggle Links module"></button>
       </div>
@@ -771,10 +811,6 @@ input[type="color"]:hover{border-color:var(--line2)}
       <div class="set-row">
         <div class="set-label"><div class="set-t">Traffic Cameras</div><div class="set-s">DriveBC bridge & highway cams</div></div>
         <button class="toggle" data-set="traffic" aria-label="Toggle Traffic module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Timer</div><div class="set-s">Parking & charging countdown</div></div>
-        <button class="toggle" data-set="timer" aria-label="Toggle Timer module"></button>
       </div>
       <div class="set-row">
         <div class="set-label"><div class="set-t">Games</div><div class="set-s">Wordle & 2048 for charging stops</div></div>
@@ -788,20 +824,6 @@ input[type="color"]:hover{border-color:var(--line2)}
   <section class="panel" id="p-saved">
     <div class="sec-title">Saved Articles</div>
     <div class="cardgroup" id="bookmarks-list"><div class="muted">No saved articles yet. Click the bookmark icon on any story.</div></div>
-  </section>
-
-  <!-- TASKS/TODO PANEL -->
-  <section class="panel" id="p-tasks">
-    <div class="sec-title">Tasks</div>
-    <div style="margin-bottom:24px">
-      <input type="text" id="task-input" placeholder="Add a new task..." class="capbox" style="min-height:50px;margin-bottom:10px">
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-pri" onclick="addTask()">Add Task</button>
-        <button class="btn btn-gh" onclick="clearCompletedTasks()">Clear Done</button>
-      </div>
-      <div style="margin-top:14px;font-size:13px;color:var(--t3)" id="task-count"></div>
-    </div>
-    <div class="cardgroup" id="tasks-list"><div class="muted">No tasks. Add one to get started!</div></div>
   </section>
 
   <!-- WEATHER FORECAST PANEL -->
@@ -839,30 +861,17 @@ input[type="color"]:hover{border-color:var(--line2)}
   <!-- TRAFFIC CAMERAS PANEL -->
   <section class="panel" id="p-traffic">
     <div class="sec-title"><div class="live-dot"></div> Traffic Cameras
-      <button class="ntab" style="margin-left:auto" onclick="renderCameras(true)">Refresh images</button>
+      <span id="cam-page-ind" style="margin-left:12px;font-weight:700"></span>
+      <div class="news-tabs">
+        <button class="ntab" onclick="camPage(-1)">‹ Prev</button>
+        <button class="ntab" onclick="camPage(1)">Next ›</button>
+        <button class="ntab" onclick="renderCameras(true)">Refresh</button>
+      </div>
     </div>
-    <div class="cam-grid" id="cam-grid"><div class="muted">Loading cameras…</div></div>
-    <div style="margin-top:16px;font-size:12px;color:var(--t3)">Live images from DriveBC — updated every few minutes. Tap "Refresh images" for the latest frame.</div>
-  </section>
-
-  <!-- TIMER PANEL -->
-  <section class="panel" id="p-timer">
-    <div class="sec-title">Timer</div>
-    <div class="timer-wrap">
-      <div style="font-size:13px;color:var(--t3)" id="timer-label">Parking meter, charging stop, or anything else</div>
-      <div class="timer-display" id="timer-display">00:00</div>
-      <div class="timer-presets">
-        <button class="timer-preset" onclick="timerStart(15)">15 min</button>
-        <button class="timer-preset" onclick="timerStart(20)">20 min</button>
-        <button class="timer-preset" onclick="timerStart(30)">30 min</button>
-        <button class="timer-preset" onclick="timerStart(45)">45 min</button>
-        <button class="timer-preset" onclick="timerStart(60)">1 hour</button>
-        <button class="timer-preset" onclick="timerStart(120)">2 hours</button>
-      </div>
-      <div class="timer-actions">
-        <button class="btn btn-pri" id="timer-plus" onclick="timerAdd(5)">+5 min</button>
-        <button class="btn btn-gh" onclick="timerStop()">Cancel</button>
-      </div>
+    <div class="cam-pager" id="cam-pager"><div class="muted">Loading cameras…</div></div>
+    <div style="margin-top:14px;font-size:12px;color:var(--t3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span>★ Favourite up to 4 cameras to pin them to page 1 · images live from DriveBC · incident data refreshes hourly</span>
+      <a href="https://x.com/DriveBC" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">@DriveBC on X ↗</a>
     </div>
   </section>
 
@@ -907,9 +916,7 @@ input[type="color"]:hover{border-color:var(--line2)}
   </div>
   <div class="dock-submenu-head">Tools</div>
   <div class="dock-submenu-grid">
-    <button class="dock-submenu-item" data-p="tasks">Tasks</button>
-    <button class="dock-submenu-item" data-p="cap">Capture</button>
-    <button class="dock-submenu-item" data-p="timer">Timer</button>
+    <button class="dock-submenu-item" data-p="cap">Productivity</button>
     <button class="dock-submenu-item" data-p="stocks">Stocks</button>
     <button class="dock-submenu-item" data-p="links">Links</button>
     <button class="dock-submenu-item" data-p="games">Games</button>
@@ -935,7 +942,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 <script>
 // ── VARIABLES (declared early to avoid undefined reference errors) ──
 var SETTINGS_KEY = 'dash_settings_v1';
-var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, tasks:true, links:true, saved:true, traffic:true, timer:true, games:true}};
+var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, links:true, saved:true, traffic:true, games:true}};
 var settings;
 var themePresets = {default: {accent:'#3a82f6'}, cyberpunk: {accent:'#ff006e'}, sunset: {accent:'#ff6b35'}, forest: {accent:'#22c55e'}, lavender: {accent:'#a78bfa'}};
 var draggedBtn = null;
@@ -1744,7 +1751,7 @@ var DASHBOARD_CACHE = {
   "weather": {
     "latitude": 49.18432,
     "longitude": -122.82682,
-    "generationtime_ms": 0.18668174743652344,
+    "generationtime_ms": 1.7794370651245117,
     "utc_offset_seconds": 0,
     "timezone": "GMT",
     "timezone_abbreviation": "GMT",
@@ -1760,20 +1767,20 @@ var DASHBOARD_CACHE = {
       "wind_speed_10m": "km/h"
     },
     "current": {
-      "time": "2026-07-02T23:30",
+      "time": "2026-07-03T00:00",
       "interval": 900,
-      "temperature_2m": 13.5,
-      "weather_code": 53,
+      "temperature_2m": 13.4,
+      "weather_code": 55,
       "is_day": 1,
-      "apparent_temperature": 13.4,
+      "apparent_temperature": 13.6,
       "relative_humidity_2m": 95,
-      "wind_speed_10m": 6.2
+      "wind_speed_10m": 4.8
     }
   },
   "forecast": {
     "latitude": 49.18432,
     "longitude": -122.82682,
-    "generationtime_ms": 0.5385875701904297,
+    "generationtime_ms": 0.6392002105712891,
     "utc_offset_seconds": -25200,
     "timezone": "America/Vancouver",
     "timezone_abbreviation": "GMT-7",
@@ -1801,20 +1808,20 @@ var DASHBOARD_CACHE = {
       "temperature_2m_max": [
         15.7,
         18.7,
-        20.9,
-        22.8,
-        24.1,
-        15.2,
-        20.9
+        20.6,
+        22.4,
+        24.0,
+        17.8,
+        20.1
       ],
       "temperature_2m_min": [
         11.6,
         13.3,
         10.9,
         8.1,
-        9.4,
-        10.1,
-        10.2
+        10.2,
+        9.8,
+        9.5
       ],
       "weather_code": [
         63,
@@ -1827,7 +1834,7 @@ var DASHBOARD_CACHE = {
       ],
       "precipitation_probability_max": [
         99,
-        28,
+        30,
         4,
         0,
         1,
@@ -1854,12 +1861,12 @@ var DASHBOARD_CACHE = {
       ],
       "uv_index_max": [
         2.5,
-        5.75,
-        7.2,
-        7.2,
-        7.05,
-        2.75,
-        5.8
+        5.8,
+        7.15,
+        7.15,
+        7.1,
+        4.9,
+        5.2
       ]
     }
   },
@@ -1867,6 +1874,12 @@ var DASHBOARD_CACHE = {
     "https://globalnews.ca/bc/feed/": {
       "status": "ok",
       "items": [
+        {
+          "title": "Former owner of sunken B.C. vessel speaks, identifies the boat involved",
+          "link": "https://globalnews.ca/news/11950968/former-owner-sunken-vessel-identifies-boat/",
+          "pubDate": "2026-07-02T23:58:23Z",
+          "source": "Global BC"
+        },
         {
           "title": "BC Highway Patrol dashcam illustrates dangers of passing on the right",
           "link": "https://globalnews.ca/news/11950875/bc-highway-patrol-dashcam-dangers-passing-right/",
@@ -1890,12 +1903,6 @@ var DASHBOARD_CACHE = {
           "link": "https://globalnews.ca/news/11950661/bc-man-trapped-venezuela-earthquakes-providing-aid/",
           "pubDate": "2026-07-02T21:37:16Z",
           "source": "Global BC"
-        },
-        {
-          "title": "B.C. TV show says boat that sank off Richmond was ‘utilized’ for several years",
-          "link": "https://globalnews.ca/news/11949333/bc-big-coast-boat-sunk-richmond-tv-show/",
-          "pubDate": "2026-07-02T21:06:34Z",
-          "source": "Global BC"
         }
       ]
     },
@@ -1903,9 +1910,15 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
-          "title": "Alberta to reveal pipeline proposal details after B.C.-Ottawa deal undermines northern route",
+          "title": "Alberta Premier Danielle Smith to speak about West Coast pipeline proposal",
           "link": "https://www.cbc.ca/news/canada/livestory/energy-proposal-ab-bc-west-coast-july-2-live-updates-9.7251535?cmp=rss",
           "pubDate": "2026-07-02T17:04:01Z",
+          "source": "CBC BC"
+        },
+        {
+          "title": "Glacial lake near Pemberton, B.C., draining slower than expected, experts and officials say",
+          "link": "https://www.cbc.ca/news/canada/british-columbia/glacial-lake-pemberton-draining-9.7256744?cmp=rss",
+          "pubDate": "2026-07-02T23:55:15Z",
           "source": "CBC BC"
         },
         {
@@ -1915,22 +1928,121 @@ var DASHBOARD_CACHE = {
           "source": "CBC BC"
         },
         {
-          "title": "B.C. nurses begin job action, employer agrees to resume negotiations",
-          "link": "https://www.cbc.ca/news/canada/british-columbia/bc-nurse-strike-begins-bcnu-9.7256426?cmp=rss",
-          "pubDate": "2026-07-02T19:54:25Z",
-          "source": "CBC BC"
-        },
-        {
           "title": "Volleyball coach charged following investigation into sexual assault complaints: North Vancouver RCMP",
           "link": "https://www.cbc.ca/news/canada/british-columbia/volleyball-sexual-assault-north-vancouver-9.7256362?cmp=rss",
           "pubDate": "2026-07-02T20:19:16Z",
           "source": "CBC BC"
         },
         {
-          "title": "Vancouver 'RoboCop' is one of 1st Canadian ALS patients to receive Elon Musk's Neuralink brain implant",
-          "link": "https://www.cbc.ca/news/canada/british-columbia/vancouver-neuralink-patient-als-vpd-sergeant-9.7253579?cmp=rss",
-          "pubDate": "2026-07-02T11:00:00Z",
+          "title": "B.C. nurses begin job action, employer agrees to resume negotiations",
+          "link": "https://www.cbc.ca/news/canada/british-columbia/bc-nurse-strike-begins-bcnu-9.7256426?cmp=rss",
+          "pubDate": "2026-07-02T19:54:25Z",
           "source": "CBC BC"
+        }
+      ]
+    },
+    "https://vancouver.citynews.ca/feed/": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Man left critically injured after suspected assault, according to Langley RCMP",
+          "link": "https://vancouver.citynews.ca/2026/07/02/langley-assault-july-1/",
+          "pubDate": "2026-07-02T23:36:08Z",
+          "source": "CityNews Van"
+        },
+        {
+          "title": "Rainbow crosswalk defaced in Langley, police say",
+          "link": "https://vancouver.citynews.ca/2026/07/02/rainbow-crosswalk-defaced/",
+          "pubDate": "2026-07-02T23:04:10Z",
+          "source": "CityNews Van"
+        },
+        {
+          "title": "Vancouver extends Pedestrian Zone on Granville Street to Labour Day",
+          "link": "https://vancouver.citynews.ca/2026/07/02/ped-zone-to-labour-day/",
+          "pubDate": "2026-07-02T22:59:01Z",
+          "source": "CityNews Van"
+        },
+        {
+          "title": "Cost of local government most important for small businesses in B.C.: CFIB",
+          "link": "https://vancouver.citynews.ca/2026/07/02/cfib-taxes-small-bus/",
+          "pubDate": "2026-07-02T22:53:26Z",
+          "source": "CityNews Van"
+        },
+        {
+          "title": "Sunk B.C. charter boat could take days to recover after it is found: police",
+          "link": "https://vancouver.citynews.ca/2026/07/02/sunk-b-c-charter-boat-could-take-days-to-recover-after-it-is-found-police/",
+          "pubDate": "2026-07-02T21:29:59Z",
+          "source": "CityNews Van"
+        }
+      ]
+    },
+    "https://dailyhive.com/feed/vancouver": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "New Canucks defenceman is the less-famous brother of Canadian Olympic hero",
+          "link": "https://dailyhive.com/vancouver/canucks-penny-oleksiak-brother",
+          "pubDate": "2026-07-02T23:16:38Z",
+          "source": "Daily Hive"
+        },
+        {
+          "title": "10 amazing Vancouver theatre and arts events happening in July",
+          "link": "https://dailyhive.com/vancouver/vancouver-theatre-arts-events-july-2026",
+          "pubDate": "2026-07-02T22:53:24Z",
+          "source": "Daily Hive"
+        },
+        {
+          "title": "Granville Street Pedestrian Zone extended to September, with Christmas market possible in fall",
+          "link": "https://dailyhive.com/vancouver/granville-street-pedestrian-zone-vancouver-extension",
+          "pubDate": "2026-07-02T22:47:25Z",
+          "source": "Daily Hive"
+        },
+        {
+          "title": "Luke Schenn seems to really care about the Vancouver Canucks",
+          "link": "https://dailyhive.com/vancouver/luke-schenn-cares-about-canucks",
+          "pubDate": "2026-07-02T22:26:34Z",
+          "source": "Daily Hive"
+        },
+        {
+          "title": "B.C. government agrees to talks on new Alberta oil pipeline to coast, with revenue share and tanker ban",
+          "link": "https://dailyhive.com/vancouver/bc-alberta-canada-new-oil-pipeline-agreement",
+          "pubDate": "2026-07-02T21:37:53Z",
+          "source": "Daily Hive"
+        }
+      ]
+    },
+    "https://vancouversun.com/feed": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Vessel that sank off B.C. coast had been impounded last year for illegal fishing, former owner says",
+          "link": "https://vancouversun.com/news/vessel-that-sank-off-bc-coast-had-been-impounded-last-year-for-illegal-fishing-former-owner-says",
+          "pubDate": "2026-07-02T23:51:40Z",
+          "source": "Vancouver Sun"
+        },
+        {
+          "title": "Alberta expected to announce 'exciting' proposal for southern route for new oil pipeline",
+          "link": "https://vancouversun.com/news/alberta-to-announce-proposal-southern-oil-pipeline-route",
+          "pubDate": "2026-07-02T23:46:36Z",
+          "source": "Vancouver Sun"
+        },
+        {
+          "title": "Langley senior in critical condition after assault",
+          "link": "https://vancouversun.com/news/langley-senior-in-critical-condition-after-assault",
+          "pubDate": "2026-07-02T23:33:35Z",
+          "source": "Vancouver Sun"
+        },
+        {
+          "title": "Vaughn Palmer: Big win for B.C. Premier David Eby in funding deal with Ottawa",
+          "link": "https://vancouversun.com/opinion/columnists/vaughn-palmer-big-win-bc-premier-david-eby-funding-deal-ottawa",
+          "pubDate": "2026-07-02T23:13:58Z",
+          "source": "Vancouver Sun"
+        },
+        {
+          "title": "Opinion: Reversing reform of B.C.'s property tax deferral program would be socially and economically repugnant",
+          "link": "https://vancouversun.com/opinion/opinion-reversing-reform-of-b-c-s-property-tax-deferral-program-would-be-socially-and-economically-repugnant",
+          "pubDate": "2026-07-02T23:00:36Z",
+          "source": "Vancouver Sun"
         }
       ]
     },
@@ -1938,21 +2050,21 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
+          "title": "Alberta Premier Danielle Smith to speak about West Coast pipeline proposal",
+          "link": "https://www.cbc.ca/news/canada/livestory/energy-proposal-ab-bc-west-coast-july-2-live-updates-9.7251535?cmp=rss",
+          "pubDate": "2026-07-02T17:04:01Z",
+          "source": "CBC News"
+        },
+        {
           "title": "'I will kill everyone around you': Threat to ex by father in double-murder suicide emerges",
           "link": "https://www.cbc.ca/news/canada/ottawa/i-will-kill-everyone-around-you-threat-to-ex-by-father-in-double-murder-suicide-emerges-9.7256577?cmp=rss",
           "pubDate": "2026-07-02T22:15:53Z",
           "source": "CBC News"
         },
         {
-          "title": "Portugal vs. Croatia locked at 0-0 in first half of World Cup knockout match in Toronto",
+          "title": "Portugal and Croatia tied 0-0 at halftime in World Cup knockout match in Toronto",
           "link": "https://www.cbc.ca/sports/livestory/fifa-world-cup-2026-portugal-croatia-toronto-9.7256369?cmp=rss",
           "pubDate": "2026-06-11T20:05:56Z",
-          "source": "CBC News"
-        },
-        {
-          "title": "Alberta to reveal pipeline proposal details after B.C.-Ottawa deal undermines northern route",
-          "link": "https://www.cbc.ca/news/canada/livestory/energy-proposal-ab-bc-west-coast-july-2-live-updates-9.7251535?cmp=rss",
-          "pubDate": "2026-07-02T17:04:01Z",
           "source": "CBC News"
         },
         {
@@ -1962,9 +2074,9 @@ var DASHBOARD_CACHE = {
           "source": "CBC News"
         },
         {
-          "title": "What happens when a World Cup match gets dangerously hot?",
-          "link": "https://www.cbc.ca/news/science/wet-bulb-temperature-explainer-9.7256223?cmp=rss",
-          "pubDate": "2026-07-02T22:00:00Z",
+          "title": "Dauphin, Man., left with 'very limited' health services as water recedes, flood cleanup begins",
+          "link": "https://www.cbc.ca/news/canada/manitoba/dauphin-flood-cleanup-hospital-9.7256762?cmp=rss",
+          "pubDate": "2026-07-02T23:56:24Z",
           "source": "CBC News"
         }
       ]
@@ -1973,33 +2085,33 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
-          "title": "BC Highway Patrol dashcam illustrates dangers of passing on the right",
-          "link": "https://globalnews.ca/news/11950875/bc-highway-patrol-dashcam-dangers-passing-right/",
-          "pubDate": "2026-07-02T23:25:05Z",
+          "title": "Calgary man facing attempted murder charges in Lethbridge sees case adjourned until next month",
+          "link": "https://globalnews.ca/news/11950503/calgary-man-attempted-murder-charges-lethbridge-case-adjourned/",
+          "pubDate": "2026-07-03T00:08:36Z",
           "source": "Global News"
         },
         {
-          "title": "Calgary mayor says he wants to hold advocacy campaign opposing separation, but can’t",
-          "link": "https://globalnews.ca/news/11950956/calgary-mayor-jeromy-farkas-alberta-separation-referendum/",
-          "pubDate": "2026-07-02T23:19:29Z",
+          "title": "University of Calgary developing new immunotherapy cancer treatment",
+          "link": "https://globalnews.ca/news/11950873/university-of-calgary-immunotherapy-cancer-treatment/",
+          "pubDate": "2026-07-03T00:06:36Z",
           "source": "Global News"
         },
         {
-          "title": "Montreal Canadiens sign goaltender Dobes to three-year extension",
-          "link": "https://globalnews.ca/news/11950942/montreal-canadiens-sign-goaltender-dobes-to-three-year-extension/",
-          "pubDate": "2026-07-02T23:10:13Z",
+          "title": "Edmonton traffic stop leads to extortion-related arrest",
+          "link": "https://globalnews.ca/news/11950829/edmonton-traffic-stop-leads-to-extortion-related-arrest/",
+          "pubDate": "2026-07-03T00:02:48Z",
           "source": "Global News"
         },
         {
-          "title": "More than 106K Albertans sign up for $100 affordability rebates as applications open",
-          "link": "https://globalnews.ca/news/11950926/thousands-of-albertans-sign-up-affordability-rebates-100/",
-          "pubDate": "2026-07-02T22:59:38Z",
+          "title": "Former owner of sunken B.C. vessel speaks, identifies the boat involved",
+          "link": "https://globalnews.ca/news/11950968/former-owner-sunken-vessel-identifies-boat/",
+          "pubDate": "2026-07-02T23:58:23Z",
           "source": "Global News"
         },
         {
-          "title": "The Riders vault with Rob Vanstone",
-          "link": "https://globalnews.ca/news/11950814/the-riders-vault-with-rob-vanstone/",
-          "pubDate": "2026-07-02T22:47:18Z",
+          "title": "Green light for Greenlight: Pembina, partners go ahead with gas plant for data centre",
+          "link": "https://globalnews.ca/news/11950983/greenlight-electricity-centre-pembina-pipeline-artificial-intelligence/",
+          "pubDate": "2026-07-02T23:53:49Z",
           "source": "Global News"
         }
       ]
@@ -2036,6 +2148,76 @@ var DASHBOARD_CACHE = {
           "link": "https://nationalpost.com/news/politics/liberal-government-tim-hodgson-oil-reserves",
           "pubDate": "2026-07-02T19:14:13Z",
           "source": "National Post"
+        }
+      ]
+    },
+    "https://financialpost.com/feed": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Booming AI Chip Trade Seals Hong Kong’s Role as Gateway to China",
+          "link": "https://financialpost.com/pmn/business-pmn/booming-ai-chip-trade-seals-hong-kongs-role-as-gateway-to-china",
+          "pubDate": "2026-07-02T23:51:46Z",
+          "source": "Financial Post"
+        },
+        {
+          "title": "China’s Net Zero Strategy Relies on an Unlikely Tool: Lots of Coal",
+          "link": "https://financialpost.com/pmn/business-pmn/chinas-net-zero-strategy-relies-on-an-unlikely-tool-lots-of-coal",
+          "pubDate": "2026-07-02T23:26:06Z",
+          "source": "Financial Post"
+        },
+        {
+          "title": "Imperial Reports Red Chris Mine Block Cave to Receive $500 Million from the Government of Canada",
+          "link": "https://financialpost.com/globe-newswire/imperial-reports-red-chris-mine-block-cave-to-receive-500-million-from-the-government-of-canada",
+          "pubDate": "2026-07-02T23:19:55Z",
+          "source": "Financial Post"
+        },
+        {
+          "title": "Canada, Philippines Agree to Sign Trade Deal This Year, Grow Defense Ties",
+          "link": "https://financialpost.com/pmn/business-pmn/canada-philippines-agree-to-sign-trade-deal-this-year-grow-defense-ties",
+          "pubDate": "2026-07-02T23:15:33Z",
+          "source": "Financial Post"
+        },
+        {
+          "title": "Power Prices Soar as Energy Emergency Worsens in US Northeast",
+          "link": "https://financialpost.com/pmn/business-pmn/power-prices-soar-as-energy-emergency-worsens-in-us-northeast",
+          "pubDate": "2026-07-02T23:10:37Z",
+          "source": "Financial Post"
+        }
+      ]
+    },
+    "https://www.cbc.ca/cmlink/rss-politics": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Alberta Premier Danielle Smith to speak about West Coast pipeline proposal",
+          "link": "https://www.cbc.ca/news/canada/livestory/energy-proposal-ab-bc-west-coast-july-2-live-updates-9.7251535?cmp=rss",
+          "pubDate": "2026-07-02T17:02:54Z",
+          "source": "CBC Politics"
+        },
+        {
+          "title": "North Coast oil tanker ban being upheld, Port of Vancouver expanding in multibillion-dollar B.C.-Ottawa deal",
+          "link": "https://www.cbc.ca/news/canada/british-columbia/eby-carney-british-columbia-economic-agreeement-pipeline-9.7255633?cmp=rss",
+          "pubDate": "2026-07-02T13:50:55Z",
+          "source": "CBC Politics"
+        },
+        {
+          "title": "U.S. declines to extend CUSMA trade deal with Canada, Mexico",
+          "link": "https://www.cbc.ca/news/world/cusma-usmca-trump-extension-renewal-9.7255204?cmp=rss",
+          "pubDate": "2026-07-01T16:57:45Z",
+          "source": "CBC Politics"
+        },
+        {
+          "title": "Carney praises connection in a 'divided world' as Canada Day celebrations underway",
+          "link": "https://www.cbc.ca/news/politics/carney-praises-canadian-connection-9.7255277?cmp=rss",
+          "pubDate": "2026-07-01T18:05:06Z",
+          "source": "CBC Politics"
+        },
+        {
+          "title": "Carney says Trudeau-era climate plan was 'too expensive' and 'divisive'",
+          "link": "https://www.cbc.ca/news/politics/carney-trudeau-carbon-emissions-climate-change-9.7254619?cmp=rss",
+          "pubDate": "2026-06-30T22:39:18Z",
+          "source": "CBC Politics"
         }
       ]
     },
@@ -2078,6 +2260,18 @@ var DASHBOARD_CACHE = {
       "status": "ok",
       "items": [
         {
+          "title": "Trump administration indicts Olympic athlete for Reflecting Pool vandalism",
+          "link": "https://www.aljazeera.com/news/2026/7/2/trump-administration-indicts-olympic-athlete-for-reflecting-pool-vandalism?traffic_source=rss",
+          "pubDate": "2026-07-02T23:31:22Z",
+          "source": "Al Jazeera"
+        },
+        {
+          "title": "Will the end of TPS for Haitians mean a caregiving crisis in US?",
+          "link": "https://www.aljazeera.com/news/2026/7/2/will-the-end-of-tps-for-haitians-mean-a-caregiving-crisis-in-us?traffic_source=rss",
+          "pubDate": "2026-07-02T23:26:38Z",
+          "source": "Al Jazeera"
+        },
+        {
           "title": "Portugal fans gather ahead of Ronaldo-Modric clash",
           "link": "https://www.aljazeera.com/video/newsfeed/2026/7/2/portugal-fans-gather-ahead-of-ronaldo-modric-clash?traffic_source=rss",
           "pubDate": "2026-07-02T22:49:24Z",
@@ -2093,18 +2287,6 @@ var DASHBOARD_CACHE = {
           "title": "Oyarzabal scores two goals as Spain dominates Austria in World Cup knockout",
           "link": "https://www.aljazeera.com/sports/2026/7/2/oyarzabal-scores-two-goals-as-spain-dominates-austria-in-world-cup-knockout?traffic_source=rss",
           "pubDate": "2026-07-02T21:45:42Z",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "Could water become a flashpoint between Islamabad and New Delhi?",
-          "link": "https://www.aljazeera.com/video/inside-story/2026/7/2/could-water-become-a-flashpoint-between-islamabad-and-new-delhi?traffic_source=rss",
-          "pubDate": "2026-07-02T21:01:30Z",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "WHO declares cruise-linked hantavirus outbreak officially over",
-          "link": "https://www.aljazeera.com/news/2026/7/2/who-declares-cruise-linked-hantavirus-outbreak-officially-over?traffic_source=rss",
-          "pubDate": "2026-07-02T20:50:03Z",
           "source": "Al Jazeera"
         }
       ]
@@ -2178,6 +2360,111 @@ var DASHBOARD_CACHE = {
           "source": "France24"
         }
       ]
+    },
+    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Russia Hammers Ukraine’s Capital in Deadly Attacks",
+          "link": "https://www.nytimes.com/live/2026/07/02/world/ukraine-kyiv-russia-attack",
+          "pubDate": "2026-07-02T21:51:00Z",
+          "source": "NYT World"
+        },
+        {
+          "title": "Can the World’s Largest Stadium Explain the Global Economy?",
+          "link": "https://www.nytimes.com/2026/07/02/world/asia/vietnam-stadium-corporate-inequality.html",
+          "pubDate": "2026-07-02T19:43:36Z",
+          "source": "NYT World"
+        },
+        {
+          "title": "U.S. Hopes for Investment in Iran Would Break With Decades of History",
+          "link": "https://www.nytimes.com/2026/07/02/world/middleeast/us-iran-negotiations-economy-opening-up.html",
+          "pubDate": "2026-07-02T14:14:38Z",
+          "source": "NYT World"
+        },
+        {
+          "title": "Iran Prepares to Bury Supreme Leader, Ayatollah Ali Khamenei, Killed at Iran War’s Outset",
+          "link": "https://www.nytimes.com/2026/07/02/world/middleeast/iran-funeral-ali-khamenei-preparations.html",
+          "pubDate": "2026-07-02T15:32:34Z",
+          "source": "NYT World"
+        },
+        {
+          "title": "Court Investigates Spanish Police Chief, Heaping Pressure on Prime Minister",
+          "link": "https://www.nytimes.com/2026/07/02/world/europe/spain-police-investigation-sanchez.html",
+          "pubDate": "2026-07-02T15:05:57Z",
+          "source": "NYT World"
+        }
+      ]
+    },
+    "https://feeds.skynews.com/feeds/rss/world.xml": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Cubans face endless blackouts, collapsing salaries and empty shops – but they're refusing to give up",
+          "link": "https://news.sky.com/story/cuba-faces-an-unceasing-crisis-but-its-people-are-refusing-to-give-up-13559697",
+          "pubDate": "2026-07-02T03:59:00Z",
+          "source": "Sky News"
+        },
+        {
+          "title": "Violent protests over luxury resort linked to Trump's son-in-law",
+          "link": "https://news.sky.com/story/violent-protests-in-albania-over-luxury-resort-linked-to-donald-trumps-son-in-law-jared-kushner-13559893",
+          "pubDate": "2026-07-02T15:14:00Z",
+          "source": "Sky News"
+        },
+        {
+          "title": "Nine Thai monks killed as 11-year-old boy crashes pickup truck into pilgrimage walk",
+          "link": "https://news.sky.com/story/eight-thai-monks-killed-as-11-year-old-boy-crashes-pickup-truck-into-pilgrimage-walk-13559765",
+          "pubDate": "2026-07-02T09:57:00Z",
+          "source": "Sky News"
+        },
+        {
+          "title": "At least 16 killed and 20 injured in South Africa bus crash",
+          "link": "https://news.sky.com/story/at-least-16-killed-and-20-injured-in-south-africa-bus-crash-13559802",
+          "pubDate": "2026-07-02T11:08:00Z",
+          "source": "Sky News"
+        },
+        {
+          "title": "Alleged member of hacking group Scattered Spider arrested",
+          "link": "https://news.sky.com/story/alleged-member-of-international-cyber-hacking-group-scattered-spider-arrested-13559690",
+          "pubDate": "2026-07-01T23:38:00Z",
+          "source": "Sky News"
+        }
+      ]
+    },
+    "https://www.cbc.ca/cmlink/rss-world": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Venezuelans now face grim and daunting task of recovering bodies from devastated areas",
+          "link": "https://www.cbc.ca/news/world/venezuela-rescue-earthquake-9.7255637?cmp=rss",
+          "pubDate": "2026-06-25T01:33:43Z",
+          "source": "CBC World"
+        },
+        {
+          "title": "Trump isn't extending CUSMA trade deal, so what happens now?",
+          "link": "https://www.cbc.ca/news/politics/what-next-cusma-usmca-us-canada-mexico-trump-tariffs-9.7255435?cmp=rss",
+          "pubDate": "2026-07-02T08:00:00Z",
+          "source": "CBC World"
+        },
+        {
+          "title": "Ex-Olympian indicted on felony charge over what Trump called reflecting pool vandalism",
+          "link": "https://www.cbc.ca/news/world/olympian-indicted-felony-charge-trump-reflecting-pool-vandalism-9.7256383?cmp=rss",
+          "pubDate": "2026-07-02T20:02:11Z",
+          "source": "CBC World"
+        },
+        {
+          "title": "Deadly, large-scale Russian attack shakes Kyiv as Ukrainian strikes batter Moscow's oil sector",
+          "link": "https://www.cbc.ca/news/world/missile-drone-attack-kyiv-russia-war-9.7255625?cmp=rss",
+          "pubDate": "2026-07-02T10:21:05Z",
+          "source": "CBC World"
+        },
+        {
+          "title": "Watchdog puts blame on U.S. Secret Service for missing crucial radio calls during 2024 Trump shooting",
+          "link": "https://www.cbc.ca/news/world/trump-assassination-attempt-secret-service-failings-9.7256751?cmp=rss",
+          "pubDate": "2026-07-02T22:55:00Z",
+          "source": "CBC World"
+        }
+      ]
     }
   },
   "sports": {
@@ -2222,31 +2509,31 @@ var DASHBOARD_CACHE = {
         {
           "title": "4 CFL Fantasy waiver wire pickups for Week 5",
           "link": "https://www.cfl.ca/2026/07/02/4-cfl-fantasy-waiver-wire-pickups-for-week-5/",
-          "pubDate": "2026-07-02T23:44:47Z",
+          "pubDate": "2026-07-03T00:11:39Z",
           "source": "CFL.ca"
         },
         {
           "title": "3 keys to victory for Saskatchewan, Ottawa on FanDuel Canada Day Weekend",
           "link": "https://www.cfl.ca/2026/07/02/3-keys-to-victory-for-saskatchewan-ottawa-on-fanduel-canada-day-weekend/",
-          "pubDate": "2026-07-02T23:44:47Z",
+          "pubDate": "2026-07-03T00:11:39Z",
           "source": "CFL.ca"
         },
         {
           "title": "A position-by-position look at the CFL’s Canadian talent",
           "link": "https://www.cfl.ca/2026/07/02/a-position-by-position-look-at-the-cfls-canadian-talent/",
-          "pubDate": "2026-07-02T23:44:47Z",
+          "pubDate": "2026-07-03T00:11:39Z",
           "source": "CFL.ca"
         },
         {
           "title": "8 players who could decide FanDuel Canada Day Weekend",
           "link": "https://www.cfl.ca/2026/07/02/8-players-who-could-decide-fanduel-canada-day-weekend/",
-          "pubDate": "2026-07-02T23:44:47Z",
+          "pubDate": "2026-07-03T00:11:39Z",
           "source": "CFL.ca"
         },
         {
           "title": "6 CFL Fantasy trades to upgrade your roster in Week 5",
           "link": "https://www.cfl.ca/2026/07/02/6-cfl-fantasy-trades-to-upgrade-your-roster-in-week-5/",
-          "pubDate": "2026-07-02T23:44:47Z",
+          "pubDate": "2026-07-03T00:11:39Z",
           "source": "CFL.ca"
         }
       ]
@@ -2283,6 +2570,111 @@ var DASHBOARD_CACHE = {
           "link": "https://www.mlb.com/news/cade-cavalli-willson-contreras-disciplined-for-benches-clearing-incident",
           "pubDate": "2026-07-02T21:36:16Z",
           "source": "MLB.com"
+        }
+      ]
+    },
+    "https://www.cbc.ca/cmlink/rss-sports": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "How can Canada beat Morocco? It could be found in Promise David’s sublime group-stage goal",
+          "link": "https://www.cbc.ca/sports/soccer/worldcup/fifa-world-cup-canada-round-of-16-chris-jones-july-2-9.7256433?cmp=rss",
+          "pubDate": "2026-07-02T20:42:44Z",
+          "source": "CBC Sports"
+        },
+        {
+          "title": "Raptors sign head coach Rajakovic to multi-year extension",
+          "link": "https://www.cbc.ca/sports/basketball/nba/toronto-raptors-sign-head-coach-rajakovic-to-multi-year-extension-9.7256002?cmp=rss",
+          "pubDate": "2026-07-02T15:26:13Z",
+          "source": "CBC Sports"
+        },
+        {
+          "title": "Mikel Oyarzabal's 2 goals send dominant Spain past Austria 3-0, into Round of 16 at World Cup",
+          "link": "https://www.cbc.ca/sports/soccer/worldcup/fifa-world-cup-spain-austria-july-2-9.7256110?cmp=rss",
+          "pubDate": "2026-07-02T21:18:05Z",
+          "source": "CBC Sports"
+        },
+        {
+          "title": "Canada's Diallo out of Wimbledon after five-set loss to Italy's Sonego",
+          "link": "https://www.cbc.ca/sports/tennis/wimbledon-roundup-july-2-2026-9.7256025?cmp=rss",
+          "pubDate": "2026-07-02T15:44:34Z",
+          "source": "CBC Sports"
+        },
+        {
+          "title": "Alex Ovechkin returning for a 22nd NHL season after re-signing with the Capitals",
+          "link": "https://www.cbc.ca/sports/hockey/nhl/nhl-free-agency-roundup-july-2-9.7256079?cmp=rss",
+          "pubDate": "2026-07-02T16:37:10Z",
+          "source": "CBC Sports"
+        }
+      ]
+    },
+    "https://sports.yahoo.com/rss/": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Are you watching, France? Spain breeze past Austria – and this is why they’re peaking at just the right time",
+          "link": "https://sports.yahoo.com/articles/watching-france-spain-breeze-past-212653568.html",
+          "pubDate": "2026-07-03T00:01:38Z",
+          "source": "Yahoo Sports"
+        },
+        {
+          "title": "GameThread: Detroit Tigers vs. Texas Rangers, 8:05 p.m.",
+          "link": "https://sports.yahoo.com/articles/gamethread-detroit-tigers-vs-texas-000000578.html",
+          "pubDate": "2026-07-03T00:00:00Z",
+          "source": "Yahoo Sports"
+        },
+        {
+          "title": "Arizona Diamondbacks Series Preview # 29: Diamondbacks vs Brewers",
+          "link": "https://sports.yahoo.com/articles/arizona-diamondbacks-series-preview-29-000000346.html",
+          "pubDate": "2026-07-03T00:00:00Z",
+          "source": "Yahoo Sports"
+        },
+        {
+          "title": "Miami Dolphins Discussion: How To Handle Malik Willis Edition",
+          "link": "https://sports.yahoo.com/articles/miami-dolphins-discussion-handle-malik-000000622.html",
+          "pubDate": "2026-07-03T00:00:00Z",
+          "source": "Yahoo Sports"
+        },
+        {
+          "title": "Watch as Portugal on top against Croatia but goalless in World Cup last 32",
+          "link": "https://sports.yahoo.com/articles/portugal-face-croatia-spain-waiting-210819570.html",
+          "pubDate": "2026-07-02T23:59:25Z",
+          "source": "Yahoo Sports"
+        }
+      ]
+    },
+    "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/sports/": {
+      "status": "ok",
+      "items": [
+        {
+          "title": "Redblacks host Riders, looking for first win",
+          "link": "https://www.theglobeandmail.com/sports/football/article-redblacks-host-riders-looking-for-first-win/",
+          "pubDate": "2026-07-03T00:04:10Z",
+          "source": "Globe Sports"
+        },
+        {
+          "title": "Versatile Tani Oluwaseyi contributes more than goals for Canada",
+          "link": "https://www.theglobeandmail.com/sports/soccer/article-tani-oluwaseyi-canada-world-cup-fifa-goals-stats-impact/",
+          "pubDate": "2026-07-03T00:03:48Z",
+          "source": "Globe Sports"
+        },
+        {
+          "title": "Anisimova avoids Wimbledon upset with 20 aces in win over Kenin",
+          "link": "https://www.theglobeandmail.com/sports/tennis/article-anisimova-avoids-wimbledon-upset-with-20-aces-in-win-over-kenin/",
+          "pubDate": "2026-07-02T23:52:01Z",
+          "source": "Globe Sports"
+        },
+        {
+          "title": "Ronaldo, Modric the marquee attractions at Toronto’s World Cup finale",
+          "link": "https://www.theglobeandmail.com/sports/soccer/article-ronaldo-modric-croatia-portugal-toronto-world-cup/",
+          "pubDate": "2026-07-01T23:33:02Z",
+          "source": "Globe Sports"
+        },
+        {
+          "title": "Ovechkin declares ‘I’m back!’ and re-signs with Capitals to play in his 22nd NHL season",
+          "link": "https://www.theglobeandmail.com/sports/hockey/article-ovechkin-declares-im-back-and-re-signs-with-capitals-to-play-in-his/",
+          "pubDate": "2026-07-02T19:30:45Z",
+          "source": "Globe Sports"
         }
       ]
     }
@@ -2503,7 +2895,7 @@ var DASHBOARD_CACHE = {
           {
             "meta": {
               "symbol": "CADUSD=X",
-              "regularMarketPrice": 0.7049,
+              "regularMarketPrice": 0.7044,
               "chartPreviousClose": 0.7051
             }
           }
@@ -2514,7 +2906,7 @@ var DASHBOARD_CACHE = {
   "air": {
     "latitude": 49.199997,
     "longitude": -122.8,
-    "generationtime_ms": 0.19252300262451172,
+    "generationtime_ms": 0.1608133316040039,
     "utc_offset_seconds": 0,
     "timezone": "GMT",
     "timezone_abbreviation": "GMT",
@@ -2526,63 +2918,333 @@ var DASHBOARD_CACHE = {
       "pm2_5": "μg/m³"
     },
     "current": {
-      "time": "2026-07-02T23:00",
+      "time": "2026-07-03T00:00",
       "interval": 3600,
       "us_aqi": 48,
-      "pm2_5": 10.9
+      "pm2_5": 9.9
     }
   },
   "cameras": [
     {
+      "id": 275,
+      "name": "Port Mann Bridge E",
+      "caption": "Highway 1 at Port Mann Bridge, looking eastbound.",
+      "url": "https://www.drivebc.ca/images/275.jpg",
+      "stale": true,
+      "lon": -122.807465,
+      "lat": 49.210134,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MAJOR",
+          "road": "Highway 7B Mary Hill Bypass",
+          "desc": "Bridge construction. Starting Mon Dec 1. From 7:00 AM to 5:00 PM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. Expect delays due to congestion. Watch for traffic control. Be advised: There are two lanes in eac",
+          "updated": "2026-06-27T14:34:35-07:00",
+          "km": 1.9
+        },
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 7B Mary Hill Bypass",
+          "desc": "Construction work. Starting Mon Jan 5 until Fri Aug 28. From 6:00 AM to 2:00 PM PST on Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday. Right lane closed. Bus stop improvement project. Expect additiona",
+          "updated": "2026-06-26T10:46:43-07:00",
+          "km": 3.9
+        }
+      ]
+    },
+    {
+      "id": 292,
+      "name": "Port Mann Bridge W",
+      "caption": "Highway 1 at Port Mann Bridge, looking westbound.",
+      "url": "https://www.drivebc.ca/images/292.jpg",
+      "stale": true,
+      "lon": -122.807465,
+      "lat": 49.210134,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MAJOR",
+          "road": "Highway 7B Mary Hill Bypass",
+          "desc": "Bridge construction. Starting Mon Dec 1. From 7:00 AM to 5:00 PM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. Expect delays due to congestion. Watch for traffic control. Be advised: There are two lanes in eac",
+          "updated": "2026-06-27T14:34:35-07:00",
+          "km": 1.9
+        },
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 7B Mary Hill Bypass",
+          "desc": "Construction work. Starting Mon Jan 5 until Fri Aug 28. From 6:00 AM to 2:00 PM PST on Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday. Right lane closed. Bus stop improvement project. Expect additiona",
+          "updated": "2026-06-26T10:46:43-07:00",
+          "km": 3.9
+        }
+      ]
+    },
+    {
       "id": 91,
       "name": "Alex Fraser Bridge N",
       "caption": "Alex Fraser Bridge, mid-span, looking north.",
-      "url": "https://www.drivebc.ca/images/91.jpg"
+      "url": "https://www.drivebc.ca/images/91.jpg",
+      "lon": -122.942054,
+      "lat": 49.157778,
+      "events": [
+        {
+          "type": "Incident",
+          "severity": "MAJOR",
+          "road": "Highway 91 Highway 91",
+          "desc": "Vehicle incident. Left lane blocked.",
+          "updated": "2026-07-02T16:35:49-07:00",
+          "km": 3.5
+        },
+        {
+          "type": "Construction",
+          "severity": "MAJOR",
+          "road": "Highway 91A Queensborough Bridge",
+          "desc": "Bridge maintenance. Starting Thu Mar 26 until Sun Nov 15. From 9:30 PM to 9:00 AM PST on Saturday and Sunday. From 9:30 AM to 5:00 AM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. No lane closures from June 11",
+          "updated": "2026-06-26T11:17:32-07:00",
+          "km": 4.3
+        }
+      ]
     },
     {
       "id": 92,
       "name": "Alex Fraser Bridge S",
       "caption": "Alex Fraser Bridge, mid-span, looking south.",
-      "url": "https://www.drivebc.ca/images/92.jpg"
+      "url": "https://www.drivebc.ca/images/92.jpg",
+      "lon": -122.942054,
+      "lat": 49.157778,
+      "events": [
+        {
+          "type": "Incident",
+          "severity": "MAJOR",
+          "road": "Highway 91 Highway 91",
+          "desc": "Vehicle incident. Left lane blocked.",
+          "updated": "2026-07-02T16:35:49-07:00",
+          "km": 3.5
+        },
+        {
+          "type": "Construction",
+          "severity": "MAJOR",
+          "road": "Highway 91A Queensborough Bridge",
+          "desc": "Bridge maintenance. Starting Thu Mar 26 until Sun Nov 15. From 9:30 PM to 9:00 AM PST on Saturday and Sunday. From 9:30 AM to 5:00 AM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. No lane closures from June 11",
+          "updated": "2026-06-26T11:17:32-07:00",
+          "km": 4.3
+        }
+      ]
     },
     {
       "id": 30,
       "name": "Massey Tunnel (Deas)",
       "caption": "Highway 99 north of Highway 17A overpass, looking north*.",
-      "url": "https://www.drivebc.ca/images/30.jpg"
+      "url": "https://www.drivebc.ca/images/30.jpg",
+      "lon": -123.0623638,
+      "lat": 49.1103521,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 99 Highway 99",
+          "desc": "Utility work. Starting Wed Sep 17 until Sat Nov 7.",
+          "updated": "2026-06-26T10:18:37-07:00",
+          "km": 7.4
+        }
+      ]
     },
     {
-      "id": 18,
-      "name": "Lions Gate North",
-      "caption": "Lions Gate Bridge north end, looking south.",
-      "url": "https://www.drivebc.ca/images/18.jpg"
+      "id": 33,
+      "name": "Hwy 99 at 17A Overpass",
+      "caption": "Highway 99 from Highway 17A overpass, looking northbound.",
+      "url": "https://www.drivebc.ca/images/33.jpg",
+      "lon": -123.0557016,
+      "lat": 49.1072495,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 99 Highway 99",
+          "desc": "Utility work. Starting Wed Sep 17 until Sat Nov 7.",
+          "updated": "2026-06-26T10:18:37-07:00",
+          "km": 6.9
+        }
+      ]
     },
     {
-      "id": 72,
-      "name": "Ironworkers Midspan",
-      "caption": "Highway 1 at mid-span on the Ironworkers Memorial Bridge, looking south.",
-      "url": "https://www.drivebc.ca/images/72.jpg"
+      "id": 313,
+      "name": "Hwy 99 at Mud Bay",
+      "caption": "Highway 99, near Highway 91 around Mud Bay in Surrey, looking west on Highway 99 northbound.",
+      "url": "https://www.drivebc.ca/images/313.jpg",
+      "lon": -122.872608,
+      "lat": 49.091036,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 99 Highway 99",
+          "desc": "Utility work. Starting Wed Sep 17 until Sat Nov 7.",
+          "updated": "2026-06-26T10:18:37-07:00",
+          "km": 6.7
+        }
+      ]
     },
     {
-      "id": 82,
-      "name": "Hwy 10 at 152 St W",
-      "caption": "Highway 10 at 152 Street, looking west.",
-      "url": "https://www.drivebc.ca/images/82.jpg"
+      "id": 258,
+      "name": "King George at 132 St",
+      "caption": "Highway 99A (King George Boulevard) near 132 Street, looking west.",
+      "url": "https://www.drivebc.ca/images/258.jpg",
+      "lon": -122.859486,
+      "lat": 49.207354,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MAJOR",
+          "road": "Highway 7B Mary Hill Bypass",
+          "desc": "Bridge construction. Starting Mon Dec 1. From 7:00 AM to 5:00 PM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. Expect delays due to congestion. Watch for traffic control. Be advised: There are two lanes in eac",
+          "updated": "2026-06-27T14:34:35-07:00",
+          "km": 4.4
+        },
+        {
+          "type": "Construction",
+          "severity": "MAJOR",
+          "road": "Highway 91A Queensborough Bridge",
+          "desc": "Bridge maintenance. Starting Thu Mar 26 until Sun Nov 15. From 9:30 PM to 9:00 AM PST on Saturday and Sunday. From 9:30 AM to 5:00 AM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. No lane closures from June 11",
+          "updated": "2026-06-26T11:17:32-07:00",
+          "km": 6.5
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "name": "Hwy 10 at King George E",
+      "caption": "Highway 10 at King George Boulevard, looking east on Highway 10.",
+      "url": "https://www.drivebc.ca/images/103.jpg",
+      "lon": -122.832247,
+      "lat": 49.105311,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 15 176 Street",
+          "desc": "Road construction. Starting Tue Jun 23 until Wed Jul 8. From 11:30 PM to 1:00 AM PST on Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday. Right turn lane closed.",
+          "updated": "2026-06-24T15:04:42-07:00",
+          "km": 8.0
+        }
+      ]
     },
     {
       "id": 79,
       "name": "Hwy 10 at 152 St N",
       "caption": "Highway 10 at 152 Street, looking north.",
-      "url": "https://www.drivebc.ca/images/79.jpg"
+      "url": "https://www.drivebc.ca/images/79.jpg",
+      "lon": -122.8012,
+      "lat": 49.104347,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 15 176 Street",
+          "desc": "Road construction. Starting Tue Jun 23 until Wed Jul 8. From 11:30 PM to 1:00 AM PST on Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday. Right turn lane closed.",
+          "updated": "2026-06-24T15:04:42-07:00",
+          "km": 6.1
+        }
+      ]
     },
     {
       "id": 477,
       "name": "Hwy 15 at 8 Ave N",
       "caption": "Highway 15 at 8 Avenue in South Surrey, looking north.",
-      "url": "https://www.drivebc.ca/images/477.jpg"
+      "url": "https://www.drivebc.ca/images/477.jpg",
+      "lon": -122.735478,
+      "lat": 49.016575,
+      "events": []
+    },
+    {
+      "id": 279,
+      "name": "Hwy 1 at 232 St E",
+      "caption": "Highway 1 at 232 Street Overpass, looking east.",
+      "url": "https://www.drivebc.ca/images/279.jpg",
+      "lon": -122.579894,
+      "lat": 49.134869,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MAJOR",
+          "road": "Highway 1 Trans-Canada Highway",
+          "desc": "Road construction. Starting Sat Jun 27 until Mon Jul 6. Lane closures in both directions. Closure times vary.",
+          "updated": "2026-06-30T10:17:41-07:00",
+          "km": 3.7
+        },
+        {
+          "type": "Construction",
+          "severity": "MAJOR",
+          "road": "Highway 1 Trans-Canada Highway",
+          "desc": "Construction work. Starting Thu Jan 29 until Tue Dec 15. From 9:00 PM to 5:30 AM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. From 9:00 PM to 7:30 AM PST on Saturday and Sunday. Speed Limit restriction: 60km/",
+          "updated": "2026-06-24T21:31:22-07:00",
+          "km": 7.3
+        }
+      ]
+    },
+    {
+      "id": 212,
+      "name": "Hwy 99 at 8 Ave (White Rock)",
+      "caption": "Highway 99 at 8 Avenue in White Rock, looking north.",
+      "url": "https://www.drivebc.ca/images/212.jpg",
+      "lon": -122.758119,
+      "lat": 49.014668,
+      "events": []
+    },
+    {
+      "id": 18,
+      "name": "Lions Gate North",
+      "caption": "Lions Gate Bridge north end, looking south.",
+      "url": "https://www.drivebc.ca/images/18.jpg",
+      "lon": -123.130153,
+      "lat": 49.324198,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 1 Trans-Canada Highway",
+          "desc": "Utility work. Starting Mon Jul 6 until Fri Jul 17. From 7:00 AM to 5:00 PM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. Right turn lane closed.",
+          "updated": "2026-07-02T13:44:00-07:00",
+          "km": 4.3
+        },
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 1 Trans-Canada Highway",
+          "desc": "Road construction. Starting Thu Jan 22 until Fri Jul 31. From 7:00 AM to 5:00 PM PST on Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday. Right lane of eastbound on ramp  closed.",
+          "updated": "2026-06-26T09:02:43-07:00",
+          "km": 4.3
+        }
+      ]
+    },
+    {
+      "id": 72,
+      "name": "Ironworkers Midspan",
+      "caption": "Highway 1 at mid-span on the Ironworkers Memorial Bridge, looking south.",
+      "url": "https://www.drivebc.ca/images/72.jpg",
+      "lon": -123.0263548,
+      "lat": 49.2966333,
+      "events": [
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Other Roads Main Street",
+          "desc": "Utility work. Starting Mon May 11 until Fri May 12. From 9:00 PM to 5:00 AM PST on Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday. Right lane blocked.",
+          "updated": "2026-06-26T09:32:52-07:00",
+          "km": 1.0
+        },
+        {
+          "type": "Construction",
+          "severity": "MINOR",
+          "road": "Highway 1 Trans-Canada Highway",
+          "desc": "Road construction. Starting Wed Jun 24 until Wed Sep 30. From 7:00 AM to 9:00 PM PST on Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday. Shoulder closed.",
+          "updated": "2026-06-26T09:03:27-07:00",
+          "km": 2.3
+        }
+      ]
     }
   ],
-  "updated": "2026-07-02T23:44:50.693249+00:00"
+  "updated": "2026-07-03T00:11:45.784611+00:00"
 };
 // ── DIAGNOSTIC TEST FOR FETCH/API SUPPORT ──
 (function() {
@@ -2982,19 +3644,26 @@ function loadFeeds(configs, targetId) {
 newsCategories = {
   local: [
     {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Fbc%2Ffeed%2F', key:'n_loc_gbc', source:'Global BC'},
-    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-canada-britishcolumbia', key:'n_loc_cbc', source:'CBC BC'}
+    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-canada-britishcolumbia', key:'n_loc_cbc', source:'CBC BC'},
+    {url:RSS+'https%3A%2F%2Fvancouver.citynews.ca%2Ffeed%2F', key:'n_loc_city', source:'CityNews Van'},
+    {url:RSS+'https%3A%2F%2Fdailyhive.com%2Ffeed%2Fvancouver', key:'n_loc_dh', source:'Daily Hive'},
+    {url:RSS+'https%3A%2F%2Fvancouversun.com%2Ffeed', key:'n_loc_vs', source:'Vancouver Sun'}
   ],
   national: [
     {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-topstories', key:'n_nat_cbc', source:'CBC News'},
     {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Ffeed%2F', key:'n_nat_gn', source:'Global News'},
-    {url:RSS+'https%3A%2F%2Fnationalpost.com%2Ffeed%2F', key:'n_nat_np', source:'National Post'}
+    {url:RSS+'https%3A%2F%2Fnationalpost.com%2Ffeed%2F', key:'n_nat_np', source:'National Post'},
+    {url:RSS+'https%3A%2F%2Ffinancialpost.com%2Ffeed', key:'n_nat_fp', source:'Financial Post'},
+    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-politics', key:'n_nat_cbp', source:'CBC Politics'}
   ],
   world: [
     {url:RSS+'https%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Fworld%2Frss.xml', key:'n_wld_bbc', source:'BBC World'},
     {url:RSS+'https%3A%2F%2Fwww.aljazeera.com%2Fxml%2Frss%2Fall.xml', key:'n_wld_aje', source:'Al Jazeera'},
     {url:RSS+'https%3A%2F%2Fwww.theguardian.com%2Finternational%2Frss', key:'n_wld_grd', source:'Guardian'},
-    {url:RSS+'https%3A%2F%2Fwww.dw.com%2Fen%2Fxml%2Frss%2Fxml_en_all', key:'n_wld_dw', source:'DW'},
-    {url:RSS+'https%3A%2F%2Fwww.france24.com%2Fen%2Frss', key:'n_wld_f24', source:'France24'}
+    {url:RSS+'https%3A%2F%2Fwww.france24.com%2Fen%2Frss', key:'n_wld_f24', source:'France24'},
+    {url:RSS+'https%3A%2F%2Frss.nytimes.com%2Fservices%2Fxml%2Frss%2Fnyt%2FWorld.xml', key:'n_wld_nyt', source:'NYT World'},
+    {url:RSS+'https%3A%2F%2Ffeeds.skynews.com%2Ffeeds%2Frss%2Fworld.xml', key:'n_wld_sky', source:'Sky News'},
+    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-world', key:'n_wld_cbw', source:'CBC World'}
   ]
 };
 function showNews(cat) { loadFeeds(newsCategories[cat] || newsCategories.local, 'news-feed'); }
@@ -3014,7 +3683,12 @@ loadFeeds([
   {url:RSS+'https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnews', key:'s_espn', source:'ESPN'},
   {url:RSS+'https%3A%2F%2Fwww.sportsnet.ca%2Ffeed%2F', key:'s_snet', source:'Sportsnet'},
   {url:RSS+'https%3A%2F%2Fwww.cfl.ca%2Frss%2F', key:'s_cfl', source:'CFL.ca'},
-  {url:RSS+'https%3A%2F%2Fwww.mlb.com%2Ffeeds%2Fnews%2Frss.xml', key:'s_mlb', source:'MLB.com'}
+  {url:RSS+'https%3A%2F%2Fwww.mlb.com%2Ffeeds%2Fnews%2Frss.xml', key:'s_mlb', source:'MLB.com'},
+  {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-sports', key:'s_cbcs', source:'CBC Sports'},
+  {url:RSS+'https%3A%2F%2Fsports.yahoo.com%2Frss%2F', key:'s_yah', source:'Yahoo Sports'},
+  {url:RSS+'https%3A%2F%2Fwww.theglobeandmail.com%2Farc%2Foutboundfeeds%2Frss%2Fcategory%2Fsports%2F', key:'s_glb', source:'Globe Sports'},
+  {url:RSS+'https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnhl%2Fnews', key:'s_enhl', source:'ESPN NHL'},
+  {url:RSS+'https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fmlb%2Fnews', key:'s_emlb', source:'ESPN MLB'}
 ], 'sports-feed');
 
 // ── MY TEAMS TRACKER ──
@@ -3182,25 +3856,107 @@ function renderIndices() {
 }
 renderIndices();
 
-// ── TRAFFIC CAMERAS (metadata cached; images hotlinked live from DriveBC) ──
+// ── TRAFFIC CAMERAS (metadata + nearby DriveBC events cached hourly;
+//    images hotlinked live from DriveBC; favourites pinned to page 1) ──
+var CAM_FAVS_KEY = 'cam_favs_v1';
+function camFavs() {
+  try { return JSON.parse(localStorage.getItem(CAM_FAVS_KEY) || '[]'); } catch(e) { return []; }
+}
+function toggleCamFav(id) {
+  var favs = camFavs();
+  var i = favs.indexOf(id);
+  if (i >= 0) favs.splice(i, 1);
+  else {
+    if (favs.length >= 4) { alert('Up to 4 favourite cameras — remove one first.'); return; }
+    favs.push(id);
+  }
+  saveLS(CAM_FAVS_KEY, favs);
+  renderCameras(false);
+}
+function fmtEvTime(iso) {
+  try {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var h = d.getHours() % 12 || 12;
+    return d.toLocaleDateString('en-CA', {month: 'short', day: 'numeric'}) + ', '
+      + h + ':' + String(d.getMinutes()).padStart(2, '0') + (d.getHours() >= 12 ? ' PM' : ' AM');
+  } catch(e) { return ''; }
+}
 function renderCameras(bust) {
-  var el = document.getElementById('cam-grid');
+  var el = document.getElementById('cam-pager');
   if (!el) return;
   var cams = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.cameras) || [];
   if (!cams.length) {
-    el.innerHTML = '<div class="muted">Camera list unavailable — it refreshes with the data cache every 4 hours.</div>';
+    el.innerHTML = '<div class="muted">Camera list unavailable — it refreshes with the hourly data cache.</div>';
     return;
   }
-  var t = Date.now();
-  var html = '';
-  cams.forEach(function(c) {
-    html += '<div class="cam-card">'
-      + '<img src="' + escHtml(c.url) + '?t=' + t + '" alt="' + escHtml(c.name) + '" loading="lazy" onerror="this.closest(\'.cam-card\').style.display=\'none\'">'
-      + '<div class="cam-name"><span>' + escHtml(c.name) + '</span><span>DriveBC</span></div>'
-      + '</div>';
+  var favs = camFavs();
+  // Favourites first (in the order they were starred), then the rest
+  var ordered = [];
+  favs.forEach(function(id) {
+    var c = cams.filter(function(x) { return x.id === id; })[0];
+    if (c) ordered.push(c);
   });
+  cams.forEach(function(c) { if (favs.indexOf(c.id) < 0) ordered.push(c); });
+
+  var sevColor = {MAJOR: 'var(--red)', MODERATE: '#ff9f0a', MINOR: '#ffd60a'};
+  var t = Date.now();
+  function card(c) {
+    var isFav = favs.indexOf(c.id) >= 0;
+    var h = '<div class="cam-card">'
+      + '<img src="' + escHtml(c.url) + '?t=' + t + '" alt="' + escHtml(c.name) + '" loading="lazy">'
+      + '<div class="cam-name">'
+      + '<button class="cam-star' + (isFav ? ' fav' : '') + '" onclick="toggleCamFav(' + c.id + ')" title="' + (isFav ? 'Remove favourite' : 'Pin to page 1') + '">' + (isFav ? '★' : '☆') + '</button>'
+      + '<span>' + escHtml(c.name) + (c.stale ? ' <span style="font-size:10px;color:#ff9f0a;font-weight:700;text-transform:uppercase">delayed</span>' : '') + '</span><span class="cam-src">DriveBC</span></div>';
+    var evs = c.events || [];
+    if (evs.length) {
+      h += '<div class="cam-events">';
+      evs.forEach(function(ev) {
+        var col = sevColor[ev.severity] || 'var(--t3)';
+        var when = fmtEvTime(ev.updated);
+        h += '<div class="cam-ev">'
+          + '<div class="cam-ev-dot" style="background:' + col + '"></div>'
+          + '<div class="cam-ev-body">'
+          + '<div class="cam-ev-head">' + escHtml(ev.type || 'Event') + (ev.road ? ' — ' + escHtml(ev.road) : '') + (ev.km != null ? ' <span style="color:var(--t3);font-weight:500">(' + ev.km + ' km)</span>' : '') + '</div>'
+          + (ev.desc ? '<div class="cam-ev-desc">' + escHtml(ev.desc) + '</div>' : '')
+          + (when ? '<div class="cam-ev-time">Updated ' + when + '</div>' : '')
+          + '</div></div>';
+      });
+      h += '</div>';
+    } else {
+      h += '<div class="cam-noev">No incidents reported nearby</div>';
+    }
+    return h + '</div>';
+  }
+  var html = '';
+  for (var i = 0; i < ordered.length; i += 4) {
+    html += '<div class="cam-page">' + ordered.slice(i, i + 4).map(card).join('') + '</div>';
+  }
   el.innerHTML = html;
+  camUpdateIndicator();
 }
+function camUpdateIndicator() {
+  var pager = document.getElementById('cam-pager');
+  var ind = document.getElementById('cam-page-ind');
+  if (!pager || !ind) return;
+  var pages = pager.querySelectorAll('.cam-page').length;
+  if (!pages) { ind.textContent = ''; return; }
+  var cur = Math.round(pager.scrollLeft / Math.max(pager.clientWidth, 1)) + 1;
+  ind.textContent = 'Page ' + Math.min(cur, pages) + ' of ' + pages;
+}
+function camPage(dir) {
+  var pager = document.getElementById('cam-pager');
+  if (!pager) return;
+  pager.scrollBy({left: dir * pager.clientWidth, behavior: 'smooth'});
+  setTimeout(camUpdateIndicator, 350);
+}
+(function() {
+  var pager = document.getElementById('cam-pager');
+  if (pager) pager.addEventListener('scroll', function() {
+    clearTimeout(camUpdateIndicator._t);
+    camUpdateIndicator._t = setTimeout(camUpdateIndicator, 120);
+  });
+})();
 renderCameras(false);
 
 // ── TIMER (persists across reloads via the stored end timestamp) ──
@@ -3430,6 +4186,28 @@ document.addEventListener('keydown', function(e) {
   }, {passive: true});
 })();
 g2048New();
+
+// ── COPY HELPERS (paste into Apple Notes / Reminders — no public Apple API exists) ──
+function copyText(txt, btnLabel) {
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).catch(fallback);
+  } else fallback();
+  alert(btnLabel + ' copied — paste into Apple Notes or Reminders.');
+}
+function copyNotes() {
+  if (!notes.length) { alert('No notes to copy.'); return; }
+  copyText(notes.map(function(n) { return '• ' + n.t + ' (' + n.d + ')'; }).join('\n'), 'Notes');
+}
+function copyTasks() {
+  if (!tasks.length) { alert('No tasks to copy.'); return; }
+  copyText(tasks.map(function(t) { return (t.done ? '[x] ' : '[ ] ') + t.text; }).join('\n'), 'Tasks');
+}
 
 // ── ENTER-KEY SHORTCUTS (fewer taps: submit from the keyboard directly) ──
 document.getElementById('task-input').addEventListener('keydown', function(e) {
