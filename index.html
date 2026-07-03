@@ -308,6 +308,11 @@ input[type="color"]:hover{border-color:var(--line2)}
 .cam-page{min-width:100%;scroll-snap-align:start;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-content:start}
 .cam-card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}
 .cam-card img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;background:var(--surface)}
+.cam-imgwrap{position:relative;display:block}
+.cam-offline{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;background:rgba(12,14,18,.72);color:#fff;backdrop-filter:blur(1px)}
+.cam-offline .cam-off-ico{font-size:30px;line-height:1}
+.cam-offline .cam-off-msg{font-size:14px;font-weight:700}
+.cam-offline .cam-off-sub{font-size:11px;color:rgba(255,255,255,.72);font-weight:500;max-width:220px}
 .cam-name{padding:12px 16px;font-size:16px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:10px}
 .cam-name .cam-src{margin-left:auto;font-size:11px;color:var(--t3);font-weight:500}
 .cam-star{font-size:24px;line-height:1;color:var(--t3);padding:6px 8px;border-radius:8px;cursor:pointer;transition:all .2s;flex-shrink:0}
@@ -3241,6 +3246,8 @@ var DASHBOARD_CACHE = {
       "caption": "Highway 1 at Port Mann Bridge, looking eastbound.",
       "url": "https://www.drivebc.ca/images/275.jpg",
       "stale": true,
+      "offline": true,
+      "offSince": "Jun 24",
       "lon": -122.807465,
       "lat": 49.210134,
       "events": [
@@ -3268,6 +3275,8 @@ var DASHBOARD_CACHE = {
       "caption": "Highway 1 at Port Mann Bridge, looking westbound.",
       "url": "https://www.drivebc.ca/images/292.jpg",
       "stale": true,
+      "offline": true,
+      "offSince": "Jun 24",
       "lon": -122.807465,
       "lat": 49.210134,
       "events": [
@@ -3674,6 +3683,8 @@ var DASHBOARD_CACHE = {
       "caption": "Highway 97C (Okanagan Connector) about 74 km west of Kelowna, looking west.",
       "url": "https://www.drivebc.ca/images/251.jpg",
       "stale": true,
+      "offline": true,
+      "offSince": "Jun 16",
       "lon": -120.024167,
       "lat": 49.9093,
       "events": []
@@ -4350,11 +4361,18 @@ function renderCameras(bust) {
   var t = Date.now();
   function card(c) {
     var isFav = favs.indexOf(c.id) >= 0;
+    var badge = c.offline
+      ? ' <span style="font-size:10px;color:var(--red);font-weight:700;text-transform:uppercase">offline</span>'
+      : (c.stale ? ' <span style="font-size:10px;color:#ff9f0a;font-weight:700;text-transform:uppercase">delayed</span>' : '');
+    var overlay = c.offline
+      ? '<div class="cam-offline"><div class="cam-off-ico">📷</div><div class="cam-off-msg">Camera offline</div>'
+        + '<div class="cam-off-sub">DriveBC’s feed for this camera is down' + (c.offSince ? ' since ' + escHtml(c.offSince) : '') + ' — it will return automatically.</div></div>'
+      : '';
     var h = '<div class="cam-card">'
-      + '<img src="' + escHtml(c.url) + '?t=' + t + '" alt="' + escHtml(c.name) + '" loading="lazy">'
+      + '<div class="cam-imgwrap"><img src="' + escHtml(c.url) + '?t=' + t + '" alt="' + escHtml(c.name) + '" loading="lazy">' + overlay + '</div>'
       + '<div class="cam-name">'
       + '<button class="cam-star' + (isFav ? ' fav' : '') + '" onclick="toggleCamFav(' + c.id + ')" title="' + (isFav ? 'Remove favourite' : 'Pin to page 1') + '">' + (isFav ? '★' : '☆') + '</button>'
-      + '<span>' + escHtml(c.name) + (c.stale ? ' <span style="font-size:10px;color:#ff9f0a;font-weight:700;text-transform:uppercase">delayed</span>' : '') + '</span><span class="cam-src">DriveBC</span></div>';
+      + '<span>' + escHtml(c.name) + badge + '</span><span class="cam-src">DriveBC</span></div>';
     var evs = c.events || [];
     if (evs.length) {
       h += '<div class="cam-events">';

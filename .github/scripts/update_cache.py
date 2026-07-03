@@ -350,6 +350,11 @@ def fetch_cameras() -> list[dict]:
         if not cam:
             continue
         flagged = cam.get("marked_stale") or cam.get("marked_delayed")
+        # DriveBC turns a camera "off" when its feed dies; the image endpoint
+        # then serves a black "DriveBC.ca" placeholder. is_on is the reliable
+        # signal — flag it so the browser can say "offline" instead of showing
+        # a confusing black frame (e.g. the Port Mann cams when they drop out).
+        offline = cam.get("is_on", True) is False
         if flagged and cam_id not in always:
             continue
         rec = {
@@ -360,6 +365,13 @@ def fetch_cameras() -> list[dict]:
         }
         if flagged:
             rec["stale"] = True
+        if offline:
+            rec["offline"] = True
+            since = cam.get("last_update_modified") or ""
+            try:
+                rec["offSince"] = datetime.fromisoformat(since).strftime("%b %-d")
+            except Exception:
+                pass
         loc = (cam.get("location") or {}).get("coordinates")
         if loc:
             rec["lon"], rec["lat"] = loc[0], loc[1]
