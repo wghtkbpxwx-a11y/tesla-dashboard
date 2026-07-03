@@ -351,6 +351,23 @@ input[type="color"]:hover{border-color:var(--line2)}
 .wkey.miss{background:var(--surface2);color:var(--t3)}
 .wkey.wide{padding:20px 20px}
 
+/* SHOOTOUT */
+#shoot-canvas{display:block;margin:0 auto;border-radius:16px;border:1px solid var(--line);background:#e8eef5;touch-action:manipulation;max-width:100%;cursor:crosshair}
+
+/* TRAIL MONSTERS */
+.mon-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:960px;margin:0 auto}
+.mon-card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:24px;text-align:center;box-shadow:var(--shadow-sm)}
+.mon-emoji{font-size:90px;line-height:1.15}
+.mon-name{font-size:22px;font-weight:700;margin-top:4px}
+.mon-hpbar{height:16px;background:var(--surface2);border-radius:8px;overflow:hidden;margin:12px auto;max-width:280px;border:1px solid var(--line)}
+.mon-hpfill{height:100%;background:var(--green);transition:width .3s ease,background .3s ease}
+.mon-log{min-height:44px;font-size:15px;color:var(--t2);margin:10px 0;line-height:1.4}
+.mon-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.mon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mon-slot{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;font-size:12px;color:var(--t3)}
+.mon-slot .me{font-size:34px;display:block;margin-bottom:4px}
+.mon-slot.caught{border-color:var(--green);color:var(--t1)}
+
 /* CONVERTER */
 .conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .conv-row input{flex:1;min-width:110px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--t1);font-size:15px;font-family:var(--f);outline:none}
@@ -371,6 +388,7 @@ input[type="color"]:hover{border-color:var(--line2)}
   #dock{gap:4px;padding:8px 12px;bottom:16px}.dock-btn{padding:10px 16px;font-size:14px}
   #stocks-dropdown{width:calc(100vw - 24px);left:12px;margin-left:0}
   .cam-page{grid-template-columns:1fr}
+  .mon-wrap{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -881,6 +899,8 @@ input[type="color"]:hover{border-color:var(--line2)}
     <div class="game-tabs">
       <button class="ntab on" id="gtab-wordle" onclick="showGame('wordle')">Wordle</button>
       <button class="ntab" id="gtab-2048" onclick="showGame('2048')">2048</button>
+      <button class="ntab" id="gtab-shoot" onclick="showGame('shoot')">Canucks Shootout</button>
+      <button class="ntab" id="gtab-mon" onclick="showGame('mon')">Trail Monsters</button>
     </div>
     <div id="game-wordle">
       <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:14px" id="wordle-msg">Guess the 5-letter word — new word daily</div>
@@ -892,6 +912,30 @@ input[type="color"]:hover{border-color:var(--line2)}
       <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:14px">Swipe or use arrow keys to merge tiles · Score: <strong id="g2048-score" style="color:var(--t1)">0</strong></div>
       <div class="g2048-board" id="g2048-board"></div>
       <div style="text-align:center;margin-top:16px"><button class="btn btn-gh" onclick="g2048New()">New game</button></div>
+    </div>
+    <div id="game-shoot" style="display:none">
+      <div style="text-align:center;font-size:14px;color:var(--t3);margin-bottom:14px" id="shoot-msg">Shootout at Rogers Arena — tap where you want to shoot. 5 pucks per round.</div>
+      <canvas id="shoot-canvas"></canvas>
+      <div style="text-align:center;margin-top:16px"><button class="btn btn-gh" onclick="shootNew()">New round</button></div>
+    </div>
+    <div id="game-mon" style="display:none">
+      <div class="mon-wrap">
+        <div class="mon-card">
+          <div class="mon-emoji" id="mon-emoji">🌲</div>
+          <div class="mon-name" id="mon-name">Trail Monsters</div>
+          <div class="mon-hpbar"><div class="mon-hpfill" id="mon-hpfill" style="width:100%"></div></div>
+          <div class="mon-log" id="mon-log">A wild monster is nearby…</div>
+          <div class="mon-btns">
+            <button class="btn btn-pri" id="mon-atk" onclick="monAttack()">Attack</button>
+            <button class="btn btn-pri" id="mon-orb" onclick="monCatch()" style="background:var(--green)">Throw Orb</button>
+            <button class="btn btn-gh" onclick="monNew()">Next</button>
+          </div>
+        </div>
+        <div>
+          <div class="sec-title">Collection <span id="mon-count" style="margin-left:auto;color:var(--t2)"></span></div>
+          <div class="mon-grid" id="mon-grid"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1540,7 +1584,7 @@ function renderTasks() {
 
 // ── STOCKS WATCHLIST ──
 // Common stocks/securities for autocomplete
-var commonStocks = ['AAPL','MSFT','GOOGL','GOOG','AMZN','TSLA','META','NVDA','NFLX','AMD','INTC','CRM','ADBE','CSCO','ASML','AVGO','AXP','BA','BKNG','COST','DLTR','EBAY','GILD','HD','HSIC','IBM','INFY','JPM','KO','LRCX','MA','MCHP','MU','NXPI','ORCL','PAYC','PEP','QCOM','SBUX','SCHW','SNAP','SNPS','SNOW','SQ','TEAM','TMDX','TNDM','TTD','UUUU','V','VZ','WDAY','XOM','XEQT.TO','VFV.TO','VSP.TO','XIC.TO','VCN.TO','BNS.TO','TD.TO','RY.TO','BMO.TO','BCE.TO','ENB.TO','CNQ.TO','TRP.TO','MG.TO','WFT.TO','WN.TO','BAM.A','AC.TO','POW.TO','SCR.TO','GRT.U','FLT.TO','DOL.TO','AQN.TO','GDMK.U','SRU.U'];
+var commonStocks = ['AAPL','MSFT','GOOGL','GOOG','AMZN','TSLA','META','NVDA','NFLX','AMD','INTC','CRM','ADBE','CSCO','ASML','AVGO','AXP','BA','BKNG','COST','DLTR','EBAY','GILD','HD','HSIC','IBM','INFY','JPM','KO','LRCX','MA','MCHP','MU','NXPI','ORCL','PAYC','PEP','QCOM','SBUX','SCHW','SNAP','SNPS','SNOW','SQ','TEAM','TMDX','TNDM','TTD','UUUU','V','VZ','WDAY','XOM','XEQT.TO','VFV.TO','VSP.TO','XIC.TO','VCN.TO','BNS.TO','TD.TO','RY.TO','BMO.TO','BCE.TO','ENB.TO','CNQ.TO','TRP.TO','MG.TO','WFT.TO','WN.TO','BAM.A','AC.TO','POW.TO','SCR.TO','GRT.U','FLT.TO','DOL.TO','AQN.TO','GDMK.U','SRU.U','XGRO.TO','VGRO.TO','XBAL.TO','VBAL.TO','ZSP.TO','ZEB.TO','XUU.TO','VUN.TO','XAW.TO','VDY.TO','ZAG.TO','XSP.TO','HXS.TO','CASH.TO','PSA.TO'];
 
 // Seed with pre-cached tickers on first run (no saved key yet); respect a deliberately-cleared list.
 try {
@@ -1551,7 +1595,14 @@ try {
 function searchStocks(query) {
   var q = query.toUpperCase().trim();
   if (!q) return [];
-  return commonStocks.filter(function(s) { return s.indexOf(q) === 0; }).slice(0, 6);
+  // Prefix matches first, then anywhere-in-symbol matches (e.g. "GRO" → XGRO.TO, VGRO.TO)
+  var pre = [], sub = [];
+  commonStocks.forEach(function(s) {
+    var i = s.indexOf(q);
+    if (i === 0) pre.push(s);
+    else if (i > 0) sub.push(s);
+  });
+  return pre.concat(sub).slice(0, 8);
 }
 
 function showStockSuggestions(query) {
@@ -1569,7 +1620,9 @@ function showStockSuggestions(query) {
   if (!results.length) { listEl.style.display = 'none'; return; }
   listEl.innerHTML = results.map(function(s) {
     var q = query.toUpperCase().trim();
-    return '<div class="stock-suggest-item" onclick="addStock(\'' + s + '\')" style="padding:8px 12px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px;color:var(--t1)" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'"><strong>' + s.substring(0, q.length) + '</strong>' + s.substring(q.length) + '</div>';
+    var i = s.indexOf(q);
+    var marked = i < 0 ? s : s.substring(0, i) + '<strong>' + s.substring(i, i + q.length) + '</strong>' + s.substring(i + q.length);
+    return '<div class="stock-suggest-item" onclick="addStock(\'' + s + '\')" style="padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;font-size:15px;color:var(--t1)" onmouseover="this.style.background=\'var(--surface2)\'" onmouseout="this.style.background=\'\'">' + marked + '</div>';
   }).join('');
   listEl.style.display = 'block';
 }
@@ -1615,7 +1668,8 @@ function fetchStocks() {
           + '<button class="stock-remove" data-sym="' + escHtml(sym) + '">×</button>'
           + '</div>';
       } else {
-        html += '<div class="stock-item"><div class="stock-info"><div class="stock-sym">' + sym + '</div><div class="stock-px">Error loading</div></div></div>';
+        html += '<div class="stock-item"><div class="stock-info"><div class="stock-sym">' + sym + '</div><div class="stock-px">No cached price yet — updates hourly</div></div>'
+          + '<button class="stock-remove" data-sym="' + escHtml(sym) + '">×</button></div>';
       }
     });
     el.innerHTML = html || '<div class="muted" style="padding:20px;text-align:center;font-size:13px">No data</div>';
@@ -4037,10 +4091,10 @@ document.getElementById('conv-type').addEventListener('change', convUpdate);
 
 // ── GAMES ──
 function showGame(g) {
-  document.getElementById('game-wordle').style.display = g === 'wordle' ? '' : 'none';
-  document.getElementById('game-2048').style.display = g === '2048' ? '' : 'none';
-  document.getElementById('gtab-wordle').classList.toggle('on', g === 'wordle');
-  document.getElementById('gtab-2048').classList.toggle('on', g === '2048');
+  ['wordle', '2048', 'shoot', 'mon'].forEach(function(k) {
+    document.getElementById('game-' + k).style.display = k === g ? '' : 'none';
+    document.getElementById('gtab-' + k).classList.toggle('on', k === g);
+  });
 }
 
 // Wordle — daily word by default, "New word" picks randomly
@@ -4186,6 +4240,188 @@ document.addEventListener('keydown', function(e) {
   }, {passive: true});
 })();
 g2048New();
+
+// ── CANUCKS SHOOTOUT ──
+var shoot = {shots: 0, goals: 0, puck: null, msg: '', msgT: 0, gSpeed: 1.6, t: 0};
+function shootNew() {
+  shoot.shots = 0; shoot.goals = 0; shoot.puck = null; shoot.msg = ''; shoot.gSpeed = 1.6;
+  var m = document.getElementById('shoot-msg');
+  if (m) m.textContent = 'Shootout at Rogers Arena — tap where you want to shoot. 5 pucks per round.';
+}
+(function() {
+  var cv = document.getElementById('shoot-canvas');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  function size() {
+    var w = Math.min(720, Math.max(320, (document.getElementById('game-shoot').clientWidth || window.innerWidth) - 20));
+    cv.width = w; cv.height = Math.round(w * 0.62);
+  }
+  size();
+  window.addEventListener('resize', size);
+  function netRect() {
+    var W = cv.width;
+    return {x: W * 0.32, y: cv.height * 0.10, w: W * 0.36, h: cv.height * 0.16};
+  }
+  function goalieX() {
+    var n = netRect();
+    return n.x + n.w / 2 + Math.sin(shoot.t * shoot.gSpeed) * (n.w / 2 - cv.width * 0.05);
+  }
+  cv.addEventListener('click', function(e) {
+    if (shoot.puck || shoot.shots >= 5) return;
+    var r = cv.getBoundingClientRect();
+    var scale = cv.width / r.width;
+    var tx = (e.clientX - r.left) * scale, ty = (e.clientY - r.top) * scale;
+    var n = netRect();
+    tx = Math.max(n.x + 8, Math.min(n.x + n.w - 8, tx));
+    ty = Math.max(n.y + 6, Math.min(n.y + n.h - 4, ty));
+    shoot.puck = {x: cv.width / 2, y: cv.height - 26, tx: tx, ty: ty, p: 0};
+  });
+  function step() {
+    shoot.t += 0.033;
+    var W = cv.width, H = cv.height;
+    var panel = document.getElementById('p-games');
+    var vis = panel && panel.classList.contains('on') && document.getElementById('game-shoot').style.display !== 'none';
+    if (vis) {
+      // Ice
+      ctx.fillStyle = '#e8eef5'; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(200,30,50,.55)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(0, H * 0.62); ctx.lineTo(W, H * 0.62); ctx.stroke();
+      var n = netRect();
+      // Crease
+      ctx.fillStyle = 'rgba(80,150,240,.25)';
+      ctx.beginPath(); ctx.arc(n.x + n.w / 2, n.y + n.h, n.w * 0.42, 0, Math.PI); ctx.fill();
+      // Net
+      ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.fillRect(n.x, n.y, n.w, n.h);
+      ctx.strokeStyle = '#c33'; ctx.lineWidth = 5; ctx.strokeRect(n.x, n.y, n.w, n.h);
+      ctx.strokeStyle = 'rgba(160,160,170,.7)'; ctx.lineWidth = 1;
+      for (var gx = n.x; gx <= n.x + n.w; gx += 12) { ctx.beginPath(); ctx.moveTo(gx, n.y); ctx.lineTo(gx, n.y + n.h); ctx.stroke(); }
+      for (var gy = n.y; gy <= n.y + n.h; gy += 12) { ctx.beginPath(); ctx.moveTo(n.x, gy); ctx.lineTo(n.x + n.w, gy); ctx.stroke(); }
+      // Goalie (Canucks blue jersey, green pads)
+      var gxp = goalieX(), gw = W * 0.10, gh = H * 0.135;
+      ctx.fillStyle = '#00843D'; ctx.fillRect(gxp - gw / 2 - 6, n.y + n.h - 12, gw + 12, 12);
+      ctx.fillStyle = '#00205B';
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(gxp - gw / 2, n.y + n.h - gh, gw, gh, 8); ctx.fill(); }
+      else ctx.fillRect(gxp - gw / 2, n.y + n.h - gh, gw, gh);
+      ctx.fillStyle = '#f1c9a5'; ctx.beginPath(); ctx.arc(gxp, n.y + n.h - gh - 8, 10, 0, 7); ctx.fill();
+      // Shooter marker
+      ctx.fillStyle = '#00205B'; ctx.beginPath(); ctx.arc(W / 2, H - 22, 9, 0, 7); ctx.fill();
+      ctx.fillStyle = '#00843D'; ctx.beginPath(); ctx.arc(W / 2, H - 22, 4, 0, 7); ctx.fill();
+      // Puck
+      if (shoot.puck) {
+        var pk = shoot.puck;
+        pk.p = Math.min(1, pk.p + 0.055);
+        var px = pk.x + (pk.tx - pk.x) * pk.p;
+        var py = pk.y + (pk.ty - pk.y) * (pk.p * pk.p * (3 - 2 * pk.p));
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.ellipse(px, py, 8, 5.5, 0, 0, 7); ctx.fill();
+        if (pk.p >= 1) {
+          shoot.shots++;
+          var saved = Math.abs(pk.tx - gxp) < gw / 2 + 8;
+          if (!saved) { shoot.goals++; shoot.gSpeed += 0.5; }
+          shoot.msg = saved ? 'SAVED by the goalie!' : 'HE SHOOTS — HE SCORES! 🚨';
+          shoot.msgT = 34;
+          shoot.puck = null;
+          if (shoot.shots >= 5) {
+            var flavor = shoot.goals >= 4 ? 'Shootout hero!' : shoot.goals >= 2 ? 'Solid hands.' : 'The goalie stood on his head.';
+            document.getElementById('shoot-msg').textContent = 'Final: ' + shoot.goals + '/5 goals — ' + flavor + ' Tap "New round" to play again.';
+          }
+        }
+      }
+      // Scoreboard
+      ctx.fillStyle = '#00205B'; ctx.font = '700 ' + Math.round(W * 0.032) + 'px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('CANUCKS SHOOTOUT', 14, 26);
+      ctx.textAlign = 'right';
+      ctx.fillText('Shots ' + shoot.shots + '/5   Goals ' + shoot.goals, W - 14, 26);
+      if (shoot.msgT > 0) {
+        shoot.msgT--;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = shoot.msg.indexOf('SCORES') >= 0 ? '#00843D' : '#c0392b';
+        ctx.font = '800 ' + Math.round(W * 0.05) + 'px Inter, sans-serif';
+        ctx.fillText(shoot.msg, W / 2, H * 0.52);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+})();
+
+// ── TRAIL MONSTERS (an original creature-collector in the Pokémon spirit) ──
+var MONSTERS = [
+  {n: 'Sparkit',   e: '⚡', hp: 38, r: 5}, {n: 'Embercub',  e: '🔥', hp: 42, r: 5},
+  {n: 'Aquafin',   e: '💧', hp: 40, r: 5}, {n: 'Thornpup',  e: '🌿', hp: 40, r: 5},
+  {n: 'Boltbat',   e: '🦇', hp: 46, r: 4}, {n: 'Frostfox',  e: '🦊', hp: 48, r: 4},
+  {n: 'Glowmoth',  e: '🦋', hp: 44, r: 4}, {n: 'Tidecrab',  e: '🦀', hp: 52, r: 3},
+  {n: 'Zephyrbird',e: '🕊️', hp: 50, r: 3}, {n: 'Rumblebear',e: '🐻', hp: 60, r: 2},
+  {n: 'Stormdrake',e: '🐉', hp: 70, r: 1}, {n: 'Auroralynx',e: '🐆', hp: 66, r: 1}
+];
+var monCur = null, monCaught = {};
+try { monCaught = JSON.parse(localStorage.getItem('monsters_v1') || '{}'); } catch(e) { monCaught = {}; }
+function monNew() {
+  var pool = [];
+  MONSTERS.forEach(function(m, i) { for (var k = 0; k < m.r; k++) pool.push(i); });
+  var i = pool[Math.floor(Math.random() * pool.length)];
+  monCur = {i: i, hp: MONSTERS[i].hp, max: MONSTERS[i].hp, gone: false};
+  monLog('A wild ' + MONSTERS[i].n + ' appeared!');
+  monRender();
+}
+function monLog(t) { var el = document.getElementById('mon-log'); if (el) el.textContent = t; }
+function monRender() {
+  if (!monCur) return;
+  var m = MONSTERS[monCur.i];
+  document.getElementById('mon-emoji').textContent = monCur.gone ? '💨' : m.e;
+  document.getElementById('mon-name').textContent = m.n + (monCaught[monCur.i] ? ' ✓' : '');
+  var pct = Math.max(0, monCur.hp / monCur.max * 100);
+  var fill = document.getElementById('mon-hpfill');
+  fill.style.width = pct + '%';
+  fill.style.background = pct > 50 ? 'var(--green)' : pct > 25 ? '#ffd60a' : 'var(--red)';
+  var dis = monCur.gone;
+  document.getElementById('mon-atk').disabled = dis;
+  document.getElementById('mon-orb').disabled = dis;
+  var grid = document.getElementById('mon-grid');
+  grid.innerHTML = MONSTERS.map(function(mm, ii) {
+    var got = monCaught[ii];
+    return '<div class="mon-slot' + (got ? ' caught' : '') + '"><span class="me">' + (got ? mm.e : '❓') + '</span>' + (got ? mm.n : '???') + '</div>';
+  }).join('');
+  var n = Object.keys(monCaught).length;
+  document.getElementById('mon-count').textContent = 'Caught ' + n + ' / ' + MONSTERS.length;
+}
+function monFleeCheck(p) {
+  if (Math.random() < p) {
+    monCur.gone = true;
+    monLog(MONSTERS[monCur.i].n + ' fled! Tap Next to keep exploring.');
+    monRender();
+    return true;
+  }
+  return false;
+}
+function monAttack() {
+  if (!monCur || monCur.gone) return;
+  var dmg = 12 + Math.floor(Math.random() * 17);
+  monCur.hp -= dmg;
+  if (monCur.hp <= 0) {
+    monCur.hp = 0; monCur.gone = true;
+    monLog('Hit for ' + dmg + '… ' + MONSTERS[monCur.i].n + ' fainted. Too rough to catch!');
+  } else {
+    monLog('Hit for ' + dmg + '! Weaker monsters are easier to catch.');
+    monFleeCheck(0.08);
+  }
+  monRender();
+}
+function monCatch() {
+  if (!monCur || monCur.gone) return;
+  var p = 0.15 + 0.75 * (1 - monCur.hp / monCur.max);
+  if (Math.random() < p) {
+    monCaught[monCur.i] = (monCaught[monCur.i] || 0) + 1;
+    saveLS('monsters_v1', monCaught);
+    monCur.gone = true;
+    monLog('Gotcha! ' + MONSTERS[monCur.i].n + ' was caught! 🎉');
+  } else {
+    monLog('So close! It broke free…');
+    monFleeCheck(0.12);
+  }
+  monRender();
+}
+monNew();
 
 // ── COPY HELPERS (paste into Apple Notes / Reminders — no public Apple API exists) ──
 function copyText(txt, btnLabel) {
