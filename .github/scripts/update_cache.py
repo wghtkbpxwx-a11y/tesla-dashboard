@@ -6,7 +6,7 @@ import os
 import re
 import sys
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode
 
 import requests
@@ -114,23 +114,29 @@ def _event_dt(ev):
 
 
 def _pick_game(events):
-    """Choose the most relevant game: a live one, else the latest final,
-    else the next upcoming."""
+    """Choose the most relevant game to show: a live one, else a *recent* final
+    (last couple of days), else the next upcoming game within a short horizon.
+
+    The recency window is the whole point: without it we'd surface a months-old
+    final during the offseason (e.g. a June NBA Finals game still shown as
+    "FINAL" in July). If nothing is live/recent/soon, return None → "No game"."""
     now = datetime.now(timezone.utc)
-    live = last_final = next_up = None
+    RECENT_FINAL = timedelta(days=2)   # show last night's / yesterday's result
+    UPCOMING = timedelta(days=8)       # show a game that's genuinely coming up
+    live = recent_final = next_up = None
     for ev in events:
         comp = (ev.get("competitions") or [{}])[0]
         state = comp.get("status", {}).get("type", {}).get("state")
         dt = _event_dt(ev)
         if state == "in":
             live = ev
-        elif state == "post":
-            if last_final is None or (dt and dt > _event_dt(last_final)):
-                last_final = ev
-        elif state == "pre" and dt and dt >= now:
+        elif state == "post" and dt and (now - dt) <= RECENT_FINAL:
+            if recent_final is None or dt > _event_dt(recent_final):
+                recent_final = ev
+        elif state == "pre" and dt and now <= dt <= now + UPCOMING:
             if next_up is None or dt < _event_dt(next_up):
                 next_up = ev
-    return live or last_final or next_up or (events[-1] if events else None)
+    return live or recent_final or next_up
 
 
 def _side(competitors, home_away):
