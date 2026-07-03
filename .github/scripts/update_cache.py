@@ -536,6 +536,22 @@ def main():
         print("ERROR: DASHBOARD_CACHE marker not found in index.html", file=sys.stderr)
         sys.exit(1)
 
+    # Self-check before writing: the assembled file must still match the sacred
+    # marker and round-trip as valid JSON. This job commits with [skip ci], so the
+    # Validate workflow can't guard it — bail out (leaving the last good index.html
+    # untouched) rather than push a cache that would blank the dashboard in-car.
+    check = re.search(r"var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n", html)
+    if not check:
+        print("ERROR: rewritten DASHBOARD_CACHE no longer matches its marker — aborting", file=sys.stderr)
+        sys.exit(1)
+    try:
+        json.loads(check.group(1))
+    except Exception as e:
+        print(f"ERROR: rewritten DASHBOARD_CACHE is not valid JSON ({e}) — aborting", file=sys.stderr)
+        sys.exit(1)
+    if not (cache.get("weather") or cache.get("forecast")):
+        print("  ⚠ warning: both weather and forecast are empty this run (kept as-is)")
+
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
