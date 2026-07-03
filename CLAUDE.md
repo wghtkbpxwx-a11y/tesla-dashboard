@@ -131,6 +131,17 @@ RIGHT. Caught Critter stays in the Capsule (`rest` phase, idle bob).
 Catch odds rise as wild HP AND level drop. Keys: `monsters_v1`,
 `mon_party_v1`, `mon_started_v1`, `mon_trainer_v1`.
 
+v3 shipped: second area — **Crystal Cave** (`MON_CAVE`, `monArea`
+'field'|'cave', `monMapData()`), reached via a cave mouth 'C' on the
+field's right edge; cave has stronger encounters (`caveSet`, +2 levels)
+and a boss altar 'B'. Boss **Terravore** is `MONSTERS[12]`/`CRDEF[12]`
+(excluded from the collectable set via `TOTAL=12`); stepping on 'B' with
+all 12 caught starts `monBoss()` (can't be captured). Beating it →
+`monShowChampion()` ceremony (confetti + trophy + trainer on
+`#mon-champ-canvas`, `mon_champion_v1`). Animation loops are now
+on-demand: `monLoopStart`/`shootLoopStart`/`monChampStart` gate rAF to
+visibility (no idle CPU when the Games panel is closed).
+
 v2 shipped: tile overworld (15×10, `MON_MAP` strings: `.` walk, `,` tall
 grass w/ 22% encounters, `T`/`~` block, `=` path), D-pad + arrow movement,
 turn-based battles (2 moves each, strong move 15% miss, enemy scales with
