@@ -484,6 +484,16 @@ def main():
         except Exception:
             pass
 
+    # Per-feed fallback: keep the last good items for any source that failed
+    # this run (feeds like ESPN parse 0 items intermittently — without this,
+    # a source vanishes from its tab until the next successful hourly run)
+    for url in NEWS_FEEDS:
+        if url not in news and url in existing.get("news", {}):
+            news[url] = existing["news"][url]
+    for url in SPORTS_FEEDS:
+        if url not in sports and url in existing.get("sports", {}):
+            sports[url] = existing["sports"][url]
+
     # Build new cache, keeping existing data as fallback if live fetch failed
     cache = {
         "weather": weather or existing.get("weather"),
