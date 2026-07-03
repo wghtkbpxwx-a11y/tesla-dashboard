@@ -368,6 +368,18 @@ input[type="color"]:hover{border-color:var(--line2)}
 .mon-slot .me{font-size:34px;display:block;margin-bottom:4px}
 .mon-slot.caught{border-color:var(--green);color:var(--t1)}
 
+/* TRAIL MONSTERS — overworld + battle */
+#mon-map-canvas{display:block;margin:0 auto;border-radius:14px;border:1px solid var(--line);max-width:100%;image-rendering:pixelated;touch-action:manipulation}
+.mon-dpad{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;justify-content:center;margin:16px auto 0}
+.mon-dpad button{border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--t1);font-size:24px;cursor:pointer}
+.mon-dpad button:active{background:var(--accent);color:#fff}
+.mon-battle-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:720px;margin:0 auto 16px}
+.mon-fighter{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);padding:18px;text-align:center}
+.mon-fighter .mf-emoji{font-size:64px;line-height:1.1}
+.mon-fighter .mf-name{font-size:17px;font-weight:700;margin-top:4px}
+.mon-fighter .mf-lv{font-size:12px;color:var(--t3);font-weight:600}
+.mon-moves{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;max-width:720px;margin:0 auto}
+
 /* CONVERTER */
 .conv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .conv-row input{flex:1;min-width:110px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--t1);font-size:15px;font-family:var(--f);outline:none}
@@ -919,21 +931,42 @@ input[type="color"]:hover{border-color:var(--line2)}
       <div style="text-align:center;margin-top:16px"><button class="btn btn-gh" onclick="shootNew()">New round</button></div>
     </div>
     <div id="game-mon" style="display:none">
-      <div class="mon-wrap">
-        <div class="mon-card">
-          <div class="mon-emoji" id="mon-emoji">🌲</div>
-          <div class="mon-name" id="mon-name">Trail Monsters</div>
-          <div class="mon-hpbar"><div class="mon-hpfill" id="mon-hpfill" style="width:100%"></div></div>
-          <div class="mon-log" id="mon-log">A wild monster is nearby…</div>
-          <div class="mon-btns">
-            <button class="btn btn-pri" id="mon-atk" onclick="monAttack()">Attack</button>
-            <button class="btn btn-pri" id="mon-orb" onclick="monCatch()" style="background:var(--green)">Throw Orb</button>
-            <button class="btn btn-gh" onclick="monNew()">Next</button>
+      <div id="mon-map-view">
+        <div style="text-align:center;font-size:13px;color:var(--t3);margin-bottom:12px">Walk through tall grass to find wild monsters · arrows or D-pad</div>
+        <canvas id="mon-map-canvas"></canvas>
+        <div class="mon-dpad">
+          <span></span><button onclick="monMove(0,-1)">▲</button><span></span>
+          <button onclick="monMove(-1,0)">◀</button><span></span><button onclick="monMove(1,0)">▶</button>
+          <span></span><button onclick="monMove(0,1)">▼</button><span></span>
+        </div>
+        <div style="text-align:center;margin-top:14px">
+          <span id="mon-count" style="font-size:13px;color:var(--t2);font-weight:600"></span>
+        </div>
+        <div class="mon-grid" id="mon-grid" style="max-width:720px;margin:16px auto 0"></div>
+      </div>
+      <div id="mon-battle-view" style="display:none">
+        <div class="mon-battle-grid">
+          <div class="mon-fighter">
+            <div class="mf-lv">WILD</div>
+            <div class="mf-emoji" id="mon-emoji">❓</div>
+            <div class="mf-name" id="mon-name">—</div>
+            <div class="mf-lv" id="mon-elv"></div>
+            <div class="mon-hpbar"><div class="mon-hpfill" id="mon-hpfill" style="width:100%"></div></div>
+          </div>
+          <div class="mon-fighter">
+            <div class="mf-lv">YOUR MONSTER</div>
+            <div class="mf-emoji" id="mon-pemoji">❓</div>
+            <div class="mf-name" id="mon-pname">—</div>
+            <div class="mf-lv" id="mon-plv"></div>
+            <div class="mon-hpbar"><div class="mon-hpfill" id="mon-phpfill" style="width:100%"></div></div>
           </div>
         </div>
-        <div>
-          <div class="sec-title">Collection <span id="mon-count" style="margin-left:auto;color:var(--t2)"></span></div>
-          <div class="mon-grid" id="mon-grid"></div>
+        <div class="mon-log" id="mon-log" style="text-align:center;max-width:720px;margin:0 auto"></div>
+        <div class="mon-moves" id="mon-moves"></div>
+        <div class="mon-moves" style="margin-top:10px">
+          <button class="btn btn-pri" id="mon-orb" onclick="monCatch()" style="background:var(--green)">Throw Orb</button>
+          <button class="btn btn-gh" onclick="monRun()">Run</button>
+          <button class="btn btn-gh" id="mon-back" onclick="monBackToMap()" style="display:none">Back to map</button>
         </div>
       </div>
     </div>
@@ -4655,83 +4688,212 @@ function shootNew() {
   requestAnimationFrame(step);
 })();
 
-// ── TRAIL MONSTERS (an original creature-collector in the Pokémon spirit) ──
+// ── TRAIL MONSTERS — original creature RPG (Pokémon-inspired mechanics,
+//    all creatures/names/art original). Overworld map with tall-grass
+//    encounters, turn-based battles, catching, levels, persistent party. ──
 var MONSTERS = [
-  {n: 'Sparkit',   e: '⚡', hp: 38, r: 5}, {n: 'Embercub',  e: '🔥', hp: 42, r: 5},
-  {n: 'Aquafin',   e: '💧', hp: 40, r: 5}, {n: 'Thornpup',  e: '🌿', hp: 40, r: 5},
-  {n: 'Boltbat',   e: '🦇', hp: 46, r: 4}, {n: 'Frostfox',  e: '🦊', hp: 48, r: 4},
-  {n: 'Glowmoth',  e: '🦋', hp: 44, r: 4}, {n: 'Tidecrab',  e: '🦀', hp: 52, r: 3},
-  {n: 'Zephyrbird',e: '🕊️', hp: 50, r: 3}, {n: 'Rumblebear',e: '🐻', hp: 60, r: 2},
-  {n: 'Stormdrake',e: '🐉', hp: 70, r: 1}, {n: 'Auroralynx',e: '🐆', hp: 66, r: 1}
+  {n: 'Sparkit',   e: '⚡', hp: 38, r: 5, mv: ['Tackle', 'Spark Jolt']},
+  {n: 'Embercub',  e: '🔥', hp: 42, r: 5, mv: ['Scratch', 'Flame Puff']},
+  {n: 'Aquafin',   e: '💧', hp: 40, r: 5, mv: ['Tackle', 'Bubble Jet']},
+  {n: 'Thornpup',  e: '🌿', hp: 40, r: 5, mv: ['Bite', 'Vine Snap']},
+  {n: 'Boltbat',   e: '🦇', hp: 46, r: 4, mv: ['Wing Slap', 'Static Screech']},
+  {n: 'Frostfox',  e: '🦊', hp: 48, r: 4, mv: ['Pounce', 'Ice Nip']},
+  {n: 'Glowmoth',  e: '🦋', hp: 44, r: 4, mv: ['Dust Flap', 'Lumen Beam']},
+  {n: 'Tidecrab',  e: '🦀', hp: 52, r: 3, mv: ['Pinch', 'Tide Slam']},
+  {n: 'Zephyrbird',e: '🕊️', hp: 50, r: 3, mv: ['Peck', 'Gale Dive']},
+  {n: 'Rumblebear',e: '🐻', hp: 60, r: 2, mv: ['Maul', 'Quake Stomp']},
+  {n: 'Stormdrake',e: '🐉', hp: 70, r: 1, mv: ['Talon Rake', 'Thunder Roar']},
+  {n: 'Auroralynx',e: '🐆', hp: 66, r: 1, mv: ['Shadow Claw', 'Aurora Burst']}
 ];
-var monCur = null, monCaught = {};
+var monCaught = {}, monParty = {};
 try { monCaught = JSON.parse(localStorage.getItem('monsters_v1') || '{}'); } catch(e) { monCaught = {}; }
-function monNew() {
+try { monParty = JSON.parse(localStorage.getItem('mon_party_v1') || '{}'); } catch(e) { monParty = {}; }
+
+// ── Overworld ──
+// . walkable  , tall grass (encounters)  T tree  ~ water  = path
+var MON_MAP = [
+  'TTTTTTTTTTTTTTT',
+  'T,,,..~~~..,,,T',
+  'T,,,..~~~..,,,T',
+  'T....=====....T',
+  'T.,,.=...=.,,.T',
+  'T.,,.=...=====T',
+  'T....=........T',
+  'T~~..=..,,,,..T',
+  'T~~..=..,,,,..T',
+  'TTTTTTTTTTTTTTT'
+];
+var TILE = 34, MW = MON_MAP[0].length, MH = MON_MAP.length;
+var monP = {x: 7, y: 6};
+var monInBattle = false;
+function monTile(x, y) { return (MON_MAP[y] || '')[x] || 'T'; }
+function monDrawMap() {
+  var cv = document.getElementById('mon-map-canvas');
+  if (!cv) return;
+  cv.width = MW * TILE; cv.height = MH * TILE;
+  cv.style.width = Math.min(560, window.innerWidth - 40) + 'px';
+  var ctx = cv.getContext('2d');
+  var colors = {'.': '#7ec850', ',': '#4ea339', 'T': '#2f6b2f', '~': '#3f8fd2', '=': '#d8c58c'};
+  for (var y = 0; y < MH; y++) for (var x = 0; x < MW; x++) {
+    var t = monTile(x, y);
+    ctx.fillStyle = colors[t] || '#7ec850';
+    ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+    ctx.font = (TILE - 8) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (t === 'T') ctx.fillText('🌲', x * TILE + TILE / 2, y * TILE + TILE / 2 + 2);
+    if (t === ',') { ctx.fillStyle = 'rgba(0,60,0,.35)'; ctx.font = (TILE - 16) + 'px serif'; ctx.fillText('𝑤𝑤', x * TILE + TILE / 2, y * TILE + TILE / 2 + 3); }
+    if (t === '~' && (x + y) % 2 === 0) { ctx.font = (TILE - 18) + 'px serif'; ctx.fillText('〜', x * TILE + TILE / 2, y * TILE + TILE / 2); }
+  }
+  ctx.font = (TILE - 6) + 'px serif';
+  ctx.fillText('🧢', monP.x * TILE + TILE / 2, monP.y * TILE + TILE / 2 + 1);
+}
+function monMove(dx, dy) {
+  if (monInBattle) return;
+  var nx = monP.x + dx, ny = monP.y + dy;
+  var t = monTile(nx, ny);
+  if (t === 'T' || t === '~') return;
+  monP.x = nx; monP.y = ny;
+  monDrawMap();
+  if (t === ',' && Math.random() < 0.22) monEncounter();
+}
+document.addEventListener('keydown', function(e) {
+  var panel = document.getElementById('p-games');
+  if (!panel || !panel.classList.contains('on')) return;
+  if (document.getElementById('game-mon').style.display === 'none') return;
+  var map = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]};
+  if (map[e.key] && !monInBattle) { e.preventDefault(); monMove(map[e.key][0], map[e.key][1]); }
+});
+
+// ── Party helpers ──
+function monActive() {
+  var best = null;
+  Object.keys(monParty).forEach(function(i) {
+    if (!best || monParty[i] > monParty[best]) best = i;
+  });
+  if (best === null) { monParty[0] = 3; saveLS('mon_party_v1', monParty); best = 0; }  // starter Sparkit Lv.3
+  return parseInt(best, 10);
+}
+function monMaxHp(idx, lvl) { return MONSTERS[idx].hp + 4 * (lvl - 1); }
+
+// ── Battle ──
+var monB = null;
+function monEncounter() {
   var pool = [];
   MONSTERS.forEach(function(m, i) { for (var k = 0; k < m.r; k++) pool.push(i); });
   var i = pool[Math.floor(Math.random() * pool.length)];
-  monCur = {i: i, hp: MONSTERS[i].hp, max: MONSTERS[i].hp, gone: false};
-  monLog('A wild ' + MONSTERS[i].n + ' appeared!');
-  monRender();
+  var pi = monActive();
+  var plv = monParty[pi];
+  var elv = Math.max(1, plv + Math.floor(Math.random() * 3) - 1);
+  monB = {ei: i, elv: elv, ehp: monMaxHp(i, elv), emax: monMaxHp(i, elv),
+          pi: pi, plv: plv, php: monMaxHp(pi, plv), pmax: monMaxHp(pi, plv), over: false};
+  monInBattle = true;
+  document.getElementById('mon-map-view').style.display = 'none';
+  document.getElementById('mon-battle-view').style.display = '';
+  monLog('A wild ' + MONSTERS[i].n + ' (Lv.' + elv + ') appeared!');
+  monRenderBattle();
 }
 function monLog(t) { var el = document.getElementById('mon-log'); if (el) el.textContent = t; }
-function monRender() {
-  if (!monCur) return;
-  var m = MONSTERS[monCur.i];
-  document.getElementById('mon-emoji').textContent = monCur.gone ? '💨' : m.e;
-  document.getElementById('mon-name').textContent = m.n + (monCaught[monCur.i] ? ' ✓' : '');
-  var pct = Math.max(0, monCur.hp / monCur.max * 100);
-  var fill = document.getElementById('mon-hpfill');
-  fill.style.width = pct + '%';
-  fill.style.background = pct > 50 ? 'var(--green)' : pct > 25 ? '#ffd60a' : 'var(--red)';
-  var dis = monCur.gone;
-  document.getElementById('mon-atk').disabled = dis;
-  document.getElementById('mon-orb').disabled = dis;
+function monBar(id, hp, max) {
+  var el = document.getElementById(id);
+  var pct = Math.max(0, hp / max * 100);
+  el.style.width = pct + '%';
+  el.style.background = pct > 50 ? 'var(--green)' : pct > 25 ? '#ffd60a' : 'var(--red)';
+}
+function monRenderBattle() {
+  if (!monB) return;
+  var e = MONSTERS[monB.ei], pm = MONSTERS[monB.pi];
+  document.getElementById('mon-emoji').textContent = monB.over === 'fled' ? '💨' : e.e;
+  document.getElementById('mon-name').textContent = e.n + (monCaught[monB.ei] ? ' ✓' : '');
+  document.getElementById('mon-elv').textContent = 'Lv.' + monB.elv;
+  document.getElementById('mon-pemoji').textContent = pm.e;
+  document.getElementById('mon-pname').textContent = pm.n;
+  document.getElementById('mon-plv').textContent = 'Lv.' + monB.plv;
+  monBar('mon-hpfill', monB.ehp, monB.emax);
+  monBar('mon-phpfill', monB.php, monB.pmax);
+  var mv = document.getElementById('mon-moves');
+  mv.innerHTML = pm.mv.map(function(name, k) {
+    return '<button class="btn btn-pri" onclick="monUseMove(' + k + ')"' + (monB.over ? ' disabled' : '') + '>' + name + '</button>';
+  }).join('');
+  document.getElementById('mon-orb').disabled = !!monB.over;
+  document.getElementById('mon-back').style.display = monB.over ? '' : 'none';
+  monRenderGrid();
+}
+function monRenderGrid() {
   var grid = document.getElementById('mon-grid');
-  grid.innerHTML = MONSTERS.map(function(mm, ii) {
+  if (grid) grid.innerHTML = MONSTERS.map(function(mm, ii) {
     var got = monCaught[ii];
-    return '<div class="mon-slot' + (got ? ' caught' : '') + '"><span class="me">' + (got ? mm.e : '❓') + '</span>' + (got ? mm.n : '???') + '</div>';
+    var lv = monParty[ii] ? ' Lv.' + monParty[ii] : '';
+    return '<div class="mon-slot' + (got ? ' caught' : '') + '"><span class="me">' + (got ? mm.e : '❓') + '</span>' + (got ? mm.n + lv : '???') + '</div>';
   }).join('');
   var n = Object.keys(monCaught).length;
-  document.getElementById('mon-count').textContent = 'Caught ' + n + ' / ' + MONSTERS.length;
+  var c = document.getElementById('mon-count');
+  if (c) c.textContent = 'Caught ' + n + ' / ' + MONSTERS.length + ' · Active: ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()];
 }
-function monFleeCheck(p) {
-  if (Math.random() < p) {
-    monCur.gone = true;
-    monLog(MONSTERS[monCur.i].n + ' fled! Tap Next to keep exploring.');
-    monRender();
-    return true;
-  }
-  return false;
-}
-function monAttack() {
-  if (!monCur || monCur.gone) return;
-  var dmg = 12 + Math.floor(Math.random() * 17);
-  monCur.hp -= dmg;
-  if (monCur.hp <= 0) {
-    monCur.hp = 0; monCur.gone = true;
-    monLog('Hit for ' + dmg + '… ' + MONSTERS[monCur.i].n + ' fainted. Too rough to catch!');
+function monEnemyTurn() {
+  if (!monB || monB.over) return;
+  var e = MONSTERS[monB.ei];
+  var dmg = 8 + Math.floor(Math.random() * 10) + monB.elv * 2;
+  monB.php -= dmg;
+  var mvName = e.mv[Math.floor(Math.random() * e.mv.length)];
+  if (monB.php <= 0) {
+    monB.php = 0; monB.over = 'lost';
+    monLog(e.n + ' used ' + mvName + ' for ' + dmg + '! Your ' + MONSTERS[monB.pi].n + ' fainted… it will recover back at camp.');
   } else {
-    monLog('Hit for ' + dmg + '! Weaker monsters are easier to catch.');
-    monFleeCheck(0.08);
+    monLog(e.n + ' used ' + mvName + ' for ' + dmg + '!');
   }
-  monRender();
+  monRenderBattle();
+}
+function monUseMove(k) {
+  if (!monB || monB.over) return;
+  var pm = MONSTERS[monB.pi];
+  var strong = k === 1;
+  if (strong && Math.random() < 0.15) {
+    monLog(pm.n + "'s " + pm.mv[k] + ' missed!');
+    setTimeout(monEnemyTurn, 650);
+    return;
+  }
+  var dmg = (strong ? 16 : 11) + Math.floor(Math.random() * (strong ? 14 : 9)) + monB.plv;
+  monB.ehp -= dmg;
+  if (monB.ehp <= 0) {
+    monB.ehp = 0; monB.over = 'won';
+    monParty[monB.pi] = monB.plv + 1;
+    saveLS('mon_party_v1', monParty);
+    monLog(pm.mv[k] + ' hits for ' + dmg + '! Wild ' + MONSTERS[monB.ei].n + ' fainted — ' + pm.n + ' grew to Lv.' + monParty[monB.pi] + '!');
+  } else {
+    monLog(pm.mv[k] + ' hits for ' + dmg + '! Weaker monsters are easier to catch.');
+    setTimeout(monEnemyTurn, 650);
+  }
+  monRenderBattle();
 }
 function monCatch() {
-  if (!monCur || monCur.gone) return;
-  var p = 0.15 + 0.75 * (1 - monCur.hp / monCur.max);
+  if (!monB || monB.over) return;
+  var p = 0.15 + 0.75 * (1 - monB.ehp / monB.emax);
   if (Math.random() < p) {
-    monCaught[monCur.i] = (monCaught[monCur.i] || 0) + 1;
+    monCaught[monB.ei] = (monCaught[monB.ei] || 0) + 1;
+    if (!monParty[monB.ei] || monB.elv > monParty[monB.ei]) monParty[monB.ei] = monB.elv;
     saveLS('monsters_v1', monCaught);
-    monCur.gone = true;
-    monLog('Gotcha! ' + MONSTERS[monCur.i].n + ' was caught! 🎉');
+    saveLS('mon_party_v1', monParty);
+    monB.over = 'caught';
+    monLog('Gotcha! ' + MONSTERS[monB.ei].n + ' (Lv.' + monB.elv + ') was caught! 🎉');
   } else {
     monLog('So close! It broke free…');
-    monFleeCheck(0.12);
+    setTimeout(monEnemyTurn, 650);
   }
-  monRender();
+  monRenderBattle();
 }
-monNew();
+function monRun() {
+  if (!monB || monB.over) return;
+  monB.over = 'fled';
+  monLog('Got away safely!');
+  monRenderBattle();
+}
+function monBackToMap() {
+  monB = null; monInBattle = false;
+  document.getElementById('mon-battle-view').style.display = 'none';
+  document.getElementById('mon-map-view').style.display = '';
+  monDrawMap(); monRenderGrid();
+}
+monDrawMap();
+monRenderGrid();
 
 // ── COPY HELPERS (paste into Apple Notes / Reminders — no public Apple API exists) ──
 function copyText(txt, btnLabel) {
