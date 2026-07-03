@@ -113,6 +113,25 @@ camera list is reused and fresh events still attach via stored lat/lon.
 `monsters_v1`, `geo_coords_v1`, plus feed caches (`n_*`, `s_*`, `wx*`,
 `stk_*`). `saveLS()` evicts feed caches on QuotaExceededError.
 
+## Trail Monsters roadmap (for the next session)
+
+v2 shipped: tile overworld (15×10, `MON_MAP` strings: `.` walk, `,` tall
+grass w/ 22% encounters, `T`/`~` block, `=` path), D-pad + arrow movement,
+turn-based battles (2 moves each, strong move 15% miss, enemy scales with
+level), catching, level-ups (+1 lvl per win, HP = base + 4/lvl), persistent
+party (`mon_party_v1`: idx→level) and collection (`monsters_v1`). Starter is
+Sparkit Lv.3, auto-granted. All creatures are ORIGINAL — never use Nintendo
+names/designs; mechanics in the classic style are fine.
+
+Natural extensions, in rough order of value:
+1. Multiple map areas (beach/mountain/cave) with different encounter pools —
+   add exits at map edges, an `AREAS` array of map-strings + pool weights.
+2. Type effectiveness (each creature gets a type; 2× / 0.5× multipliers).
+3. Party picker in battle (switch active creature instead of highest-level).
+4. A rival/NPC battle at a fixed map tile; healing "camp" tile.
+5. Evolutions at level thresholds (new emoji + name per stage).
+6. Sound via the existing WebAudio beep pattern (timerBeep is the template).
+
 ## Open items / ideas not yet done
 
 - Sports feeds are flaky run-to-run (ESPN sometimes parses 0 items); only
