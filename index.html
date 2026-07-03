@@ -247,6 +247,11 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .toggle.on{background:var(--green);border-color:var(--green)}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.34,.69,.66,1)}
 .toggle.on::after{transform:translateX(18px)}
+.toggle:disabled{opacity:.35;cursor:not-allowed}
+.set-toggles{display:flex;gap:18px;align-items:center;flex-shrink:0}
+.set-col{width:48px;text-align:center;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.toggle-spacer{width:48px;height:28px;flex-shrink:0;display:inline-block}
+.set-menu-head{padding-top:12px;padding-bottom:8px}
 .theme-presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;width:100%}
 .theme-preset{padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);background:var(--surface)}
 .theme-preset:hover{border-color:var(--accent);background:var(--surface2);transform:translateY(-1px)}
@@ -819,60 +824,16 @@ input[type="color"]:hover{border-color:var(--line2)}
         </div>
       </div>
     </div>
-    <div class="sec-title">Modules</div>
+    <div class="sec-title">Menu Items</div>
     <div class="set-group">
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Sports News</div><div class="set-s">Live sports headlines</div></div>
-        <button class="toggle" data-set="sports" aria-label="Toggle Sports module"></button>
+      <div class="set-row set-menu-head">
+        <div class="set-label" style="flex:1"><div class="set-s"><strong style="color:var(--t2)">Show</strong> a panel in the menu · <strong style="color:var(--t2)">Dock</strong> it to the bottom bar (up to 5)</div></div>
+        <div class="set-toggles"><span class="set-col">Show</span><span class="set-col">Dock</span></div>
       </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Messages</div><div class="set-s">Messaging hub shortcuts</div></div>
-        <button class="toggle" data-set="msg" aria-label="Toggle Messages module"></button>
+      <div id="menu-rows"></div>
+      <div class="set-row" style="justify-content:center;border-top:1px solid var(--line)">
+        <div id="dock-shortcut-hint" style="opacity:0;transition:opacity .25s;font-size:12px;color:var(--red);font-weight:600">Dock is full — remove one first (max 5).</div>
       </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Apple</div><div class="set-s">Apple ecosystem shortcuts</div></div>
-        <button class="toggle" data-set="apple" aria-label="Toggle Apple module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Productivity</div><div class="set-s">Notes, tasks, timer, calculator & converter</div></div>
-        <button class="toggle" data-set="cap" aria-label="Toggle Productivity module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Streaming</div><div class="set-s">Theater mode shortcuts</div></div>
-        <button class="toggle" data-set="stream" aria-label="Toggle Streaming module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Learning</div><div class="set-s">Research & learning tools</div></div>
-        <button class="toggle" data-set="learn" aria-label="Toggle Learning module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Weather</div><div class="set-s">Forecast & conditions panel</div></div>
-        <button class="toggle" data-set="weather" aria-label="Toggle Weather module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Quick Links</div><div class="set-s">Favorite link shortcuts</div></div>
-        <button class="toggle" data-set="links" aria-label="Toggle Links module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Saved</div><div class="set-s">Bookmarked articles</div></div>
-        <button class="toggle" data-set="saved" aria-label="Toggle Saved module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Traffic Cameras</div><div class="set-s">DriveBC bridge & highway cams</div></div>
-        <button class="toggle" data-set="traffic" aria-label="Toggle Traffic module"></button>
-      </div>
-      <div class="set-row">
-        <div class="set-label"><div class="set-t">Games</div><div class="set-s">Wordle & 2048 for charging stops</div></div>
-        <button class="toggle" data-set="games" aria-label="Toggle Games module"></button>
-      </div>
-    </div>
-    <div class="sec-title">Dock Shortcuts</div>
-    <div class="set-group">
-      <div class="set-row col-dir" style="align-items:stretch">
-        <div class="set-label" style="width:100%"><div class="set-t">Pin to bottom bar</div><div class="set-s">Move a “More” item into the dock for one-tap access (up to 5)</div></div>
-        <div id="dock-shortcut-hint" style="opacity:0;transition:opacity .25s;font-size:12px;color:var(--red);font-weight:600;margin-top:8px">Dock is full — remove one first (max 5).</div>
-      </div>
-      <div id="dock-shortcut-rows"></div>
     </div>
     <button class="btn btn-gh" onclick="resetSettings()">Reset to defaults</button>
   </section>
@@ -1352,7 +1313,8 @@ function resetSettings() {
   settings.themeMode = 'manual';
   settings.dockOrder = null;
   setPromoted([]);
-  saveSettings(); applyTheme(); applyModules(); syncToggles(); applyColors(); applyDockOrder(); initDragAndDrop(); syncDockToggles();
+  saveSettings(); applyTheme(); applyModules(); applyColors(); applyDockOrder(); initDragAndDrop();
+  if (typeof renderMenuRows === 'function') renderMenuRows(); else { syncToggles(); syncDockToggles(); }
 }
 document.querySelectorAll('.toggle[data-set]').forEach(function(t) {
   t.addEventListener('click', function() {
@@ -1606,21 +1568,57 @@ function addToDock(panelId) { promoteToDock(panelId); }
 function removeFromDock(panelId) { demoteFromDock(panelId); }
 
 // Settings "Dock Shortcuts" — render one toggle per pinnable panel
-function renderDockShortcuts() {
-  var host = document.getElementById('dock-shortcut-rows');
+// Merged Settings list: each panel gets a "Show" (module) and a "Dock" (pin) toggle
+var MENU_ITEMS = [
+  {p:'sports',  label:'Sports News',     sub:'Live sports headlines'},
+  {p:'msg',     label:'Messages',        sub:'Messaging hub shortcuts'},
+  {p:'weather', label:'Weather',         sub:'Forecast & conditions panel'},
+  {p:'traffic', label:'Traffic Cameras', sub:'DriveBC bridge & highway cams'},
+  {p:'saved',   label:'Saved',           sub:'Bookmarked articles'},
+  {p:'cap',     label:'Productivity',    sub:'Notes, tasks, timer, calculator & converter'},
+  {p:'stocks',  label:'Stocks',          sub:'Watchlist & market prices'},
+  {p:'links',   label:'Quick Links',     sub:'Favorite link shortcuts'},
+  {p:'games',   label:'Games',           sub:'Wordle & 2048 for charging stops'},
+  {p:'apple',   label:'Apple',           sub:'Apple ecosystem shortcuts'},
+  {p:'stream',  label:'Streaming',       sub:'Theater mode shortcuts'},
+  {p:'learn',   label:'Learning',        sub:'Research & learning tools'}
+];
+function menuHasModule(p) { return defaultSettings.modules[p] !== undefined; }
+function renderMenuRows() {
+  var host = document.getElementById('menu-rows');
   if (!host) return;
-  host.innerHTML = DOCK_PROMOTABLE.map(function(x) {
-    return '<div class="set-row"><div class="set-label"><div class="set-t">' + x.label + '</div></div>'
-      + '<button class="toggle" data-dock="' + x.p + '" aria-label="Pin ' + x.label + ' to dock"></button></div>';
+  host.innerHTML = MENU_ITEMS.map(function(m) {
+    var shown = settings.modules[m.p] !== false;
+    var showCell = menuHasModule(m.p)
+      ? '<button class="toggle" data-set="' + m.p + '" aria-label="Show ' + m.label + '"></button>'
+      : '<span class="toggle-spacer" title="Always available"></span>';
+    var dockCell = isPromotable(m.p)
+      ? '<button class="toggle" data-dock="' + m.p + '" aria-label="Pin ' + m.label + ' to dock"' + (shown ? '' : ' disabled') + '></button>'
+      : '<span class="toggle-spacer" title="Always in the dock"></span>';
+    return '<div class="set-row"><div class="set-label"><div class="set-t">' + m.label + '</div><div class="set-s">' + m.sub + '</div></div>'
+      + '<div class="set-toggles">' + showCell + dockCell + '</div></div>';
   }).join('');
+  // "Show" (module visibility) handlers
+  host.querySelectorAll('.toggle[data-set]').forEach(function(t) {
+    t.addEventListener('click', function() {
+      var k = t.dataset.set;
+      settings.modules[k] = settings.modules[k] === false; // flip
+      // Hiding a panel also unpins it from the dock (can't dock a hidden panel)
+      if (settings.modules[k] === false && isPromotable(k)) setPromoted(getPromoted().filter(function(x) { return x !== k; }));
+      applyModules(); saveSettings(); applyDockOrder(); initDragAndDrop(); renderMenuRows();
+    });
+  });
+  // "Dock" (pin) handlers
   host.querySelectorAll('.toggle[data-dock]').forEach(function(t) {
+    if (t.disabled) return;
     t.addEventListener('click', function() {
       var p = t.dataset.dock;
       if (getPromoted().indexOf(p) >= 0) demoteFromDock(p);
       else if (!promoteToDock(p)) flashDockCap();
+      renderMenuRows();
     });
   });
-  syncDockToggles();
+  syncToggles(); syncDockToggles();
 }
 function syncDockToggles() {
   var promoted = getPromoted();
@@ -1643,7 +1641,7 @@ try {
   applyColors();
   applyDockOrder();
   initDragAndDrop();
-  renderDockShortcuts();
+  renderMenuRows();
 } catch(e) { console.error('Init error:', e.message); }
 
 // ── BOOKMARKS ──
