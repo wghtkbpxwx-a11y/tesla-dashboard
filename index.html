@@ -1038,6 +1038,28 @@ input[type="color"]:hover{border-color:var(--line2)}
 </div>
 
 <script>
+// ── ERROR BEACON ──
+// The whole app is one script; if something throws (init or later), surface a
+// small "tap to reload" chip instead of leaving a silently-dead panel, and
+// remember the last error for inspection. Bubble-phase listener only, so it
+// catches real JS errors — not benign <img> load failures (e.g. offline cams).
+(function() {
+  window.addEventListener('error', function(e) {
+    if (!e || !e.message) return; // resource errors have no message; ignore
+    try { localStorage.setItem('last_error_v1', JSON.stringify({ m: String(e.message).slice(0, 300), src: (e.filename || '').split('/').pop(), line: e.lineno || 0, t: Date.now() })); } catch(_) {}
+    function chip() {
+      if (document.getElementById('err-beacon')) return; // one at a time
+      var b = document.createElement('button');
+      b.id = 'err-beacon';
+      b.textContent = '⚠ Something glitched — tap to reload';
+      b.setAttribute('style', 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:9999;background:#c0392b;color:#fff;border:none;border-radius:100px;padding:12px 22px;font:600 14px system-ui,-apple-system,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.45);cursor:pointer');
+      b.onclick = function() { location.reload(); };
+      (document.body || document.documentElement).appendChild(b);
+    }
+    if (document.body) chip(); else document.addEventListener('DOMContentLoaded', chip);
+  });
+})();
+
 // ── VARIABLES (declared early to avoid undefined reference errors) ──
 var SETTINGS_KEY = 'dash_settings_v1';
 var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, links:true, saved:true, traffic:true, games:true}};
