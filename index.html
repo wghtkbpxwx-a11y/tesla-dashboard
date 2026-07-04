@@ -1197,7 +1197,7 @@ function renderLiveStocks() {
         var diff = px - prev;
         var pct = ((diff / prev) * 100).toFixed(1);
         var chgClass = diff >= 0 ? 'up' : 'down';
-        html += '<div class="stock-chip" onclick="goPanel(\'stocks\')">'
+        html += '<div class="stock-chip" onclick="toggleStocksDropdown()">'
           + '<span class="stock-chip-sym">' + sym + '</span>'
           + '<span class="stock-chip-px">$' + px.toFixed(2) + '</span>'
           + '<span class="stock-chip-chg ' + chgClass + '">' + (diff >= 0 ? '+' : '') + pct + '%</span>'
@@ -1451,6 +1451,9 @@ function briefingToggle() {
 
 // ── DOCK ──
 function goPanel(p) {
+  // A panel id with no matching section (e.g. 'stocks', which is a dropdown)
+  // must never blank the page — land on Live instead.
+  if (!document.getElementById('p-' + p)) p = 'live';
   document.querySelectorAll('.dock-btn').forEach(function(b) { b.classList.remove('on'); });
   document.querySelectorAll('.dock-submenu-item').forEach(function(b) { b.classList.remove('on'); });
   document.querySelectorAll('.panel').forEach(function(pn) { pn.classList.remove('on'); });
