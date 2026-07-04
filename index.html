@@ -1537,9 +1537,14 @@ function briefingSetBtns(on) {
   });
 }
 var briefingKeepalive = null;
+var briefingAudio = null;
+// Hourly server-generated MP3 (single-commit `audio` branch; media tags need
+// no CORS, same hotlink pattern as the DriveBC camera images)
+var BRIEFING_MP3 = 'https://raw.githubusercontent.com/wghtkbpxwx-a11y/tesla-dashboard/audio/briefing.mp3';
 function briefingStop() {
   briefingOn = false;
   clearInterval(briefingKeepalive); briefingKeepalive = null;
+  if (briefingAudio) { try { briefingAudio.pause(); } catch(e) {} briefingAudio = null; }
   if (briefingSupported()) { try { window.speechSynthesis.cancel(); } catch(e) {} }
   briefingSetBtns(false);
 }
@@ -1559,11 +1564,13 @@ function briefingSpeakParts(parts) {
     try { synth.resume(); } catch(e) {}
   }, 4000);
 }
-function briefingToggle() {
-  if (!briefingSupported()) { alert('Read-aloud is not supported in this browser.'); return; }
-  if (briefingOn) { briefingStop(); return; }
-  briefingOn = true;
-  briefingSetBtns(true);
+function briefingSpeakFallback() {
+  if (!briefingOn) return;
+  if (!briefingSupported()) {
+    briefingOn = false; briefingSetBtns(false);
+    alert('Audio briefing is unavailable right now — it regenerates hourly, try again in a few minutes.');
+    return;
+  }
   var parts = briefingScript();
   var synth = window.speechSynthesis;
   // iOS/WebKit quirk: cancel() immediately followed by speak() silently eats
@@ -1576,9 +1583,23 @@ function briefingToggle() {
     try { synth.cancel(); } catch(e) {}
     setTimeout(function() { if (briefingOn) briefingSpeakParts(parts); }, 180);
   } else {
-    // Common case: idle engine — speak directly inside the tap gesture
     briefingSpeakParts(parts);
   }
+}
+function briefingToggle() {
+  if (briefingOn) { briefingStop(); return; }
+  briefingOn = true;
+  briefingSetBtns(true);
+  // Server-generated MP3 first: MEDIA playback is audible in the Tesla browser
+  // and on iPhones with the silent switch on, where speechSynthesis is not.
+  try {
+    var bucket = Math.floor(Date.now() / 900000); // 15-min cache buckets
+    briefingAudio = new Audio(BRIEFING_MP3 + '?t=' + bucket);
+    briefingAudio.onended = function() { briefingOn = false; briefingAudio = null; briefingSetBtns(false); };
+    briefingAudio.onerror = function() { briefingAudio = null; briefingSpeakFallback(); };
+    var p = briefingAudio.play();
+    if (p && p.catch) p.catch(function() { briefingAudio = null; briefingSpeakFallback(); });
+  } catch(e) { briefingAudio = null; briefingSpeakFallback(); }
 }
 
 // ── DOCK ──

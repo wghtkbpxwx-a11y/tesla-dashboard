@@ -37,6 +37,51 @@ jobs:
       - name: Validate before commit
         run: python3 .github/scripts/validate.py
 
+      # ── Audio briefing (MP3) ──
+      # speechSynthesis is silent in the Tesla browser and muted by the iPhone
+      # silent switch; a real MP3 played via <audio> works on both. Published
+      # to the force-pushed single-commit `audio` branch (zero repo bloat) and
+      # hotlinked by the client from raw.githubusercontent.com.
+      - name: Cache Piper voice
+        id: voice
+        uses: actions/cache@v4
+        with:
+          path: ~/.piper-voice
+          key: piper-en_US-lessac-medium-v1
+
+      - name: Download Piper voice (cache miss)
+        if: steps.voice.outputs.cache-hit != 'true'
+        continue-on-error: true
+        run: |
+          mkdir -p ~/.piper-voice
+          curl -sL --retry 2 -o ~/.piper-voice/voice.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx"
+          curl -sL --retry 2 -o ~/.piper-voice/voice.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json"
+
+      - name: Generate audio briefing
+        continue-on-error: true
+        run: |
+          pip install --quiet piper-tts
+          BRIEFING_VOICE="$HOME/.piper-voice/voice.onnx" python3 .github/scripts/generate_briefing.py
+
+      - name: Publish audio branch
+        continue-on-error: true
+        run: |
+          if [ -f briefing.mp3 ]; then
+            mkdir -p /tmp/audio-pub
+            cp briefing.mp3 /tmp/audio-pub/
+            cp briefing.txt /tmp/audio-pub/ 2>/dev/null || true
+            cd /tmp/audio-pub
+            git init -q -b audio
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add .
+            git commit -qm "audio briefing $(date -u +%FT%TZ)"
+            git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" audio
+            echo "audio branch updated"
+          else
+            echo "no briefing.mp3 produced; audio branch left as-is"
+          fi
+
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
