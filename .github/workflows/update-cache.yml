@@ -27,6 +27,16 @@ jobs:
           LON: '-122.85'
         run: python3 .github/scripts/update_cache.py
 
+      # Build the spoken news/sports/pharmacy digest from the fresh cache.
+      # Extractive by default (no model); set DIGEST_GGUF to a GGUF path to
+      # enable the guarded LLM polish pass. Never blocks the cache commit.
+      - name: Generate spoken digest
+        continue-on-error: true
+        run: python3 .github/scripts/generate_digest.py
+
+      - name: Validate before commit
+        run: python3 .github/scripts/validate.py
+
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"

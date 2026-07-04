@@ -12,11 +12,22 @@ on live fetches. Instead:
 
 1. `.github/workflows/update-cache.yml` runs **hourly** (+ manual dispatch).
 2. It runs `.github/scripts/update_cache.py`, which fetches news RSS, sports
-   RSS, weather/forecast/air-quality (open-meteo), ESPN team scores, Yahoo
-   stock quotes, DriveBC webcam metadata, and Open511 traffic events, then
-   rewrites the `var DASHBOARD_CACHE = {...};` block inside `index.html`
+   RSS, pharmacy/medicine RSS (NEJM, Lancet, JAMA, CBC Health — David is a
+   pharmacist; BCPhA/PharmaCare have no RSS), weather/forecast/air-quality
+   (open-meteo), ESPN team scores, Yahoo stock quotes, DriveBC webcam metadata,
+   and Open511 traffic events, then rewrites the `var DASHBOARD_CACHE = {...};`
+   block inside `index.html`
    (regex: `var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n` — **never break this
-   marker**) and commits with `[skip ci]`.
+   marker**) and commits with `[skip ci]`. `parse_rss` handles RSS 2.0, RSS
+   1.0/RDF (namespaced items, dc:date — NEJM/Lancet style) and Atom.
+   Then `.github/scripts/generate_digest.py` builds `cache.digest`
+   {news, sports, pharmacy} — a deduped spoken summary the audio briefing
+   reads. Extractive by default; a guarded LLM polish activates only if
+   DIGEST_GGUF points at a local model (small models hallucinate: measured
+   Qwen 0.5B inventing a "body", 1.5B inventing an actor — every model
+   sentence is overlap-checked and falls back to the raw headline).
+   `validate.py` runs before the commit (the CI Validate workflow doesn't see
+   `[skip ci]` commits).
 3. In the browser, `httpGet()` intercepts URLs (open-meteo, rss2json,
    finance.yahoo.com) and serves from `DASHBOARD_CACHE`; uncached rss2json
    URLs fast-fail (return null) instead of hanging. `fetchCached()` layers
