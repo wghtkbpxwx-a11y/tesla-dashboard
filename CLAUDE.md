@@ -143,6 +143,12 @@ RIGHT. Caught Critter stays in the Capsule (`rest` phase, idle bob).
 Catch odds rise as wild HP AND level drop. Keys: `monsters_v1`,
 `mon_party_v1`, `mon_started_v1`, `mon_trainer_v1`.
 
+v4 shipped: **evolutions** at Lv.10 (`EVO_LEVEL`, `EVO_NAMES`, `monIsEvolved`,
+`monName(idx,lvl)` — use it for any displayed name; sprites get aura+crown via
+`drawCritter(...,evolved)`, +12 HP in `monMaxHp`), **battle-partner picker**
+(tap a caught Critter in the Critterdex, `mon_active_v1`), and **sound**
+(`monSfx(kind)` WebAudio chip effects, 🔊/🔇 button, `mon_sound_v1`).
+
 v3 shipped: second area — **Crystal Cave** (`MON_CAVE`, `monArea`
 'field'|'cave', `monMapData()`), reached via a cave mouth 'C' on the
 field's right edge; cave has stronger encounters (`caveSet`, +2 levels)

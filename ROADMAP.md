@@ -60,10 +60,9 @@ dashboard** — in the car, mid-drive. There is currently no automated guard.
 
 ## Tier 2 — Driving-first UX (think outside the box)
 
-8. **Glance / Park mode** **[M] ⭐⭐⭐ 🎨**
-   One giant-type card: temperature, next headline, next game, freshness — readable in a
-   half-second glance. Auto-engage when the car is stationary, or a single big toggle.
-   This is the feature that best fits "used in a moving Tesla."
+8. **Glance / Park mode** ✅ **shipped** — full-screen giant-type card (clock, weather,
+   rotating facts: 4 headlines / sports / teams / traffic / Rx / quote) + the 🔊 audio
+   briefing. Possible v2: auto-engage when stationary.
 9. **Voice navigation** **[M] ⭐⭐ 🧪**
    The Web Speech API is already wired for dictation — extend it: "show traffic",
    "weather", "play a game". Hands-stay-on-wheel navigation.
@@ -80,21 +79,24 @@ dashboard** — in the car, mid-drive. There is currently no automated guard.
 
 ## Tier 3 — Content depth
 
-13. **Portfolio roll-up** **[S] ⭐⭐**
-    The watchlist shows quotes; add optional share counts → a single "today's P/L" number
-    for the XEQT/ETF holdings. High personal value, small code.
+13. **Portfolio roll-up** ✅ **shipped** — share counts per stock (`stocks_shares_v1`),
+    Portfolio summary row in the dropdown + MY PORTFOLIO chip in the hero with today's P/L.
 14. **Richer sports** **[M] ⭐ 🎨**
     Standings, next-game countdown, simple playoff-odds line for the followed teams.
-15. **News dedup + one-line summaries** **[M] ⭐ 🎨**
-    Cluster near-duplicate headlines across sources; a crisp one-liner per cluster. Great
-    copy/creative task for a Fable session.
+15. **News dedup + summaries** ✅ **mostly shipped** — `generate_digest.py` dedupes
+    same-story headlines across sources into a spoken/text digest (Today's Digest card +
+    briefing); a guarded LLM polish hook exists (`DIGEST_GGUF`). Remaining 🎨: richer
+    per-cluster summaries if a bigger model ever becomes available.
 
 ## Tier 4 — Critterra (all creative → 🎨 great Fable-session material)
 
-16. **Evolutions** at level thresholds (new sprite + name per stage) **[M] 🎨**
-17. **Sound**: reuse the WebAudio beep pattern for hits/catches/level-ups **[S] 🎨**
+16. **Evolutions** ✅ **shipped** — Lv.10 evolved forms with original names (Voltarix,
+    Glaciern, Tempestwyrm…), aura+crown sprites, +12 HP; evolution moment on level-up.
+17. **Sound** ✅ **shipped** — WebAudio chip effects (hits, throw, catch arpeggio, break,
+    win fanfare, faint) with a persisted 🔊/🔇 toggle (`mon_sound_v1`).
 18. **A third area** (beach/mountain) with its own encounter pool + tileset **[M] 🎨**
-19. **Party picker in battle** (switch active Critter instead of auto-highest) **[S]**
+19. **Party picker** ✅ **shipped** — tap a caught Critter in the Critterdex to set the
+    battle partner (`mon_active_v1`), ★ tag + glow on the active one.
 20. **2048 game-over detection** ✅ **shipped** — win message on reaching 2048, and a proper
     game-over state (final score, input blocked) when no legal move remains.
 
