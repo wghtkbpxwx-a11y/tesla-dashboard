@@ -51,6 +51,16 @@ SPORTS_FEEDS = {
     "https://www.espn.com/espn/rss/mlb/news": "ESPN MLB",
 }
 
+# Pharmacy / medicine — David is a pharmacist. Landmark trials from the big
+# journals + Canadian health news. (BCPhA and the PharmaCare newsletter don't
+# publish RSS feeds, so they can't be pulled automatically.)
+PHARMACY_FEEDS = {
+    "https://www.nejm.org/action/showFeed?jc=nejm&type=etoc&feed=rss": "NEJM",
+    "https://www.thelancet.com/rssfeed/lancet_current.xml": "The Lancet",
+    "https://jamanetwork.com/rss/site_3/67.xml": "JAMA",
+    "https://www.cbc.ca/webfeed/rss/rss-health": "CBC Health",
+}
+
 # "My Teams" — the scores box on the Live panel. ESPN site API, team schedule
 # endpoint per team. `path` is the sport/league, `id` is the ESPN team id/abbr.
 DEFAULT_STOCKS = ["XEQT.TO", "VFV.TO", "AAPL", "TSLA", "MSFT", "NVDA", "AMZN", "GOOGL",
@@ -183,31 +193,60 @@ def fetch_scores():
     return out
 
 
+def _localname(tag) -> str:
+    return tag.rsplit("}", 1)[-1] if isinstance(tag, str) else ""
+
+
+def _norm_date(pub: str) -> str:
+    """Normalise RFC-2822 or ISO dates to UTC ISO-8601 Z; fall back to now."""
+    try:
+        from email.utils import parsedate_to_datetime
+        return parsedate_to_datetime(pub).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except Exception:
+        pass
+    try:
+        dt = datetime.fromisoformat(pub.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except Exception:
+        return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def parse_rss(content: bytes, source: str) -> list[dict]:
-    """Parse RSS/Atom XML and return list of item dicts."""
+    """Parse RSS 2.0, RSS 1.0/RDF (namespaced <item>, dc:date — NEJM/Lancet
+    style) and Atom, returning a list of item dicts."""
     items = []
     try:
         root = ET.fromstring(content)
         ns = {"atom": "http://www.w3.org/2005/Atom"}
 
-        # RSS 2.0
-        for item in root.findall(".//item"):
-            def txt(tag):
-                el = item.find(tag)
-                return el.text.strip() if el is not None and el.text else ""
-            title = txt("title")
-            link = txt("link")
-            pub = txt("pubDate")
-            if not title or not link:
+        # Channel title, so we can skip self-referential items (JAMA ships an
+        # item literally titled "JAMA")
+        chan_title = ""
+        for el in root.iter():
+            if _localname(el.tag) == "title":
+                chan_title = "".join(el.itertext()).strip()
+                break
+
+        # RSS 2.0 and RSS 1.0/RDF: match any element whose LOCAL name is
+        # 'item', and read children by local name so namespaced feeds work
+        for item in root.iter():
+            if _localname(item.tag) != "item":
                 continue
-            # Normalise pubDate to UTC ISO-8601 with Z suffix
-            try:
-                from email.utils import parsedate_to_datetime
-                dt = parsedate_to_datetime(pub).astimezone(timezone.utc)
-                pub = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-            except Exception:
-                pub = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-            items.append({"title": title, "link": link, "pubDate": pub, "source": source})
+            def txt(name):
+                for c in item:
+                    if _localname(c.tag) == name:
+                        v = "".join(c.itertext()).strip()
+                        if v:
+                            return v
+                return ""
+            title = txt("title")
+            link = txt("link") or item.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about") or ""
+            pub = txt("pubDate") or txt("date")  # dc:date on RDF feeds
+            if not title or not link or title == chan_title or len(title) < 6:
+                continue
+            items.append({"title": title, "link": link, "pubDate": _norm_date(pub), "source": source})
 
         # Atom
         if not items:
@@ -474,6 +513,13 @@ def main():
         if result:
             sports[url] = result
 
+    print("Fetching pharmacy feeds...")
+    pharmacy = {}
+    for url, source in PHARMACY_FEEDS.items():
+        result = fetch_feed(url, source)
+        if result:
+            pharmacy[url] = result
+
     print("Fetching My Teams scores...")
     scores = fetch_scores()
 
@@ -511,6 +557,9 @@ def main():
     for url in SPORTS_FEEDS:
         if url not in sports and url in existing.get("sports", {}):
             sports[url] = existing["sports"][url]
+    for url in PHARMACY_FEEDS:
+        if url not in pharmacy and url in existing.get("pharmacy", {}):
+            pharmacy[url] = existing["pharmacy"][url]
 
     # Build new cache, keeping existing data as fallback if live fetch failed
     cache = {
@@ -518,6 +567,7 @@ def main():
         "forecast": forecast or existing.get("forecast"),
         "news": news if news else existing.get("news", {}),
         "sports": sports if sports else existing.get("sports", {}),
+        "pharmacy": pharmacy if pharmacy else existing.get("pharmacy", {}),
         "scores": scores if scores else existing.get("scores", []),
         "stocks": stocks if stocks else existing.get("stocks", {}),
         "air": air or existing.get("air"),
