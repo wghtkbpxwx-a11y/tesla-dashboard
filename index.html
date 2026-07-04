@@ -5522,6 +5522,12 @@ var MONSTERS = [
   {n:'Terravore', e:'🌋', hp:200, r:0, t:'rock', mv:['Crush','Cataclysm']}
 ];
 var TOTAL = 12; // catchable Critters; index 12 (Terravore) is the boss, not collectable
+// Evolved forms at Lv.10+ — original names, upgraded look (+12 base HP)
+var EVO_LEVEL = 10;
+var EVO_NAMES = ['Voltarix','Pyrogrizz','Tidalume','Bramblehound','Stormwing','Glaciern',
+                 'Lumivelle','Reefclaw','Galeraptor','Terragrowl','Tempestwyrm','Borealisk'];
+function monIsEvolved(idx, lvl) { return idx < TOTAL && lvl >= EVO_LEVEL; }
+function monName(idx, lvl) { return monIsEvolved(idx, lvl) ? EVO_NAMES[idx] : MONSTERS[idx].n; }
 var MON_EFF = {
   ember:{leaf:2, frost:2, aqua:0.5, rock:0.5},
   aqua:{ember:2, rock:2, leaf:0.5, spark:0.5},
@@ -5732,10 +5738,10 @@ function monActive() {
 function monSetActive(idx) {
   if (!monParty[idx]) return;
   try { localStorage.setItem('mon_active_v1', String(idx)); } catch(e) {}
-  monLog2(MONSTERS[idx].n + ' (Lv.' + monParty[idx] + ') is now your battle partner!');
+  monLog2(monName(idx, monParty[idx]) + ' (Lv.' + monParty[idx] + ') is now your battle partner!');
   monRenderGrid();
 }
-function monMaxHp(idx, lvl) { return MONSTERS[idx].hp + 4 * (lvl - 1); }
+function monMaxHp(idx, lvl) { return MONSTERS[idx].hp + 4 * (lvl - 1) + (monIsEvolved(idx, lvl) ? 12 : 0); }
 
 // ── Battle state ──
 var monB = null, monBusy = false;
@@ -5771,7 +5777,7 @@ function monEncounter() {
   document.getElementById('mon-battle-view').style.display = '';
   monBattleSize();
   monSelMove = 0;
-  monLog('A wild ' + MONSTERS[i].n + ' (Lv.' + elv + ') appeared!');
+  monLog('A wild ' + monName(i, elv) + ' (Lv.' + elv + ') appeared!');
   monSfx('meet');
   monRenderControls();
   setTimeout(function() { monBusy = false; monRenderControls(); }, 700);
@@ -5810,11 +5816,11 @@ function monRenderGrid() {
     var icon = got ? '<canvas class="mon-thumb" width="58" height="58" data-idx="' + ii + '"></canvas>' : '<span class="me">❓</span>';
     var cls = 'mon-slot' + (got ? ' caught' : '') + (ii === act ? ' active' : '');
     var tap = inParty ? ' onclick="monSetActive(' + ii + ')" title="Tap to make this your battle partner"' : '';
-    return '<div class="' + cls + '"' + tap + '>' + icon + '<div>' + (got ? mm.n + lv : '???') + (ii === act ? '<div class="mon-active-tag">★ partner</div>' : '') + '</div></div>';
+    return '<div class="' + cls + '"' + tap + '>' + icon + '<div>' + (got ? monName(ii, monParty[ii] || 0) + lv : '???') + (ii === act ? '<div class="mon-active-tag">★ partner</div>' : '') + '</div></div>';
   }).join('');
   monPaintThumbs();
   var n = monCaughtCount(), c = document.getElementById('mon-count');
-  if (c) c.textContent = monStarted() ? ('Caught ' + n + ' / ' + TOTAL + ' · ' + monTrainer().name + ' uses ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()] + ' · tap a Critter to switch' + (n >= TOTAL ? ' · the cave boss awaits!' : '')) : 'Choose your first Critter to begin!';
+  if (c) c.textContent = monStarted() ? ('Caught ' + n + ' / ' + TOTAL + ' · ' + monTrainer().name + ' uses ' + monName(monActive(), monParty[monActive()]) + ' Lv.' + monParty[monActive()] + ' · tap a Critter to switch' + (n >= TOTAL ? ' · the cave boss awaits!' : '')) : 'Choose your first Critter to begin!';
 }
 
 // ── Sound effects (WebAudio, timerBeep pattern; tiny & original) ──
@@ -5862,10 +5868,11 @@ function monUseMove(k) {
   if (!monB || monB.over || monBusy) return;
   monBusy = true; monRenderControls();
   var pm = MONSTERS[monB.pi], en = MONSTERS[monB.ei];
+  var pmN = monName(monB.pi, monB.plv), enN = monName(monB.ei, monB.elv);
   monView.lungeP = 1;
   var strong = k === 1;
   if (strong && Math.random() < 0.12) {
-    monLog(pm.n + ' used ' + pm.mv[k] + ' — but it missed!');
+    monLog(pmN + ' used ' + pm.mv[k] + ' — but it missed!');
     setTimeout(monEnemyTurn, 750);
     return;
   }
@@ -5878,7 +5885,7 @@ function monUseMove(k) {
   }
   monB.ehp = Math.max(0, monB.ehp - dmg);
   setTimeout(function() { monHitFx(true, dmg, note); }, 240);
-  monLog(pm.n + ' used ' + pm.mv[k] + '! (' + dmg + ' dmg)' + note);
+  monLog(pmN + ' used ' + pm.mv[k] + '! (' + dmg + ' dmg)' + note);
   setTimeout(function() {
     if (monB.ehp <= 0) {
       if (monB.boss) {
@@ -5892,8 +5899,14 @@ function monUseMove(k) {
       } else {
         monB.over = 'won';
         monSfx('win');
-        monParty[monB.pi] = monB.plv + 1; saveLS('mon_party_v1', monParty);
-        monLog('Wild ' + en.n + ' fainted! ' + pm.n + ' grew to Lv.' + monParty[monB.pi] + '.');
+        var before = monB.plv;
+        monParty[monB.pi] = before + 1; saveLS('mon_party_v1', monParty);
+        if (before < EVO_LEVEL && monParty[monB.pi] >= EVO_LEVEL) {
+          monSfx('catch');
+          monLog('Wild ' + enN + ' fainted! ✨ ' + pm.n + ' evolved into ' + EVO_NAMES[monB.pi] + '!');
+        } else {
+          monLog('Wild ' + enN + ' fainted! ' + pmN + ' grew to Lv.' + monParty[monB.pi] + '.');
+        }
         monBusy = false; monRenderControls();
       }
     } else { monEnemyTurn(); }
@@ -5902,6 +5915,7 @@ function monUseMove(k) {
 function monEnemyTurn() {
   if (!monB || monB.over) return;
   var en = MONSTERS[monB.ei], pm = MONSTERS[monB.pi];
+  var pmN = monName(monB.pi, monB.plv), enN = monName(monB.ei, monB.elv);
   monView.lungeE = 1;
   var k = Math.floor(Math.random() * 2), strong = k === 1;
   var dmg = (strong ? 12 : 8) + Math.floor(Math.random() * 9) + monB.elv * 2;
@@ -5909,9 +5923,9 @@ function monEnemyTurn() {
   if (strong) { var eff = monEff(en.t, pm.t); dmg = Math.round(dmg * 1.25 * eff); note = eff > 1 ? ' Super effective!' : eff < 1 ? ' Not very effective…' : ''; }
   monB.php = Math.max(0, monB.php - dmg);
   setTimeout(function() { monHitFx(false, dmg, note); }, 240);
-  monLog('Wild ' + en.n + ' used ' + en.mv[k] + '! (' + dmg + ' dmg)' + note);
+  monLog('Wild ' + enN + ' used ' + en.mv[k] + '! (' + dmg + ' dmg)' + note);
   setTimeout(function() {
-    if (monB.php <= 0) { monB.over = 'lost'; monSfx('lose'); monLog(pm.n + ' fainted! Head back to camp to recover.'); }
+    if (monB.php <= 0) { monB.over = 'lost'; monSfx('lose'); monLog(pmN + ' fainted! Head back to camp to recover.'); }
     monBusy = false; monRenderControls();
   }, 780);
 }
@@ -5928,15 +5942,16 @@ function monCatch() {
 }
 function monAfterCatch(success) {
   var en = MONSTERS[monB.ei];
+  var enN = monName(monB.ei, monB.elv);
   if (success) {
     monCaught[monB.ei] = (monCaught[monB.ei] || 0) + 1;
     if (!monParty[monB.ei] || monB.elv > monParty[monB.ei]) monParty[monB.ei] = monB.elv;
     saveLS('monsters_v1', monCaught); saveLS('mon_party_v1', monParty);
     monB.over = 'caught';
-    monLog('Gotcha! ' + en.n + ' (Lv.' + monB.elv + ') was caught!');
+    monLog('Gotcha! ' + enN + ' (Lv.' + monB.elv + ') was caught!');
     monBusy = false; monRenderControls();
   } else {
-    monLog('Oh no — ' + en.n + ' broke free!');
+    monLog('Oh no — ' + enN + ' broke free!');
     setTimeout(monEnemyTurn, 600);
   }
 }
@@ -6261,9 +6276,28 @@ function crAntennae(ctx, R) {
     ctx.beginPath(); ctx.arc(s * R * 0.56, -R * 1.02, R * 0.06, 0, 7); ctx.fill();
   }
 }
-function drawCritter(ctx, cx, cy, size, idx) {
+function crCrown(ctx, R, col) {
+  ctx.fillStyle = col;
+  [[-0.3, 0.62, 0.16], [0, 0.72, 0.2], [0.3, 0.62, 0.16]].forEach(function(p) {
+    ctx.beginPath();
+    ctx.moveTo(R * (p[0] - 0.1), -R * p[1]);
+    ctx.lineTo(R * p[0], -R * (p[1] + p[2] + 0.16));
+    ctx.lineTo(R * (p[0] + 0.1), -R * p[1]);
+    ctx.closePath(); ctx.fill();
+  });
+}
+function drawCritter(ctx, cx, cy, size, idx, evolved) {
   var d = CRDEF[idx] || CRDEF[0], R = size * 0.5 * (d.sc || 1);
   ctx.save(); ctx.translate(cx, cy);
+  if (evolved) {
+    R *= 1.1;
+    var glow = ctx.createRadialGradient(0, 0, R * 0.3, 0, 0, R * 1.35);
+    glow.addColorStop(0, 'rgba(255,255,255,0)');
+    glow.addColorStop(0.75, d.accent + '55');
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(0, 0, R * 1.4, 0, 7); ctx.fill();
+  }
   // behind body
   if (d.wings === 'moth') crWingsMoth(ctx, R, d.body, d.accent);
   if (d.wings === 'bat') crWingsBat(ctx, R, d.accent);
@@ -6286,6 +6320,7 @@ function drawCritter(ctx, cx, cy, size, idx) {
   else if (d.horn === 'leaf') crLeaf(ctx, R);
   if (d.fin) crFin(ctx, R, d.accent);
   if (d.antennae) crAntennae(ctx, R);
+  if (evolved) crCrown(ctx, R, d.accent);
   // face
   crEyes(ctx, R, 0.34, -R * 0.12, d.mood, d.body);
   if (d.beak) crBeak(ctx, R); else crMouth(ctx, R, R * 0.18, d.mood);
@@ -6299,16 +6334,16 @@ function monPaintThumbs() {
     if (cv.getAttribute('data-painted')) continue;
     var idx = parseInt(cv.getAttribute('data-idx'), 10);
     var ctx = cv.getContext('2d'); ctx.clearRect(0, 0, cv.width, cv.height);
-    drawCritter(ctx, cv.width / 2, cv.height / 2 + cv.height * 0.06, cv.height * 0.8, idx);
+    drawCritter(ctx, cv.width / 2, cv.height / 2 + cv.height * 0.06, cv.height * 0.8, idx, monIsEvolved(idx, monParty[idx] || 0));
     cv.setAttribute('data-painted', '1');
   }
 }
-function monCreature(ctx, cx, cy, size, idx, shake, flash, scale) {
+function monCreature(ctx, cx, cy, size, idx, shake, flash, scale, evolved) {
   var sx = cx + (Math.random() * 2 - 1) * shake;
   ctx.fillStyle = 'rgba(0,0,0,.18)';
   ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.5, size * 0.42, size * 0.13, 0, 0, 7); ctx.fill();
   ctx.save(); ctx.translate(sx, cy); ctx.scale(scale, scale);
-  drawCritter(ctx, 0, 0, size, idx);
+  drawCritter(ctx, 0, 0, size, idx, evolved);
   ctx.restore();
   if (flash > 0) { ctx.save(); ctx.globalAlpha = flash * 0.55; ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.arc(sx, cy, size * 0.5, 0, 7); ctx.fill(); ctx.restore(); }
@@ -6410,18 +6445,18 @@ function monLoop() {
   var eIntroDx = v.intro * W * 0.25;
   if (eScale > 0.02) {
     monContactShadow(ctx, eP.x + eLunge + eIntroDx, eP.y + H * 0.085, H * 0.15 * eScale, 3 + eBob);
-    monCreature(ctx, eP.x + eLunge + eIntroDx, eP.y + eBob, H * 0.26, monB.ei, v.shakeE, v.flashE, eScale);
+    monCreature(ctx, eP.x + eLunge + eIntroDx, eP.y + eBob, H * 0.26, monB.ei, v.shakeE, v.flashE, eScale, monIsEvolved(monB.ei, monB.elv));
   }
   // Bree's creature (back-ish view, lunges toward enemy)
   var pLunge = v.lungeP * Math.sin(v.lungeP * Math.PI) * (W * 0.06);
   var pBob = Math.sin(v.bob + 1) * 3;
   monContactShadow(ctx, pP.x + pLunge, pP.y + H * 0.06, H * 0.18, 3 + pBob);
-  monCreature(ctx, pP.x + pLunge, pP.y + pBob, H * 0.30, monB.pi, v.shakeP, v.flashP, 1);
+  monCreature(ctx, pP.x + pLunge, pP.y + pBob, H * 0.30, monB.pi, v.shakeP, v.flashP, 1, monIsEvolved(monB.pi, monB.plv));
   // Bree, standing at the near corner
   drawBree(ctx, W * 0.08, H * 0.9, H * 0.26, 'up', monTrainer());
   // HP boxes
-  monHpBox(ctx, W * 0.54, H * 0.05, W * 0.42, MONSTERS[monB.ei].n, monB.elv, v.ehpS, monB.emax, MONSTERS[monB.ei].t, false);
-  monHpBox(ctx, W * 0.04, H * 0.58, W * 0.42, MONSTERS[monB.pi].n, monB.plv, v.phpS, monB.pmax, MONSTERS[monB.pi].t, true);
+  monHpBox(ctx, W * 0.54, H * 0.05, W * 0.42, monName(monB.ei, monB.elv), monB.elv, v.ehpS, monB.emax, MONSTERS[monB.ei].t, false);
+  monHpBox(ctx, W * 0.04, H * 0.58, W * 0.42, monName(monB.pi, monB.plv), monB.plv, v.phpS, monB.pmax, MONSTERS[monB.pi].t, true);
   // floating damage numbers
   v.dmgPops = v.dmgPops || [];
   for (var dp = v.dmgPops.length - 1; dp >= 0; dp--) {
