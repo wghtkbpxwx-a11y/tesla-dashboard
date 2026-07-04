@@ -1023,6 +1023,7 @@ input[type="color"]:hover{border-color:var(--line2)}
         </div>
         <div style="text-align:center;margin-top:12px">
           <button class="btn btn-gh" onclick="monResetGame()" style="font-size:12px;padding:10px 18px">Reset game</button>
+          <button class="btn btn-gh" id="mon-snd-btn" onclick="monToggleSound()" title="Sound on — tap to mute" style="font-size:16px;padding:10px 16px;margin-left:8px">🔊</button>
         </div>
       </div>
       <div id="mon-battle-view" style="display:none">
@@ -5771,6 +5772,7 @@ function monEncounter() {
   monBattleSize();
   monSelMove = 0;
   monLog('A wild ' + MONSTERS[i].n + ' (Lv.' + elv + ') appeared!');
+  monSfx('meet');
   monRenderControls();
   setTimeout(function() { monBusy = false; monRenderControls(); }, 700);
 }
@@ -5815,10 +5817,46 @@ function monRenderGrid() {
   if (c) c.textContent = monStarted() ? ('Caught ' + n + ' / ' + TOTAL + ' · ' + monTrainer().name + ' uses ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()] + ' · tap a Critter to switch' + (n >= TOTAL ? ' · the cave boss awaits!' : '')) : 'Choose your first Critter to begin!';
 }
 
+// ── Sound effects (WebAudio, timerBeep pattern; tiny & original) ──
+var monSndOn = true;
+try { monSndOn = localStorage.getItem('mon_sound_v1') !== '0'; } catch(e) {}
+var monAudioCtx = null;
+function monSfx(kind) {
+  if (!monSndOn) return;
+  try {
+    monAudioCtx = monAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = monAudioCtx, t = ctx.currentTime;
+    function tone(freq, start, dur, vol, type) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = type || 'square'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, t + start);
+      g.gain.exponentialRampToValueAtTime(0.001, t + start + dur);
+      o.start(t + start); o.stop(t + start + dur + 0.02);
+    }
+    if (kind === 'hit')       { tone(160, 0, 0.10, 0.10); }
+    else if (kind === 'super'){ tone(160, 0, 0.09, 0.11); tone(220, 0.08, 0.12, 0.10); }
+    else if (kind === 'throw'){ tone(520, 0, 0.08, 0.07, 'sine'); tone(700, 0.07, 0.10, 0.06, 'sine'); }
+    else if (kind === 'catch'){ [523, 659, 784, 1047].forEach(function(f, i) { tone(f, i * 0.11, 0.14, 0.09, 'triangle'); }); }
+    else if (kind === 'break'){ tone(440, 0, 0.10, 0.09); tone(300, 0.09, 0.14, 0.09); }
+    else if (kind === 'win')  { [392, 523, 659, 784].forEach(function(f, i) { tone(f, i * 0.09, 0.12, 0.09, 'triangle'); }); }
+    else if (kind === 'lose') { tone(330, 0, 0.16, 0.08); tone(247, 0.14, 0.22, 0.08); }
+    else if (kind === 'meet') { tone(494, 0, 0.09, 0.08); tone(494, 0.12, 0.09, 0.08); }
+  } catch(e) {}
+}
+function monToggleSound() {
+  monSndOn = !monSndOn;
+  try { localStorage.setItem('mon_sound_v1', monSndOn ? '1' : '0'); } catch(e) {}
+  var b = document.getElementById('mon-snd-btn');
+  if (b) { b.textContent = monSndOn ? '🔊' : '🔇'; b.title = monSndOn ? 'Sound on — tap to mute' : 'Sound off — tap to unmute'; }
+  if (monSndOn) monSfx('meet'); // audible confirmation
+}
+
 // ── Turn logic (state changes; the render loop animates them) ──
 function monHitFx(onEnemy, dmg, note) {
   if (onEnemy) { monView.flashE = 1; monView.shakeE = 9; } else { monView.flashP = 1; monView.shakeP = 9; }
   if (dmg != null) { monView.dmgPops = monView.dmgPops || []; monView.dmgPops.push({target: onEnemy ? 'E' : 'P', dmg: dmg, note: note || '', f: 0}); }
+  monSfx(note && /Super/.test(note) ? 'super' : 'hit');
 }
 function monUseMove(k) {
   if (!monB || monB.over || monBusy) return;
@@ -5845,6 +5883,7 @@ function monUseMove(k) {
     if (monB.ehp <= 0) {
       if (monB.boss) {
         monB.over = 'champion';
+        monSfx('win');
         try { localStorage.setItem('mon_champion_v1', '1'); } catch(e) {}
         monParty[monB.pi] = monB.plv + 2; saveLS('mon_party_v1', monParty);
         monLog('TERRAVORE is defeated! ' + monTrainer().name + ' is the Critterra Champion!');
@@ -5852,6 +5891,7 @@ function monUseMove(k) {
         setTimeout(monShowChampion, 1300);
       } else {
         monB.over = 'won';
+        monSfx('win');
         monParty[monB.pi] = monB.plv + 1; saveLS('mon_party_v1', monParty);
         monLog('Wild ' + en.n + ' fainted! ' + pm.n + ' grew to Lv.' + monParty[monB.pi] + '.');
         monBusy = false; monRenderControls();
@@ -5871,7 +5911,7 @@ function monEnemyTurn() {
   setTimeout(function() { monHitFx(false, dmg, note); }, 240);
   monLog('Wild ' + en.n + ' used ' + en.mv[k] + '! (' + dmg + ' dmg)' + note);
   setTimeout(function() {
-    if (monB.php <= 0) { monB.over = 'lost'; monLog(pm.n + ' fainted! Head back to camp to recover.'); }
+    if (monB.php <= 0) { monB.over = 'lost'; monSfx('lose'); monLog(pm.n + ' fainted! Head back to camp to recover.'); }
     monBusy = false; monRenderControls();
   }, 780);
 }
@@ -5884,6 +5924,7 @@ function monCatch() {
   var p = Math.min(0.95, 0.1 + 0.5 * hpFactor + 0.32 * lvFactor);
   monView.capsule = {f:0, phase:'throw', success:Math.random() < p, done:false};
   monLog(monTrainer().name + ' hurls a Capsule…');
+  monSfx('throw');
 }
 function monAfterCatch(success) {
   var en = MONSTERS[monB.ei];
@@ -6417,9 +6458,9 @@ function monLoop() {
       var wob = Math.sin(cap.f * 0.35) * Math.max(0, 0.5 - cap.f / 200);
       monDrawCapsule(ctx, eP.x, eP.y + H * 0.09, 15, wob);
       if (cap.f > 96) {
-        if (cap.success) { cap.phase = 'caught'; cap.f = 0;
+        if (cap.success) { cap.phase = 'caught'; cap.f = 0; monSfx('catch');
           for (var s = 0; s < 14; s++) v.stars.push({x:eP.x, y:eP.y + H*0.09, a:Math.random()*7, sp:2+Math.random()*3, life:1}); }
-        else { cap.phase = 'break'; cap.f = 0; }
+        else { cap.phase = 'break'; cap.f = 0; monSfx('break'); }
       }
     } else if (cap.phase === 'caught') {
       var settle = Math.sin(cap.f * 0.45) * Math.max(0, 0.3 - cap.f / 80);
@@ -6443,6 +6484,11 @@ function monLoop() {
 window.addEventListener('resize', function() { if (monInBattle) monBattleSize(); });
 
 monShowEntry();
+// Reflect the persisted mute state on the sound button
+(function() {
+  var b = document.getElementById('mon-snd-btn');
+  if (b && !monSndOn) { b.textContent = '🔇'; b.title = 'Sound off — tap to unmute'; }
+})();
 
 // ── COPY HELPERS (paste into Apple Notes / Reminders — no public Apple API exists) ──
 function copyText(txt, btnLabel) {
