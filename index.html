@@ -433,6 +433,10 @@ input[type="color"]:hover{border-color:var(--line2)}
 .cdex-screen .mon-slot{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.09);color:#c9c9cf}
 .cdex-screen .mon-slot.caught{border-color:var(--green);color:#fff}
 .mon-slot{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;font-size:12px;color:var(--t3)}
+.mon-slot[onclick]{cursor:pointer}
+.mon-slot.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft),0 0 14px var(--accent-soft)}
+.mon-active-tag{font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.5px;margin-top:3px;text-transform:uppercase}
+.cdex-screen .mon-slot.active{border-color:var(--accent)}
 .mon-slot .me{font-size:34px;display:block;margin-bottom:4px}
 .mon-slot.caught{border-color:var(--green);color:var(--t1)}
 .mon-start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:640px;margin:0 auto}
@@ -5714,10 +5718,21 @@ document.addEventListener('keydown', function(e) {
 
 // ── Party helpers ──
 function monActive() {
+  // Player-chosen battle partner first (tap a caught Critter in the Critterdex)
+  try {
+    var pick = parseInt(localStorage.getItem('mon_active_v1'), 10);
+    if (pick >= 0 && pick < TOTAL && monParty[pick]) return pick;
+  } catch(e) {}
   var best = null;
   Object.keys(monParty).forEach(function(i) { if (best === null || monParty[i] > monParty[best]) best = i; });
   if (best === null) { monParty[0] = 3; saveLS('mon_party_v1', monParty); best = 0; } // starter Sparkit Lv.3
   return parseInt(best, 10);
+}
+function monSetActive(idx) {
+  if (!monParty[idx]) return;
+  try { localStorage.setItem('mon_active_v1', String(idx)); } catch(e) {}
+  monLog2(MONSTERS[idx].n + ' (Lv.' + monParty[idx] + ') is now your battle partner!');
+  monRenderGrid();
 }
 function monMaxHp(idx, lvl) { return MONSTERS[idx].hp + 4 * (lvl - 1); }
 
@@ -5787,14 +5802,17 @@ function monRenderControls() {
 }
 function monRenderGrid() {
   var grid = document.getElementById('mon-grid');
+  var act = monStarted() ? monActive() : -1;
   if (grid) grid.innerHTML = MONSTERS.slice(0, TOTAL).map(function(mm, ii) {
-    var got = monCaught[ii], lv = monParty[ii] ? ' Lv.' + monParty[ii] : '';
+    var got = monCaught[ii], inParty = !!monParty[ii], lv = monParty[ii] ? ' Lv.' + monParty[ii] : '';
     var icon = got ? '<canvas class="mon-thumb" width="58" height="58" data-idx="' + ii + '"></canvas>' : '<span class="me">❓</span>';
-    return '<div class="mon-slot' + (got ? ' caught' : '') + '">' + icon + '<div>' + (got ? mm.n + lv : '???') + '</div></div>';
+    var cls = 'mon-slot' + (got ? ' caught' : '') + (ii === act ? ' active' : '');
+    var tap = inParty ? ' onclick="monSetActive(' + ii + ')" title="Tap to make this your battle partner"' : '';
+    return '<div class="' + cls + '"' + tap + '>' + icon + '<div>' + (got ? mm.n + lv : '???') + (ii === act ? '<div class="mon-active-tag">★ partner</div>' : '') + '</div></div>';
   }).join('');
   monPaintThumbs();
   var n = monCaughtCount(), c = document.getElementById('mon-count');
-  if (c) c.textContent = monStarted() ? ('Caught ' + n + ' / ' + TOTAL + ' · ' + monTrainer().name + ' uses ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()] + (n >= TOTAL ? ' · the cave boss awaits!' : '')) : 'Choose your first Critter to begin!';
+  if (c) c.textContent = monStarted() ? ('Caught ' + n + ' / ' + TOTAL + ' · ' + monTrainer().name + ' uses ' + MONSTERS[monActive()].n + ' Lv.' + monParty[monActive()] + ' · tap a Critter to switch' + (n >= TOTAL ? ' · the cave boss awaits!' : '')) : 'Choose your first Critter to begin!';
 }
 
 // ── Turn logic (state changes; the render loop animates them) ──
@@ -5996,7 +6014,7 @@ function monChooseTrainer(idx) {
 }
 function monResetGame() {
   if (!confirm('Reset Critterra? This clears your trainer, party and collection.')) return;
-  ['monsters_v1', 'mon_party_v1', 'mon_started_v1', 'mon_trainer_v1', 'mon_champion_v1'].forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
+  ['monsters_v1', 'mon_party_v1', 'mon_started_v1', 'mon_trainer_v1', 'mon_champion_v1', 'mon_active_v1'].forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
   monParty = {}; monCaught = {}; monB = null; monView = null; monInBattle = false; monBusy = false;
   monArea = 'field'; monP = {x:7, y:6, dir:'down'};
   monShowEntry();
