@@ -29,14 +29,13 @@ dashboard** — in the car, mid-drive. There is currently no automated guard.
    fails the check on any breakage. *Next step to make it truly blocking:* turn on branch
    protection for `main` requiring the "Validate" check (a one-click repo setting). A future
    enhancement is a full headless-load check that also catches runtime/init errors.
-2. **Cache schema assertion in the hourly job** **[S] ⭐⭐**
-   Before committing, assert the new cache has the expected top-level keys and non-empty
-   `weather`/`forecast`; otherwise keep the previous block. Stops a bad API day from
-   silently blanking panels.
-3. **Lightweight error beacon** **[S] ⭐**
-   `window.onerror` → stash last error + timestamp in `localStorage` and show a tiny
-   "something glitched — tap to reload" chip. David already sends photo feedback; this makes
-   failures self-reporting.
+2. **Cache self-check in the hourly job** ✅ **shipped** — `update_cache.py` re-validates the
+   rewritten `DASHBOARD_CACHE` (marker still matches · valid JSON) before writing, and aborts
+   (leaving the last good `index.html`) otherwise. Closes the gap where the `[skip ci]` hourly
+   commit isn't covered by the Validate workflow.
+3. **Lightweight error beacon** ✅ **shipped** — a bubble-phase `window` error listener shows a
+   "⚠ Something glitched — tap to reload" chip and stashes the last error in `last_error_v1`.
+   Ignores benign `<img>` load failures (offline cams), so it only fires on real JS errors.
 
 ## Tier 1 — Load & architecture (the big optimization)
 
@@ -96,8 +95,8 @@ dashboard** — in the car, mid-drive. There is currently no automated guard.
 17. **Sound**: reuse the WebAudio beep pattern for hits/catches/level-ups **[S] 🎨**
 18. **A third area** (beach/mountain) with its own encounter pool + tileset **[M] 🎨**
 19. **Party picker in battle** (switch active Critter instead of auto-highest) **[S]**
-20. **2048 game-over detection** — today it silently stops accepting moves when the board
-    locks; add a "no moves left" end state + score save **[S] ⭐** (nearest thing to a bug).
+20. **2048 game-over detection** ✅ **shipped** — win message on reaching 2048, and a proper
+    game-over state (final score, input blocked) when no legal move remains.
 
 ---
 
