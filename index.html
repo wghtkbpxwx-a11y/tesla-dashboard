@@ -5556,7 +5556,7 @@ var MON_MAP = [
   'T....=........T',
   'T~~..=..,,,,..T',
   'T~~..=..,,,,..T',
-  'TTTTTTTTTTTTTTT'
+  'TTTTTSTTTTTTTTT'
 ];
 var TILE = 34, MW = MON_MAP[0].length, MH = MON_MAP.length;
 var monP = {x:7, y:6, dir:'down'};
@@ -5576,8 +5576,21 @@ var MON_CAVE = [
   '#:,,,,:::,,,,:#',
   '###############'
 ];
-function monMapData() { return monArea === 'cave' ? MON_CAVE : MON_MAP; }
-function monTile(x, y) { var m = monMapData(); return (m[y] || '')[x] || (monArea === 'cave' ? '#' : 'T'); }
+// Sunset Shore — sea border, sand, surf patches (encounters), palms
+var MON_BEACH = [
+  '~~~~~~~~~~~~~~~',
+  '~~~,,~~~~,,,~~~',
+  '~..,,.....,,..~',
+  '~.............~',
+  '~..T..===..T..~',
+  '~.....=.=.....~',
+  '~.,,..===..,,.~',
+  '~.,,.......,,.~',
+  '~......S......~',
+  '~~~~~~~~~~~~~~~'
+];
+function monMapData() { return monArea === 'cave' ? MON_CAVE : monArea === 'beach' ? MON_BEACH : MON_MAP; }
+function monTile(x, y) { var m = monMapData(); return (m[y] || '')[x] || (monArea === 'cave' ? '#' : monArea === 'beach' ? '~' : 'T'); }
 function monCaughtCount() { return Object.keys(monCaught).filter(function(k) { return parseInt(k, 10) < TOTAL; }).length; }
 function monAllCaught() { return monCaughtCount() >= TOTAL; }
 function monLog2(t) { var el = document.getElementById('mon-map-sub'); if (el) el.textContent = t; }
@@ -5639,31 +5652,36 @@ function drawBree(ctx, cx, cy, s, dir, pal) {
 function monDrawMap() {
   var cv = document.getElementById('mon-map-canvas');
   if (!cv) return;
-  var map = monMapData(), cave = monArea === 'cave';
+  var map = monMapData(), cave = monArea === 'cave', beach = monArea === 'beach';
   cv.width = MW * TILE; cv.height = MH * TILE;
   cv.style.width = Math.min(560, window.innerWidth - 40) + 'px';
   var ctx = cv.getContext('2d');
   var colors = cave
     ? {'#':'#2f2836', ':':'#5a4f63', ',':'#4a3f58', 'C':'#8a7fa0', 'B':'#3a2030'}
-    : {'.':'#7ec850', ',':'#5bb043', 'T':'#2f6b2f', '~':'#3f8fd2', '=':'#d8c58c', 'C':'#3a2030'};
+    : beach
+    ? {'.':'#efd9a7', ',':'#8fd8e8', 'T':'#efd9a7', '~':'#2f7fc2', '=':'#e2c98f', 'S':'#3a2030'}
+    : {'.':'#7ec850', ',':'#5bb043', 'T':'#2f6b2f', '~':'#3f8fd2', '=':'#d8c58c', 'C':'#3a2030', 'S':'#3a2030'};
   for (var y = 0; y < MH; y++) for (var x = 0; x < MW; x++) {
     var t = (map[y] || '')[x] || (cave ? '#' : 'T');
     ctx.fillStyle = colors[t] || (cave ? '#5a4f63' : '#7ec850');
     ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (t === 'T') { ctx.font = (TILE - 8) + 'px serif'; ctx.fillText('🌲', x * TILE + TILE/2, y * TILE + TILE/2 + 2); }
+    if (t === 'T') { ctx.font = (TILE - 8) + 'px serif'; ctx.fillText(beach ? '🌴' : '🌲', x * TILE + TILE/2, y * TILE + TILE/2 + 2); }
+    else if (t === 'S') { ctx.font = (TILE - 6) + 'px serif'; ctx.fillText(beach ? '🚪' : '🏖️', x * TILE + TILE/2, y * TILE + TILE/2 + 1); }
     else if (t === '#') { ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fillRect(x * TILE + 3, y * TILE + 3, TILE - 6, TILE - 6); }
     else if (t === 'C') { ctx.font = (TILE - 6) + 'px serif'; ctx.fillText(cave ? '🚪' : '🕳️', x * TILE + TILE/2, y * TILE + TILE/2 + 1); }
     else if (t === 'B') { ctx.font = (TILE - 6) + 'px serif'; ctx.fillText('💠', x * TILE + TILE/2, y * TILE + TILE/2 + 1); }
     else if (t === ',') {
-      if (cave) { ctx.fillStyle = '#b98bff'; for (var b = 0; b < 3; b++) { ctx.beginPath(); ctx.moveTo(x*TILE+8+b*9, y*TILE+TILE-6); ctx.lineTo(x*TILE+6+b*9, y*TILE+TILE-16); ctx.lineTo(x*TILE+10+b*9, y*TILE+TILE-16); ctx.closePath(); ctx.fill(); } }
+      if (beach) { ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2;
+        for (var b3 = 0; b3 < 2; b3++) { ctx.beginPath(); ctx.arc(x*TILE+10+b3*13, y*TILE+TILE-11, 5, Math.PI, 0); ctx.stroke(); } }
+      else if (cave) { ctx.fillStyle = '#b98bff'; for (var b = 0; b < 3; b++) { ctx.beginPath(); ctx.moveTo(x*TILE+8+b*9, y*TILE+TILE-6); ctx.lineTo(x*TILE+6+b*9, y*TILE+TILE-16); ctx.lineTo(x*TILE+10+b*9, y*TILE+TILE-16); ctx.closePath(); ctx.fill(); } }
       else { ctx.strokeStyle = '#2f7d2f'; ctx.lineWidth = 2; for (var b2 = 0; b2 < 3; b2++) { var bx = x*TILE+8+b2*9; ctx.beginPath(); ctx.moveTo(bx, y*TILE+TILE-5); ctx.lineTo(bx-2, y*TILE+TILE-15); ctx.stroke(); } }
     }
     else if (t === '~' && (x + y) % 2 === 0) { ctx.font = (TILE - 18) + 'px serif'; ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillText('〜', x * TILE + TILE/2, y * TILE + TILE/2); }
   }
   // depth vignette
   var vg = ctx.createRadialGradient(cv.width/2, cv.height/2, cv.height*0.28, cv.width/2, cv.height/2, cv.height*0.72);
-  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, cave ? 'rgba(0,0,0,0.42)' : 'rgba(0,0,0,0.2)');
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, cave ? 'rgba(0,0,0,0.42)' : beach ? 'rgba(120,40,0,0.22)' : 'rgba(0,0,0,0.2)');
   ctx.fillStyle = vg; ctx.fillRect(0, 0, cv.width, cv.height);
   // soft shadow under the trainer
   ctx.fillStyle = 'rgba(0,0,0,.22)';
@@ -5671,12 +5689,12 @@ function monDrawMap() {
   drawBree(ctx, monP.x * TILE + TILE/2, monP.y * TILE + TILE/2 + 3, TILE - 4, monP.dir, monTrainer());
   // area name badge
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  var label = cave ? 'CRYSTAL CAVE' : 'MEADOW';
+  var label = cave ? 'CRYSTAL CAVE' : beach ? 'SUNSET SHORE' : 'MEADOW';
   ctx.font = '700 12px Inter, sans-serif';
   var bw = ctx.measureText(label).width + 22;
   ctx.fillStyle = 'rgba(0,0,0,.5)';
   if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(8, 8, bw, 24, 8); ctx.fill(); } else ctx.fillRect(8, 8, bw, 24);
-  ctx.fillStyle = cave ? '#c9a6ff' : '#a8f0a0'; ctx.fillText(label, 19, 21);
+  ctx.fillStyle = cave ? '#c9a6ff' : beach ? '#ffd9a0' : '#a8f0a0'; ctx.fillText(label, 19, 21);
 }
 function monMove(dx, dy) {
   if (monInBattle) return;
@@ -5689,6 +5707,12 @@ function monMove(dx, dy) {
     monDrawMap();
     return;
   }
+  if (t === 'S') { // travel between the field and Sunset Shore
+    if (monArea === 'field') { monArea = 'beach'; monP.x = 7; monP.y = 7; monP.dir = 'down'; monLog2('You arrive at Sunset Shore — sea Critters splash in the surf.'); }
+    else { monArea = 'field'; monP.x = 5; monP.y = 8; monP.dir = 'up'; monLog2('Back to the meadow.'); }
+    monDrawMap();
+    return;
+  }
   if (t === 'B') { // boss altar
     monP.x = nx; monP.y = ny; monDrawMap();
     if (monAllCaught()) monBoss();
@@ -5697,7 +5721,7 @@ function monMove(dx, dy) {
   }
   monP.x = nx; monP.y = ny;
   monDrawMap();
-  if (t === ',' && Math.random() < (monArea === 'cave' ? 0.26 : 0.22)) monEncounter();
+  if (t === ',' && Math.random() < (monArea === 'cave' ? 0.26 : monArea === 'beach' ? 0.24 : 0.22)) monEncounter();
 }
 document.addEventListener('keydown', function(e) {
   var panel = document.getElementById('p-games');
@@ -5754,18 +5778,20 @@ function monBattleSize() {
   w = Math.max(300, w); cv.width = w; cv.height = Math.round(w * 0.56);
 }
 function monEncounter() {
-  var cave = monArea === 'cave';
+  var cave = monArea === 'cave', beach = monArea === 'beach';
   var caveSet = [4, 5, 6, 9, 10, 11]; // spookier / stronger Critters haunt the cave
+  var beachSet = [2, 7, 8, 11];       // sea & sky Critters splash in the surf
   var pool = [];
   MONSTERS.forEach(function(m, i) {
     if (i >= TOTAL) return; // never spawn the boss as a wild encounter
     if (cave && caveSet.indexOf(i) < 0) return;
+    if (beach && beachSet.indexOf(i) < 0) return;
     for (var k = 0; k < m.r; k++) pool.push(i);
   });
   if (!pool.length) pool = [0];
   var i = pool[Math.floor(Math.random() * pool.length)];
   var pi = monActive(), plv = monParty[pi];
-  var elv = Math.max(1, plv + (cave ? 2 : 0) + Math.floor(Math.random() * 3) - (cave ? 0 : 1));
+  var elv = Math.max(1, plv + (cave ? 2 : beach ? 1 : 0) + Math.floor(Math.random() * 3) - (cave || beach ? 0 : 1));
   monB = {ei:i, elv:elv, ehp:monMaxHp(i, elv), emax:monMaxHp(i, elv),
           pi:pi, plv:plv, php:monMaxHp(pi, plv), pmax:monMaxHp(pi, plv), over:false};
   monView = {ehpS:monB.emax, phpS:monB.pmax, shakeE:0, shakeP:0, flashE:0, flashP:0,
@@ -6365,10 +6391,23 @@ var MON_TYPE_COL = {
 };
 function monTypeCol(t) { return MON_TYPE_COL[t] || '#c9b48c'; }
 function monBattleBg(ctx, W, H, cave) {
+  var beach = monArea === 'beach';
   var sky = ctx.createLinearGradient(0, 0, 0, H);
   if (cave) { sky.addColorStop(0, '#211934'); sky.addColorStop(0.6, '#2c2342'); sky.addColorStop(1, '#3b2c50'); }
+  else if (beach) { sky.addColorStop(0, '#ffb56b'); sky.addColorStop(0.45, '#ff8f6b'); sky.addColorStop(0.62, '#3f8fd2'); sky.addColorStop(1, '#efd9a7'); }
   else { sky.addColorStop(0, '#bfe6ff'); sky.addColorStop(0.55, '#e8f5cf'); sky.addColorStop(1, '#a9dd72'); }
   ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  if (beach) {
+    // low sun + glitter path on the water
+    var sun2 = ctx.createRadialGradient(W * 0.5, H * 0.4, 2, W * 0.5, H * 0.4, H * 0.3);
+    sun2.addColorStop(0, 'rgba(255,240,200,.95)'); sun2.addColorStop(1, 'rgba(255,240,200,0)');
+    ctx.fillStyle = sun2; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    for (var gl = 0; gl < 14; gl++) { ctx.fillRect(W * (0.42 + Math.sin(gl * 2.7) * 0.06) + gl * 2, H * (0.5 + gl * 0.008), 10 - gl * 0.5, 2); }
+    ctx.fillStyle = 'rgba(239,217,167,.95)';
+    ctx.beginPath(); ctx.moveTo(0, H * 0.66); ctx.quadraticCurveTo(W * 0.5, H * 0.58, W, H * 0.64); ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.fill();
+    return;
+  }
   if (cave) {
     ctx.fillStyle = 'rgba(126,96,176,.30)';
     for (var i = 0; i < 5; i++) { var bx = W * (0.12 + i * 0.19), bw = W * 0.085; ctx.beginPath(); ctx.moveTo(bx - bw, H * 0.64); ctx.lineTo(bx, H * (0.30 + (i % 2) * 0.06)); ctx.lineTo(bx + bw, H * 0.64); ctx.fill(); }
@@ -6390,6 +6429,7 @@ function monPlatform(ctx, x, y, rx, ry, cave) {
   ctx.beginPath(); ctx.ellipse(x, y + ry * 0.5, rx * 1.02, ry * 0.9, 0, 0, 7); ctx.fill();
   var g = ctx.createRadialGradient(x, y - ry * 0.4, ry * 0.2, x, y, rx);
   if (cave) { g.addColorStop(0, '#6a5688'); g.addColorStop(1, 'rgba(44,32,64,.25)'); }
+  else if (monArea === 'beach') { g.addColorStop(0, '#f4e2b8'); g.addColorStop(1, 'rgba(216,183,120,.3)'); }
   else { g.addColorStop(0, '#98d86e'); g.addColorStop(1, 'rgba(96,158,72,.2)'); }
   ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill();
   ctx.strokeStyle = cave ? 'rgba(180,150,220,.45)' : 'rgba(255,255,255,.45)'; ctx.lineWidth = 2;
