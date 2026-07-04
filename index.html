@@ -329,6 +329,13 @@ input[type="color"]:hover{border-color:var(--line2)}
 
 /* MARKETS STRIP */
 .live-indices{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;font-weight:600;color:var(--t3)}
+.live-digest{margin-top:16px;padding:16px 20px;background:var(--glass2);border:1px solid var(--line);border-radius:14px}
+.ld-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.ld-title{font-size:13px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:1px}
+.ld-stamp{font-size:11px;color:var(--t3);font-weight:600}
+.ld-text{font-size:15px;color:var(--t1);line-height:1.6}
+.ld-rx{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);color:var(--t2)}
+.ld-rx::before{content:'Rx · ';font-weight:800;color:var(--accent)}
 .live-quote{margin-top:16px;padding:16px 20px;background:var(--glass2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:14px;position:relative}
 .live-quote .lq-text{font-size:16px;font-style:italic;color:var(--t1);line-height:1.55}
 .live-quote .lq-text::before{content:'“';color:var(--accent);font-weight:700;margin-right:2px}
@@ -521,6 +528,17 @@ input[type="color"]:hover{border-color:var(--line2)}
       </div>
       <!-- Markets strip: indices + CAD/USD -->
       <div class="live-indices" id="live-indices"></div>
+    </div>
+
+    <!-- Today's digest (built hourly by generate_digest.py; readable + listenable) -->
+    <div class="live-digest" id="live-digest" style="display:none">
+      <div class="ld-head">
+        <span class="ld-title">Today's digest</span>
+        <span class="ld-stamp" id="ld-stamp"></span>
+        <button class="glance-btn briefing-btn" data-label="Listen" onclick="briefingToggle()" style="margin-left:auto">🔊 Listen</button>
+      </div>
+      <div class="ld-text" id="ld-news"></div>
+      <div class="ld-text ld-rx" id="ld-rx"></div>
     </div>
 
     <!-- Daily inspirational quote -->
@@ -1269,6 +1287,22 @@ function setDailyQuote() {
   auth.textContent = '— ' + q[1];
 }
 setDailyQuote();
+
+// ── TODAY'S DIGEST card (text of what the briefing reads) ──
+function renderDigestCard() {
+  var box = document.getElementById('live-digest');
+  if (!box) return;
+  var D = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE && DASHBOARD_CACHE.digest) || null;
+  if (!D || !D.news) { box.style.display = 'none'; return; }
+  document.getElementById('ld-news').textContent = D.news;
+  var rx = document.getElementById('ld-rx');
+  if (D.pharmacy) { rx.textContent = D.pharmacy; rx.style.display = ''; } else rx.style.display = 'none';
+  var stamp = document.getElementById('ld-stamp');
+  var age = cacheAgeText();
+  if (stamp) stamp.textContent = age ? 'updated ' + age : '';
+  box.style.display = '';
+}
+renderDigestCard();
 
 // ── GLANCE MODE (full-screen at-a-glance card; on-demand timers only) ──
 var glanceClockInt = null, glanceFactInt = null, glanceFactIdx = 0, glanceFactList = [];
