@@ -70,6 +70,26 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .fresh-chip .fresh-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
 .fresh-chip.stale .fresh-dot{background:#ffd60a}
 .fresh-chip.old .fresh-dot{background:var(--red)}
+/* GLANCE MODE — full-screen, half-second-readable card. Deliberately near-black
+   in both themes: max contrast in sun, glare-free at night. */
+#glance{position:fixed;inset:0;z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;gap:4vh;background:radial-gradient(120% 120% at 50% 0%,#141821 0%,#07080c 70%);color:#fff;cursor:pointer;text-align:center;padding:24px 24px 70px}
+#glance.on{display:flex}
+.gl-clock{font-size:min(21vw,170px);font-weight:800;line-height:1;letter-spacing:-3px;font-variant-numeric:tabular-nums}
+.gl-date{font-size:min(3.4vw,24px);font-weight:600;color:rgba(255,255,255,.66);margin-top:10px;text-transform:uppercase;letter-spacing:2px}
+.gl-wx{display:flex;align-items:center;gap:22px}
+.gl-wx .gl-temp{font-size:min(9vw,72px);font-weight:700;line-height:1}
+.gl-wx .gl-ico{font-size:min(8vw,60px);display:flex;color:#fff}
+.gl-wx .gl-desc{font-size:min(3.2vw,22px);color:rgba(255,255,255,.72);font-weight:600;text-align:left}
+.gl-fact{max-width:min(88vw,880px);min-height:96px;display:flex;flex-direction:column;align-items:center;gap:12px;transition:opacity .45s ease}
+.gl-fact.fade{opacity:0}
+.gl-tag{font-size:12px;font-weight:800;letter-spacing:2.5px;padding:6px 14px;border-radius:100px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
+.gl-txt{font-size:min(4.6vw,34px);font-weight:700;line-height:1.35}
+.gl-hint{position:absolute;bottom:26px;left:0;right:0;font-size:13px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.5px}
+.glance-btn{display:flex;align-items:center;gap:7px;padding:12px 18px;background:var(--surface);border:1px solid var(--line);border-radius:100px;font-size:12px;font-weight:700;color:var(--t2);cursor:pointer;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
+.glance-btn:hover{background:var(--surface2);color:var(--t1);border-color:var(--line2)}
+.briefing-btn.speaking{background:var(--accent);color:#fff;border-color:var(--accent)}
+#glance .briefing-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#fff;font-size:15px;padding:14px 26px}
+#glance .briefing-btn.speaking{background:var(--accent);border-color:var(--accent)}
 .live-hero-desc{font-size:13px;color:var(--t3);margin-top:2px}
 .live-hero-greet{font-size:15px;font-weight:600;color:var(--accent);margin-bottom:6px;letter-spacing:-.1px}
 .wx-meta-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 24px 20px}
@@ -482,6 +502,8 @@ input[type="color"]:hover{border-color:var(--line2)}
         <button class="fresh-chip" id="fresh-chip" onclick="location.reload()" title="Data refreshes automatically every hour — tap to reload now">
           <span class="fresh-dot"></span><span id="fresh-chip-txt">Checking data…</span><span style="font-size:13px">⟳</span>
         </button>
+        <button class="glance-btn" onclick="glanceOpen()" title="Big, at-a-glance view">⛶ Glance</button>
+        <button class="glance-btn briefing-btn" data-label="Briefing" onclick="briefingToggle()" title="Read the weather, headlines and scores aloud">🔊 Briefing</button>
       </div>
       <!-- Glanceable 5-day forecast strip (no tap needed) -->
       <div class="live-forecast-row" id="live-forecast-row"></div>
@@ -995,6 +1017,25 @@ input[type="color"]:hover{border-color:var(--line2)}
 
 </main>
 
+<!-- GLANCE MODE overlay: giant clock + weather + one rotating fact -->
+<div id="glance" onclick="glanceClose(event)">
+  <div>
+    <div class="gl-clock" id="gl-clock">--:--</div>
+    <div class="gl-date" id="gl-date">—</div>
+  </div>
+  <div class="gl-wx">
+    <span class="gl-temp" id="gl-temp">--°</span>
+    <span class="gl-ico" id="gl-ico"></span>
+    <span class="gl-desc" id="gl-desc"></span>
+  </div>
+  <div class="gl-fact" id="gl-fact">
+    <span class="gl-tag" id="gl-tag"></span>
+    <span class="gl-txt" id="gl-txt"></span>
+  </div>
+  <button class="glance-btn briefing-btn gl-keep" data-label="Read briefing" onclick="briefingToggle()">🔊 Read briefing</button>
+  <div class="gl-hint">Tap anywhere to exit</div>
+</div>
+
 <nav id="dock">
   <button class="dock-btn on" data-p="live" draggable="true">Live</button>
   <button class="dock-btn" data-p="msg" draggable="true">Messages</button>
@@ -1208,6 +1249,184 @@ function setDailyQuote() {
   auth.textContent = '— ' + q[1];
 }
 setDailyQuote();
+
+// ── GLANCE MODE (full-screen at-a-glance card; on-demand timers only) ──
+var glanceClockInt = null, glanceFactInt = null, glanceFactIdx = 0, glanceFactList = [];
+// Some feeds ship section headers ("Home Page Featured") as items — not headlines
+function isRealHeadline(t) { return t && t.length > 18 && !/home ?page|^featured$/i.test(t); }
+function glanceBuildFacts() {
+  var facts = [];
+  var C = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE) || {};
+  // Top local headline
+  try {
+    var news = C.news || {};
+    var keys = Object.keys(news);
+    for (var i = 0; i < keys.length; i++) {
+      var items = news[keys[i]].items;
+      if (items && items[0] && isRealHeadline(items[0].title)) { facts.push({tag: 'NEWS', txt: items[0].title}); break; }
+    }
+  } catch(e) {}
+  // My Teams: first entry with an actual matchup
+  try {
+    (C.scores || []).some(function(s) {
+      if (!s.home || !s.away) return false;
+      var line = s.away.name + (s.away.score !== '-' ? ' ' + s.away.score : '') + ' @ '
+               + s.home.name + (s.home.score !== '-' ? ' ' + s.home.score : '')
+               + (s.status ? ' · ' + s.status : '');
+      facts.push({tag: s.league || 'MY TEAMS', txt: line});
+      return true;
+    });
+  } catch(e) {}
+  // Traffic: incidents near the cached cameras
+  try {
+    var inc = 0;
+    (C.cameras || []).forEach(function(c) {
+      (c.events || []).forEach(function(ev) { if (ev.type === 'Incident' || ev.severity === 'MAJOR') inc++; });
+    });
+    facts.push({tag: 'TRAFFIC', txt: inc ? inc + ' incident' + (inc === 1 ? '' : 's') + ' reported near your cameras' : 'No incidents on your routes'});
+  } catch(e) {}
+  // Daily quote
+  try {
+    var day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    var q = DAILY_QUOTES[day % DAILY_QUOTES.length];
+    facts.push({tag: 'QUOTE', txt: '“' + q[0] + '” — ' + q[1]});
+  } catch(e) {}
+  return facts.length ? facts : [{tag: 'DASHBOARD', txt: 'Data refreshes hourly'}];
+}
+function glanceTick() {
+  var d = new Date();
+  var h = d.getHours() % 12 || 12, mm = String(d.getMinutes()).padStart(2, '0');
+  var ce = document.getElementById('gl-clock'), de = document.getElementById('gl-date');
+  if (ce) ce.textContent = h + ':' + mm;
+  if (de) de.textContent = d.toLocaleDateString('en-CA', {weekday: 'long', month: 'long', day: 'numeric'});
+}
+function glanceShowFact() {
+  var wrap = document.getElementById('gl-fact');
+  var f = glanceFactList[glanceFactIdx % glanceFactList.length];
+  if (!wrap || !f) return;
+  wrap.classList.add('fade');
+  setTimeout(function() {
+    document.getElementById('gl-tag').textContent = f.tag;
+    document.getElementById('gl-txt').textContent = f.txt;
+    wrap.classList.remove('fade');
+  }, 450);
+  glanceFactIdx++;
+}
+function glanceOpen() {
+  var g = document.getElementById('glance');
+  if (!g) return;
+  // Weather row from the embedded cache
+  try {
+    var cur = DASHBOARD_CACHE.weather.current;
+    document.getElementById('gl-temp').textContent = Math.round(cur.temperature_2m) + '°C';
+    document.getElementById('gl-ico').innerHTML = weatherIcon(cur.weather_code);
+    document.getElementById('gl-desc').textContent = getWeatherDescription(cur.weather_code);
+  } catch(e) {}
+  glanceFactList = glanceBuildFacts();
+  glanceFactIdx = 0;
+  document.getElementById('gl-tag').textContent = glanceFactList[0].tag;
+  document.getElementById('gl-txt').textContent = glanceFactList[0].txt;
+  glanceFactIdx = 1;
+  glanceTick();
+  g.classList.add('on');
+  glanceClockInt = setInterval(glanceTick, 15000);
+  glanceFactInt = setInterval(glanceShowFact, 8000);
+}
+function glanceClose(e) {
+  // Let buttons inside the overlay (e.g. the briefing toggle) handle their own taps
+  if (e && e.target && e.target.closest && e.target.closest('.gl-keep')) return;
+  var g = document.getElementById('glance');
+  if (g) g.classList.remove('on');
+  clearInterval(glanceClockInt); clearInterval(glanceFactInt);
+  glanceClockInt = glanceFactInt = null;
+  briefingStop();
+}
+
+// ── AUDIO BRIEFING (read the day aloud: weather, headlines, sports, scores) ──
+var briefingOn = false;
+function briefingSupported() { return typeof window.speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined'; }
+function briefingScript() {
+  var parts = [];
+  var C = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE) || {};
+  var hr = new Date().getHours();
+  parts.push((hr < 12 ? 'Good morning.' : hr < 17 ? 'Good afternoon.' : 'Good evening.') + ' Here is your briefing.');
+  try {
+    var cur = C.weather.current;
+    parts.push('It is ' + Math.round(cur.temperature_2m) + ' degrees and ' + getWeatherDescription(cur.weather_code).toLowerCase()
+      + (cur.apparent_temperature != null ? ', feeling like ' + Math.round(cur.apparent_temperature) + '.' : '.'));
+  } catch(e) {}
+  try {
+    var f = C.forecast.daily;
+    parts.push('Today: a high of ' + Math.round(f.temperature_2m_max[0]) + ', low of ' + Math.round(f.temperature_2m_min[0])
+      + (f.precipitation_probability_max && f.precipitation_probability_max[0] >= 30 ? ', with a ' + f.precipitation_probability_max[0] + ' percent chance of rain.' : '.'));
+  } catch(e) {}
+  // Top 3 news headlines across sources (first item from up to 3 sources)
+  try {
+    var titles = [];
+    Object.keys(C.news || {}).forEach(function(k) {
+      var it = C.news[k].items;
+      if (it && it[0] && isRealHeadline(it[0].title) && titles.length < 3) titles.push(it[0].title);
+    });
+    if (titles.length) {
+      parts.push('Top headlines.');
+      titles.forEach(function(t) { parts.push(t + '.'); });
+    }
+  } catch(e) {}
+  // Sports headlines (up to 2)
+  try {
+    var st = [];
+    Object.keys(C.sports || {}).forEach(function(k) {
+      var it = C.sports[k].items;
+      if (it && it[0] && isRealHeadline(it[0].title) && st.length < 2) st.push(it[0].title);
+    });
+    if (st.length) {
+      parts.push('In sports.');
+      st.forEach(function(t) { parts.push(t + '.'); });
+    }
+  } catch(e) {}
+  // My Teams scores
+  try {
+    (C.scores || []).forEach(function(s) {
+      if (s.home && s.away && s.home.score !== '-' && /final|ft/i.test(s.status || '')) {
+        var w = s.home.winner ? s.home : s.away, l = s.home.winner ? s.away : s.home;
+        parts.push('The ' + w.name + ' beat the ' + l.name + ' ' + w.score + ' to ' + l.score + '.');
+      } else if (s.home && s.away && s.status) {
+        parts.push(s.away.name + ' play the ' + s.home.name + ', ' + s.status + '.');
+      }
+    });
+  } catch(e) {}
+  parts.push('That is your briefing. Drive safe.');
+  return parts;
+}
+function briefingSetBtns(on) {
+  document.querySelectorAll('.briefing-btn').forEach(function(b) {
+    b.classList.toggle('speaking', on);
+    b.innerHTML = on ? '◼ Stop' : '🔊 ' + (b.getAttribute('data-label') || 'Read briefing');
+  });
+}
+function briefingStop() {
+  if (!briefingSupported()) return;
+  briefingOn = false;
+  try { window.speechSynthesis.cancel(); } catch(e) {}
+  briefingSetBtns(false);
+}
+function briefingToggle() {
+  if (!briefingSupported()) { alert('Read-aloud is not supported in this browser.'); return; }
+  if (briefingOn) { briefingStop(); return; }
+  briefingOn = true;
+  briefingSetBtns(true);
+  var parts = briefingScript();
+  var synth = window.speechSynthesis;
+  try { synth.cancel(); } catch(e) {}
+  // Queue one utterance per sentence-chunk so Stop cuts in fast and long
+  // headlines don't hit engine limits
+  parts.forEach(function(text, i) {
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.0; u.pitch = 1.0;
+    if (i === parts.length - 1) u.onend = function() { briefingOn = false; briefingSetBtns(false); };
+    synth.speak(u);
+  });
+}
 
 // ── DOCK ──
 function goPanel(p) {
