@@ -1257,13 +1257,29 @@ function isRealHeadline(t) { return t && t.length > 18 && !/home ?page|^featured
 function glanceBuildFacts() {
   var facts = [];
   var C = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE) || {};
-  // Top local headline
+  // Headlines: top story from up to 4 news sources, interleaved with the
+  // other fact types by the caller order below
   try {
     var news = C.news || {};
-    var keys = Object.keys(news);
-    for (var i = 0; i < keys.length; i++) {
-      var items = news[keys[i]].items;
-      if (items && items[0] && isRealHeadline(items[0].title)) { facts.push({tag: 'NEWS', txt: items[0].title}); break; }
+    var seen = {};
+    Object.keys(news).forEach(function(k) {
+      var items = news[k].items || [];
+      for (var i = 0; i < items.length; i++) {
+        var t = items[i].title;
+        if (isRealHeadline(t) && !seen[t]) { seen[t] = 1; facts.push({tag: 'NEWS', txt: t}); break; }
+      }
+    });
+    // keep at most 4 news facts so the rotation still gets to sports/traffic
+    var newsCount = 0;
+    facts = facts.filter(function(f) { return f.tag !== 'NEWS' || ++newsCount <= 4; });
+  } catch(e) {}
+  // Top sports headline
+  try {
+    var sp = C.sports || {};
+    var spKeys = Object.keys(sp);
+    for (var s2 = 0; s2 < spKeys.length; s2++) {
+      var sit = sp[spKeys[s2]].items;
+      if (sit && sit[0] && isRealHeadline(sit[0].title)) { facts.push({tag: 'SPORTS', txt: sit[0].title}); break; }
     }
   } catch(e) {}
   // My Teams: first entry with an actual matchup
@@ -1291,7 +1307,15 @@ function glanceBuildFacts() {
     var q = DAILY_QUOTES[day % DAILY_QUOTES.length];
     facts.push({tag: 'QUOTE', txt: '“' + q[0] + '” — ' + q[1]});
   } catch(e) {}
-  return facts.length ? facts : [{tag: 'DASHBOARD', txt: 'Data refreshes hourly'}];
+  // Weave: alternate news with the other fact types so the rotation stays varied
+  var newsF = facts.filter(function(f) { return f.tag === 'NEWS'; });
+  var otherF = facts.filter(function(f) { return f.tag !== 'NEWS'; });
+  var woven = [], n = Math.max(newsF.length, otherF.length);
+  for (var w = 0; w < n; w++) {
+    if (newsF[w]) woven.push(newsF[w]);
+    if (otherF[w]) woven.push(otherF[w]);
+  }
+  return woven.length ? woven : [{tag: 'DASHBOARD', txt: 'Data refreshes hourly'}];
 }
 function glanceTick() {
   var d = new Date();
