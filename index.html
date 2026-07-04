@@ -312,6 +312,14 @@ input[type="color"]:hover{border-color:var(--line2)}
 .stock-chg.down{color:var(--red)}
 .stock-remove{background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--t3);font-size:18px;padding:0;cursor:pointer;transition:all .2s ease;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .stock-remove:hover{color:var(--red);background:var(--red-bg);border-color:var(--red)}
+.stock-qty{width:76px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--t1);font-size:13px;text-align:right;flex-shrink:0}
+.stock-qty::placeholder{color:var(--t3);font-size:11px}
+.stock-qty:focus{border-color:var(--accent);outline:none}
+.portfolio-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:13px 14px;border-bottom:2px solid var(--accent);background:var(--surface)}
+.portfolio-row .pf-l{font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:.6px}
+.portfolio-row .pf-v{font-size:17px;font-weight:800;color:var(--t1)}
+.portfolio-row .pf-c{font-size:12px;font-weight:700}
+.stock-chip.pf-chip{border-color:var(--accent)}
 .stocks-dropdown-footer{padding:8px 12px;border-top:1px solid var(--line);font-size:11px;color:var(--t3);text-align:center;background:var(--surface);text-transform:uppercase;letter-spacing:.2px}
 
 /* SUBMENU GROUPS */
@@ -1206,6 +1214,17 @@ function renderLiveStocks() {
       }
     });
     el.innerHTML = html || '<div class="muted" style="padding:8px;font-size:12px">Loading prices…</div>';
+    // Portfolio chip (uses ALL watchlist symbols with share counts, not just
+    // the first six chips) — declared with function hoisting further down
+    if (typeof portfolioData === 'function') portfolioData().then(function(p) {
+      if (!p || !el) return;
+      var cls = p.chg >= 0 ? 'up' : 'down', sign = p.chg >= 0 ? '+' : '−';
+      el.insertAdjacentHTML('beforeend',
+        '<div class="stock-chip pf-chip" onclick="toggleStocksDropdown()" title="Your portfolio — tap to edit share counts">'
+        + '<span class="stock-chip-sym">MY PORTFOLIO</span>'
+        + '<span class="stock-chip-px">' + pfFmt(p.val) + '</span>'
+        + '<span class="stock-chip-chg ' + cls + '">' + sign + pfFmt(p.chg) + '</span></div>');
+    });
   }).catch(function() {
     el.innerHTML = '<div class="muted" style="padding:8px;font-size:12px">Stock prices unavailable</div>';
   });
@@ -2157,6 +2176,35 @@ try {
   watchlist = _wl ? JSON.parse(_wl) : ['XEQT.TO', 'VFV.TO', 'TSLA', 'AAPL'];
 } catch(e) { watchlist = ['XEQT.TO', 'VFV.TO', 'TSLA', 'AAPL']; }
 
+// Optional share counts per symbol → a portfolio value + today's P/L
+var stocksShares = {};
+try { stocksShares = JSON.parse(localStorage.getItem('stocks_shares_v1') || '{}'); } catch(e) { stocksShares = {}; }
+function setShares(sym, qty) {
+  qty = parseFloat(qty);
+  if (qty > 0) stocksShares[sym] = qty; else delete stocksShares[sym];
+  saveLS('stocks_shares_v1', stocksShares);
+}
+function portfolioData() {
+  var syms = watchlist.filter(function(s) { return stocksShares[s] > 0; });
+  if (!syms.length) return Promise.resolve(null);
+  return Promise.all(syms.map(function(sym) {
+    return fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=1d', 'stk_' + sym, 5);
+  })).then(function(res) {
+    var val = 0, prevVal = 0;
+    syms.forEach(function(sym, i) {
+      var d = res[i];
+      if (!(d && d.chart && d.chart.result)) return;
+      var m = d.chart.result[0].meta;
+      var px = parseFloat(m.regularMarketPrice), pv = parseFloat(m.chartPreviousClose);
+      if (isNaN(px) || isNaN(pv)) return;
+      val += px * stocksShares[sym]; prevVal += pv * stocksShares[sym];
+    });
+    if (!val) return null;
+    return {val: val, chg: val - prevVal, pct: prevVal ? (val - prevVal) / prevVal * 100 : 0};
+  }).catch(function() { return null; });
+}
+function pfFmt(n) { return '$' + Math.abs(n).toLocaleString('en-CA', {maximumFractionDigits: 0}); }
+
 function searchStocks(query) {
   var q = query.toUpperCase().trim();
   if (!q) return [];
@@ -2206,6 +2254,7 @@ function addStock(sym) {
 function deleteStock(sym) {
   watchlist = watchlist.filter(function(s) { return s !== sym; });
   saveLS('stocks_watchlist_v1', watchlist);
+  setShares(sym, 0); // drop its share count too, so the portfolio stays honest
   fetchStocks();
 }
 function fetchStocks() {
@@ -2225,10 +2274,12 @@ function fetchStocks() {
         var diff = px - prev;
         var pct = ((diff / prev) * 100).toFixed(2);
         var chgClass = diff >= 0 ? 'up' : 'down';
+        var qv = stocksShares[sym] > 0 ? String(stocksShares[sym]) : '';
         html += '<div class="stock-item">'
           + '<a href="https://finance.yahoo.com/quote/' + sym + '/" target="_blank" rel="noopener" style="flex:1;min-width:0;color:inherit;text-decoration:none;cursor:pointer">'
           + '<div class="stock-info"><div class="stock-sym">' + sym + '</div><div class="stock-px">$' + px.toFixed(2) + '</div></div>'
           + '</a>'
+          + '<input class="stock-qty" data-sym="' + escHtml(sym) + '" type="number" inputmode="decimal" min="0" step="any" placeholder="shares" value="' + qv + '" title="Own some? Enter shares for a portfolio total">'
           + '<div class="stock-chg ' + chgClass + '">' + (diff >= 0 ? '+' : '') + pct + '%</div>'
           + '<button class="stock-remove" data-sym="' + escHtml(sym) + '">×</button>'
           + '</div>';
@@ -2238,6 +2289,15 @@ function fetchStocks() {
       }
     });
     el.innerHTML = html || '<div class="muted" style="padding:20px;text-align:center;font-size:13px">No data</div>';
+    // Portfolio summary (only when share counts are set)
+    portfolioData().then(function(p) {
+      if (!p) return;
+      var cls = p.chg >= 0 ? 'up' : 'down', sign = p.chg >= 0 ? '+' : '−';
+      el.insertAdjacentHTML('afterbegin',
+        '<div class="portfolio-row"><span class="pf-l">Portfolio</span>'
+        + '<span class="pf-v">' + pfFmt(p.val) + '</span>'
+        + '<span class="pf-c stock-chg ' + cls + '">' + sign + pfFmt(p.chg) + ' (' + sign + Math.abs(p.pct).toFixed(2) + '%) today</span></div>');
+    });
     // Also update the live stocks chips in hero
     renderLiveStocks();
   });
@@ -2246,6 +2306,13 @@ function fetchStocks() {
 document.getElementById('stocks-dropdown-list').addEventListener('click', function(e) {
   var btn = e.target.closest('.stock-remove');
   if (btn) { e.stopPropagation(); e.preventDefault(); deleteStock(btn.getAttribute('data-sym')); }
+});
+// Share-count edits (change fires on blur/Enter) → save + refresh the totals
+document.getElementById('stocks-dropdown-list').addEventListener('change', function(e) {
+  var inp = e.target.closest('.stock-qty');
+  if (!inp) return;
+  setShares(inp.getAttribute('data-sym'), inp.value);
+  fetchStocks();
 });
 
 // ── WEATHER FORECAST ──
