@@ -5849,31 +5849,86 @@ function monRenderGrid() {
   if (c) c.textContent = monStarted() ? ('Caught ' + n + ' / ' + TOTAL + ' · ' + monTrainer().name + ' uses ' + monName(monActive(), monParty[monActive()]) + ' Lv.' + monParty[monActive()] + ' · tap a Critter to switch' + (n >= TOTAL ? ' · the cave boss awaits!' : '')) : 'Choose your first Critter to begin!';
 }
 
-// ── Sound effects (WebAudio, timerBeep pattern; tiny & original) ──
+// ── Sound effects — synthesized WAVs played through <audio> elements.
+// WebAudio is muted by the iPhone silent switch and unavailable in the Tesla
+// browser, but MEDIA playback works in both (it's how YouTube makes sound).
+// Each effect is rendered once to a small 22 kHz mono WAV data URI and cached.
 var monSndOn = true;
 try { monSndOn = localStorage.getItem('mon_sound_v1') !== '0'; } catch(e) {}
-var monAudioCtx = null;
+var monSndCache = {};
+var MON_SFX = {
+  hit:   [{f:160, start:0,    dur:0.12, vol:0.40}],
+  super: [{f:160, start:0,    dur:0.10, vol:0.40}, {f:220, start:0.09, dur:0.13, vol:0.38}],
+  throw: [{f:520, start:0,    dur:0.09, vol:0.30, shape:'sine'}, {f:700, start:0.08, dur:0.11, vol:0.28, shape:'sine'}],
+  catch: [{f:523, start:0,    dur:0.15, vol:0.34, shape:'tri'}, {f:659, start:0.11, dur:0.15, vol:0.34, shape:'tri'},
+          {f:784, start:0.22, dur:0.15, vol:0.34, shape:'tri'}, {f:1047, start:0.33, dur:0.20, vol:0.36, shape:'tri'}],
+  break: [{f:440, start:0,    dur:0.11, vol:0.36}, {f:300, start:0.10, dur:0.15, vol:0.36}],
+  win:   [{f:392, start:0,    dur:0.13, vol:0.34, shape:'tri'}, {f:523, start:0.09, dur:0.13, vol:0.34, shape:'tri'},
+          {f:659, start:0.18, dur:0.13, vol:0.34, shape:'tri'}, {f:784, start:0.27, dur:0.18, vol:0.36, shape:'tri'}],
+  lose:  [{f:330, start:0,    dur:0.18, vol:0.32}, {f:247, start:0.15, dur:0.24, vol:0.32}],
+  meet:  [{f:494, start:0,    dur:0.10, vol:0.32}, {f:494, start:0.13, dur:0.10, vol:0.32}]
+};
+function monWav(notes) {
+  var SR = 22050, total = 0;
+  notes.forEach(function(n) { total = Math.max(total, n.start + n.dur); });
+  var len = Math.ceil((total + 0.05) * SR);
+  var pcm = new Float32Array(len);
+  notes.forEach(function(n) {
+    var s0 = Math.floor(n.start * SR), s1 = Math.min(len, Math.floor((n.start + n.dur) * SR));
+    for (var i = s0; i < s1; i++) {
+      var tt = (i - s0) / SR;
+      var env = Math.pow(1 - (i - s0) / (s1 - s0), 1.6); // percussive decay
+      var ph = 2 * Math.PI * n.f * tt, v;
+      if (n.shape === 'sine') v = Math.sin(ph);
+      else if (n.shape === 'tri') v = (2 / Math.PI) * Math.asin(Math.sin(ph));
+      else v = (Math.sin(ph) >= 0 ? 1 : -1) * 0.55; // softened square
+      pcm[i] += v * n.vol * env;
+    }
+  });
+  var buf = new ArrayBuffer(44 + len * 2), dv = new DataView(buf);
+  function wstr(o, str) { for (var i = 0; i < str.length; i++) dv.setUint8(o + i, str.charCodeAt(i)); }
+  wstr(0, 'RIFF'); dv.setUint32(4, 36 + len * 2, true); wstr(8, 'WAVE'); wstr(12, 'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+  dv.setUint32(24, SR, true); dv.setUint32(28, SR * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
+  wstr(36, 'data'); dv.setUint32(40, len * 2, true);
+  for (var j = 0; j < len; j++) { var x = Math.max(-1, Math.min(1, pcm[j])); dv.setInt16(44 + j * 2, x * 32767, true); }
+  var bin = '', u8 = new Uint8Array(buf);
+  for (var k = 0; k < u8.length; k += 8192) bin += String.fromCharCode.apply(null, u8.subarray(k, k + 8192));
+  return 'data:audio/wav;base64,' + btoa(bin);
+}
+function monSndGet(kind) {
+  if (!monSndCache[kind] && MON_SFX[kind]) monSndCache[kind] = new Audio(monWav(MON_SFX[kind]));
+  return monSndCache[kind];
+}
+// Autoplay policies only allow media started inside a user gesture. Battle
+// taps are gestures, but catch/break fire later from the animation loop — so
+// on the first gesture-driven sound, "unlock" every effect by playing it
+// muted once. After that, loop-fired plays are allowed on those elements.
+var monSndUnlocked = false;
+function monSndUnlockAll() {
+  if (monSndUnlocked) return;
+  monSndUnlocked = true;
+  Object.keys(MON_SFX).forEach(function(k) {
+    var a = monSndGet(k);
+    if (!a) return;
+    try {
+      a.muted = true;
+      var p = a.play();
+      if (p && p.then) p.then(function() { a.pause(); a.currentTime = 0; a.muted = false; })
+                        .catch(function() { a.muted = false; });
+      else { a.pause(); a.currentTime = 0; a.muted = false; }
+    } catch(e) { try { a.muted = false; } catch(e2) {} }
+  });
+}
 function monSfx(kind) {
   if (!monSndOn) return;
   try {
-    monAudioCtx = monAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    var ctx = monAudioCtx, t = ctx.currentTime;
-    function tone(freq, start, dur, vol, type) {
-      var o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = type || 'square'; o.frequency.value = freq;
-      g.gain.setValueAtTime(vol, t + start);
-      g.gain.exponentialRampToValueAtTime(0.001, t + start + dur);
-      o.start(t + start); o.stop(t + start + dur + 0.02);
-    }
-    if (kind === 'hit')       { tone(160, 0, 0.10, 0.10); }
-    else if (kind === 'super'){ tone(160, 0, 0.09, 0.11); tone(220, 0.08, 0.12, 0.10); }
-    else if (kind === 'throw'){ tone(520, 0, 0.08, 0.07, 'sine'); tone(700, 0.07, 0.10, 0.06, 'sine'); }
-    else if (kind === 'catch'){ [523, 659, 784, 1047].forEach(function(f, i) { tone(f, i * 0.11, 0.14, 0.09, 'triangle'); }); }
-    else if (kind === 'break'){ tone(440, 0, 0.10, 0.09); tone(300, 0.09, 0.14, 0.09); }
-    else if (kind === 'win')  { [392, 523, 659, 784].forEach(function(f, i) { tone(f, i * 0.09, 0.12, 0.09, 'triangle'); }); }
-    else if (kind === 'lose') { tone(330, 0, 0.16, 0.08); tone(247, 0.14, 0.22, 0.08); }
-    else if (kind === 'meet') { tone(494, 0, 0.09, 0.08); tone(494, 0.12, 0.09, 0.08); }
+    monSndUnlockAll();
+    var a = monSndGet(kind);
+    if (!a) return;
+    a.currentTime = 0;
+    var p = a.play();
+    if (p && p.catch) p.catch(function() {});
   } catch(e) {}
 }
 function monToggleSound() {
