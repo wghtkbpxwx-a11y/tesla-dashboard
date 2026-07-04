@@ -120,8 +120,9 @@ camera list is reused and fresh events still attach via stored lat/lon.
 ## localStorage keys
 
 `dash_settings_v1`, `dock_order_v1`, `bookmarks_v1`, `tasks_v1`, `notes_v4`,
-`quick_links_v1`, `stocks_watchlist_v1`, `cam_favs_v1`, `timer_end_v1`,
-`monsters_v1`, `geo_coords_v1`, plus feed caches (`n_*`, `s_*`, `wx*`,
+`quick_links_v1`, `stocks_watchlist_v1`, `stocks_shares_v1` (share counts →
+portfolio total), `cam_favs_v1`, `timer_end_v1`, `monsters_v1`,
+`geo_coords_v1`, `last_error_v1`, plus feed caches (`n_*`, `s_*`, `wx*`,
 `stk_*`). `saveLS()` evicts feed caches on QuotaExceededError.
 
 ## Critterra (creature game) roadmap (for the next session)
