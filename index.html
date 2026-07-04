@@ -1404,11 +1404,28 @@ function briefingSetBtns(on) {
     b.innerHTML = on ? '◼ Stop' : '🔊 ' + (b.getAttribute('data-label') || 'Read briefing');
   });
 }
+var briefingKeepalive = null;
 function briefingStop() {
-  if (!briefingSupported()) return;
   briefingOn = false;
-  try { window.speechSynthesis.cancel(); } catch(e) {}
+  clearInterval(briefingKeepalive); briefingKeepalive = null;
+  if (briefingSupported()) { try { window.speechSynthesis.cancel(); } catch(e) {} }
   briefingSetBtns(false);
+}
+function briefingSpeakParts(parts) {
+  var synth = window.speechSynthesis;
+  parts.forEach(function(text, i) {
+    var u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.0; u.pitch = 1.0;
+    if (i === parts.length - 1) u.onend = function() { briefingOn = false; clearInterval(briefingKeepalive); briefingKeepalive = null; briefingSetBtns(false); };
+    synth.speak(u);
+  });
+  // iOS/WebKit can leave the engine paused (esp. after a previous cancel or
+  // when the screen dims mid-queue); nudging resume() is a no-op elsewhere.
+  clearInterval(briefingKeepalive);
+  briefingKeepalive = setInterval(function() {
+    if (!briefingOn) { clearInterval(briefingKeepalive); briefingKeepalive = null; return; }
+    try { synth.resume(); } catch(e) {}
+  }, 4000);
 }
 function briefingToggle() {
   if (!briefingSupported()) { alert('Read-aloud is not supported in this browser.'); return; }
@@ -1417,15 +1434,19 @@ function briefingToggle() {
   briefingSetBtns(true);
   var parts = briefingScript();
   var synth = window.speechSynthesis;
-  try { synth.cancel(); } catch(e) {}
-  // Queue one utterance per sentence-chunk so Stop cuts in fast and long
-  // headlines don't hit engine limits
-  parts.forEach(function(text, i) {
-    var u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.0; u.pitch = 1.0;
-    if (i === parts.length - 1) u.onend = function() { briefingOn = false; briefingSetBtns(false); };
-    synth.speak(u);
-  });
+  // iOS/WebKit quirk: cancel() immediately followed by speak() silently eats
+  // the new queue. Only cancel when something is actually queued, resume a
+  // possibly-stuck engine, and after a cancel give it a beat before speaking.
+  var busy = false;
+  try { busy = synth.speaking || synth.pending; } catch(e) {}
+  try { synth.resume(); } catch(e) {}
+  if (busy) {
+    try { synth.cancel(); } catch(e) {}
+    setTimeout(function() { if (briefingOn) briefingSpeakParts(parts); }, 180);
+  } else {
+    // Common case: idle engine — speak directly inside the tap gesture
+    briefingSpeakParts(parts);
+  }
 }
 
 // ── DOCK ──
