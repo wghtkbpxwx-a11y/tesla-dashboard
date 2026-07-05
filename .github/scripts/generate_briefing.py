@@ -126,17 +126,34 @@ def main() -> int:
     size = os.path.getsize("briefing.wav")
     print(f"briefing: synthesized {size/1e6:.1f} MB wav from {len(text)} chars")
 
-    if shutil.which("ffmpeg"):
+    # MP3 encode: lameenc first (pure pip wheel — GH runners have no ffmpeg),
+    # then ffmpeg, else leave the wav (client still plays it, just heavier).
+    done = False
+    try:
+        import lameenc
+        with wave.open("briefing.wav") as w:
+            pcm = w.readframes(w.getnframes())
+            rate = w.getframerate()
+        enc = lameenc.Encoder()
+        enc.set_bit_rate(48); enc.set_in_sample_rate(rate); enc.set_channels(1); enc.set_quality(5)
+        data = enc.encode(pcm) + enc.flush()
+        with open("briefing.mp3", "wb") as f:
+            f.write(bytes(data))
+        done = True
+        print(f"briefing: briefing.mp3 ready via lameenc ({os.path.getsize('briefing.mp3')/1e3:.0f} KB)")
+    except Exception as e:
+        print(f"briefing: lameenc unavailable ({e}); trying ffmpeg", file=sys.stderr)
+    if not done and shutil.which("ffmpeg"):
         r = subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", "briefing.wav",
                             "-codec:a", "libmp3lame", "-b:a", "48k", "briefing.mp3"],
                            capture_output=True, text=True)
         if r.returncode == 0 and os.path.exists("briefing.mp3"):
-            os.remove("briefing.wav")
-            print(f"briefing: briefing.mp3 ready ({os.path.getsize('briefing.mp3')/1e3:.0f} KB)")
-        else:
-            print(f"briefing: ffmpeg failed ({r.stderr.strip()[:200]}); keeping wav", file=sys.stderr)
+            done = True
+            print(f"briefing: briefing.mp3 ready via ffmpeg ({os.path.getsize('briefing.mp3')/1e3:.0f} KB)")
+    if done:
+        os.remove("briefing.wav")
     else:
-        print("briefing: no ffmpeg on PATH; keeping briefing.wav")
+        print("briefing: no MP3 encoder available; keeping briefing.wav")
     return 0
 
 
