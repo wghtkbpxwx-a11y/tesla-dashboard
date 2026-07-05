@@ -60,7 +60,7 @@ jobs:
       - name: Generate audio briefing
         continue-on-error: true
         run: |
-          pip install --quiet piper-tts
+          pip install --quiet piper-tts lameenc
           BRIEFING_VOICE="$HOME/.piper-voice/voice.onnx" python3 .github/scripts/generate_briefing.py
 
       - name: Publish audio branch
