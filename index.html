@@ -5913,12 +5913,14 @@ function monWav(notes) {
   dv.setUint32(24, SR, true); dv.setUint32(28, SR * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
   wstr(36, 'data'); dv.setUint32(40, len * 2, true);
   for (var j = 0; j < len; j++) { var x = Math.max(-1, Math.min(1, pcm[j])); dv.setInt16(44 + j * 2, x * 32767, true); }
-  var bin = '', u8 = new Uint8Array(buf);
-  for (var k = 0; k < u8.length; k += 8192) bin += String.fromCharCode.apply(null, u8.subarray(k, k + 8192));
-  return 'data:audio/wav;base64,' + btoa(bin);
+  return buf;
 }
 function monSndGet(kind) {
-  if (!monSndCache[kind] && MON_SFX[kind]) monSndCache[kind] = new Audio(monWav(MON_SFX[kind]));
+  if (!monSndCache[kind] && MON_SFX[kind]) {
+    // Blob URL, not a data: URI — iOS Safari silently refuses data: audio
+    var url = URL.createObjectURL(new Blob([monWav(MON_SFX[kind])], {type: 'audio/wav'}));
+    monSndCache[kind] = new Audio(url);
+  }
   return monSndCache[kind];
 }
 // Autoplay policies only allow media started inside a user gesture. Battle
@@ -5926,25 +5928,26 @@ function monSndGet(kind) {
 // on the first gesture-driven sound, "unlock" every effect by playing it
 // muted once. After that, loop-fired plays are allowed on those elements.
 var monSndUnlocked = false;
-function monSndUnlockAll() {
+function monSndUnlockAll(skipKind) {
   if (monSndUnlocked) return;
   monSndUnlocked = true;
   Object.keys(MON_SFX).forEach(function(k) {
+    if (k === skipKind) return; // the requested sound gets blessed by its real play
     var a = monSndGet(k);
     if (!a) return;
+    // Unmuted play-then-pause inside the gesture: the established iOS pattern
+    // (a muted play does NOT bless later unmuted playback there)
     try {
-      a.muted = true;
       var p = a.play();
-      if (p && p.then) p.then(function() { a.pause(); a.currentTime = 0; a.muted = false; })
-                        .catch(function() { a.muted = false; });
-      else { a.pause(); a.currentTime = 0; a.muted = false; }
-    } catch(e) { try { a.muted = false; } catch(e2) {} }
+      if (p && p.then) p.then(function() { a.pause(); a.currentTime = 0; }).catch(function() {});
+      else { a.pause(); a.currentTime = 0; }
+    } catch(e) {}
   });
 }
 function monSfx(kind) {
   if (!monSndOn) return;
   try {
-    monSndUnlockAll();
+    monSndUnlockAll(kind);
     var a = monSndGet(kind);
     if (!a) return;
     a.currentTime = 0;

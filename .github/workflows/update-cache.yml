@@ -47,15 +47,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.piper-voice
-          key: piper-en_US-lessac-medium-v1
+          key: piper-en_US-ryan-high-v1
 
       - name: Download Piper voice (cache miss)
         if: steps.voice.outputs.cache-hit != 'true'
         continue-on-error: true
         run: |
           mkdir -p ~/.piper-voice
-          curl -sL --retry 2 -o ~/.piper-voice/voice.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx"
-          curl -sL --retry 2 -o ~/.piper-voice/voice.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json"
+          curl -sL --retry 2 -o ~/.piper-voice/voice.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/ryan/high/en_US-ryan-high.onnx"
+          curl -sL --retry 2 -o ~/.piper-voice/voice.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/ryan/high/en_US-ryan-high.onnx.json"
 
       - name: Generate audio briefing
         continue-on-error: true

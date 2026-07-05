@@ -42,15 +42,19 @@ def is_real_headline(t):
 
 
 def build_text(cache: dict) -> str:
+    """A warm, personable radio-style script — it addresses David by name,
+    uses spoken transitions, and rotates its sign-off by weekday."""
     parts = []
     now = datetime.now(VAN) if VAN else datetime.now()
-    hr = now.hour
-    parts.append(("Good morning." if hr < 12 else "Good afternoon." if hr < 17 else "Good evening.")
-                 + " Here is your briefing.")
+    hr, wd = now.hour, now.strftime("%A")
+    tod = "morning" if hr < 12 else "afternoon" if hr < 17 else "evening"
+    parts.append(f"Good {tod}, David — here's your briefing for {wd}, {now.strftime('%B')} {now.day}.")
     try:
         cur = cache["weather"]["current"]
         desc = WMO.get(int(cur.get("weather_code", -1)), "")
-        line = f"It is {round(cur['temperature_2m'])} degrees" + (f" and {desc}" if desc else "")
+        line = f"It's {round(cur['temperature_2m'])} degrees out right now"
+        if desc:
+            line += f" with {desc} skies" if desc in ("clear", "mostly clear", "partly cloudy", "overcast") else f" and {desc}"
         if cur.get("apparent_temperature") is not None:
             line += f", feeling like {round(cur['apparent_temperature'])}"
         parts.append(line + ".")
@@ -58,16 +62,16 @@ def build_text(cache: dict) -> str:
         pass
     try:
         f = cache["forecast"]["daily"]
-        line = f"Today: a high of {round(f['temperature_2m_max'][0])}, low of {round(f['temperature_2m_min'][0])}"
+        line = f"Expect a high of {round(f['temperature_2m_max'][0])} today and a low of {round(f['temperature_2m_min'][0])}"
         p = (f.get("precipitation_probability_max") or [None])[0]
         if p is not None and p >= 30:
-            line += f", with a {p} percent chance of rain"
+            line += f" — and heads up, there's a {p} percent chance of rain"
         parts.append(line + ".")
     except Exception:
         pass
     digest = cache.get("digest") or {}
     if digest.get("news"):
-        parts.append("Top stories. " + digest["news"])
+        parts.append(f"Here's what's making news this {tod}. " + digest["news"])
     else:
         heads = []
         for v in (cache.get("news") or {}).values():
@@ -75,22 +79,37 @@ def build_text(cache: dict) -> str:
             if items and is_real_headline(items[0].get("title", "")) and len(heads) < 3:
                 heads.append(items[0]["title"])
         if heads:
-            parts.append("Top headlines. " + " ".join(h.rstrip(".") + "." for h in heads))
+            parts.append("Here's what's making news. " + " ".join(h.rstrip(".") + "." for h in heads))
     if digest.get("sports"):
-        parts.append("In sports. " + digest["sports"])
+        parts.append("Over in sports. " + digest["sports"])
     if digest.get("pharmacy"):
-        parts.append("In pharmacy and medicine. " + digest["pharmacy"])
+        parts.append("And from the world of pharmacy and medicine. " + digest["pharmacy"])
     try:
-        for s in cache.get("scores") or []:
-            if s.get("home") and s.get("away") and s["home"].get("score") != "-" and re.search(r"final|ft", s.get("status", ""), re.I):
-                w = s["home"] if s["home"].get("winner") else s["away"]
-                l = s["away"] if s["home"].get("winner") else s["home"]
-                parts.append(f"The {w['name']} beat the {l['name']} {w['score']} to {l['score']}.")
-            elif s.get("home") and s.get("away") and s.get("status"):
-                parts.append(f"{s['away']['name']} play the {s['home']['name']}, {s['status']}.")
+        for sc in cache.get("scores") or []:
+            if sc.get("home") and sc.get("away") and sc["home"].get("score") != "-" and re.search(r"final|ft", sc.get("status", ""), re.I):
+                w = sc["home"] if sc["home"].get("winner") else sc["away"]
+                l = sc["away"] if sc["home"].get("winner") else sc["home"]
+                mine = sc.get("team", "")
+                if mine and mine in w.get("name", ""):
+                    parts.append(f"Good news for your {w['name']} — they beat the {l['name']} {w['score']} to {l['score']}.")
+                elif mine and mine in l.get("name", ""):
+                    parts.append(f"Tough one for your {l['name']} — they fell to the {w['name']} {w['score']} to {l['score']}.")
+                else:
+                    parts.append(f"The {w['name']} beat the {l['name']} {w['score']} to {l['score']}.")
+            elif sc.get("home") and sc.get("away") and sc.get("status"):
+                parts.append(f"Your {sc.get('team', sc['away']['name'])} take on the "
+                             + (sc["home"]["name"] if sc.get("team", "") in sc["away"].get("name", "") else sc["away"]["name"])
+                             + f", {sc['status']}.")
     except Exception:
         pass
-    parts.append("That is your briefing. Drive safe.")
+    signoffs = ["That's all for now — drive safe out there.",
+                f"That's your briefing. Have a great {wd}.",
+                "That's everything for now. Take care, David.",
+                "And that's the latest. Safe travels.",
+                f"That wraps it up — enjoy your {tod}.",
+                "That's all I've got. Keep well, David.",
+                "And you're all caught up. Drive safe."]
+    parts.append(signoffs[now.toordinal() % len(signoffs)])
     return " ".join(parts)
 
 
@@ -121,8 +140,16 @@ def main() -> int:
 
     import wave
     voice = PiperVoice.load(voice_path)
+    try:
+        from piper import SynthesisConfig
+        cfg = SynthesisConfig(length_scale=1.05)  # a touch slower = warmer read
+    except Exception:
+        cfg = None
     with wave.open("briefing.wav", "wb") as w:
-        voice.synthesize_wav(text, w)
+        if cfg is not None:
+            voice.synthesize_wav(text, w, syn_config=cfg)
+        else:
+            voice.synthesize_wav(text, w)
     size = os.path.getsize("briefing.wav")
     print(f"briefing: synthesized {size/1e6:.1f} MB wav from {len(text)} chars")
 
