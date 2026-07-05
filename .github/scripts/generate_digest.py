@@ -144,6 +144,20 @@ def main():
     news_titles = collect(cache.get("news"), per_source=2, cap=8)
     sports_titles = collect(cache.get("sports"), per_source=1, cap=3)
     pharmacy_titles = collect(cache.get("pharmacy"), per_source=1, cap=3)
+
+    # Cross-category dedupe: a story that already leads the news shouldn't be
+    # repeated in the sports/pharmacy segments (e.g. a Blue Jays headline that
+    # both a news feed and a sports feed carry)
+    def not_in_news(t):
+        tw = content_words(t)
+        for n in news_titles:
+            nw = content_words(n)
+            inter = len(tw & nw)
+            if inter and inter / max(1, min(len(tw), len(nw))) >= 0.5:
+                return False
+        return True
+    sports_titles = [t for t in sports_titles if not_in_news(t)]
+    pharmacy_titles = [t for t in pharmacy_titles if not_in_news(t)]
     if not news_titles and not sports_titles and not pharmacy_titles:
         print("digest: no headlines available; skipping")
         return 0
