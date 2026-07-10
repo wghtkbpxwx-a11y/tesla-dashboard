@@ -25,7 +25,7 @@
   --accent: #3b82f6;
   --accent-soft: rgba(59,130,246,0.16);
   --red: #ff453a; --red-bg: rgba(255,69,58,0.12); --green: #34c759;
-  --r: 20px;
+  --r: 14px;
   --f: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 html.light{
@@ -471,9 +471,43 @@ input[type="color"]:hover{border-color:var(--line2)}
   .cam-page{grid-template-columns:1fr}
   .mon-start-grid{grid-template-columns:1fr}
 }
+
+/* COCKPIT MODES — intentionally manual until a trusted vehicle-state link exists. */
+.cockpit-command{display:grid;grid-template-columns:minmax(220px,.9fr) minmax(280px,1.45fr) auto;gap:10px;align-items:stretch;padding:12px;background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:14px}
+.command-mode{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:4px 6px}
+.command-eyebrow{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px}
+.mode-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.mode-btn{min-height:42px;padding:8px 10px;border-radius:7px;color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.1px;transition:background .2s,color .2s,box-shadow .2s}
+.mode-btn:hover{color:var(--t1);background:var(--surface2)}
+.mode-btn.active{background:var(--accent);color:#fff;box-shadow:0 4px 14px var(--accent-soft)}
+.now-focus{display:flex;align-items:center;gap:13px;min-width:0;padding:12px 15px;border-left:2px solid var(--accent);background:var(--surface);border-radius:8px}
+.now-focus .command-eyebrow{flex-shrink:0;color:var(--accent)}
+.now-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.now-copy strong{font-size:17px;line-height:1.2;letter-spacing:0;color:var(--t1)}
+.now-copy span{font-size:12px;line-height:1.35;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.command-actions{display:flex;align-items:stretch;gap:7px}
+.command-action{display:flex;align-items:center;justify-content:center;min-width:76px;padding:10px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--t2);font-size:12px;font-weight:700;transition:background .2s,color .2s,transform .2s}
+.command-action:hover{background:var(--surface2);color:var(--t1);transform:translateY(-1px)}
+.command-action.chatgpt{background:#10a37f;border-color:#10a37f;color:#fff}
+.command-action.chatgpt:hover{background:#0d8a6b;color:#fff}
+.charge-session{display:none;grid-template-columns:1fr auto;align-items:center;gap:14px;padding:14px 16px;background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.24);border-radius:12px}
+body[data-mode="charging"] .charge-session{display:grid}
+.charge-time{display:flex;align-items:baseline;gap:10px;min-width:0}
+.charge-time strong{font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:0}
+.charge-time span:last-child{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.charge-presets{display:flex;align-items:center;gap:6px}
+.charge-preset{min-height:38px;padding:8px 11px;border:1px solid rgba(52,199,89,.3);border-radius:7px;background:rgba(52,199,89,.12);color:var(--green);font-size:11px;font-weight:700}
+.charge-preset:hover{background:rgba(52,199,89,.2)}
+.charge-presets .command-action{min-height:38px}
+body[data-mode="drive"] #stock-widget,body[data-mode="drive"] .live-stocks-row,body[data-mode="drive"] .live-indices,body[data-mode="drive"] .live-digest,body[data-mode="drive"] .live-quote,body[data-mode="drive"] .split{display:none!important}
+body[data-mode="drive"] .live-hero{gap:20px;padding:24px}
+body[data-mode="drive"] .cockpit-command{grid-template-columns:minmax(210px,.8fr) minmax(300px,1.6fr) auto}
+body[data-mode="drive"] .live-hero-time{gap:32px}
+@media(max-width:760px){.cockpit-command{grid-template-columns:1fr;gap:8px}.command-actions{min-height:42px}.command-action{flex:1}.charge-session{grid-template-columns:1fr}.charge-presets{flex-wrap:wrap}.live-hero-time{gap:20px}.now-copy span{white-space:normal}.charge-time{flex-wrap:wrap}}
+
 </style>
 </head>
-<body>
+<body data-mode="parked">
 
 <header id="header">
   <div id="s-left">
@@ -505,6 +539,42 @@ input[type="color"]:hover{border-color:var(--line2)}
   <section class="panel on" id="p-live">
     <!-- Hero: Time + Weather -->
     <div class="live-hero">
+
+      <div class="cockpit-command" aria-label="Manual dashboard mode">
+        <div class="command-mode">
+          <span class="command-eyebrow" id="mode-status">Manual mode · Parked</span>
+          <div class="mode-picker" role="group" aria-label="Dashboard mode">
+            <button class="mode-btn" type="button" data-mode-btn="drive" aria-pressed="false" onclick="setDashboardMode('drive')">Drive</button>
+            <button class="mode-btn active" type="button" data-mode-btn="parked" aria-pressed="true" onclick="setDashboardMode('parked')">Parked</button>
+            <button class="mode-btn" type="button" data-mode-btn="charging" aria-pressed="false" onclick="setDashboardMode('charging')">Charging</button>
+          </div>
+        </div>
+        <div class="now-focus">
+          <span class="command-eyebrow">Now</span>
+          <div class="now-copy">
+            <strong id="now-title">Ready when you are</strong>
+            <span id="now-detail">A calm view of what matters next.</span>
+          </div>
+        </div>
+        <div class="command-actions">
+          <button class="command-action" type="button" onclick="briefingToggle()" title="Listen to your briefing">Listen</button>
+          <a class="command-action chatgpt" href="https://chatgpt.com/" target="_blank" rel="noopener" title="Open ChatGPT">ChatGPT</a>
+        </div>
+      </div>
+      <div class="charge-session" id="charge-session" aria-live="polite">
+        <div class="charge-time">
+          <span class="command-eyebrow">Charge session</span>
+          <strong id="charge-elapsed">00:00</strong>
+          <span id="charge-reminder">No reminder set</span>
+        </div>
+        <div class="charge-presets">
+          <button class="charge-preset" type="button" onclick="startChargeTimer(15)">15 min</button>
+          <button class="charge-preset" type="button" onclick="startChargeTimer(30)">30 min</button>
+          <button class="charge-preset" type="button" onclick="startChargeTimer(60)">60 min</button>
+          <a class="command-action chatgpt" href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a>
+        </div>
+      </div>
+
       <div class="live-hero-time">
         <div>
           <div class="live-hero-greet" id="live-greet"></div>
@@ -1152,6 +1222,90 @@ var notes = [];
 var rec = null, isRec = false;
 var inflightFetches = {}; // de-dupes concurrent identical fetchCached() calls
 
+// ── MANUAL COCKPIT MODE ──
+// A static browser page cannot read Tesla vehicle state. Keep this explicit and
+// persistent; a future trusted companion can call setDashboardMode() instead.
+var DASHBOARD_MODE_KEY = 'dashboard_mode_v1';
+var dashboardMode = {name:'parked', changedAt:Date.now()};
+try {
+  var savedDashboardMode = JSON.parse(localStorage.getItem(DASHBOARD_MODE_KEY) || 'null');
+  if (savedDashboardMode && ['drive','parked','charging'].indexOf(savedDashboardMode.name) >= 0) {
+    dashboardMode = {name:savedDashboardMode.name, changedAt:Number(savedDashboardMode.changedAt) || Date.now()};
+  }
+} catch(e) {}
+
+function dashboardModeLabel(mode) {
+  return mode === 'drive' ? 'Drive' : mode === 'charging' ? 'Charging' : 'Parked';
+}
+function dashboardWeatherText() {
+  var temp = document.getElementById('live-temp');
+  var desc = document.getElementById('live-weather-desc');
+  var bits = [];
+  if (temp && temp.textContent && temp.textContent.indexOf('--') < 0) bits.push(temp.textContent.trim());
+  if (desc && desc.textContent && desc.textContent !== '—') bits.push(desc.textContent.trim());
+  return bits.join(' · ');
+}
+function formatModeDuration(ms) {
+  var total = Math.max(0, Math.floor(ms / 1000));
+  var hours = Math.floor(total / 3600);
+  var mins = Math.floor((total % 3600) / 60);
+  var secs = total % 60;
+  return (hours ? String(hours).padStart(2,'0') + ':' : '') + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+}
+function updateChargeSession() {
+  if (dashboardMode.name !== 'charging') return;
+  var elapsed = document.getElementById('charge-elapsed');
+  var reminder = document.getElementById('charge-reminder');
+  if (elapsed) elapsed.textContent = formatModeDuration(Date.now() - dashboardMode.changedAt);
+  if (reminder) {
+    var end = typeof timerEnd === 'function' ? timerEnd() : 0;
+    var left = end - Date.now();
+    reminder.textContent = left > 0 ? 'Reminder in ' + formatModeDuration(left) : 'No reminder set';
+  }
+}
+function renderDashboardMode() {
+  var mode = dashboardMode.name;
+  document.body.setAttribute('data-mode', mode);
+  document.querySelectorAll('[data-mode-btn]').forEach(function(btn) {
+    var active = btn.getAttribute('data-mode-btn') === mode;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  var label = dashboardModeLabel(mode);
+  var status = document.getElementById('mode-status');
+  if (status) status.textContent = 'Manual mode · ' + label;
+  var title = document.getElementById('now-title');
+  var detail = document.getElementById('now-detail');
+  var weather = dashboardWeatherText();
+  if (mode === 'drive') {
+    if (title) title.textContent = 'Keep it simple';
+    if (detail) detail.textContent = weather || 'Time, weather, and your essentials.';
+  } else if (mode === 'charging') {
+    if (title) title.textContent = 'Make the wait count';
+    if (detail) detail.textContent = weather || 'Your charge-session timer is ready.';
+  } else {
+    if (title) title.textContent = 'Ready when you are';
+    if (detail) detail.textContent = weather || 'A calm view of what matters next.';
+  }
+  updateChargeSession();
+}
+function setDashboardMode(mode) {
+  if (['drive','parked','charging'].indexOf(mode) < 0) return;
+  if (dashboardMode.name !== mode) dashboardMode = {name:mode, changedAt:Date.now()};
+  try { localStorage.setItem(DASHBOARD_MODE_KEY, JSON.stringify(dashboardMode)); } catch(e) {}
+  renderDashboardMode();
+}
+function startChargeTimer(minutes) {
+  if (dashboardMode.name !== 'charging') setDashboardMode('charging');
+  if (typeof timerStart === 'function') timerStart(minutes);
+  updateChargeSession();
+}
+function initDashboardMode() {
+  renderDashboardMode();
+  setInterval(updateChargeSession, 1000);
+}
+
+
 // Initialize settings from localStorage
 try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch(e) {}
 if (!settings || typeof settings !== 'object') settings = JSON.parse(JSON.stringify(defaultSettings));
@@ -1179,6 +1333,7 @@ function updateClock() {
     greetEl.textContent = hr24 < 5 ? 'Good night' : hr24 < 12 ? 'Good morning' : hr24 < 17 ? 'Good afternoon' : 'Good evening';
   }
   renderFreshness();
+  renderDashboardMode();
   if (settings.themeMode === 'auto') applyAutoTheme();
 }
 
@@ -2121,6 +2276,7 @@ try {
   applyDockOrder();
   initDragAndDrop();
   renderMenuRows();
+  initDashboardMode();
 } catch(e) { console.error('Init error:', e.message); }
 
 // ── BOOKMARKS ──
@@ -4683,6 +4839,7 @@ function loadWeatherForCoords() {
       }
 
       if (settings.themeMode === 'auto') { setAutoTheme(data.current.is_day === 1); syncThemeModeButtons(); }
+      renderDashboardMode();
       setTimeout(renderLiveStocks, 100);
     } else if (!data) {
       if (wTemp) wTemp.textContent = '—';
