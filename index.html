@@ -507,20 +507,23 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
 
 
 /* CARPLAY-STYLE APP LAUNCHERS */
-.app-panel .split{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:18px 14px}
+.app-panel .split{display:grid;grid-template-columns:repeat(auto-fit,minmax(164px,1fr));gap:22px 18px;max-width:1120px;margin:0 auto;padding:4px}
 .app-panel .cardgroup{display:contents}
-.app-panel .row{min-height:142px;padding:8px 6px;gap:10px;flex-direction:column;justify-content:flex-start;text-align:center;background:transparent;border:0;border-radius:10px}
-.app-panel .row:hover{background:var(--surface)}
-.app-panel .row:active{background:var(--surface2);transform:scale(.98)}
-.app-panel .appicon{width:84px;height:84px;border-radius:21px;box-shadow:0 8px 16px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.18);transition:transform .18s cubic-bezier(.34,.69,.66,1),box-shadow .18s cubic-bezier(.34,.69,.66,1)}
+.app-panel .row{position:relative;min-height:170px;padding:10px 8px;gap:12px;flex-direction:column;justify-content:flex-start;text-align:center;background:transparent;border:0;border-radius:18px;scroll-margin-top:16px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+.app-panel .row:hover{background:rgba(255,255,255,.045)}
+.app-panel .row:active{background:var(--surface2);transform:scale(.975)}
+.app-panel .row:focus-visible{outline:3px solid var(--accent);outline-offset:3px;background:rgba(255,255,255,.06)}
+.app-panel .appicon{width:96px;height:96px;border-radius:25px;box-shadow:0 8px 16px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.18);transition:transform .18s cubic-bezier(.34,.69,.66,1),box-shadow .18s cubic-bezier(.34,.69,.66,1)}
 .app-panel .row:hover .appicon{transform:scale(1.045);box-shadow:0 12px 22px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.22)}
-.app-panel .appicon svg{width:48px;height:48px}
-.app-panel .ic-nlm svg{width:58px;height:58px}.app-panel .ic-oe svg{width:64px;height:64px}.app-panel .ic-claude svg{width:52px;height:52px}.app-panel .ic-gemini svg{width:50px;height:50px}.app-panel .ic-perplexity svg{width:50px;height:50px}.app-panel .ic-crave svg{width:58px;height:58px}.app-panel .ic-telus svg{width:56px;height:56px}
+.app-panel .appicon svg{width:54px;height:54px}
+.app-panel .ic-nlm svg{width:66px;height:66px}.app-panel .ic-oe svg{width:70px;height:70px}.app-panel .ic-claude svg{width:58px;height:58px}.app-panel .ic-gemini svg{width:56px;height:56px}.app-panel .ic-perplexity svg{width:56px;height:56px}.app-panel .ic-crave svg{width:64px;height:64px}.app-panel .ic-telus svg{width:62px;height:62px}
 .app-panel .rl{flex:0;width:100%;min-width:0}
-.app-panel .rl-t{font-size:14px;line-height:1.25;font-weight:600;letter-spacing:0;overflow-wrap:anywhere}
+.app-panel .rl-t{font-size:15px;line-height:1.25;font-weight:700;letter-spacing:0;overflow-wrap:anywhere}
 .app-panel .rl-s,.app-panel .chev{display:none}
 .ic-chatgpt{background:#10a37f}
-@media(max-width:760px){.app-panel .split{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}.app-panel .row{min-height:136px}.app-panel .appicon{width:76px;height:76px;border-radius:19px}.app-panel .appicon svg{width:44px;height:44px}}
+@media(max-width:760px){.app-panel .split{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 12px}.app-panel .row{min-height:156px}.app-panel .appicon{width:84px;height:84px;border-radius:22px}.app-panel .appicon svg{width:48px;height:48px}}
+@media(max-width:460px){.app-panel .split{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}.app-panel .row{min-height:150px}.app-panel .appicon{width:80px;height:80px;border-radius:21px}.app-panel .appicon svg{width:46px;height:46px}}
+@media(prefers-reduced-motion:reduce){.app-panel .row,.app-panel .appicon{transition:none}}
 
 </style>
 </head>
