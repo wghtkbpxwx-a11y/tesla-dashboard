@@ -2568,7 +2568,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
-    state: 'PR #58 encrypted sync and PR #59 direct-provider/LM Studio routing are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support deployed from merge commit 398fc8a. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery; the optional LM Studio MCP path still needs a user-created scoped API token.',
+    state: 'PR #58 encrypted sync and PR #59 direct-provider/LM Studio routing are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support deployed from merge commit 398fc8a. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery. LM Studio authentication is enabled and a least-privilege Homebase token was created; the token-input persistence fix and installed-mcp.json server toggle still require live verification.',
     start_here: [
       'HOMEBASE_CHANGELOG entry 2026-07-18-direct-provider-router-v2 plus the updated 2026-07-18-cross-device-vault-deployment entry',
       'HOMEBASE_CHANGELOG entries 2026-07-18-cross-device-vault-v2, 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
@@ -2617,6 +2617,42 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-lmstudio-token-auth-fix',
+      date: '2026-07-18',
+      commit: 'pending',
+      branch: 'codex/fix-lmstudio-token-auth',
+      pull_request: 'pending',
+      title: 'Persist LM Studio scoped tokens immediately for authenticated local requests',
+      type: 'fix+security+docs',
+      depends_on: ['2026-07-18-direct-provider-router-v2'],
+      files_changed: ['ai/index.html'],
+      settings_changed: ['keys.lmstudio'],
+      interfaces_changed: ['renderProvidersPane','testProvider','fetchProviderModels','chatOpenAI','lmStudioMcpWebSearch'],
+      changes: [
+        'Updates the in-memory LM Studio credential on every token-field input so Test connection, Fetch model list, chat, and native MCP requests attach the new Bearer token immediately',
+        'Keeps the existing change-triggered encrypted/local persistence path, so the scoped token remains eligible for the optional client-side private vault without entering source control',
+        'Records the LM Studio authentication setup and token-scope verification for the next model handoff'
+      ],
+      safety_guards: [
+        'The token remains masked, browser-local unless encrypted private sync is explicitly enabled, and is never committed or printed by Homebase',
+        'The accepted token denies arbitrary per-request remote MCP servers and allows only installed mcp.json connectors; LM Studio remains bound to localhost with authentication required',
+        'No paid cloud-model or Brave request is part of this persistence fix or its connection test'
+      ],
+      verification: [
+        'Before the fix, the live masked field displayed the token but Test connection returned LM Studio HTTP 401 because the Authorization header was empty',
+        'Pending: validate the corrected token against /api/v1/models, enable the global installed-mcp.json server toggle, and run one budget-accounted MCP search after deployment'
+      ],
+      setup_required: [
+        'After deployment, re-enter or focus the scoped token once so the input handler updates the active browser state, then test the connection and fetch models',
+        'Keep arbitrary per-request MCPs disabled and enable calling servers from mcp.json before turning on Settings → Tools → LM Studio MCP web search'
+      ],
+      known_limits: [
+        'The static Pages app cannot use this Mac-local token from a phone; mobile should route to cloud providers unless it is connected to a separately reachable authenticated local runtime',
+        'Provider-side Brave usage remains outside Homebase visibility except for app-originated estimated ledger entries'
+      ],
+      next_model: 'Confirm the live input event persists keys.lmstudio before provider tests, verify the restricted token permissions, and preserve localhost/auth/CORS plus the rolling-budget reservation.'
+    },
     {
       id: '2026-07-18-direct-provider-router-v2',
       date: '2026-07-18',
@@ -9915,6 +9951,7 @@ function renderProvidersPane(expand){
       lkr.innerHTML = '<label>Scoped API token</label><input type="password" autocomplete="off" spellcheck="false" placeholder="optional · needed for installed MCPs"><button class="sm-btn show-k" type="button">👁</button>';
       var lki = qs('input', lkr);
       lki.value = getKey('lmstudio');
+      lki.addEventListener('input', function(){ S.keys.lmstudio = lki.value.trim(); });
       lki.addEventListener('change', function(){ S.keys.lmstudio = lki.value.trim(); saveKeys(); });
       qs('.show-k', lkr).addEventListener('click', function(){ lki.type = lki.type === 'password' ? 'text' : 'password'; });
       body.appendChild(lkr);
