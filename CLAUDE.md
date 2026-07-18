@@ -191,9 +191,50 @@ budget is stored in `nova_cloud_usage_v1`, reserves concurrent calls, and also
 tracks OpenAI premium speech/transcription. Unknown-price cloud models are
 blocked while the guard is enabled. Treat this as an app estimate, not provider
 billing truth; preserve the Settings → Chat tracker and per-reply route reason.
+Complex requests may create automatic task-shaped teams (normally architecture,
+product/UI, data/connectors, and implementation/QA). Role prompts and tool
+allowlists are intentionally bounded; sub-agents are read-only, models are
+selected independently by quality floor and estimated cost, and only the lead
+agent may perform allowed mutations. Preserve `autoDelegate`, `maxSubagents`,
+`teamBudgetUsd`, `buildAutoAgentTeam`, and the central `runChat` budget
+reservation path when changing this flow.
+
+Homebase source-development tools read/search the configured public GitHub repo
+and can create exact multi-file edits only on a new `homebase/ai-*` branch plus
+a draft PR after an explicit source-change request and browser confirmation.
+They reject secrets, protected paths (including `.github/workflows`), ambiguous
+replacements, and parse-invalid HTML/JSON. Never weaken these guards or add a
+direct-to-main write path. GitHub setup lives in Settings → Development; tokens
+remain browser-local in connector storage.
+
+## Mandatory Homebase model handoff
+
+`HOMEBASE_CHANGELOG` in `ai/index.html` is the canonical cross-model work log.
+Every model/session must read `current_handoff` and the newest entries before
+scoping or editing. Before handing off any material code, configuration,
+contract, tool, routing, UI, safety, documentation, or deployment change:
+
+1. append or update the newest changelog entry;
+2. record commit/branch/PR and honest implementation/merge/live state;
+3. list files, settings/interfaces, exact behaviour, guards, verification,
+   setup, known limits, and dependencies;
+4. update `current_handoff` for the next model; and
+5. preserve prior entries, correcting inaccuracies explicitly instead of
+   deleting history.
+
+The guarded repository writer enforces an `ai/index.html` changelog edit in
+every source PR. Do not bypass that requirement.
 Dashboard More→Apps has "✦ Nova AI" / "🎙️ Nova Voice" `data-href` submenu
 buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
 Nova uses `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
+`nova_vault_sync_v2` tracks per-device sync metadata and per-section timestamps.
+The Google Drive vault is schema v2 and may contain memory, tasks, selected AI
+settings, `nova_cloud_usage_v1` events, and (only when `drive.syncSecrets` is
+enabled) API keys/private connector fields. It is PBKDF2/AES-GCM ciphertext;
+the passphrase is session-only and `nova_drive_auth_v1` OAuth tokens stay local.
+Push must merge/decrypt the remote vault first and abort on a decrypt/download
+failure—never weaken this to blind last-write-wins. Background pull/push must
+not intentionally open OAuth UI. Conversations remain device-local IndexedDB.
 It is NOT cache-driven; it does live API calls, so in-car it's best-effort
 (phone/desktop is the target). Verify with the same extract-scripts +
 `node --check` recipe (its README has the one-liner). PWA bits: `ai/manifest.webmanifest`,

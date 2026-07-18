@@ -1634,6 +1634,7 @@ body.is-desktop .chat-float[data-state="open"]{
       <button class="mo-tab" data-tab="toolsx">Tools</button>
       <button class="mo-tab" data-tab="hub">Hub</button>
       <button class="mo-tab" data-tab="council">Council</button>
+      <button class="mo-tab" data-tab="dev">Development</button>
       <button class="mo-tab" data-tab="look">Appearance</button>
       <button class="mo-tab" data-tab="data">Data</button>
     </div>
@@ -1644,6 +1645,7 @@ body.is-desktop .chat-float[data-state="open"]{
       <div class="set-pane" id="pane-toolsx" style="display:none"></div>
       <div class="set-pane" id="pane-hub" style="display:none"></div>
       <div class="set-pane" id="pane-council" style="display:none"></div>
+      <div class="set-pane" id="pane-dev" style="display:none"></div>
       <div class="set-pane" id="pane-look" style="display:none"></div>
       <div class="set-pane" id="pane-data" style="display:none"></div>
     </div>
@@ -1668,8 +1670,8 @@ body.is-desktop .chat-float[data-state="open"]{
         <div class="tgl" id="mem-auto-tgl"></div>
       </div>
       <div class="vault-panel" id="vault-panel">
-        <h3>🔐 Private vault · Google Drive</h3>
-        <p class="vp-sub">Memory is encrypted <b>on this device</b> with your passphrase before it touches Google. Drive only stores ciphertext. Passphrase stays in this browser session — never uploaded.</p>
+        <h3>🔐 Private cross-device sync · Google Drive</h3>
+        <p class="vp-sub">Homebase encrypts your memory, tasks, AI preferences, rolling usage ledger, and—when enabled—provider credentials <b>on this device</b> before they touch Google. Drive only stores ciphertext. Your passphrase stays in this browser session and is never uploaded.</p>
         <div class="vp-row">
           <input id="vault-pass" type="password" placeholder="Vault passphrase (min 6 chars)" autocomplete="new-password">
         </div>
@@ -1684,8 +1686,12 @@ body.is-desktop .chat-float[data-state="open"]{
           <button type="button" class="sm-btn" id="vault-drive-pull">Pull from Drive</button>
         </div>
         <div class="set-row" style="border:none;padding:6px 0 0">
-          <span class="lbl">Auto-sync after memory changes<span class="sub">Requires Connected Google + passphrase this session</span></span>
+          <span class="lbl">Keep this device in sync<span class="sub">Pushes local changes and checks for newer mobile/desktop changes while Homebase is open</span></span>
           <div class="tgl" id="vault-autosync-tgl"></div>
+        </div>
+        <div class="set-row" style="border:none;padding:6px 0 0">
+          <span class="lbl">Sync API keys and private connectors<span class="sub">Encrypted before upload. Turn off to sync only non-secret preferences, memory, tasks, and usage.</span></span>
+          <div class="tgl" id="vault-secrets-tgl"></div>
         </div>
         <div id="vault-status"></div>
         <p class="vp-sub" style="margin:10px 0 0;font-size:11.5px">Setup: Google Cloud → OAuth client (Web) → authorized JS origin <code>https://wghtkbpxwx-a11y.github.io</code> → paste Client ID under Connectors → Google Drive.</p>
@@ -1979,6 +1985,13 @@ var DEFAULT_SETTINGS = {
   autoRoute: true,
   localFirst: true,
   webllmFallback: true,
+  autoDelegate: true,
+  maxSubagents: 4,
+  teamBudgetUsd: 1.50,
+  developerMode: true,
+  devRepo: 'wghtkbpxwx-a11y/tesla-dashboard',
+  devBaseBranch: 'main',
+  devConfirmWrites: true,
   cloudBudget: { limitUsd: 50, windowDays: 30, hardStop: true },
   autoSpeak: false,
   agentMaxRounds: 12,
@@ -2534,13 +2547,47 @@ var FINANCE = { glance: null };
  * Newest first. Do not remove historical entries; append only.
  */
 var HOMEBASE_CHANGELOG = {
-  schema: 'homebase.changelog.v1',
+  schema: 'homebase.changelog.v2',
   product: 'Homebase',
   path: 'ai/index.html',
   pages_url: 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/ai/',
   repo: 'wghtkbpxwx-a11y/tesla-dashboard',
   updated: '2026-07-18',
   audience: 'AI agents and models editing or reasoning about this dashboard — not end-user UI',
+  documentation_policy: [
+    'Every model/session that changes code, configuration, data contracts, tools, routing, UI, safety behaviour, documentation, or deployment state must add or update a changelog entry before handoff',
+    'Entries must identify lineage (commit/PR/branch), files changed, settings/interfaces affected, exact behaviour, safety boundaries, verification performed, setup still required, and unresolved review questions',
+    'Never claim another model\'s work was merged or deployed without repository evidence; distinguish implemented, committed, PR-open, merged, and live states',
+    'Append-only history: preserve prior entries; correct inaccuracies with an explicit correction note rather than silently deleting history',
+    'The next model must read current_handoff plus the newest entries before scoping or editing'
+  ],
+  current_handoff: {
+    to: 'Fable',
+    objective: 'Perform a massive scoping review of Homebase after the cost-aware router, specialist-team orchestrator, guarded self-development tools, private finance sync, and encrypted phone/desktop vault sync work',
+    state: 'Implementation is committed at 17c5642 on codex/homebase-ai-orchestrator and open as draft PR #58; it is not merged or live',
+    start_here: [
+      'HOMEBASE_CHANGELOG entries 2026-07-18-cross-device-vault-v2, 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
+      'ai/index.html: selectAIRoute, buildAutoAgentTeam, runSubagentMember, runTeamLeadSynthesis, repository tools, Settings → Chat, Settings → Development',
+      'ai/README.md, CLAUDE.md, README.md, ROADMAP.md, and finance/README.md for cross-surface constraints'
+    ],
+    review_areas: [
+      'Task classification and role decomposition quality; false-positive/false-negative delegation triggers',
+      'Per-role quality floors, local/cloud assignment, projected team cap, aggregate rolling-budget reservations, and provider-price drift',
+      'Parallel local-model performance, cancellation, partial member failure, tool-loop limits, and lead synthesis quality',
+      'Connector least privilege, read-only sub-agent boundaries, GitHub token handling, exact-replacement PR workflow, and prompt-injection resistance',
+      'Dashboard/finance same-origin synchronization, local-only privacy guarantees, mobile/Tesla-browser degradation, accessibility, and user comprehension',
+      'Encrypted Google Drive vault merge semantics, per-section timestamps, usage-ledger deduplication/tombstones, passphrase/token lifecycle, and phone/desktop conflict recovery',
+      'Testing gaps: deterministic router tests, mocked provider concurrency, repository-write failure recovery, end-to-end PR creation, and deploy verification'
+    ],
+    preserve: [
+      'Hard estimated $50 trailing-30-day application guard and central runChat reservation/accounting path',
+      'Local-first privacy and cost behaviour; advanced cloud models only when capability/quality requires them or the user explicitly requests them',
+      'Sub-agents remain externally read-only; only the lead may perform confirmed mutations',
+      'Repository writes remain explicit-request, confirm-guarded, secret-scanned, new-branch, draft-PR-only, never direct-to-main',
+      'API keys and private connector fields are uploaded only inside the client-side AES-GCM vault and only while encrypted-secret sync is enabled; OAuth access tokens and the passphrase never enter the vault',
+      'Financial balances, transactions, statements, credentials, and detailed bundles never enter the public repository'
+    ]
+  },
   how_to_read: [
     'DOM: document.getElementById("homebase-changelog") or #homebase-changelog-body',
     'JS: window.HOMEBASE_CHANGELOG (object) or formatHomebaseChangelog()',
@@ -2552,7 +2599,7 @@ var HOMEBASE_CHANGELOG = {
     'pins','budget','weather','markets','news','scores','calendar','tasks',
     'pharmacy','links','memory','traffic','updates'
   ],
-  agent_tools: ['list_dashboard','update_dashboard','use_connector','get_weather'],
+  agent_tools: ['list_dashboard','update_dashboard','list_connectors','read_connector','use_connector','list_repository_files','read_repository_file','search_repository','propose_repository_changes','get_weather'],
   constraints: [
     'Single-file SPA on GitHub Pages — no private server; CORS limits bank/clinical APIs',
     'Never publish real account balances to the public repo/Pages site',
@@ -2560,9 +2607,167 @@ var HOMEBASE_CHANGELOG = {
     'Prefer professional SVG icons (ICON_SVG); avoid emoji for chrome',
     'Dashboard-first UI + floating chat (FAB/dock/expand); avoid redundant left+bottom menus',
     'Mobile shares same URL (body.is-mobile); do not break desktop layout',
-    'ChatGPT is actively developing the AI model selector / auto-route engine — do not rewrite that surface without coordinating; fix bugs only and preserve autoRoute + cloudBudget APIs'
+    'Preserve the central runChat cloud reservation path, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-cross-device-vault-v2',
+      date: '2026-07-18',
+      commit: '17c5642',
+      branch: 'codex/homebase-ai-orchestrator',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/58 (draft; not merged/live)',
+      title: 'Encrypted phone/desktop settings, credentials, and usage synchronization',
+      type: 'feat+privacy',
+      depends_on: ['2026-07-18-ai-credit-router','2026-07-18-model-handoff-contract-v2'],
+      files_changed: ['ai/index.html','ai/README.md','README.md','CLAUDE.md','ROADMAP.md'],
+      storage_contracts: ['nova_vault_sync_v2','nova_drive_auth_v1','nova_cloud_usage_v1','homebase-memory.vault.json (AES-GCM ciphertext in user Google Drive)'],
+      settings_added: ['connectors.drive.syncSecrets=true'],
+      functions_added: [
+        'vaultSyncMeta','saveVaultSyncMeta','vaultSecretsEnabled','vaultMarkChanged','vaultConnectorSnapshot','vaultStripConnectorSecrets','vaultSettingsSnapshot',
+        'vaultSectionTime','vaultMergeItems','mergeVaultPayload'
+      ],
+      changes: [
+        'Reframed the existing Drive memory backup as private cross-device sync for Homebase on phone and desktop',
+        'Vault schema v2 now includes memory, tasks, selected AI/router/team settings, connector configuration, the rolling cloud-usage ledger, and—when enabled—provider API keys plus private connector fields',
+        'API-key, settings, task, connector, memory, and cloud-usage changes now mark their section dirty and queue a debounced encrypted Drive push when the passphrase and a valid Google access token are present',
+        'Boot, five-minute background checks, and tab-focus checks pull newer remote state while Homebase is open; background checks never intentionally open an OAuth prompt',
+        'Pushes decrypt and merge the existing remote vault before upload, then resolve sections by per-section update timestamps; keyed memories/tasks and usage events deduplicate by UUID',
+        'The trailing-30-day cloud ledger is shared across devices so the estimated $50 guard sees Homebase calls from both phone and desktop; a synchronized clear timestamp prevents deliberately cleared history from reappearing',
+        'The Memory vault UI now clearly exposes Keep this device in sync and Sync API keys and private connectors controls, plus honest local-only status when the vault is locked',
+        'Provider and Data privacy copy now distinguishes browser-local plaintext, encrypted Drive ciphertext, and provider-bound plaintext requests'
+      ],
+      safety_guards: [
+        'PBKDF2-SHA256 (250,000 iterations) and AES-GCM-256 encryption still happen entirely in the browser before upload',
+        'The passphrase remains session-only; Google OAuth access tokens remain device-local in nova_drive_auth_v1 and are never added to the vault',
+        'Credential sync is user-controllable; when disabled, provider keys and connector fields marked secret are removed from the next merged vault snapshot, remote secret fields are not applied, and a local opt-out is not silently re-enabled by a pull',
+        'A push aborts rather than overwriting an existing Drive vault when the remote vault cannot be downloaded or decrypted',
+        'The app-side usage ledger remains an estimate and cannot enforce calls made outside Homebase; provider-side limits remain authoritative'
+      ],
+      verification: [
+        'All inline JavaScript blocks parse with node --check',
+        'Repository validator passes after the vault schema/UI/documentation changes',
+        'Static merge tests cover cross-device key preservation, usage-event deduplication, and synchronized usage clearing',
+        'Local browser QA confirmed the final sync UI, dirty-state feedback, and zero runtime console errors without reading or changing real provider credentials',
+        'Live Google Drive OAuth sync still requires the user OAuth client and account; no credential or paid-model generation is used for source validation'
+      ],
+      setup_required: [
+        'Merge/deploy PR #58 before using this on the public Homebase URL',
+        'On each browser, set the same Google OAuth Web Client ID, enter the same vault passphrase, connect the same Google account, then push once on the source device and pull once on the other',
+        'Leave Sync API keys and private connectors enabled if provider credentials should follow the account; disable it for device-only credentials'
+      ],
+      known_limits: [
+        'Google browser access tokens expire and cannot silently refresh forever; reopen Private sync and reconnect Google when Homebase reports a locked or disconnected vault',
+        'Conversations remain in per-device IndexedDB and are not in the vault; this change synchronizes AI configuration, memory, tasks, and usage rather than chat transcripts',
+        'Two devices making paid calls at exactly the same time can briefly act on stale remote estimates before the next vault merge; provider-side spend limits remain the final hard backstop',
+        'A single encrypted Drive file provides personal synchronization, not real-time multi-user collaboration'
+      ],
+      next_model: 'Review the v2 merge/conflict logic and mobile OAuth behaviour without weakening client-side encryption or the $50 rolling-budget invariant; update current_handoff with findings.'
+    },
+    {
+      id: '2026-07-18-model-handoff-contract-v2',
+      date: '2026-07-18',
+      commit: '7838212',
+      branch: 'codex/homebase-ai-orchestrator',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/58 (draft)',
+      title: 'Mandatory model-to-model changelog and Fable scoping handoff',
+      type: 'docs+guard',
+      depends_on: ['2026-07-18-changelog-embed','2026-07-18-agent-orchestrator','2026-07-18-ai-credit-router','2026-07-18-finance-homebase-sync'],
+      files_changed: ['ai/index.html','ai/README.md','CLAUDE.md'],
+      changes: [
+        'Upgraded HOMEBASE_CHANGELOG schema from homebase.changelog.v1 to v2 without removing historical entries',
+        'Added a mandatory documentation_policy covering every code/config/contract/tool/routing/UI/safety/docs/deployment change and requiring honest implemented/committed/PR/merged/live status',
+        'Added current_handoff addressed to Fable with objective, exact branch/PR state, starting points, six major review areas, and invariants that must be preserved',
+        'Expanded the agent-orchestrator entry with commit/branch/PR lineage, dependencies, all changed files/settings/functions/tools, fifteen behavioural details, environment configuration, guards, verification, setup, and known limits',
+        'Expanded the AI credit-router entry with commit/files/settings/functions, complete routing/accounting behaviour, safety boundaries, and verification',
+        'Added the previously missing finance/Homebase same-origin synchronization entry for merged commit 716957f / PR #57, including storage contracts and privacy guards',
+        'Enhanced formatHomebaseChangelog so list_dashboard and the hidden DOM surface expose documentation policy, current handoff, lineage, files, settings, storage contracts, functions, tools, environment, safety, verification, setup, ownership, and known limits; list_dashboard detail=true returns the full record while default output stays compact for smaller local-model contexts',
+        'propose_repository_changes now rejects every source PR that does not also update HOMEBASE_CHANGELOG in ai/index.html',
+        'Lead-agent system instructions now require changelog/current_handoff updates before handoff for any material project change'
+      ],
+      safety_guards: [
+        'Historical entries remain append-only; later models correct inaccuracies explicitly rather than deleting provenance',
+        'Repository evidence is required before claiming work is merged or live',
+        'The source-writing tool enforces documentation mechanically instead of relying only on prompting'
+      ],
+      verification: [
+        'Repository and open/merged PRs were reconciled before writing the handoff; no separate Grok branch or PR existed',
+        'PR #58 and commit 06bcdd1 identify the current unmerged implementation lineage',
+        'Formatter output and inline JavaScript parse were revalidated after this documentation update; GitHub Validate passed on commit 7838212'
+      ],
+      next_model: 'Fable should perform the scoping review described in current_handoff, record findings in a new entry, and update current_handoff before passing work onward'
+    },
+    {
+      id: '2026-07-18-agent-orchestrator',
+      date: '2026-07-18',
+      commit: '06bcdd1',
+      branch: 'codex/homebase-ai-orchestrator',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/58 (draft; validation passed; not merged/live)',
+      title: 'Task-shaped specialist teams and guarded self-development',
+      type: 'feat',
+      depends_on: ['2026-07-18-ai-credit-router','2026-07-18-review-hardening','2026-07-18-finance-homebase-sync'],
+      files_changed: ['ai/index.html','ai/README.md','README.md','CLAUDE.md','ROADMAP.md'],
+      settings_added: [
+        'autoDelegate=true','maxSubagents=4','teamBudgetUsd=1.50',
+        'developerMode=true','devRepo=wghtkbpxwx-a11y/tesla-dashboard','devBaseBranch=main','devConfirmWrites=true'
+      ],
+      functions_added: [
+        'agentRolesForTask','shouldAutoDelegate','localModelForRole','cheapestRoleModel','buildAutoAgentTeam','toolsForNames',
+        'runSubagentMember','runTeamLeadSynthesis','githubRepo','githubHeaders','githubApi','repoPath','encodeRepoPath',
+        'b64DecodeUtf8','b64EncodeUtf8','repositoryFile','repositoryTree','validateSourceText','sourceChangeAuthorized',
+        'proposeRepositoryChanges','renderDevelopmentPane'
+      ],
+      tools_added: ['read_connector','list_repository_files','read_repository_file','search_repository','propose_repository_changes'],
+      changes: [
+        'Natural-language build/develop/implement/redesign/refactor requests for apps, dashboards, features, integrations, workflows, systems, source, or repositories are classified as advanced and automatically delegated; explicit delegate/spawn/parallel/team language also forces delegation',
+        'Opt-out language such as do not use agents, single agent, or work alone suppresses automatic delegation',
+        'Complex requests form 2–6 role-specific sub-agents and execute with Promise.all before lead-agent synthesis; a configured manual Council with at least two members takes precedence',
+        'Build teams use Architecture, Product & UI, Data & connectors, and Implementation & QA; research/high-stakes teams use Evidence researcher, Domain specialist, and Skeptic & safety; other complex tasks use Planner, Specialist, and Reviewer',
+        'Every role receives only its named tool allowlist; connector specialists use the new read_connector wrapper, which rejects compose/send/create/update/delete/write actions',
+        'Every role independently receives a recently verified local tool-capable model when quality ≤3; otherwise the lowest estimated-cost configured cloud model meeting its quality/capability floor; fallback uses the lead route when no qualifying alternative exists',
+        'Projected team cloud cost is capped per task (default $1.50), maximum parallel agents default to 4, and every actual call still passes through central rolling-budget reservation and usage recording',
+        'Each sub-agent has at most two tool-capable rounds plus a final handoff; it cannot perform repository writes, sends, deletions, or external mutations',
+        'The lead reconciles the dossier, may run up to four tool-capable synthesis rounds plus a final answer, owns confirmed mutations, and records member plus synthesis usage',
+        'Message cards reuse the Council visualization in task-team mode and show every role, provider/model, progress, errors, overall Auto team count, route reason, tokens, and estimated cost',
+        'Settings → Chat exposes automatic teams, maximum agents, and projected team cloud cap; Settings → Development exposes repository/base branch, GitHub token, access test, source-tools toggle, and confirmation control',
+        'GitHub repository tools support public list/read/search without a token and exact 1–12-file changes with a fine-grained browser-local token',
+        'Source edits validate exact unique find text, new-file intent, JSON parseability, inline HTML script parseability, and likely embedded secrets; .env/.git/secret/credential and .github/workflows paths are blocked',
+        'Approved source writes create a homebase/ai-* branch from the configured base, commit each file, and open a draft pull request; there is no direct-main path',
+        'Memory seed seed-ai-agents records David\'s preference for automatic, simultaneous, cost-aware specialist delegation',
+        'README.md, ai/README.md, CLAUDE.md, ROADMAP.md, and HOMEBASE_CHANGELOG were synchronized with the new operating model'
+      ],
+      environment_configuration: [
+        'LM Studio local server bound to 127.0.0.1:1234 with CORS enabled; identifier homebase-local loads qwen/qwen3.5-4b (Q4_K_M), 32,768 context, GPU max, four parallel contexts, one-hour TTL',
+        'Homebase auto-discovers standard LM Studio/Ollama/llama.cpp ports and only routes to local providers after a recent successful health/model-list check',
+        'No cloud provider secrets were committed; paid cloud routing remains inactive until the user adds browser-local provider keys'
+      ],
+      safety_guards: [
+        'All cloud member and lead calls use runChat → reserveCloudChat/finishCloudChat/releaseCloudReservation',
+        'Sub-agents receive read-only role tools and an explicit no-mutation system boundary',
+        'Latest user message must explicitly authorize a source change before propose_repository_changes proceeds',
+        'GitHub token stays in browser connector storage and is never rendered, exported by default, or placed in source',
+        'User confirmation occurs before branch creation, commits, or pull-request creation'
+      ],
+      verification: [
+        'All five Homebase inline script blocks parsed with new Function',
+        'Existing .github/scripts/validate.py passed and Python cache/digest/validator scripts compiled',
+        'Live browser loaded with zero console errors; Settings → Chat and Settings → Development rendered and exposed all new controls',
+        'Natural prompt “Build this app within the dashboard” produced tier 3 and four expected specialist roles without explicit delegation wording',
+        'Visible end-to-end test showed four task-team cards assigned to lmstudio/homebase-local and LM Studio reported PROCESSING/GENERATING with PARALLEL 4',
+        'Public GitHub tree read succeeded (23 files including ai/index.html); an analysis-only latest message was rejected by the repository write authorization guard',
+        'Draft PR #58 GitHub Validate check passed in 9 seconds'
+      ],
+      setup_required: [
+        'Optional: add a fine-grained GitHub token in Settings → Development with Metadata read, Contents read/write, and Pull requests read/write',
+        'Keep local LM Studio/Ollama/llama.cpp running for $0 specialist roles; configure cloud providers only for quality tiers that need them',
+        'Merge PR #58 and verify the GitHub Pages deployment before treating these features as live'
+      ],
+      known_limits: [
+        'Application cost tracking is an estimate and cannot cap calls made outside Homebase; provider billing limits remain authoritative',
+        'Four concurrent local contexts are real but can be slow on a single GPU; Fable should review adaptive local concurrency and shorter specialist contexts',
+        'Repository changes are exact replacements rather than semantic patches and can leave an unused branch if a later GitHub API step fails',
+        'Provider pricing can change; dynamic OpenRouter pricing helps but other catalog prices require maintenance'
+      ]
+    },
     {
       id: '2026-07-18-eng-pass-2',
       date: '2026-07-18',
@@ -2597,19 +2802,79 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-ai-credit-router',
       date: '2026-07-18',
+      commit: '9cdf722',
+      files_changed: ['ai/index.html','ai/README.md','README.md','CLAUDE.md'],
       title: 'Cost-effective AI router and rolling cloud budget',
       type: 'feat',
+      settings_added: [
+        'autoRoute=true','localFirst=true','webllmFallback=true',
+        'cloudBudget.limitUsd=50','cloudBudget.windowDays=30','cloudBudget.hardStop=true',
+        'modelPricing={} dynamic provider catalog','providerHealth={} recent local-runtime checks'
+      ],
+      functions_added: [
+        'cloudBudgetCfg','usageLedger','cloudSpendInfo','saveCloudUsage','modelRequestCost','estimateRequestInput',
+        'reserveCloudChat','finishCloudChat','releaseCloudReservation','reserveFixedCloud','finishFixedCloud',
+        'modelQuality','explicitModelRequest','classifyAIRequest','recentLocalProvider','localRouteCandidate',
+        'cloudRouteCandidates','selectAIRoute','updateBudgetDisplays','autoDiscoverLocalModels'
+      ],
       changes: [
-        'Auto-selects local AI for simple work and the least expensive configured cloud model meeting the task capability and quality floor',
-        'Explicit named-model / most-advanced requests raise the quality floor when the remaining budget permits',
-        'Hard $50 trailing-30-day estimated cloud guard with concurrency reservations, per-reply rationale, and embedded Settings tracker',
-        'Tracks chat, agent, Council, OpenAI premium speech, and Whisper transcription usage; unknown-price cloud models are blocked under the hard guard'
+        'Auto · best value classifies each prompt across simple, balanced, advanced, and frontier-requested tiers using vision/PDF, tools/live data, length, high-stakes domain, and complexity signals',
+        'Recently verified Ollama, LM Studio, llama.cpp, custom loopback, or WebLLM models receive suitable simple/private work at $0 cloud cost',
+        'Cloud routing filters configured models by tools/vision capability and minimum quality, then selects the lowest estimated input+output cost; explicit model names and “most advanced” wording raise the quality floor',
+        'OpenAI catalog includes GPT-5.6 Sol/Terra/Luna and earlier GPT-5.5/5.4 families; Anthropic, Gemini, Groq, OpenRouter, Mistral, DeepSeek, and xAI model catalogs participate when configured',
+        'OpenRouter fetched per-token pricing is normalized to USD per million and stored in browser settings; modelCost prefers dynamic prices before static catalog estimates',
+        'Hard $50 trailing-30-day estimated cloud guard prunes usage continuously rather than resetting on a calendar boundary',
+        'Before each paid chat call, Homebase conservatively estimates prompt/tool/attachment input plus maximum output, reserves the full estimate, and blocks calls that would exceed the remaining budget',
+        'After each call, reservations are released and actual provider token/cost data is recorded when available; failures release reservations without charging the local ledger',
+        'Parallel Council members reserve independently so simultaneous requests cannot collectively bypass the remaining budget',
+        'OpenAI premium text-to-speech and Whisper transcription use fixed conservative reservations and are stored in the same usage ledger; browser/local speech remains $0',
+        'Unknown-price paid models are blocked while hardStop is enabled rather than being treated as free',
+        'Settings → Chat shows spent/limit/remaining, progress bar, rolling window, next expiry, hard-guard toggle, local/WebLLM preferences, numeric limit/window controls, and clear-local-history action',
+        'Model picker adds Auto · best value and displays trailing spend; manual model selection disables automatic routing; every reply stores the selected model, tier, reason, tokens, and cost',
+        'Backup/export/import/reset includes the usage ledger and deep-merges cloudBudget so configuration remains durable',
+        'Memory seed seed-ai-budget records David\'s $50 trailing-window, local-first, least-cost-qualified preference'
+      ],
+      safety_guards: [
+        'The local ledger is an application estimate, not provider billing truth or a cap on calls made elsewhere',
+        'Provider-side spend limits/alerts remain required as the authoritative backstop',
+        'Keys and usage history remain browser-local and are never committed to the public repository'
+      ],
+      verification: [
+        'Router cases covered simple local/WebLLM, balanced cloud, advanced cloud, explicit frontier override, rolling expiry at 30 days, and hard-cap rejection',
+        'LM Studio model-list and chat calls succeeded over loopback with CORS; Homebase returned local responses and displayed $0-cloud route reasons',
+        'All inline scripts parsed and Settings/model-picker browser UI rendered correctly'
       ],
       setup_required: [
         'Add provider API keys in Settings → Providers',
         'Start and verify Ollama, LM Studio, or llama.cpp, or allow the WebLLM first-use download for local routing'
       ],
-      ownership_note: 'ChatGPT is currently developing the AI model selector engine on top of this router — coordinate before large UI refactors'
+      ownership_note: 'The selector is integrated with automatic task teams; preserve central budget reservations and per-role quality floors during refactors'
+    },
+    {
+      id: '2026-07-18-finance-homebase-sync',
+      date: '2026-07-18',
+      commit: '716957f',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/57 (merged)',
+      title: 'Private finance web app and same-origin Homebase synchronization',
+      type: 'feat',
+      files_changed: ['.gitignore','CLAUDE.md','README.md','ai/README.md','ai/index.html','finance/README.md','finance/index.html','finance/manifest.webmanifest','finance/sw.js'],
+      storage_contracts: ['pederson_finance_webapp_bundle_v1','homebase_finance_glance_v1','homebase-sync-v1'],
+      changes: [
+        'Added an installable /finance/ web app shell with manifest and service worker; the public repository contains UI/code only and no personal financial snapshot',
+        'Finance imports pederson.finance_webapp_bundle.v1, homebase.finance_glance.v1, or validated Pederson finance snapshot 2.0.0-alpha.1 files in the browser',
+        'The full private bundle stays in pederson_finance_webapp_bundle_v1 and only a minimized Homebase glance is written to homebase_finance_glance_v1',
+        'Because /finance/ and /ai/ share the GitHub Pages origin, storage events plus BroadcastChannel homebase-sync-v1 keep Homebase budget cards current on the same device without an API or upload',
+        'Homebase Budget & cash widget gained local finance-glance rendering, import/path/open actions, privacy/error states, and live refresh when finance storage changes',
+        'Gitignore and project instructions explicitly block finance bundles, balances, transactions, statements, receipts, credentials, and generated private files from source control',
+        'README, ai/README, finance/README, and CLAUDE.md document the data boundary and synchronization contract'
+      ],
+      safety_guards: [
+        'No account balance, transaction, statement, receipt, credential, or generated finance bundle is committed or fetched from the public Pages site',
+        'Browser-local imports are the only source of detailed finance data; the Homebase glance is deliberately minimized',
+        'Invalid/stale/incomplete evidence renders a blocked or warning state rather than presenting unsupported balances as current truth'
+      ],
+      setup_required: ['Open /finance/ and import a private validated bundle in the browser; repeat per browser/device because data is local'],
+      verification: ['PR #57 merged; finance and Homebase share-origin storage contract documented and private-data patterns added to gitignore']
     },
     {
       id: '2026-07-18-changelog-embed',
@@ -2693,10 +2958,10 @@ var HOMEBASE_CHANGELOG = {
   ],
   planned: [
     {
-      id: 'plan-model-selector-engine',
-      title: 'ChatGPT WIP: richer AI model selector engine (picker UX, capability matrix, routing UI)',
-      status: 'in_progress',
-      notes: 'Owned by ChatGPT session — other agents should only bugfix autoRoute/cloudBudget paths, not rewrite the selector'
+      id: 'plan-provider-billing-reconcile',
+      title: 'Optional read-only reconciliation with provider billing exports',
+      status: 'idea',
+      notes: 'Local rolling estimates remain privacy-first; provider billing and provider-side limits are authoritative'
     },
     {
       id: 'plan-gmail-live',
@@ -2726,7 +2991,7 @@ var HOMEBASE_CHANGELOG = {
     'Keep planned[] honest — move items to entries when shipped',
     'Call syncHomebaseChangelogDom() after editing entries if you need the DOM pre to update mid-session',
     'Do not surface this changelog as a visible dashboard card unless the user asks',
-    'Model selector / auto-router UI is under active ChatGPT development — coordinate; preserve selectAIRoute, cloudBudget, LS_USAGE, autoRoute settings keys'
+    'Preserve selectAIRoute, cloudBudget, LS_USAGE, autoRoute, buildAutoAgentTeam, bounded sub-agent tools, and draft-PR-only source write guards'
   ]
 };
 try { window.HOMEBASE_CHANGELOG = HOMEBASE_CHANGELOG; } catch(e){}
@@ -2735,6 +3000,7 @@ function formatHomebaseChangelog(opts){
   opts = opts || {};
   var maxEntries = opts.maxEntries != null ? opts.maxEntries : 8;
   var includePlanned = opts.includePlanned !== false;
+  var detail = opts.detail !== false;
   var c = HOMEBASE_CHANGELOG;
   var lines = [
     'HOMEBASE_CHANGELOG schema=' + c.schema,
@@ -2743,17 +3009,54 @@ function formatHomebaseChangelog(opts){
     'audience=' + c.audience,
     'widgets: ' + (c.widgets || []).join(', '),
     'agent_tools: ' + (c.agent_tools || []).join(', '),
-    'constraints:',
   ];
+  function list(label, items, indent){
+    if (!items || !items.length) return;
+    indent = indent || '';
+    lines.push(indent + label + ':');
+    items.forEach(function(x){ lines.push(indent + '  - ' + x); });
+  }
+  list('documentation policy', c.documentation_policy || []);
+  if (c.current_handoff){
+    lines.push('CURRENT HANDOFF → ' + (c.current_handoff.to || 'next model'));
+    lines.push('  objective: ' + (c.current_handoff.objective || ''));
+    lines.push('  state: ' + (c.current_handoff.state || ''));
+    list('start here', c.current_handoff.start_here, '  ');
+    list('review areas', c.current_handoff.review_areas, '  ');
+    list('preserve', c.current_handoff.preserve, '  ');
+  }
+  lines.push('constraints:');
   (c.constraints || []).forEach(function(x){ lines.push('  - ' + x); });
   lines.push('entries (newest first):');
   (c.entries || []).slice(0, maxEntries).forEach(function(e){
     lines.push('## [' + e.date + '] ' + e.title + (e.commit ? ' (' + e.commit + ')' : '') + ' {' + (e.type || 'change') + '}');
-    (e.changes || []).forEach(function(ch){ lines.push('  * ' + ch); });
-    if (e.setup_required && e.setup_required.length){
-      lines.push('  setup:');
-      e.setup_required.forEach(function(s){ lines.push('    - ' + s); });
+    if (e.branch) lines.push('  branch: ' + e.branch);
+    if (e.pull_request) lines.push('  pull_request: ' + e.pull_request);
+    if (detail){
+      list('depends_on', e.depends_on, '  ');
+      list('files changed', e.files_changed, '  ');
+      list('settings added/changed', e.settings_added, '  ');
+      list('storage contracts', e.storage_contracts, '  ');
+      list('functions added', e.functions_added, '  ');
+      list('tools added', e.tools_added, '  ');
     }
+    lines.push('  changes:');
+    var entryChanges = e.changes || [], shownChanges = detail ? entryChanges : entryChanges.slice(0, 5);
+    shownChanges.forEach(function(ch){ lines.push('  * ' + ch); });
+    if (!detail && entryChanges.length > shownChanges.length){
+      lines.push('  * … ' + (entryChanges.length - shownChanges.length) + ' more documented changes; call list_dashboard detail=true');
+    }
+    if (detail){
+      list('environment configuration', e.environment_configuration, '  ');
+      list('safety guards', e.safety_guards, '  ');
+      list('verification', e.verification, '  ');
+      list('known limits', e.known_limits, '  ');
+    }
+    if (e.setup_required && e.setup_required.length){
+      list('setup still required', e.setup_required, '  ');
+    }
+    if (e.ownership_note) lines.push('  ownership note: ' + e.ownership_note);
+    if (e.next_model) lines.push('  next model: ' + e.next_model);
   });
   if (includePlanned && c.planned && c.planned.length){
     lines.push('planned / roadmap:');
@@ -4166,13 +4469,13 @@ var CONNECTOR_DEFS = [
   },
   {
     id: 'drive', name: 'Google Drive vault', category: 'Google',
-    desc: 'Encrypted Homebase memory sync.',
+    desc: 'Encrypted Homebase sync across phone and desktop.',
     icon: 'cloud', grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
     fields: [
       {key:'clientId', label:'OAuth Client ID', placeholder:'….apps.googleusercontent.com', secret:false},
       {key:'fileName', label:'Vault file', placeholder:'homebase-memory.vault.json', secret:false}
     ],
-    defaults: { on:true, clientId:'', fileName:'homebase-memory.vault.json', autoSync:true, fileId:'' },
+    defaults: { on:true, clientId:'', fileName:'homebase-memory.vault.json', autoSync:true, syncSecrets:true, fileId:'' },
     actions: ['search','push','pull']
   },
   {
@@ -4292,7 +4595,10 @@ function loadConnectorsState(){
   });
   return base;
 }
-function saveConnectors(){ lsSet(LS_CONNECTORS, S.connectors || {}); }
+function saveConnectors(opts){
+  lsSet(LS_CONNECTORS, S.connectors || {});
+  if (!opts || opts.sync !== false) vaultMarkChanged('connectors');
+}
 function connectorOn(id){ return !!(S.connectors && S.connectors[id] && S.connectors[id].on); }
 function connectorCfg(id){ return (S.connectors && S.connectors[id]) || {}; }
 
@@ -4673,13 +4979,65 @@ function initConnectors(){
 
 /* ============================ Encrypted vault + Google Drive sync ============================ */
 var LS_DRIVE_AUTH = 'nova_drive_auth_v1';
+var LS_VAULT_SYNC = 'nova_vault_sync_v2';
 var VAULT = {
   passphrase: '', // session only
   lastSync: 0,
   lastPull: 0,
+  applying: false,
   status: 'idle', // idle|syncing|ok|err
   message: ''
 };
+
+function vaultSyncMeta(){
+  var m = lsGet(LS_VAULT_SYNC, {}) || {};
+  if (!m.deviceId) m.deviceId = 'device-' + uuid();
+  if (!m.sections) m.sections = {};
+  return m;
+}
+function saveVaultSyncMeta(m){ lsSet(LS_VAULT_SYNC, m || {}); }
+function vaultSecretsEnabled(){ return connectorCfg('drive').syncSecrets !== false; }
+function vaultMarkChanged(section){
+  if (VAULT.applying) return;
+  var m = vaultSyncMeta();
+  m.sections[section || 'settings'] = Date.now();
+  m.dirtySince = m.dirtySince || Date.now();
+  saveVaultSyncMeta(m);
+  if (!connectorOn('drive') || !connectorCfg('drive').autoSync) return;
+  if (!getVaultPassphrase() || !driveAccessToken()){
+    vaultSetStatus('idle', 'Saved on this device · unlock and connect the vault to sync');
+    return;
+  }
+  scheduleDriveSync();
+}
+
+function vaultConnectorSnapshot(includeSecrets){
+  var snapshot = JSON.parse(JSON.stringify(S.connectors || {}));
+  if (includeSecrets) return snapshot;
+  return vaultStripConnectorSecrets(snapshot);
+}
+function vaultStripConnectorSecrets(snapshot){
+  snapshot = snapshot || {};
+  CONNECTOR_DEFS.forEach(function(def){
+    (def.fields || []).forEach(function(field){
+      if (field.secret && snapshot[def.id]) delete snapshot[def.id][field.key];
+    });
+  });
+  return snapshot;
+}
+
+function vaultSettingsSnapshot(){
+  var fields = [
+    'provider','model','customModels','modelPricing','temperature','maxTokens','thinking','baseURL','webllmModel',
+    'persona','systemPrompt','homeLocation','injectMemory','memorySmartInject','memoryMaxInject','autoMemory',
+    'toolsDefault','webSearchTool','agentMaxRounds','agentPlanFirst','autoRoute','localFirst','webllmFallback',
+    'showCosts','autoDelegate','maxSubagents','teamBudgetUsd','cloudBudget','councilOn','council',
+    'developerMode','devRepo','devBaseBranch','devConfirmWrites','uiMode','theme','accent','fontSize','speech'
+  ];
+  var out = {};
+  fields.forEach(function(k){ if (S.settings[k] !== undefined) out[k] = S.settings[k]; });
+  return out;
+}
 
 function vaultSetStatus(st, msg){
   VAULT.status = st;
@@ -4726,35 +5084,69 @@ async function vaultDeriveKey(passphrase, saltU8){
 }
 
 function buildVaultPayload(){
+  var meta = vaultSyncMeta(), now = Date.now();
+  ['memory','tasks','connectors','keys','settings','cloudUsage'].forEach(function(section){
+    if (!meta.sections[section]) meta.sections[section] = now;
+  });
+  saveVaultSyncMeta(meta);
+  var includeSecrets = vaultSecretsEnabled();
   return {
-    v: 1,
+    v: 2,
     app: 'homebase',
-    exportedAt: Date.now(),
+    exportedAt: now,
+    deviceId: meta.deviceId,
+    sectionUpdatedAt: Object.assign({}, meta.sections),
     label: 'David · Homebase vault',
     memory: S.memory || [],
     tasks: S.tasks || [],
-    connectors: S.connectors || {},
-    keys: S.keys || {},
-    settings: {
-      persona: S.settings.persona,
-      systemPrompt: S.settings.systemPrompt,
-      homeLocation: S.settings.homeLocation,
-      injectMemory: S.settings.injectMemory,
-      memorySmartInject: S.settings.memorySmartInject,
-      memoryMaxInject: S.settings.memoryMaxInject,
-      autoMemory: S.settings.autoMemory,
-      toolsDefault: S.settings.toolsDefault,
-      webSearchTool: S.settings.webSearchTool,
-      agentMaxRounds: S.settings.agentMaxRounds,
-      agentPlanFirst: S.settings.agentPlanFirst,
-      councilOn: S.settings.councilOn,
-      council: S.settings.council,
-      uiMode: S.settings.uiMode,
-      theme: S.settings.theme,
-      accent: S.settings.accent,
-      speech: S.settings.speech
-    }
+    connectors: vaultConnectorSnapshot(includeSecrets),
+    keys: includeSecrets ? (S.keys || {}) : {},
+    settings: vaultSettingsSnapshot(),
+    cloudUsage: usageLedger(),
+    sync: { encryptedSecrets: includeSecrets, usageClearedAt: +(meta.usageClearedAt || 0) }
   };
+}
+
+function vaultSectionTime(payload, section){
+  return +((payload.sectionUpdatedAt || {})[section] || payload.exportedAt || 0);
+}
+function vaultMergeItems(older, newer){
+  var out = {}, order = [];
+  (older || []).concat(newer || []).forEach(function(item){
+    if (!item || !item.id) return;
+    if (!out[item.id]) order.push(item.id);
+    out[item.id] = item;
+  });
+  return order.map(function(id){ return out[id]; });
+}
+function mergeVaultPayload(remote, local){
+  if (!remote || typeof remote !== 'object') return local;
+  var merged = Object.assign({}, remote, local);
+  merged.v = 2;
+  merged.exportedAt = Date.now();
+  merged.deviceId = local.deviceId;
+  merged.sectionUpdatedAt = {};
+  ['memory','tasks','connectors','keys','settings'].forEach(function(section){
+    var remoteNewer = vaultSectionTime(remote, section) > vaultSectionTime(local, section);
+    var older = remoteNewer ? local[section] : remote[section];
+    var newer = remoteNewer ? remote[section] : local[section];
+    if (section === 'memory' || section === 'tasks') merged[section] = vaultMergeItems(older, newer);
+    else if (section === 'connectors'){
+      merged.connectors = Object.assign({}, older || {});
+      Object.keys(newer || {}).forEach(function(id){ merged.connectors[id] = Object.assign({}, merged.connectors[id] || {}, newer[id] || {}); });
+    } else merged[section] = Object.assign({}, older || {}, newer || {});
+    merged.sectionUpdatedAt[section] = Math.max(vaultSectionTime(remote, section), vaultSectionTime(local, section));
+  });
+  var usageClearedAt = Math.max(+((remote.sync || {}).usageClearedAt || 0), +((local.sync || {}).usageClearedAt || 0));
+  merged.cloudUsage = vaultMergeItems(remote.cloudUsage || [], local.cloudUsage || []).filter(function(x){ return (+x.ts || 0) > usageClearedAt; }).sort(function(a,b){ return (+a.ts || 0) - (+b.ts || 0); }).slice(-3000);
+  merged.sectionUpdatedAt.cloudUsage = Math.max(vaultSectionTime(remote, 'cloudUsage'), vaultSectionTime(local, 'cloudUsage'));
+  merged.sync = Object.assign({}, remote.sync || {}, local.sync || {}, {usageClearedAt:usageClearedAt});
+  if ((local.sync || {}).encryptedSecrets === false){
+    merged.keys = {};
+    merged.connectors = vaultStripConnectorSecrets(merged.connectors || {});
+    merged.sync.encryptedSecrets = false;
+  }
+  return merged;
 }
 
 async function encryptVault(passphrase, payloadObj){
@@ -4772,7 +5164,13 @@ async function encryptVault(passphrase, payloadObj){
     salt: b64FromBytes(salt),
     iv: b64FromBytes(iv),
     data: b64FromBytes(new Uint8Array(ct)),
-    meta: { exportedAt: payloadObj.exportedAt, memoryCount: (payloadObj.memory || []).length }
+    meta: {
+      exportedAt: payloadObj.exportedAt,
+      memoryCount: (payloadObj.memory || []).length,
+      usageCount: (payloadObj.cloudUsage || []).length,
+      providerKeyCount: Object.keys(payloadObj.keys || {}).filter(function(k){ return !!payloadObj.keys[k]; }).length,
+      sourceDevice: payloadObj.deviceId || null
+    }
   };
 }
 
@@ -4793,6 +5191,8 @@ async function decryptVault(passphrase, vaultObj){
 function applyVaultPayload(payload, opts){
   opts = opts || {};
   if (!payload || typeof payload !== 'object') throw new Error('Empty vault payload');
+  VAULT.applying = true;
+  try {
   if (Array.isArray(payload.memory)){
     S.memory = payload.memory.map(normalizeMemoryItem).filter(Boolean);
     saveMemoryRaw();
@@ -4805,7 +5205,12 @@ function applyVaultPayload(payload, opts){
     var base = loadConnectorsState();
     Object.keys(payload.connectors).forEach(function(id){
       var incoming = payload.connectors[id] || {};
+      if (!vaultSecretsEnabled()){
+        var def = CONNECTOR_DEFS.find(function(x){ return x.id === id; });
+        (def && def.fields || []).forEach(function(field){ if (field.secret) delete incoming[field.key]; });
+      }
       var local = base[id] || {};
+      if (id === 'drive' && local.syncSecrets === false) incoming.syncSecrets = false;
       var merged = Object.assign({}, local, incoming);
       // Never clobber non-empty local secrets/config with empty remote values
       Object.keys(local).forEach(function(k){
@@ -4814,9 +5219,9 @@ function applyVaultPayload(payload, opts){
       base[id] = merged;
     });
     S.connectors = base;
-    saveConnectors();
+    saveConnectors({sync:false});
   }
-  if (payload.keys && typeof payload.keys === 'object' && opts.includeKeys !== false){
+  if (payload.keys && typeof payload.keys === 'object' && opts.includeKeys !== false && vaultSecretsEnabled()){
     S.keys = Object.assign({}, S.keys || {}, payload.keys);
     saveKeys();
   }
@@ -4827,11 +5232,26 @@ function applyVaultPayload(payload, opts){
     saveSettings();
     applyTheme();
   }
+  if (Array.isArray(payload.cloudUsage)){
+    var usageClearedAt = +((payload.sync || {}).usageClearedAt || 0);
+    var usage = vaultMergeItems(usageLedger(), payload.cloudUsage).filter(function(x){ return (+x.ts || 0) > usageClearedAt; }).sort(function(a,b){ return (+a.ts || 0) - (+b.ts || 0); }).slice(-3000);
+    lsSet(LS_USAGE, usage);
+    try { updateBudgetDisplays(); } catch(e){}
+  }
+  var sm = vaultSyncMeta();
+  Object.keys(payload.sectionUpdatedAt || {}).forEach(function(k){
+    sm.sections[k] = Math.max(+(sm.sections[k] || 0), +(payload.sectionUpdatedAt[k] || 0));
+  });
+  sm.lastRemoteExportedAt = Math.max(+(sm.lastRemoteExportedAt || 0), +(payload.exportedAt || 0));
+  saveVaultSyncMeta(sm);
   try { seedProfileMemories(); } catch(e){}
   try { renderMemory(); } catch(e){}
   try { renderConnectors(); } catch(e){}
   try { renderModeRail(); updateModeChrome(); } catch(e){}
   try { if (typeof renderTasksIfOpen === 'function') renderTasksIfOpen(); } catch(e){}
+  } finally {
+    VAULT.applying = false;
+  }
 }
 
 function saveMemoryRaw(){ lsSet(LS_MEMORY, S.memory); }
@@ -4866,7 +5286,7 @@ async function exportVaultFile(){
   var blob = new Blob([JSON.stringify(vault, null, 2)], { type: 'application/json' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'homebase-memory-' + new Date().toISOString().slice(0,10) + '.vault.json';
+  a.download = 'homebase-sync-' + new Date().toISOString().slice(0,10) + '.vault.json';
   document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   vaultSetStatus('ok', 'Encrypted vault downloaded');
@@ -4885,8 +5305,8 @@ async function importVaultFile(file){
   var payload = await decryptVault(pass, vault);
   setVaultPassphrase(pass);
   applyVaultPayload(payload);
-  vaultSetStatus('ok', 'Vault restored · ' + (payload.memory || []).length + ' memories');
-  toast('Vault restored into this browser', 'ok');
+  vaultSetStatus('ok', 'Vault restored · ' + (payload.memory || []).length + ' memories · ' + (payload.cloudUsage || []).length + ' usage records');
+  toast('Homebase restored and synced into this browser', 'ok');
 }
 
 /* ---- Google Drive auth + file IO ---- */
@@ -4959,7 +5379,11 @@ async function driveGetToken(interactive){
 
 async function driveApi(path, opts){
   opts = opts || {};
-  var token = await driveGetToken(opts.interactive);
+  var token = driveAccessToken();
+  if (!token){
+    if (opts.interactive === false) throw new Error('Google connection expired — reconnect in Private sync');
+    token = await driveGetToken(!!opts.interactive);
+  }
   var headers = Object.assign({}, opts.headers || {}, { Authorization: 'Bearer ' + token });
   var res = await fetch('https://www.googleapis.com' + path, {
     method: opts.method || 'GET',
@@ -4968,6 +5392,7 @@ async function driveApi(path, opts){
   });
   if (res.status === 401){
     saveDriveAuth(null);
+    if (opts.interactive !== true) return res;
     token = await driveRequestToken(true);
     headers.Authorization = 'Bearer ' + token;
     res = await fetch('https://www.googleapis.com' + path, {
@@ -4979,20 +5404,21 @@ async function driveApi(path, opts){
   return res;
 }
 
-async function driveFindVaultFile(){
+async function driveFindVaultFile(opts){
   var name = (connectorCfg('drive').fileName || 'homebase-memory.vault.json').replace(/'/g, '');
   var q = "name='" + name + "' and trashed=false";
-  var res = await driveApi('/drive/v3/files?pageSize=5&spaces=drive&fields=files(id,name,modifiedTime,size)&q=' + encodeURIComponent(q));
+  var res = await driveApi('/drive/v3/files?pageSize=5&spaces=drive&fields=files(id,name,modifiedTime,size)&q=' + encodeURIComponent(q), opts || {});
   if (!res.ok) throw new Error('Drive list failed HTTP ' + res.status);
   var data = await res.json();
   var files = data.files || [];
   return files[0] || null;
 }
 
-async function driveUploadVault(vaultObj){
+async function driveUploadVault(vaultObj, opts){
+  opts = opts || {};
   var name = connectorCfg('drive').fileName || 'homebase-memory.vault.json';
   var meta = { name: name, mimeType: 'application/json' };
-  var existing = await driveFindVaultFile();
+  var existing = await driveFindVaultFile({interactive:opts.interactive});
   if (existing && existing.id){
     meta = { mimeType: 'application/json' }; // name optional on update
   }
@@ -5010,7 +5436,7 @@ async function driveUploadVault(vaultObj){
     : '/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime';
   var res = await driveApi(path, {
     method: existing && existing.id ? 'PATCH' : 'POST',
-    interactive: false,
+    interactive: opts.interactive,
     headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
     body: body
   });
@@ -5023,21 +5449,22 @@ async function driveUploadVault(vaultObj){
     S.connectors.drive = S.connectors.drive || {};
     S.connectors.drive.fileId = file.id;
     S.connectors.drive.on = true;
-    saveConnectors();
+    saveConnectors({sync:false});
   }
   return file;
 }
 
-async function driveDownloadVault(){
+async function driveDownloadVault(opts){
+  opts = opts || {};
   var file = null;
   var cfg = connectorCfg('drive');
   if (cfg.fileId){
     file = { id: cfg.fileId };
   } else {
-    file = await driveFindVaultFile();
+    file = await driveFindVaultFile({interactive:opts.interactive});
   }
   if (!file || !file.id) throw new Error('No vault file on Drive yet — push once first');
-  var res = await driveApi('/drive/v3/files/' + file.id + '?alt=media', { interactive: false });
+  var res = await driveApi('/drive/v3/files/' + file.id + '?alt=media', { interactive: opts.interactive });
   if (!res.ok) throw new Error('Drive download HTTP ' + res.status);
   return res.json();
 }
@@ -5056,15 +5483,32 @@ async function vaultPushToDrive(opts){
   if (opts.interactive !== false){
     try { await driveGetToken(true); } catch(e){ /* upload path retries */ }
   }
-  var vault = await encryptVault(pass, buildVaultPayload());
-  var file = await driveUploadVault(vault);
+  var payload = buildVaultPayload();
+  if (opts.mergeRemote !== false){
+    try {
+      var remoteVault = await driveDownloadVault({interactive:opts.interactive});
+      var remotePayload = await decryptVault(pass, remoteVault);
+      payload = mergeVaultPayload(remotePayload, payload);
+      applyVaultPayload(payload, {includeKeys:vaultSecretsEnabled()});
+    } catch(e){
+      if (!/No vault file/.test(e.message || '')) throw new Error('Sync stopped to protect the existing Drive vault: ' + (e.message || e));
+    }
+  }
+  var vault = await encryptVault(pass, payload);
+  var file = await driveUploadVault(vault, {interactive:opts.interactive});
   VAULT.lastSync = Date.now();
+  var syncMeta = vaultSyncMeta();
+  syncMeta.dirtySince = 0;
+  syncMeta.lastRemoteExportedAt = payload.exportedAt;
+  syncMeta.lastPush = VAULT.lastSync;
+  saveVaultSyncMeta(syncMeta);
   vaultSetStatus('ok', 'Synced to Drive · ' + (file.name || 'vault') + ' · ' + fmtDateTime(VAULT.lastSync));
-  toast('Homebase vault encrypted & saved to Google Drive', 'ok', 3200);
+  if (!opts.quiet) toast('Phone and desktop vault encrypted & synced', 'ok', 3200);
   return file;
 }
 
-async function vaultPullFromDrive(){
+async function vaultPullFromDrive(opts){
+  opts = opts || {};
   var pass = getVaultPassphrase();
   if (!pass){
     var typed = $('vault-pass') && $('vault-pass').value.trim();
@@ -5072,14 +5516,26 @@ async function vaultPullFromDrive(){
   }
   if (!pass) throw new Error('Enter vault passphrase to decrypt Drive backup');
   setVaultPassphrase(pass);
-  try { await driveGetToken(true); } catch(e){}
+  if (opts.interactive !== false){ try { await driveGetToken(true); } catch(e){} }
   vaultSetStatus('syncing', 'Downloading vault…');
-  var vault = await driveDownloadVault();
-  var payload = await decryptVault(pass, vault);
-  applyVaultPayload(payload);
+  var vault = await driveDownloadVault({interactive:opts.interactive});
+  var syncMeta = vaultSyncMeta();
+  var remoteExportedAt = +((vault.meta || {}).exportedAt || 0);
+  if (opts.onlyIfNewer && remoteExportedAt && remoteExportedAt <= +(syncMeta.lastRemoteExportedAt || 0)){
+    vaultSetStatus('ok', 'Phone and desktop are up to date');
+    return null;
+  }
+  var remotePayload = await decryptVault(pass, vault);
+  var payload = mergeVaultPayload(remotePayload, buildVaultPayload());
+  applyVaultPayload(payload, {includeKeys:vaultSecretsEnabled()});
   VAULT.lastPull = Date.now();
-  vaultSetStatus('ok', 'Restored from Drive · ' + (payload.memory || []).length + ' memories · ' + fmtDateTime(VAULT.lastPull));
-  toast('Vault pulled from Google Drive', 'ok');
+  syncMeta = vaultSyncMeta();
+  syncMeta.lastRemoteExportedAt = Math.max(remoteExportedAt, +(remotePayload.exportedAt || 0));
+  syncMeta.lastPull = VAULT.lastPull;
+  syncMeta.dirtySince = 0;
+  saveVaultSyncMeta(syncMeta);
+  vaultSetStatus('ok', 'Synced from Drive · ' + (payload.memory || []).length + ' memories · ' + (payload.cloudUsage || []).length + ' usage records · ' + fmtDateTime(VAULT.lastPull));
+  if (!opts.quiet) toast('Newer Homebase data synced to this device', 'ok');
   return payload;
 }
 
@@ -5091,7 +5547,7 @@ var scheduleDriveSync = debounce(function(){
     if (!getVaultPassphrase()) return;
     // Auto-sync only when a session token already exists (never pop OAuth unexpectedly)
     if (!driveAccessToken()) return;
-    vaultPushToDrive().catch(function(e){
+    vaultPushToDrive({interactive:false, quiet:true}).catch(function(e){
       vaultSetStatus('err', e.message || String(e));
     });
   } catch(e){}
@@ -5099,7 +5555,7 @@ var scheduleDriveSync = debounce(function(){
 
 function saveMemory(){
   lsSet(LS_MEMORY, S.memory);
-  scheduleDriveSync();
+  vaultMarkChanged('memory');
 }
 
 var _vaultUiReady = false;
@@ -5107,6 +5563,7 @@ function initVaultUi(){
   if (_vaultUiReady) {
     // refresh autosync toggle + status only
     if ($('vault-autosync-tgl')) $('vault-autosync-tgl').classList.toggle('on', !!(connectorCfg('drive').autoSync));
+    if ($('vault-secrets-tgl')) $('vault-secrets-tgl').classList.toggle('on', vaultSecretsEnabled());
     if ($('vault-pass') && !VAULT.passphrase){
       try { $('vault-pass').value = sessionStorage.getItem('nova_vault_pass') || ''; } catch(e){}
     }
@@ -5137,7 +5594,7 @@ function initVaultUi(){
     driveRequestToken(true).then(function(){
       toast('Google Drive connected', 'ok');
       vaultSetStatus('ok', 'Google account linked for vault sync');
-      if (S.connectors && S.connectors.drive){ S.connectors.drive.on = true; saveConnectors(); }
+      if (S.connectors && S.connectors.drive){ S.connectors.drive.on = true; saveConnectors({sync:false}); }
       updateConnectorsBtn();
     }).catch(function(e){ toast(e.message || String(e), 'err'); });
   });
@@ -5152,7 +5609,7 @@ function initVaultUi(){
     if (!confirm('Pull vault from Drive and replace local memory/settings snapshot with the Drive vault?')) return;
     var btn = $('vault-drive-pull');
     btn.disabled = true; btn.textContent = 'Pulling…';
-    vaultPullFromDrive().catch(function(e){
+    vaultPullFromDrive({interactive:true}).catch(function(e){
       toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message);
     }).finally(function(){ btn.disabled = false; btn.textContent = 'Pull from Drive'; });
   });
@@ -5161,13 +5618,26 @@ function initVaultUi(){
     $('vault-autosync-tgl').addEventListener('click', function(){
       if (!S.connectors.drive) S.connectors.drive = Object.assign({}, defaultConnectorsState().drive);
       S.connectors.drive.autoSync = !S.connectors.drive.autoSync;
-      saveConnectors();
+      saveConnectors({sync:false});
       this.classList.toggle('on', !!S.connectors.drive.autoSync);
       toast('Auto-sync ' + (S.connectors.drive.autoSync ? 'ON' : 'OFF'), 'ok');
+      if (S.connectors.drive.autoSync) bootVaultSync();
+    });
+  }
+  if ($('vault-secrets-tgl')){
+    $('vault-secrets-tgl').classList.toggle('on', vaultSecretsEnabled());
+    $('vault-secrets-tgl').addEventListener('click', function(){
+      if (!S.connectors.drive) S.connectors.drive = Object.assign({}, defaultConnectorsState().drive);
+      S.connectors.drive.syncSecrets = !vaultSecretsEnabled();
+      saveConnectors({sync:false});
+      this.classList.toggle('on', vaultSecretsEnabled());
+      vaultMarkChanged('connectors');
+      vaultMarkChanged('keys');
+      toast(vaultSecretsEnabled() ? 'Encrypted API-key sync ON' : 'API keys will stay on each device', 'ok', 3600);
     });
   }
   vaultSetStatus('idle', connectorCfg('drive').clientId
-    ? 'Encrypted vault ready — connect Google to multi-device sync'
+    ? 'Encrypted sync ready — connect Google and use the same passphrase on phone and desktop'
     : 'Set a passphrase · optional Google Drive Client ID in Connectors');
 }
 
@@ -5184,8 +5654,9 @@ async function bootVaultSync(){
     if (!connectorCfg('drive').autoSync) return;
     if (!getVaultPassphrase()) return;
     if (!driveAccessToken()) return;
-    if (!memoryLooksUninitialized()) return;
-    await vaultPullFromDrive();
+    var m = vaultSyncMeta();
+    if (m.dirtySince) await vaultPushToDrive({interactive:false, quiet:true});
+    else await vaultPullFromDrive({interactive:false, quiet:true, onlyIfNewer:true});
   } catch(e){
     console.info('[vault] boot pull skipped', e.message || e);
   }
@@ -5240,6 +5711,7 @@ var PROFILE_SEEDS = [
   { id:'seed-communication', text:'Prefers clear, outcome-first, non-technical explanations with minimal jargon; important results should be easy to scan.', category:'preference', importance:4, pinned:false, tags:['communication','ux'] },
   { id:'seed-finance-privacy', text:'Treat personal financial data as private: keep balances and detailed account data local or in private storage, never on public GitHub Pages.', category:'preference', importance:5, pinned:false, tags:['finance','privacy'] },
   { id:'seed-ai-budget', text:'Keep estimated paid cloud AI usage below $50 across the trailing 30 days. Prefer local models for simple work and choose the least expensive cloud model that meets the task quality and capability requirements.', category:'preference', importance:5, pinned:true, tags:['ai','budget','routing'] },
+  { id:'seed-ai-agents', text:'For complex requests, automatically decompose the work across simultaneous specialist sub-agents with role-appropriate tools and cost-effective models. Reserve advanced cloud models for the subproblems and final integration that genuinely require them.', category:'preference', importance:5, pinned:true, tags:['ai','agents','delegation'] },
   { id:'seed-timezone', text:'Default timezone is America/Vancouver (Pacific Time); use local Pacific dates and times unless another timezone is specified.', category:'location', importance:5, pinned:false, tags:['timezone','locale'] },
   { id:'seed-workstation', text:'Uses a Mac and the Codex desktop app for local project work.', category:'fact', importance:3, pinned:false, tags:['mac','codex'] }
 ];
@@ -5286,9 +5758,12 @@ function loadState(){
   var n = seedProfileMemories();
   if (n) try { console.info('[Homebase] Seeded ' + n + ' profile memories'); } catch(e){}
 }
-function saveSettings(){ lsSet(LS_SETTINGS, S.settings); }
-function saveKeys(){ lsSet(LS_KEYS, S.keys); }
-function saveTasks(){ lsSet(LS_TASKS, S.tasks); }
+function saveSettings(opts){
+  lsSet(LS_SETTINGS, S.settings);
+  if (!opts || opts.sync !== false) vaultMarkChanged('settings');
+}
+function saveKeys(){ lsSet(LS_KEYS, S.keys); vaultMarkChanged('keys'); }
+function saveTasks(){ lsSet(LS_TASKS, S.tasks); vaultMarkChanged('tasks'); }
 
 var persistConvo = debounce(function(convo){ if (convo) idb.put(convo); }, 350);
 
@@ -5627,11 +6102,14 @@ function saveCloudUsage(entry){
   var list = usageLedger();
   list.push(Object.assign({id:uuid(), ts:Date.now(), estimated:true}, entry || {}));
   lsSet(LS_USAGE, list.slice(-3000));
+  vaultMarkChanged('cloudUsage');
   updateBudgetDisplays();
 }
 function clearCloudUsage(){
   if (!confirm('Clear the local cloud-usage estimate history? This does not change provider billing.')) return;
-  lsSet(LS_USAGE, []); updateBudgetDisplays(); renderChatPane();
+  lsSet(LS_USAGE, []);
+  var m = vaultSyncMeta(); m.usageClearedAt = Date.now(); saveVaultSyncMeta(m);
+  vaultMarkChanged('cloudUsage'); updateBudgetDisplays(); renderChatPane();
   toast('Local usage history cleared', 'ok');
 }
 function modelRequestCost(p, id, inTok, outTok){
@@ -5732,7 +6210,8 @@ function classifyAIRequest(query, latestUser, convo){
   var maxQuality = /\b(most advanced|best (?:available )?model|maximum quality|highest quality|strongest model|frontier model|no matter the cost)\b/i.test(q);
   var needsTools = /\b(today|current|currently|latest|live|right now|news|weather|price|stock|score|schedule|search|browse|look up|verify|source|citation|dashboard|calendar|task|remind|update|change|modify|create|delete)\b/i.test(q);
   var highStakes = /\b(diagnos|dose|dosage|interaction|contraindication|patient|clinical|legal|lawsuit|tax|portfolio|investment|retirement|mortgage|financial plan)\b/i.test(q);
-  var advanced = hasVision || highStakes || /\b(architecture|debug|refactor|security audit|research|analy[sz]e|strategy|multi-step|proof|theorem|complex|compare.*trade-?off|production|migration|forecast|model this|write (?:an )?(?:app|program|contract))\b/i.test(q) || q.length > 1400;
+  var advanced = hasVision || highStakes || /\b(architecture|debug|refactor|security audit|research|analy[sz]e|strategy|multi-step|proof|theorem|complex|compare.*trade-?off|production|migration|forecast|model this|write (?:an )?(?:app|program|contract))\b/i.test(q) ||
+    /\b(build|develop|implement|redesign|refactor)\b[\s\S]{0,120}\b(app|dashboard|feature|integration|workflow|system|source|repository|repo)\b/i.test(q) || q.length > 1400;
   var simple = q.length < 550 && !hasVision && !highStakes && !advanced && !needsTools;
   var tier = maxQuality || named ? 4 : (advanced ? 3 : (simple ? 1 : 2));
   return {tier:tier, named:named, explicitMax:maxQuality, vision:hasVision, tools:needsTools,
@@ -5826,6 +6305,149 @@ function updateBudgetDisplays(){
     var mp = $('model-prov');
     if (mp && S.settings && S.settings.autoRoute) mp.textContent = '$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(0) + ' · ' + info.windowDays + 'd';
   } catch(e){}
+}
+
+/* ================= task-shaped agent teams ================= */
+function agentRolesForTask(query, cls){
+  var q = String(query || '').toLowerCase(), roles;
+  if (/\b(build|create|develop|implement|refactor|debug|fix|redesign|web ?app|dashboard|source code|repository|repo)\b/.test(q)){
+    roles = [
+      {label:'Architecture', quality:4, prompt:'Act as the architecture lead. Inspect the existing product and repository, define boundaries, dependencies, risks, and the smallest coherent implementation plan. Return concrete findings for the lead agent.', tools:['list_dashboard','list_repository_files','read_repository_file','search_repository']},
+      {label:'Product & UI', quality:3, prompt:'Act as the product and interface specialist. Check the existing user experience, workflows, responsive behaviour, accessibility, and consistency. Return specific implementation guidance, not generic design advice.', tools:['list_dashboard','read_repository_file','search_repository']},
+      {label:'Data & connectors', quality:3, prompt:'Act as the data and integrations specialist. Identify data contracts, connectors, API boundaries, privacy constraints, and failure states. Use only read-only connector actions and return implementation-ready findings.', tools:['list_connectors','read_connector','list_dashboard','read_repository_file','search_repository','web_search','read_url']},
+      {label:'Implementation & QA', quality:4, prompt:'Act as the implementation and QA specialist. Inspect relevant files, identify exact changes and regression risks, and propose focused verification. Do not mutate the repository; the lead agent owns reviewed writes.', tools:['list_dashboard','list_repository_files','read_repository_file','search_repository','calculate']}
+    ];
+  } else if (/\b(research|compare|evidence|clinical|drug|medication|medical|legal|tax|invest|portfolio|financial)\b/.test(q)){
+    roles = [
+      {label:'Evidence researcher', quality:3, prompt:'Find current primary or authoritative evidence and preserve source context. Separate sourced facts from inference.', tools:['research','web_search','read_url','search_memory']},
+      {label:'Domain specialist', quality:4, prompt:'Analyze the request as a careful domain specialist. Surface important constraints, calculations, uncertainty, and decisions.', tools:['calculate','research','search_memory','list_connectors']},
+      {label:'Skeptic & safety', quality:4, prompt:'Challenge assumptions, look for missing evidence and safety risks, and identify claims that need qualification or verification.', tools:['research','web_search','read_url','calculate']}
+    ];
+  } else {
+    roles = [
+      {label:'Planner', quality:3, prompt:'Decompose the task into concrete decisions and dependencies. Return a concise execution brief.', tools:['search_memory','list_dashboard','list_connectors']},
+      {label:'Specialist', quality:cls && cls.tier >= 3 ? 4 : 3, prompt:'Solve the hardest substantive part of the task. Be specific, practical, and evidence-aware.', tools:['search_memory','research','web_search','read_url','calculate']},
+      {label:'Reviewer', quality:3, prompt:'Review the likely answer for omissions, contradictions, safety issues, and unnecessary cost or complexity.', tools:['calculate','search_memory']}
+    ];
+  }
+  return roles.slice(0, clamp(+S.settings.maxSubagents || 4, 2, 6));
+}
+function shouldAutoDelegate(query, cls){
+  if (!S.settings.autoDelegate) return false;
+  var q = String(query || '');
+  if (/\b(do not|don't|dont) (?:use|delegate|spawn|assign).{0,18}(?:agents?|team)\b|\b(single agent|work alone)\b/i.test(q)) return false;
+  if (/\b(delegate|spawn|assign|parallel(?:ize)?|agent team|sub-?agents?|several agents?)\b/i.test(q)) return true;
+  if (/\b(build|develop|implement|redesign|refactor)\b[\s\S]{0,140}\b(app|dashboard|feature|integration|workflow|system|source|repository|repo)\b/i.test(q)) return true;
+  return !!(cls && cls.tier >= 3 && /\b(build|create|develop|implement|redesign|refactor|debug|audit|research|analy[sz]e|compare|strategy|migration|investigate|plan)\b/i.test(q));
+}
+function localModelForRole(role){
+  if (!S.settings.localFirst || +role.quality > 3) return null;
+  var locals = ['ollama','lmstudio','llamacpp','custom'];
+  for (var i = 0; i < locals.length; i++){
+    var p = locals[i], ids = (S.settings.modelCache[p] || []);
+    if (!localEndpoint(p) || !recentLocalProvider(p) || !ids.length) continue;
+    var caps = modelCaps(p, ids[0]);
+    if (role.tools.length && !caps.tools) continue;
+    return {provider:p, model:ids[0], estimatedCost:0, quality:modelQuality(p, ids[0]), local:true};
+  }
+  return null;
+}
+function cheapestRoleModel(role, fallback, msgs){
+  var local = localModelForRole(role);
+  if (local) return local;
+  var tier = +role.quality >= 5 ? 4 : (+role.quality >= 4 ? 3 : 2);
+  var cls = {tier:tier, explicitMax:false, vision:false, tools:role.tools.length > 0};
+  var maxOut = tier >= 3 ? 1600 : 1000;
+  var choices = cloudRouteCandidates(cls, '', msgs || [], maxOut);
+  choices.sort(function(a,b){ return a.estimatedCost - b.estimatedCost || b.quality - a.quality; });
+  if (choices.length) return Object.assign(choices[0], {maxTokens:maxOut});
+  if (fallback && PROVIDERS[fallback.provider] && providerReady(fallback.provider)){
+    return {provider:fallback.provider, model:fallback.model, estimatedCost:+fallback.estimatedCost || 0,
+      quality:modelQuality(fallback.provider, fallback.model), maxTokens:Math.min(fallback.maxTokens || maxOut, maxOut)};
+  }
+  return null;
+}
+function buildAutoAgentTeam(query, route, msgs){
+  var cls = (route && route.classification) || classifyAIRequest(query, {}, null);
+  if (!shouldAutoDelegate(query, cls)) return [];
+  var cap = Math.max(0.05, +S.settings.teamBudgetUsd || 1.5), projected = 0, team = [];
+  agentRolesForTask(query, cls).forEach(function(role){
+    var pick = cheapestRoleModel(role, route, msgs);
+    if (!pick) return;
+    var next = projected + (+pick.estimatedCost || 0);
+    if (team.length >= 2 && next > cap) return;
+    projected = next;
+    team.push({label:role.label, rolePrompt:role.prompt, toolNames:role.tools.slice(), quality:role.quality,
+      provider:pick.provider, model:pick.model, estimatedCost:+pick.estimatedCost || 0,
+      maxTokens:pick.maxTokens || (+role.quality >= 4 ? 1600 : 1000)});
+  });
+  if (team.length < 2) return [];
+  team.projectedCost = projected;
+  return team;
+}
+function toolsForNames(names){
+  names = names || [];
+  return enabledTools().filter(function(t){ return names.indexOf(t.name) >= 0; });
+}
+async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
+  if (!PROVIDERS[cm.provider] || !providerReady(cm.provider)) throw new Error('Provider not ready');
+  var history = msgs.slice(), roleTools = toolsForNames(cm.toolNames), finalText = '';
+  for (var round = 0; round < 3; round++){
+    var canCall = roleTools.length && round < 2 ? roleTools : null;
+    var res = await runChat({
+      provider:cm.provider, model:cm.model,
+      system:buildSystem(convo, {query:userQuery}) + '\n\nYou are a bounded sub-agent on a coordinated team. ' + cm.rolePrompt +
+        '\nUse only the tools supplied to you. Never perform repository writes, sends, deletions, or other external mutations. Return a compact handoff to the lead agent.',
+      msgs:history, temperature:Math.min(.5, S.settings.temperature), maxTokens:cm.maxTokens || 1200,
+      think:false, tools:canCall, signal:S.abort.signal, conversationId:convo.id, messageId:am.id,
+      onText:function(t){ cm.text += t; schedulePaint(am, convo); }, onThink:null, onProgress:null
+    });
+    addUsage(totalUsage, res.usage);
+    finalText = res.text || cm.text;
+    if (!(res.toolCalls && res.toolCalls.length && canCall)) break;
+    var results = [];
+    for (var i = 0; i < res.toolCalls.length; i++){
+      var call = res.toolCalls[i];
+      results.push({id:call.id, name:call.name, text:await execTool(call.name, call.args)});
+    }
+    history.push({role:'assistant', text:res.text || '', anthRaw:res.anthRaw, toolCalls:res.toolCalls});
+    history.push({role:'tool', results:results});
+    cm.text = '';
+  }
+  cm.text = finalText || cm.text;
+}
+async function runTeamLeadSynthesis(sp, sm, convo, history, userQuery, am, totalUsage, allowTools, maxTokens){
+  var leadTools = allowTools ? enabledTools() : null, final = null;
+  for (var round = 0; round < 5; round++){
+    var roundTools = leadTools && round < 4 ? leadTools : null;
+    var res = await runChat({
+      provider:sp, model:sm,
+      system:buildSystem(convo, {query:userQuery, councilSynth:true}) +
+        '\n\nYou are the lead agent. Reconcile the specialist handoffs, make the final decisions, and complete the user\'s request. You own any allowed mutations. Inspect before editing, keep changes scoped, and use a guarded draft pull request for source-code changes.',
+      msgs:history, temperature:Math.min(.7, S.settings.temperature), maxTokens:maxTokens,
+      think:S.settings.thinking, tools:roundTools, signal:S.abort.signal,
+      conversationId:convo.id, messageId:am.id,
+      onText:function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
+      onThink:function(t){ am.thinking += t; schedulePaint(am, convo); },
+      onProgress:function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
+    });
+    addUsage(totalUsage, res.usage); final = res;
+    if (!(res.toolCalls && res.toolCalls.length && roundTools)) break;
+    var rd = {text:res.text || '', anthRaw:res.anthRaw,
+      calls:res.toolCalls.map(function(c){ return {id:c.id, name:c.name, args:c.args, result:null, state:'run'}; })};
+    am.toolRounds.push(rd); am.liveText = ''; paintMsg(am, convo);
+    for (var i = 0; i < rd.calls.length; i++){
+      var call = rd.calls[i];
+      call.result = await execTool(call.name, call.args);
+      call.state = /^Error:/.test(call.result) ? 'err' : 'done';
+      paintMsg(am, convo);
+      if (S.abort.signal.aborted) throw domAbort();
+    }
+    history.push({role:'assistant', text:rd.text, anthRaw:rd.anthRaw,
+      toolCalls:rd.calls.map(function(c){ return {id:c.id, name:c.name, args:c.args}; })});
+    history.push({role:'tool', results:rd.calls.map(function(c){ return {id:c.id, name:c.name, text:c.result}; })});
+  }
+  return final || {text:am.liveText, usage:{}};
 }
 
 /* ============================ SSE reader ============================ */
@@ -6282,6 +6904,125 @@ async function runChat(o){
 /* ============================ agent tools ============================ */
 var WMO_CODES = {0:'clear sky',1:'mainly clear',2:'partly cloudy',3:'overcast',45:'fog',48:'rime fog',51:'light drizzle',53:'drizzle',55:'heavy drizzle',61:'light rain',63:'rain',65:'heavy rain',66:'freezing rain',67:'freezing rain',71:'light snow',73:'snow',75:'heavy snow',77:'snow grains',80:'light showers',81:'showers',82:'heavy showers',85:'snow showers',86:'snow showers',95:'thunderstorm',96:'thunderstorm w/ hail',99:'thunderstorm w/ hail'};
 
+function githubRepo(){
+  var repo = String(S.settings.devRepo || 'wghtkbpxwx-a11y/tesla-dashboard').trim();
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) throw new Error('Repository must be owner/name.');
+  return repo;
+}
+function githubHeaders(extra){
+  var h = Object.assign({'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}, extra || {});
+  var cfg = connectorCfg('github');
+  if (cfg && cfg.token) h.Authorization = 'Bearer ' + cfg.token;
+  return h;
+}
+async function githubApi(path, options){
+  options = options || {};
+  var resp = await withTimeout(function(sig){
+    return fetch('https://api.github.com' + path, Object.assign({}, options, {signal:sig,
+      headers:githubHeaders(options.headers)}));
+  }, 20000);
+  if (!resp.ok){
+    var msg = 'HTTP ' + resp.status;
+    try { var j = await resp.json(); if (j.message) msg += ' — ' + j.message; } catch(e){}
+    throw new Error(msg);
+  }
+  if (resp.status === 204) return {};
+  return resp.json();
+}
+function repoPath(path){
+  path = String(path || '').replace(/^\/+/, '').trim();
+  if (!path || path.indexOf('..') >= 0 || /(^|\/)(\.env|\.git|secrets?|credentials?)(\.|\/|$)/i.test(path) || /^\.github\/workflows\//i.test(path))
+    throw new Error('That repository path is not allowed.');
+  return path;
+}
+function encodeRepoPath(path){ return repoPath(path).split('/').map(encodeURIComponent).join('/'); }
+function b64DecodeUtf8(s){
+  var bin = atob(String(s || '').replace(/\s/g,'')), bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function b64EncodeUtf8(s){
+  var bytes = new TextEncoder().encode(String(s)), bin = '', chunk = 0x8000;
+  for (var i = 0; i < bytes.length; i += chunk) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  return btoa(bin);
+}
+async function repositoryFile(path, ref){
+  var data = await githubApi('/repos/' + githubRepo() + '/contents/' + encodeRepoPath(path) + '?ref=' + encodeURIComponent(ref || S.settings.devBaseBranch || 'main'));
+  if (data.type !== 'file' || !data.content) throw new Error('Path is not a readable file.');
+  return {path:data.path, sha:data.sha, text:b64DecodeUtf8(data.content), html_url:data.html_url};
+}
+async function repositoryTree(ref){
+  var data = await githubApi('/repos/' + githubRepo() + '/git/trees/' + encodeURIComponent(ref || S.settings.devBaseBranch || 'main') + '?recursive=1');
+  return (data.tree || []).filter(function(x){ return x.type === 'blob'; });
+}
+function validateSourceText(path, text){
+  if (/\b(?:api[_-]?key|access[_-]?token|secret)\b\s*[:=]\s*["'][A-Za-z0-9_\-.]{18,}["']/i.test(text))
+    throw new Error('Potential embedded secret detected in ' + path + '. Store credentials in browser settings instead.');
+  if (/\.json$/i.test(path)) JSON.parse(text);
+  if (/\.html?$/i.test(path)){
+    var re = /<script\b[^>]*>([\s\S]*?)<\/script>/gi, m;
+    while ((m = re.exec(text))){ if (m[1].trim()) new Function(m[1]); }
+  }
+  return true;
+}
+function sourceChangeAuthorized(){
+  var c = activeConvo(), last = '';
+  if (c) for (var i = c.messages.length - 1; i >= 0; i--) if (c.messages[i].role === 'user'){ last = c.messages[i].text || ''; break; }
+  return /\b(build|create|add|implement|update|change|modify|improve|fix|remove|delete|refactor|redesign|configure)\b/i.test(last);
+}
+async function proposeRepositoryChanges(a){
+  if (!S.settings.developerMode) return 'Error: source-development tools are off in Settings → Development.';
+  if (!sourceChangeAuthorized()) return 'Error: the latest user message must explicitly request a source change.';
+  var cfg = connectorCfg('github');
+  if (!cfg.token) return 'Error: add a fine-grained GitHub token in Settings → Development.';
+  var changes;
+  try { changes = typeof a.changes_json === 'string' ? JSON.parse(a.changes_json) : a.changes_json; }
+  catch(e){ return 'Error: changes_json must be a JSON array.'; }
+  if (!Array.isArray(changes) || !changes.length || changes.length > 12) return 'Error: provide 1–12 file changes.';
+  var documentsHandoff = changes.some(function(ch){
+    return ch && String(ch.path || '').replace(/^\/+/, '') === 'ai/index.html' &&
+      /HOMEBASE_CHANGELOG|entries\s*:\s*\[|conventions_for_future_editors/.test(String(ch.find || '') + '\n' + String(ch.replace || ''));
+  });
+  if (!documentsHandoff) return 'Error: every source pull request must update HOMEBASE_CHANGELOG in ai/index.html so the next model can build on the work.';
+  var base = String(S.settings.devBaseBranch || 'main'), seen = {}, prepared = [];
+  for (var i = 0; i < changes.length; i++){
+    var ch = changes[i] || {}, path = repoPath(ch.path), find = String(ch.find || ''), repl = String(ch.replace == null ? '' : ch.replace);
+    if (seen[path]) return 'Error: combine multiple edits to the same file into one replacement: ' + path;
+    seen[path] = 1;
+    var current = null;
+    try { current = await repositoryFile(path, base); }
+    catch(e){ if (find) return 'Error reading ' + path + ': ' + e.message; }
+    var next;
+    if (!current){ next = repl; }
+    else {
+      if (!find) return 'Error: find is required when editing existing file ' + path;
+      var parts = current.text.split(find);
+      if (parts.length !== 2) return 'Error: find text must occur exactly once in ' + path + ' (found ' + (parts.length - 1) + ').';
+      next = parts[0] + repl + parts[1];
+    }
+    validateSourceText(path, next);
+    prepared.push({path:path, sha:current && current.sha, text:next});
+  }
+  var title = String(a.title || 'Homebase agent update').trim().slice(0, 120);
+  var summary = prepared.map(function(x){ return '• ' + x.path; }).join('\n');
+  if (S.settings.devConfirmWrites !== false && !confirm('Homebase is ready to create a branch and draft pull request:\n\n' + title + '\n\n' + summary + '\n\nContinue?'))
+    return 'Cancelled: no repository changes were made.';
+  var ref = await githubApi('/repos/' + githubRepo() + '/git/ref/heads/' + encodeURIComponent(base));
+  var stamp = new Date().toISOString().replace(/[-:TZ.]/g,'').slice(0,14);
+  var branch = 'homebase/ai-' + stamp + '-' + uuid().slice(0,6);
+  await githubApi('/repos/' + githubRepo() + '/git/refs', {method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ref:'refs/heads/' + branch, sha:ref.object.sha})});
+  for (var pi = 0; pi < prepared.length; pi++){
+    var f = prepared[pi];
+    await githubApi('/repos/' + githubRepo() + '/contents/' + encodeRepoPath(f.path), {method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:title + ' · ' + f.path, content:b64EncodeUtf8(f.text), branch:branch, sha:f.sha || undefined})});
+  }
+  var pr = await githubApi('/repos/' + githubRepo() + '/pulls', {method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({title:title, head:branch, base:base, draft:true,
+      body:'Created by the Homebase lead agent after an explicit dashboard chat request.\n\n## Why\n' + String(a.reason || 'User-requested dashboard improvement.') + '\n\n## Files\n' + summary + '\n\nPlease review and test before merging.'})});
+  return 'Draft pull request created: ' + pr.html_url + '\nBranch: ' + branch + '\nFiles: ' + prepared.map(function(x){ return x.path; }).join(', ');
+}
+
 var TOOLS = [
   { name:'get_current_time',
     description:'Get the current local date and time of the user, including timezone.',
@@ -6599,6 +7340,17 @@ TOOLS.push(
         return (on ? 'ON ' : 'off') + ' · ' + d.id + ' — ' + d.name + ': ' + d.desc;
       }).join('\n');
     }},
+  { name:'read_connector',
+    description:'Use a connector in read-only mode for specialist research. Mutating actions such as compose, send, create, update, delete, or write are rejected.',
+    params:{ connector:{type:'string'}, action:{type:'string'}, query:{type:'string'}, repo:{type:'string'}, location:{type:'string'} }, required:['connector'],
+    run:async function(a){
+      var action = String(a.action || 'status').toLowerCase();
+      if (/\b(compose|send|create|update|delete|remove|write|push|post|upload|share|move|cancel)\b/.test(action))
+        return 'Error: read_connector only permits read-only actions.';
+      return runConnector(String(a.connector || '').toLowerCase(), action, {
+        query:a.query, repo:a.repo, location:a.location
+      });
+    }},
   { name:'use_connector',
     description:'Use a connected service. Connectors: dashboard, github, gmail, calendar, drive, weather, web, tasks. Actions e.g. dashboard:brief, github:repos|issues, gmail:compose|search, calendar:upcoming|open, weather:now, web:search, tasks:list.',
     params:{
@@ -6615,10 +7367,61 @@ TOOLS.push(
 );
 
 TOOLS.push(
+  { name:'list_repository_files',
+    description:'List files in the configured Homebase GitHub repository. Read-only. Use before planning source changes.',
+    params:{ path:{type:'string', description:'Optional path prefix'}, limit:{type:'number', description:'Maximum files, default 120'} }, required:[],
+    run:async function(a){
+      if (!S.settings.developerMode) return 'Error: source-development tools are off.';
+      var prefix = String(a.path || '').replace(/^\/+|\/+$/g,''), limit = clamp(+a.limit || 120, 1, 300);
+      var tree = await repositoryTree();
+      var paths = tree.map(function(x){ return x.path; }).filter(function(p){ return !prefix || p === prefix || p.indexOf(prefix + '/') === 0; }).slice(0, limit);
+      return 'Repository ' + githubRepo() + ' @ ' + (S.settings.devBaseBranch || 'main') + '\n' + (paths.length ? paths.join('\n') : '(no files under that path)');
+    }},
+  { name:'read_repository_file',
+    description:'Read one text/source file from the configured Homebase GitHub repository. Read-only.',
+    params:{ path:{type:'string'}, ref:{type:'string', description:'Optional branch; defaults to configured base'} }, required:['path'],
+    run:async function(a){
+      if (!S.settings.developerMode) return 'Error: source-development tools are off.';
+      var f = await repositoryFile(a.path, a.ref);
+      return 'File: ' + f.path + '\nSHA: ' + f.sha + '\n\n' + (f.text.length > 50000 ? f.text.slice(0,50000) + '\n…(truncated)' : f.text);
+    }},
+  { name:'search_repository',
+    description:'Search file paths and text within the configured Homebase repository. Read-only; returns compact matching excerpts.',
+    params:{ query:{type:'string'}, path:{type:'string', description:'Optional path prefix'}, limit:{type:'number'} }, required:['query'],
+    run:async function(a){
+      if (!S.settings.developerMode) return 'Error: source-development tools are off.';
+      var needle = String(a.query || '').trim().toLowerCase();
+      if (!needle) return 'Error: empty query.';
+      var prefix = String(a.path || '').replace(/^\/+|\/+$/g,''), limit = clamp(+a.limit || 12, 1, 24);
+      var tree = await repositoryTree(), textual = /\.(html?|css|js|mjs|cjs|ts|tsx|jsx|json|md|txt|ya?ml|toml|py|sh)$/i;
+      var candidates = tree.filter(function(x){ return textual.test(x.path) && (!prefix || x.path.indexOf(prefix) === 0); });
+      candidates.sort(function(x,y){ return (y.path.toLowerCase().indexOf(needle) >= 0) - (x.path.toLowerCase().indexOf(needle) >= 0); });
+      var hits = [];
+      for (var i = 0; i < candidates.length && hits.length < limit && i < 40; i++){
+        try {
+          var f = await repositoryFile(candidates[i].path), low = f.text.toLowerCase(), at = low.indexOf(needle);
+          if (at < 0 && candidates[i].path.toLowerCase().indexOf(needle) < 0) continue;
+          var start = Math.max(0, at < 0 ? 0 : at - 220), excerpt = f.text.slice(start, start + 700).replace(/\n{3,}/g,'\n\n');
+          hits.push('--- ' + f.path + ' ---\n' + excerpt);
+        } catch(e){}
+      }
+      return hits.length ? hits.join('\n\n') : 'No repository matches for "' + needle + '".';
+    }},
+  { name:'propose_repository_changes',
+    description:'After explicit user authorization and read-only inspection, create a NEW branch and DRAFT pull request containing 1–12 exact source-file edits. Never writes to the base branch. Existing files require an exact unique find string; new files use an empty find. One edit must update HOMEBASE_CHANGELOG in ai/index.html so the next model can build on the work. The user is asked to confirm before any write.',
+    params:{
+      title:{type:'string', description:'Short pull request title'},
+      reason:{type:'string', description:'Why this change is needed and how it was checked'},
+      changes_json:{type:'string', description:'JSON array: [{"path":"ai/index.html","find":"exact old text","replace":"new text"}]. Empty find is only for a new file.'}
+    }, required:['title','reason','changes_json'],
+    run:proposeRepositoryChanges}
+);
+
+TOOLS.push(
   { name:'list_dashboard',
-    description:'Inspect the Homebase dashboard: widgets on/off, hub modules, agent pins, and the hidden HOMEBASE_CHANGELOG (history + roadmap for other models). Call before update_dashboard. Also available as window.HOMEBASE_CHANGELOG and #homebase-changelog in the DOM.',
-    params:{}, required:[],
-    run: async function(){
+    description:'Inspect the Homebase dashboard: widgets on/off, hub modules, agent pins, and HOMEBASE_CHANGELOG. Pass detail=true for full lineage, settings/functions/tools, safety, verification, setup, limits, and Fable/next-model handoff. Call before update_dashboard. Also available as window.HOMEBASE_CHANGELOG and #homebase-changelog in the DOM.',
+    params:{ detail:{type:'boolean', description:'Return the full cross-model implementation record (default false for compact output)'} }, required:[],
+    run: async function(a){
       var layout = loadDashLayout();
       var hub = S.hubModules || loadHubConfig();
       var notes = loadDashNotes();
@@ -6635,7 +7438,7 @@ TOOLS.push(
         lines.push('• ['+n.id+'] '+(n.title||'Note')+': '+(n.body||'').slice(0,120));
       });
       lines.push('== Changelog (for agents; hidden in UI) ==');
-      lines.push(formatHomebaseChangelog({ maxEntries: 6, includePlanned: true }));
+      lines.push(formatHomebaseChangelog({ maxEntries: 6, includePlanned: true, detail:!!(a && a.detail) }));
       return lines.join('\n');
     }},
   { name:'update_dashboard',
@@ -6781,6 +7584,7 @@ TOOLS.forEach(function(t){ TOOLS_BY_NAME[t.name] = t; });
 function enabledTools(){
   return TOOLS.filter(function(t){
     if ((t.name === 'web_search' || t.name === 'read_url' || t.name === 'research' || t.name === 'get_news') && !S.settings.webSearchTool) return false;
+    if (/repository/.test(t.name) && !S.settings.developerMode) return false;
     return true;
   });
 }
@@ -6960,7 +7764,8 @@ function buildSystem(convo, opts){
       'Use search_memory before inventing personal facts; use remember / update_memory / forget_memory to maintain memory.',
       'When the user asks about email, calendar, Drive, GitHub, the Tesla dashboard, or connected services, call list_connectors / use_connector.',
       'You can UPDATE the Homebase life dashboard live: call list_dashboard then update_dashboard (pin_note, set_widget, reorder_widget, add_hub_link, refresh, set_home_location, etc.). When the user says things like “put this on my dashboard”, “hide sports”, “add a link to Monarch”, “refresh my dashboard”, or “pin a reminder”, use these tools — the UI updates immediately.',
-      'Dashboard history and roadmap for agents lives in HOMEBASE_CHANGELOG (window.HOMEBASE_CHANGELOG, hidden #homebase-changelog, and list_dashboard → Changelog section). When editing dashboard modules/APIs, append a new changelog entry (newest first) and update planned items — do not show the changelog as a user-facing card unless asked.',
+      'For requested SOURCE-CODE work, inspect with list_repository_files, search_repository, and read_repository_file. Only after an explicit user request, use propose_repository_changes with exact unique replacements. Every source PR must include an updated HOMEBASE_CHANGELOG entry describing lineage, files, interfaces/settings, exact behaviour, safety boundaries, verification, setup, limits, and next-model handoff. The tool rejects undocumented source PRs. It creates a new branch and draft pull request; never place secrets in source, never write directly to the base branch, and never claim a source change happened unless the tool returns a pull-request URL.',
+      'Dashboard history and roadmap for agents lives in HOMEBASE_CHANGELOG (window.HOMEBASE_CHANGELOG, hidden #homebase-changelog, and list_dashboard → Changelog section). Before any handoff after changing code, configuration, contracts, tools, routing, UI, safety, documentation, or deployment state, append/update the newest changelog entry and current_handoff; update planned items; preserve history; do not show the changelog as a user-facing card unless asked.',
       'After tools, answer naturally with key findings — do not dump raw tool JSON.'
     ];
     if (S.settings.agentPlanFirst) agentBits.push('Prefer planning before more than two tool calls.');
@@ -6972,7 +7777,7 @@ function buildSystem(convo, opts){
     }).join('\n'));
   }
   if (opts.councilSynth){
-    parts.push('You are the Council synthesizer. Multiple models answered the user. Produce a single superior answer: reconcile disagreements, keep the best reasoning, note residual uncertainty, and be decisive. Do not mention "as an AI council" unless asked.');
+    parts.push('You are the lead synthesizer. Multiple specialists may have answered the user. Produce a single superior result: reconcile disagreements, keep the best reasoning, note residual uncertainty, and be decisive. Complete allowed actions instead of merely summarizing the team.');
   }
   return parts.join('\n\n');
 }
@@ -7296,10 +8101,13 @@ async function sendMessage(rawText, opts){
   var route = S.settings.autoRoute ? selectAIRoute(latestUser.text || '', latestUser, convo, previewMsgs) : null;
   var provider = route ? route.provider : convo.provider;
   var model = route ? route.model : convo.model;
+  var configuredCouncilReady = !!(S.settings.councilOn && (S.settings.council.members || []).length >= 2);
+  var autoTeam = (S.settings.autoRoute && !configuredCouncilReady) ? buildAutoAgentTeam(latestUser.text || '', route, previewMsgs) : [];
   var caps = modelCaps(provider, model);
   var am = { id: uuid(), role:'assistant', text:'', liveText:'', thinking:'', toolRounds:[],
     provider: provider, model: model, ts: Date.now(), streaming: true, usage:{},
-    routeReason: route ? route.reason : 'Manual model selection', routeTier: route ? route.tier : null };
+    routeReason: (route ? route.reason : 'Manual model selection') + (autoTeam.length ? ' · Auto team: ' + autoTeam.length + ' specialists' : ''),
+    routeTier: route ? route.tier : null };
   convo.messages.push(am);
   $('chat').appendChild(msgEl(am, convo));
   scrollBottom(true);
@@ -7309,7 +8117,9 @@ async function sendMessage(rawText, opts){
   var totalUsage = {inTok:0, outTok:0, costUsd:0};
   var toolsOn = convo.toolsOn && caps.tools;
   var tools = toolsOn ? enabledTools() : null;
-  var useCouncil = !!(S.settings.councilOn && (S.settings.council.members || []).length >= 2);
+  var manualCouncil = configuredCouncilReady;
+  var councilMembers = manualCouncil ? (S.settings.council.members || []).slice(0, 5) : autoTeam;
+  var useCouncil = councilMembers.length >= 2;
   try {
     var msgs = internalHistory(convo, convo.messages.length - 1);
     var userQuery = '';
@@ -7318,14 +8128,16 @@ async function sendMessage(rawText, opts){
     }
 
     if (useCouncil){
-      am.councilMode = S.settings.council.mode || 'debate';
-      am.council = (S.settings.council.members || []).slice(0, 5).map(function(mem, i){
+      am.councilMode = manualCouncil ? (S.settings.council.mode || 'debate') : 'task team';
+      am.council = councilMembers.map(function(mem, i){
         return {
           label: mem.label || ((PROVIDERS[mem.provider] && PROVIDERS[mem.provider].name) || mem.provider || 'Model') + ' ' + (i+1),
-          provider: mem.provider, model: mem.model, text: '', state: 'run', error: null
+          provider: mem.provider, model: mem.model, text: '', state: 'run', error: null,
+          rolePrompt:mem.rolePrompt || '', toolNames:(mem.toolNames || []).slice(), quality:mem.quality || 3,
+          maxTokens:mem.maxTokens || 1200, estimatedCost:+mem.estimatedCost || 0
         };
       });
-      am.statusNote = 'Council deliberating';
+      am.statusNote = manualCouncil ? 'Council deliberating' : 'Specialists working in parallel';
       paintMsg(am, convo);
       var memberJobs = am.council.map(function(cm){
         return (async function(){
@@ -7333,21 +8145,24 @@ async function sendMessage(rawText, opts){
             cm.state = 'err'; cm.error = 'Provider not ready'; return;
           }
           try {
-            var roleHint = (S.settings.council.mode === 'debate')
-              ? 'You are one expert on a model council. Give your best independent answer. Be concise but rigorous. Do not defer to other models.'
-              : 'Give a high-quality independent answer. Be concise.';
-            var res = await runChat({
-              provider: cm.provider, model: cm.model,
-              system: buildSystem(convo, {query: userQuery}) + '\n\n' + roleHint,
-              msgs: msgs, temperature: S.settings.temperature, maxTokens: Math.min(S.settings.maxTokens, 4096),
-              think: false, tools: null, signal: S.abort.signal,
-              conversationId:convo.id, messageId:am.id,
-              onText: function(t){ cm.text += t; schedulePaint(am, convo); },
-              onThink: null, onProgress: null
-            });
-            cm.text = res.text || cm.text;
+            if (!manualCouncil){
+              await runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage);
+            } else {
+              var roleHint = (S.settings.council.mode === 'debate')
+                ? 'You are one expert on a model council. Give your best independent answer. Be concise but rigorous. Do not defer to other models.'
+                : 'Give a high-quality independent answer. Be concise.';
+              var res = await runChat({
+                provider:cm.provider, model:cm.model,
+                system:buildSystem(convo, {query:userQuery}) + '\n\n' + roleHint,
+                msgs:msgs, temperature:S.settings.temperature, maxTokens:Math.min(S.settings.maxTokens, 4096),
+                think:false, tools:null, signal:S.abort.signal,
+                conversationId:convo.id, messageId:am.id,
+                onText:function(t){ cm.text += t; schedulePaint(am, convo); }, onThink:null, onProgress:null
+              });
+              cm.text = res.text || cm.text;
+              addUsage(totalUsage, res.usage);
+            }
             cm.state = 'done';
-            addUsage(totalUsage, res.usage);
           } catch(e){
             if (e && (e.name === 'AbortError' || e.code === 20)) throw e;
             cm.state = 'err'; cm.error = (e && e.message) || String(e);
@@ -7364,25 +8179,17 @@ async function sendMessage(rawText, opts){
       var sp = (synth && synth.provider) || provider;
       var sm = (synth && synth.model) || model;
       var dossier = am.council.map(function(cm, i){
-        return '### Council member ' + (i+1) + ' — ' + cm.label + ' (' + cm.provider + '/' + cm.model + ')\n' +
+        return '### ' + (manualCouncil ? 'Council member ' : 'Specialist ') + (i+1) + ' — ' + cm.label + ' (' + cm.provider + '/' + cm.model + ')\n' +
           (cm.error ? '[error] ' + cm.error : (cm.text || '(empty)'));
       }).join('\n\n');
       var synthMsgs = msgs.concat([{
-        role: 'user', text: 'Here are independent council answers to the user\'s latest question. Synthesize the best final answer.\n\n' + dossier,
+        role:'user', text:(manualCouncil ? 'Here are independent council answers. Synthesize the best final answer.' :
+          'Here are parallel specialist handoffs. Reconcile them, then complete the original task as the lead agent. Do not merely summarize the handoffs.') + '\n\n' + dossier,
         images: [], files: []
       }]);
       am.liveText = '';
-      var sres = await runChat({
-        provider: sp, model: sm,
-        system: buildSystem(convo, {query: userQuery, councilSynth: true}),
-        msgs: synthMsgs, temperature: Math.min(0.7, S.settings.temperature),
-        maxTokens: route ? route.maxTokens : S.settings.maxTokens, think: S.settings.thinking, tools: null, signal: S.abort.signal,
-        conversationId:convo.id, messageId:am.id,
-        onText: function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
-        onThink: function(t){ am.thinking += t; schedulePaint(am, convo); },
-        onProgress: function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
-      });
-      addUsage(totalUsage, sres.usage);
+      var sres = await runTeamLeadSynthesis(sp, sm, convo, synthMsgs, userQuery, am, totalUsage,
+        !manualCouncil && toolsOn, route ? route.maxTokens : S.settings.maxTokens);
       am.text = sres.text || am.liveText;
       am.provider = sp; am.model = sm;
     } else {
@@ -8769,13 +9576,14 @@ function renderSettings(expandProvider){
   renderToolsPane();
   renderHubSettingsPane();
   renderCouncilPane();
+  renderDevelopmentPane();
   renderLookPane();
   renderDataPane();
 }
 
 function renderProvidersPane(expand){
   var pane = $('pane-providers');
-  pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">🔒 Use a dedicated, low-limit key in this personal browser. Keys are stored in localStorage and sent only to the provider you pick. Never use this on a shared device or commit keys to source control.</div>';
+  pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">🔒 Use a dedicated, low-limit key. Keys stay in this browser unless encrypted cross-device sync is enabled in Memory → Private sync; then only ciphertext is stored in your Google Drive. Keys are sent in readable form only to the provider you pick. Never use this on a shared device or commit keys to source control.</div>';
   PROVIDER_ORDER.forEach(function(p){
     var pr = PROVIDERS[p];
     if (pr.kind === 'demo') return;
@@ -8926,10 +9734,10 @@ async function testProvider(p, btn){
       resp = await withTimeout(function(sig){ return fetch(url, {headers:h, signal:sig}); }, 10000);
     }
     if (!resp.ok) throw await httpError(resp);
-    S.settings.providerHealth[p] = {ok:true, ts:Date.now()}; saveSettings();
+    S.settings.providerHealth[p] = {ok:true, ts:Date.now()}; saveSettings({sync:false});
     toast(PROVIDERS[p].name + ' connected ✅', 'ok');
   } catch(err){
-    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings();
+    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings({sync:false});
     var m = err.message || String(err);
     if (err.name === 'AbortError') m = 'timed out';
     if (PROVIDERS[p].local && /fetch|network|abort/i.test(m)) m += ' — is the server running? (see setup note below)';
@@ -8977,7 +9785,7 @@ async function fetchProviderModels(p, btn){
     toast(ids.length + ' models loaded for ' + pr.name, 'ok');
     if (ids.length && pr.local && !S.settings.autoRoute) selectModel(p, ids[0]);
   } catch(err){
-    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings();
+    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings({sync:false});
     toast('Fetch failed: ' + (err.name === 'AbortError' ? 'timed out' : err.message), 'err', 5000);
   }
   btn.textContent = 'Fetch model list';
@@ -9000,7 +9808,7 @@ async function autoDiscoverLocalModels(){
     }
   }));
   if (changed){
-    saveSettings(); updateModelBtn();
+    saveSettings({sync:false}); updateModelBtn();
     if ($('model-menu') && $('model-menu').classList.contains('open')) renderModelMenu();
   }
 }
@@ -9022,6 +9830,15 @@ function renderChatPane(){
     function(){ return S.settings.localFirst; }, function(v){ S.settings.localFirst = v; }));
   pane.appendChild(tglRow('In-browser local fallback', 'Use WebLLM for simple queries when no local server is ready (first use downloads the model)',
     function(){ return S.settings.webllmFallback; }, function(v){ S.settings.webllmFallback = v; }));
+  pane.appendChild(tglRow('Automatic specialist teams', 'For complex tasks, delegate independent sub-components in parallel and let a lead agent integrate the result',
+    function(){ return S.settings.autoDelegate; }, function(v){ S.settings.autoDelegate = v; }));
+  var teamRow = row('Team limits', 'Caps parallel roles and the projected cloud cost for one delegated team',
+    '<span style="display:flex;align-items:center;gap:6px"><input id="ps-agents" type="number" min="2" max="6" step="1" style="width:58px"><span style="color:var(--text3)">agents · $</span><input id="ps-team-budget" type="number" min="0.05" max="50" step="0.05" style="width:76px"><span style="color:var(--text3)">max/task</span></span>');
+  pane.appendChild(teamRow);
+  var sai = qs('#ps-agents', pane), tbi = qs('#ps-team-budget', pane);
+  sai.value = clamp(+S.settings.maxSubagents || 4, 2, 6); tbi.value = Math.max(.05, +S.settings.teamBudgetUsd || 1.5).toFixed(2);
+  sai.addEventListener('change', function(){ S.settings.maxSubagents = clamp(+this.value || 4, 2, 6); this.value = S.settings.maxSubagents; saveSettings(); });
+  tbi.addEventListener('change', function(){ S.settings.teamBudgetUsd = clamp(+this.value || 1.5, .05, 50); this.value = S.settings.teamBudgetUsd.toFixed(2); saveSettings(); });
   pane.appendChild(tglRow('Hard cloud spending guard', 'Reserve the estimated maximum before every paid API call; unknown-price models are blocked',
     function(){ return S.settings.cloudBudget.hardStop; }, function(v){ S.settings.cloudBudget.hardStop = v; }));
   var bRow = row('Rolling cloud limit', 'Combined estimated spend across every configured paid provider', '<span style="display:flex;align-items:center;gap:6px">$<input id="ps-budget" type="number" min="1" max="10000" step="1" style="width:90px"><span style="color:var(--text3)">/ trailing</span><input id="ps-window" type="number" min="1" max="365" step="1" style="width:70px"><span style="color:var(--text3)">days</span></span>');
@@ -9257,6 +10074,39 @@ function renderCouncilPane(){
   qs('#co-smodel', pane).addEventListener('change', saveSynth);
 }
 
+function renderDevelopmentPane(){
+  var pane = $('pane-dev');
+  if (!pane) return;
+  var cfg = connectorCfg('github');
+  pane.innerHTML = '<div class="hint-box" style="margin:0 0 14px"><b>Guarded self-development.</b> The lead agent can inspect this repository and turn an exact, reviewed source edit into a new branch and <b>draft pull request</b>. It never writes directly to <code>main</code>, never commits API keys, and asks before every write.</div>';
+  pane.appendChild(tglRow('Allow source-development tools', 'Lets the lead agent read/search the configured repository and propose draft pull requests',
+    function(){ return S.settings.developerMode; }, function(v){ S.settings.developerMode = v; }));
+  pane.appendChild(tglRow('Confirm every source write', 'Required safety prompt before creating a branch, commit, or draft pull request',
+    function(){ return S.settings.devConfirmWrites !== false; }, function(v){ S.settings.devConfirmWrites = v; }));
+  var rr = row('Dashboard repository', 'GitHub owner/repository', '<input id="dev-repo" type="text" style="width:250px" placeholder="owner/repository">');
+  pane.appendChild(rr); qs('#dev-repo', pane).value = S.settings.devRepo || 'wghtkbpxwx-a11y/tesla-dashboard';
+  qs('#dev-repo', pane).addEventListener('change', function(){ S.settings.devRepo = this.value.trim(); saveSettings(); });
+  var br = row('Base branch', 'All agent branches start here', '<input id="dev-branch" type="text" style="width:150px" placeholder="main">');
+  pane.appendChild(br); qs('#dev-branch', pane).value = S.settings.devBaseBranch || 'main';
+  qs('#dev-branch', pane).addEventListener('change', function(){ S.settings.devBaseBranch = this.value.trim() || 'main'; saveSettings(); });
+  var tr = row('GitHub access token', 'Stored only in this browser; use a fine-grained token scoped to this repository', '<input id="dev-token" type="password" style="width:250px" placeholder="github_pat_…" autocomplete="off">');
+  pane.appendChild(tr); qs('#dev-token', pane).value = cfg.token || '';
+  qs('#dev-token', pane).addEventListener('change', function(){ cfg.token = this.value.trim(); saveConnectors(); });
+  var actions = document.createElement('div');
+  actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin:14px 0';
+  actions.innerHTML = '<button class="sm-btn pri" id="dev-test" type="button">Test repository access</button><a class="sm-btn" target="_blank" rel="noopener" href="https://github.com/settings/personal-access-tokens/new">Create fine-grained token ↗</a>';
+  pane.appendChild(actions);
+  qs('#dev-test', pane).addEventListener('click', async function(){
+    var b = this; b.disabled = true; b.textContent = 'Testing…';
+    try { var repo = await githubApi('/repos/' + githubRepo()); toast('Connected to ' + repo.full_name, 'ok'); }
+    catch(e){ toast('GitHub: ' + e.message, 'err', 6000); }
+    b.disabled = false; b.textContent = 'Test repository access';
+  });
+  var note = document.createElement('div'); note.className = 'hint-box';
+  note.innerHTML = '<b>Token permissions:</b> repository access to <code>tesla-dashboard</code>; Metadata: read; Contents: read/write; Pull requests: read/write. Read-only inspection works without a token while the repository is public. Source writes still require the token and your confirmation.';
+  pane.appendChild(note);
+}
+
 var ACCENTS = ['#4f46e5','#6366f1','#0ea5e9','#4285f4','#34a853','#fbbc04','#ea4335','#a78bfa'];
 function renderLookPane(){
   var pane = $('pane-look');
@@ -9287,7 +10137,7 @@ function renderLookPane(){
 
 function renderDataPane(){
   var pane = $('pane-data');
-  pane.innerHTML = '<div class="hint-box" style="margin:0 0 13px">Everything lives in this browser: settings, keys & memory in localStorage; conversations in IndexedDB. Nothing is sent anywhere except to the AI provider you choose.</div>';
+  pane.innerHTML = '<div class="hint-box" style="margin:0 0 13px">Homebase is local-first: settings, keys, memory, tasks, and usage estimates live in this browser; conversations live in IndexedDB. If you enable Private sync, selected data is encrypted here before an unreadable vault is stored in your Google Drive. Plaintext keys are sent only to the AI provider you choose.</div>';
   var exRow = row('Export backup', 'Conversations, memory, tasks, usage estimates & settings as JSON', '<label style="font-size:12px; color:var(--text2); display:flex; gap:5px; align-items:center"><input type="checkbox" id="ex-keys" style="width:auto"> include API keys</label><button class="sm-btn" id="ex-btn">Export</button>');
   pane.appendChild(exRow);
   qs('#ex-btn', pane).addEventListener('click', function(){
@@ -9543,6 +10393,10 @@ async function boot(){
   }, 180000);
   setInterval(autoDiscoverLocalModels, 300000);
   bootVaultSync();
+  setInterval(bootVaultSync, 300000);
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible') bootVaultSync();
+  });
   // deep link ?chat=1 or ?voice=1 opens float
   try {
     var q = new URLSearchParams(location.search);
