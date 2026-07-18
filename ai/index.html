@@ -75,7 +75,20 @@ body{
   letter-spacing:-.011em;
   -webkit-font-smoothing:antialiased;
 }
-body::before{display:none}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(900px 520px at 15% -5%, rgba(129,140,248,.22), transparent 55%),
+    radial-gradient(800px 480px at 90% 8%, rgba(56,189,248,.14), transparent 50%),
+    radial-gradient(700px 420px at 50% 110%, rgba(244,114,182,.10), transparent 55%);
+  opacity:1;
+}
+[data-theme="light"] body::before{
+  background:
+    radial-gradient(900px 520px at 15% -5%, rgba(129,140,248,.14), transparent 55%),
+    radial-gradient(800px 480px at 90% 8%, rgba(56,189,248,.10), transparent 50%),
+    radial-gradient(700px 420px at 50% 110%, rgba(244,114,182,.08), transparent 55%);
+}
 button{font-family:inherit; font-size:inherit; color:inherit; background:none; border:none; cursor:pointer; padding:0}
 input,textarea,select{font-family:inherit; font-size:inherit; color:var(--text)}
 input,textarea{
@@ -92,7 +105,7 @@ a:hover{text-decoration:underline}
 ::-webkit-scrollbar-track{background:transparent}
 
 /* ============================= App layout ============================= */
-#app{display:flex; height:100vh; height:100dvh; width:100%; position:relative; z-index:1; background:var(--bg)}
+#app{display:flex; height:100vh; height:100dvh; width:100%; position:relative; z-index:1; background:transparent}
 #sidebar{
   width:var(--sidebar-w); min-width:var(--sidebar-w); height:100%;
   background:var(--sidebar-bg);
@@ -100,16 +113,16 @@ a:hover{text-decoration:underline}
   display:flex; flex-direction:column; z-index:40;
   transition:transform .28s cubic-bezier(.22,1,.36,1), margin-left .28s cubic-bezier(.22,1,.36,1);
 }
-#main{flex:1; display:flex; flex-direction:column; min-width:0; position:relative; background:var(--bg)}
+#main{flex:1; display:flex; flex-direction:column; min-width:0; position:relative; background:transparent}
 
 /* Sidebar — ChatGPT-like */
 .sb-head{display:flex; align-items:center; gap:10px; padding:14px 14px 6px}
 .brand{display:flex; align-items:center; gap:10px; font-weight:650; font-size:16px; letter-spacing:-.02em; flex:1; min-width:0}
 .brand .logo{
   width:28px;height:28px;border-radius:9px;
-  background:linear-gradient(145deg,#a78bfa 0%,#6366f1 50%,#22d3ee 100%);
+  background:conic-gradient(from 210deg,#818cf8,#38bdf8,#f472b6,#a78bfa,#818cf8);
   display:grid; place-items:center; color:#fff; font-size:14px; flex:none;
-  box-shadow:0 2px 12px rgba(99,102,241,.35);
+  box-shadow:0 2px 14px rgba(129,140,248,.4);
 }
 .brand .nm{color:var(--text); background:none; -webkit-text-fill-color:unset}
 .icon-btn{
@@ -185,6 +198,10 @@ a:hover{text-decoration:underline}
 #chat{
   max-width:var(--chat-w); margin:0 auto; width:100%;
   padding:12px 20px 36px; display:flex; flex-direction:column; gap:28px;
+  min-height:100%;
+}
+#chat:has(#empty-state){
+  justify-content:center; padding-top:8px; padding-bottom:12px;
 }
 .msg{display:flex; gap:14px; animation:msgIn .28s cubic-bezier(.22,1,.36,1); align-items:flex-start}
 @keyframes msgIn{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
@@ -352,47 +369,146 @@ a:hover{text-decoration:underline}
 }
 .codeblock code{background:none; border:none; padding:0; font-size:inherit; color:inherit}
 
-/* ============================= Empty state — Gemini/ChatGPT ============================= */
+/* ============================= Empty state — Gemini-grade ============================= */
 #empty-state{
-  margin:auto; text-align:center; padding:48px 24px 24px; max-width:720px;
-  animation:msgIn .45s cubic-bezier(.22,1,.36,1);
+  margin:auto; text-align:center; padding:36px 22px 20px; max-width:780px; width:100%;
+  animation:msgIn .5s cubic-bezier(.22,1,.36,1);
   display:flex; flex-direction:column; align-items:center;
 }
-#empty-state .big-orb{
-  width:56px;height:56px; margin:0 auto 22px; border-radius:16px;
-  background:linear-gradient(145deg,#a78bfa 0%,#6366f1 50%,#22d3ee 100%);
-  display:grid; place-items:center; font-size:24px; color:#fff;
-  box-shadow:0 8px 32px rgba(99,102,241,.35);
-  animation:none;
+#empty-state .hero-orb{
+  position:relative; width:88px; height:88px; margin:0 auto 22px;
+  display:grid; place-items:center;
 }
+#empty-state .hero-orb .orb-core{
+  width:64px; height:64px; border-radius:22px; position:relative; z-index:2;
+  background:conic-gradient(from 210deg, #818cf8, #38bdf8, #f472b6, #a78bfa, #818cf8);
+  display:grid; place-items:center; color:#fff; font-size:28px;
+  box-shadow:0 12px 40px rgba(129,140,248,.4), inset 0 1px 0 rgba(255,255,255,.35);
+  animation:orbFloat 5s ease-in-out infinite;
+}
+#empty-state .hero-orb .orb-core::after{
+  content:""; position:absolute; inset:2px; border-radius:20px;
+  background:linear-gradient(160deg, rgba(255,255,255,.22), transparent 45%, rgba(0,0,0,.12));
+  pointer-events:none;
+}
+#empty-state .hero-orb .orb-glow{
+  position:absolute; inset:-12px; border-radius:50%; z-index:1;
+  background:conic-gradient(from 0deg, #818cf8, #38bdf8, #f472b6, #818cf8);
+  filter:blur(22px); opacity:.55; animation:orbSpin 10s linear infinite;
+}
+@keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
 #empty-state h1{
-  font-size:clamp(28px, 4.5vw, 36px); font-weight:600; margin:0 0 10px;
-  letter-spacing:-.035em; line-height:1.15;
-  background:linear-gradient(120deg, var(--text) 30%, var(--text2));
+  font-size:clamp(30px, 5vw, 42px); font-weight:600; margin:0 0 10px;
+  letter-spacing:-.04em; line-height:1.12; color:var(--text);
+  background:linear-gradient(115deg, #fff 0%, #c4b5fd 40%, #7dd3fc 75%, #f9a8d4 100%);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
 }
-#empty-state p{
-  color:var(--text2); margin:0 0 28px; font-size:15.5px; line-height:1.5; max-width:420px;
+[data-theme="light"] #empty-state h1{
+  background:linear-gradient(115deg, #1e1b4b 0%, #6366f1 40%, #0284c7 75%, #db2777 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+#empty-state .subhead{
+  color:var(--text2); margin:0 0 28px; font-size:15.5px; line-height:1.5; max-width:440px;
   letter-spacing:-.01em;
 }
-.sample-grid{
-  display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; max-width:560px; text-align:left;
+#empty-state .mode-tiles{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
+  width:100%; max-width:640px; margin-bottom:22px;
 }
-.sample{
-  display:flex; flex-direction:column; align-items:flex-start; gap:10px;
-  padding:16px 16px; border-radius:16px;
-  background:transparent; border:1px solid var(--border);
-  color:var(--text2); font-size:13.5px; font-weight:500; line-height:1.4;
-  transition:background .15s, border-color .15s, color .15s, transform .15s;
-  min-height:88px;
+#empty-state .mode-tile{
+  position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:12px;
+  padding:16px 15px 15px; border-radius:18px; text-align:left;
+  background:color-mix(in srgb, var(--bg2) 72%, transparent);
+  border:1px solid var(--border);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  color:var(--text); cursor:pointer;
+  transition:transform .18s cubic-bezier(.22,1,.36,1), border-color .18s, box-shadow .18s, background .18s;
+  min-height:118px; overflow:hidden;
 }
-.sample:hover{
-  background:var(--bg2); border-color:var(--border2); color:var(--text);
-  transform:translateY(-1px);
+#empty-state .mode-tile::before{
+  content:""; position:absolute; inset:0; opacity:0; transition:opacity .2s;
+  background:radial-gradient(120% 80% at 0% 0%, var(--tile-glow, rgba(129,140,248,.18)), transparent 55%);
+  pointer-events:none;
 }
-.sample .s-ico{font-size:18px; line-height:1}
+#empty-state .mode-tile:hover{
+  transform:translateY(-3px);
+  border-color:color-mix(in srgb, var(--tile-c, var(--acc)) 45%, var(--border));
+  box-shadow:0 16px 40px rgba(0,0,0,.28), 0 0 0 1px color-mix(in srgb, var(--tile-c, var(--acc)) 25%, transparent);
+}
+#empty-state .mode-tile:hover::before{opacity:1}
+#empty-state .mode-tile.active{
+  border-color:color-mix(in srgb, var(--tile-c, var(--acc)) 55%, var(--border));
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--tile-c, var(--acc)) 35%, transparent), 0 12px 36px rgba(0,0,0,.25);
+  background:color-mix(in srgb, var(--bg2) 88%, var(--tile-c, var(--acc)) 12%);
+}
+#empty-state .mode-tile.active::before{opacity:1}
+#empty-state .mode-tile .mt-ico{
+  width:38px; height:38px; border-radius:12px; display:grid; place-items:center;
+  font-size:18px; color:#fff; flex:none;
+  background:var(--tile-grad, linear-gradient(145deg, #818cf8, #6366f1));
+  box-shadow:0 6px 16px color-mix(in srgb, var(--tile-c, #6366f1) 40%, transparent);
+}
+#empty-state .mode-tile .mt-title{font-size:14.5px; font-weight:650; letter-spacing:-.02em}
+#empty-state .mode-tile .mt-desc{font-size:12.5px; color:var(--text2); line-height:1.4; font-weight:450}
+#empty-state .mode-tile .mt-badge{
+  position:absolute; top:12px; right:12px; font-size:10px; font-weight:700;
+  letter-spacing:.04em; text-transform:uppercase; padding:3px 7px; border-radius:999px;
+  background:rgba(255,255,255,.06); color:var(--text3); border:1px solid var(--border);
+}
+#empty-state .mode-tile.active .mt-badge{
+  background:color-mix(in srgb, var(--tile-c, var(--acc)) 18%, transparent);
+  color:var(--text); border-color:color-mix(in srgb, var(--tile-c, var(--acc)) 30%, transparent);
+}
+#empty-state .prompt-chips{
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:640px; width:100%;
+}
+#empty-state .prompt-chip{
+  padding:9px 14px; border-radius:999px; font-size:13px; font-weight:500;
+  color:var(--text2); border:1px solid var(--border);
+  background:color-mix(in srgb, var(--bg2) 70%, transparent);
+  backdrop-filter:blur(10px); transition:background .15s, color .15s, border-color .15s, transform .15s;
+}
+#empty-state .prompt-chip:hover{
+  color:var(--text); border-color:var(--border2); background:var(--bg2); transform:translateY(-1px);
+}
 
-/* ============================= Composer — floating pill ============================= */
+/* legacy sample-grid kept for safety */
+.sample-grid{display:none}
+.sample{display:none}
+.big-orb{display:none}
+
+/* ============================= Mode rail (above composer) ============================= */
+#mode-rail{
+  display:flex; gap:8px; overflow-x:auto; scrollbar-width:none;
+  max-width:var(--chat-w); margin:0 auto 10px; padding:0 2px 2px;
+  -webkit-overflow-scrolling:touch;
+}
+#mode-rail::-webkit-scrollbar{display:none}
+.mode-pill{
+  flex:none; display:inline-flex; align-items:center; gap:8px;
+  padding:8px 14px 8px 10px; border-radius:999px;
+  border:1px solid var(--border); background:color-mix(in srgb, var(--bg2) 80%, transparent);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  color:var(--text2); font-size:13px; font-weight:600; letter-spacing:-.01em;
+  transition:background .15s, border-color .15s, color .15s, box-shadow .15s, transform .12s;
+  cursor:pointer; white-space:nowrap;
+}
+.mode-pill:hover{color:var(--text); border-color:var(--border2); background:var(--bg2)}
+.mode-pill.active{
+  color:var(--text);
+  border-color:color-mix(in srgb, var(--pill-c, var(--acc)) 50%, var(--border));
+  background:color-mix(in srgb, var(--pill-c, var(--acc)) 14%, var(--bg2));
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--pill-c, var(--acc)) 20%, transparent), 0 4px 16px color-mix(in srgb, var(--pill-c, var(--acc)) 18%, transparent);
+}
+.mode-pill .mp-ico{
+  width:24px; height:24px; border-radius:8px; display:grid; place-items:center;
+  font-size:12px; color:#fff; background:var(--pill-grad, linear-gradient(145deg,#818cf8,#6366f1));
+  box-shadow:0 2px 8px color-mix(in srgb, var(--pill-c, #6366f1) 35%, transparent);
+}
+.mode-pill .mp-label{line-height:1}
+
+/* ============================= Composer /* ============================= Composer — floating pill ============================= */
 #composer-wrap{
   padding:0 16px calc(14px + env(safe-area-inset-bottom, 0px));
   max-width:calc(var(--chat-w) + 40px); width:100%; margin:0 auto;
@@ -409,11 +525,12 @@ a:hover{text-decoration:underline}
 }
 #composer{
   display:flex; align-items:flex-end; gap:4px;
-  background:var(--bg2);
+  background:color-mix(in srgb, var(--bg2) 88%, transparent);
+  backdrop-filter:blur(20px) saturate(1.2); -webkit-backdrop-filter:blur(20px) saturate(1.2);
   border:1px solid var(--border2);
   border-radius:var(--composer-r);
   padding:10px 10px 10px 8px;
-  box-shadow:0 0 0 1px rgba(255,255,255,.02), 0 12px 40px rgba(0,0,0,.28);
+  box-shadow:0 0 0 1px rgba(255,255,255,.03), 0 16px 48px rgba(0,0,0,.32), 0 0 80px rgba(129,140,248,.06);
   transition:border-color .15s, box-shadow .15s;
   max-width:var(--chat-w); margin:0 auto;
 }
@@ -704,13 +821,14 @@ a:hover{text-decoration:underline}
   #chat{padding:12px 14px 24px}
   .att-thumb{width:74px;height:74px}
   #composer-wrap{padding:6px 12px calc(12px + env(safe-area-inset-bottom,0px))}
-  .sample-grid{grid-template-columns:1fr}
+  #empty-state .mode-tiles{grid-template-columns:1fr 1fr}
   .hide-sm{display:none !important}
   .msg.user .body{max-width:92%}
 }
 @media (max-width:480px){
   :root{--fs:15.5px}
   #empty-state h1{font-size:26px}
+  #empty-state .mode-tiles{grid-template-columns:1fr}
   #topbar{padding:6px 10px}
 }
 
@@ -766,6 +884,7 @@ a:hover{text-decoration:underline}
     <button id="jump-btn" title="Jump to latest"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 10l6 6 6-6"/></svg></button>
 
     <div id="composer-wrap">
+      <div id="mode-rail" aria-label="Modes"></div>
       <div id="pending-atts"></div>
       <div id="composer">
         <button class="icon-btn" id="attach-btn" title="Attach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -1140,6 +1259,7 @@ var DEFAULT_SETTINGS = {
   memoryMaxInject: 14,
   memorySmartInject: true,
   autoMemory: false,
+  uiMode: 'chat',
   councilOn: false,
   council: { mode: 'debate', members: [], synthesizer: null },
   speech: { lang: 'en-US', voiceURI: '', rate: 1.0, engine: 'browser', openaiVoice: 'alloy' },
@@ -1157,6 +1277,166 @@ var PERSONAS = {
   agent:     { name: 'Agent (proactive)', sys: 'You are Nova in agent mode. Break complex requests into steps, use tools aggressively for live data, verify claims, keep a short plan when multi-step, and finish with a clear outcome. Prefer action over speculation.' },
   researcher:{ name: 'Researcher', sys: 'You are Nova, a careful researcher. Search, read sources, cross-check, cite links, separate fact from inference, and flag uncertainty. Prefer primary sources when available.' }
 };
+
+/* ============================ UI modes (Gemini-style) ============================ */
+var UI_MODES = [
+  {
+    id: 'chat',
+    title: 'Chat',
+    desc: 'Fast answers, writing, brainstorming',
+    icon: '✦',
+    badge: null,
+    color: '#818cf8',
+    grad: 'linear-gradient(145deg,#a78bfa,#6366f1)',
+    placeholder: 'Ask anything…',
+    apply: function(){
+      var c = ensureConvo();
+      c.toolsOn = !!S.settings.toolsDefault;
+      if (S.settings.persona === 'agent' || S.settings.persona === 'researcher') S.settings.persona = 'assistant';
+      S.settings.councilOn = false;
+    }
+  },
+  {
+    id: 'voice',
+    title: 'Voice',
+    desc: 'Hands-free talk · interrupt anytime',
+    icon: '🎙️',
+    badge: 'Live',
+    color: '#38bdf8',
+    grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
+    placeholder: 'Tap Voice to start, or type…',
+    apply: function(){ /* launch handled separately */ }
+  },
+  {
+    id: 'agent',
+    title: 'Agent',
+    desc: 'Plans, tools, multi-step work',
+    icon: '⚡',
+    badge: 'Tools',
+    color: '#f59e0b',
+    grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
+    placeholder: 'Describe a goal for the agent…',
+    apply: function(){
+      var c = ensureConvo();
+      c.toolsOn = true;
+      S.settings.persona = 'agent';
+      S.settings.councilOn = false;
+    }
+  },
+  {
+    id: 'research',
+    title: 'Research',
+    desc: 'Search, read sources, cite findings',
+    icon: '🔬',
+    badge: 'Web',
+    color: '#34d399',
+    grad: 'linear-gradient(145deg,#34d399,#059669)',
+    placeholder: 'What should I research?',
+    apply: function(){
+      var c = ensureConvo();
+      c.toolsOn = true;
+      S.settings.webSearchTool = true;
+      S.settings.persona = 'researcher';
+      S.settings.councilOn = false;
+    }
+  },
+  {
+    id: 'council',
+    title: 'Council',
+    desc: 'Multi-model debate & synthesis',
+    icon: '⚖️',
+    badge: 'Pro',
+    color: '#f472b6',
+    grad: 'linear-gradient(145deg,#f472b6,#db2777)',
+    placeholder: 'Pose a question for the council…',
+    apply: function(){
+      var c = ensureConvo();
+      c.toolsOn = false;
+      S.settings.councilOn = true;
+    }
+  },
+  {
+    id: 'memory',
+    title: 'Memory',
+    desc: 'Personal context that persists',
+    icon: '🧠',
+    badge: null,
+    color: '#a78bfa',
+    grad: 'linear-gradient(145deg,#c4b5fd,#7c3aed)',
+    placeholder: 'Ask about what I know, or teach me something…',
+    apply: function(){
+      var c = ensureConvo();
+      c.toolsOn = true;
+      S.settings.injectMemory = true;
+      S.settings.councilOn = false;
+    }
+  }
+];
+function modeById(id){
+  for (var i = 0; i < UI_MODES.length; i++) if (UI_MODES[i].id === id) return UI_MODES[i];
+  return UI_MODES[0];
+}
+function setUiMode(id, opts){
+  opts = opts || {};
+  var mode = modeById(id || 'chat');
+  S.settings.uiMode = mode.id;
+  saveSettings();
+  try { mode.apply(); } catch(e){ console.warn(mode.id, e); }
+  var c = activeConvo();
+  if (c) persistConvo(c);
+  updateToolsBtn();
+  updateCouncilBtn();
+  renderModeRail();
+  updateModeChrome();
+  // refresh empty state if visible
+  if ($('chat') && $('chat').querySelector('#empty-state')) renderChat();
+  if (mode.id === 'voice' && !opts.skipVoice){
+    startVoiceMode();
+  }
+  if (mode.id === 'memory' && opts.openPanel){
+    renderMemory(); $('memory-ov').classList.add('open');
+  }
+  if (mode.id === 'council' && (S.settings.council.members || []).length < 2){
+    toast('Add at least 2 council models in Settings → Council', 'warn', 4000);
+  }
+  if (!opts.silent){
+    var labels = {chat:'Chat', voice:'Voice', agent:'Agent', research:'Research', council:'Council', memory:'Memory'};
+    if (mode.id !== 'voice') toast(labels[mode.id] + ' mode', 'ok', 1600);
+  }
+}
+function renderModeRail(){
+  var rail = $('mode-rail');
+  if (!rail) return;
+  var cur = S.settings.uiMode || 'chat';
+  rail.innerHTML = '';
+  UI_MODES.forEach(function(m){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mode-pill' + (m.id === cur ? ' active' : '');
+    b.style.setProperty('--pill-c', m.color);
+    b.style.setProperty('--pill-grad', m.grad);
+    b.innerHTML = '<span class="mp-ico"></span><span class="mp-label"></span>';
+    qs('.mp-ico', b).textContent = m.icon;
+    qs('.mp-label', b).textContent = m.title;
+    b.title = m.desc;
+    b.addEventListener('click', function(){
+      if (m.id === 'voice') setUiMode('voice');
+      else if (m.id === 'memory' && (S.settings.uiMode === 'memory')){
+        renderMemory(); $('memory-ov').classList.add('open');
+      } else setUiMode(m.id, {silent: m.id === cur});
+    });
+    rail.appendChild(b);
+  });
+}
+function updateModeChrome(){
+  var mode = modeById(S.settings.uiMode || 'chat');
+  if ($('input')){
+    $('input').placeholder = mode.placeholder || 'Ask anything…';
+  }
+  document.body.dataset.mode = mode.id;
+  updateHints();
+}
+
 
 var S = {
   settings: null,
@@ -2311,7 +2591,7 @@ function createConvo(){
   S.convos.unshift(c);
   S.activeId = c.id;
   idb.put(c);
-  renderSidebar(); renderChat(); updateModelBtn(); updateHints();
+  renderSidebar(); renderChat(); updateModelBtn(); updateHints(); updateModeChrome();
   return c;
 }
 function ensureConvo(){ return activeConvo() || createConvo(); }
@@ -2519,20 +2799,65 @@ function emptyStateEl(){
   d.id = 'empty-state';
   var hour = new Date().getHours();
   var greet = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+  var cur = S.settings.uiMode || 'chat';
+  var chips = {
+    chat: [
+      {q:'Write a crisp weekly plan for deep work and pharmacy CE.', t:0},
+      {q:'Explain vector databases for a smart engineer new to the topic.', t:0}
+    ],
+    voice: [
+      {q:'', t:0, voice:1, label:'Start voice conversation'},
+      {q:'Give me a 30-second spoken briefing on markets.', t:0}
+    ],
+    agent: [
+      {q:'Build a plan, then run it: Surrey BC morning brief with news and a clinical pearl.', t:1},
+      {q:'Organize my next product milestone for Nova into concrete steps and schedule a reminder.', t:1}
+    ],
+    research: [
+      {q:'Research the latest EV battery breakthroughs and summarize with sources.', t:1},
+      {q:'What changed in GLP-1 therapy guidance recently? Cite sources.', t:1}
+    ],
+    council: [
+      {q:'Should a long-term Canadian investor prefer XEQT or a XGRO/VGRO blend? Argue both sides.', t:0},
+      {q:'Is now a good time to refinance a mortgage in BC? Steel-man both views.', t:0}
+    ],
+    memory: [
+      {q:'What do you already know about me from memory? Organize by category.', t:1},
+      {q:'Remember that I prefer concise answers with clear action items.', t:1}
+    ]
+  };
+  var modeChips = chips[cur] || chips.chat;
+  var tilesHtml = UI_MODES.map(function(m){
+    return '<button type="button" class="mode-tile' + (m.id === cur ? ' active' : '') + '" data-mode="' + m.id + '" style="--tile-c:' + m.color + ';--tile-grad:' + m.grad + ';--tile-glow:color-mix(in srgb, ' + m.color + ' 28%, transparent)">' +
+      (m.badge ? '<span class="mt-badge">' + esc(m.badge) + '</span>' : '') +
+      '<span class="mt-ico">' + m.icon + '</span>' +
+      '<span class="mt-title">' + esc(m.title) + '</span>' +
+      '<span class="mt-desc">' + esc(m.desc) + '</span></button>';
+  }).join('');
+  var chipsHtml = modeChips.map(function(ch){
+    if (ch.voice) return '<button type="button" class="prompt-chip" data-voice="1">🎙️ Start voice conversation</button>';
+    return '<button type="button" class="prompt-chip" data-q="' + esc(ch.q).replace(/"/g, '&quot;') + '" data-tools="' + (ch.t ? '1' : '') + '">' + esc(ch.label || ch.q) + '</button>';
+  }).join('');
   d.innerHTML =
-    '<div class="big-orb">✦</div>' +
+    '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">✦</div></div>' +
     '<h1>' + greet + ', David</h1>' +
-    '<p>Ask anything — research, code, memory, or a multi-step agent plan.</p>' +
-    '<div class="sample-grid">' +
-    '<button class="sample" data-q="Research the latest EV battery breakthroughs and summarize with sources." data-tools="1"><span class="s-ico">🔬</span>Deep research with sources</button>' +
-    '<button class="sample" data-q="For a long-term Canadian investor, compare XEQT vs XGRO/VGRO: equity mix, risk, and when each makes sense." data-tools="1"><span class="s-ico">📈</span>XEQT vs balanced ETFs</button>' +
-    '<button class="sample" data-q="What do you already know about me from memory? Organize it by category." data-tools="1"><span class="s-ico">🧠</span>Recall my profile</button>' +
-    '<button class="sample" data-q="Build a plan, then run it: Surrey BC morning brief — local news, Canucks/Jays if relevant, and one useful clinical pearl for a community pharmacist." data-tools="1"><span class="s-ico">📋</span>Personal morning brief</button>' +
-    '</div>';
-  qsa('.sample', d).forEach(function(b){
+    '<p class="subhead">Pick a mode, then ask anything. Built for serious work — research, voice, agents, and multi-model council.</p>' +
+    '<div class="mode-tiles">' + tilesHtml + '</div>' +
+    '<div class="prompt-chips">' + chipsHtml + '</div>';
+  qsa('.mode-tile', d).forEach(function(b){
     b.addEventListener('click', function(){
+      var id = b.getAttribute('data-mode');
+      if (id === 'voice') setUiMode('voice');
+      else if (id === 'memory') setUiMode('memory', {openPanel: false});
+      else setUiMode(id);
+      $('input').focus();
+    });
+  });
+  qsa('.prompt-chip', d).forEach(function(b){
+    b.addEventListener('click', function(){
+      if (b.dataset.voice){ setUiMode('voice'); return; }
       if (b.dataset.tools){ var c = ensureConvo(); c.toolsOn = true; updateToolsBtn(); }
-      $('input').value = b.dataset.q;
+      $('input').value = b.getAttribute('data-q') || '';
       autoresize(); updateSendBtn();
       $('input').focus();
     });
@@ -3107,6 +3432,10 @@ function updateHints(){
   $('hint-model').textContent = (PROVIDERS[p] ? PROVIDERS[p].name : p) + ' · ' + (modelInfo(p, m).label || m);
   $('hint-tools').style.display = (c && c.toolsOn) ? '' : 'none';
   if ($('hint-council')) $('hint-council').style.display = S.settings.councilOn ? '' : 'none';
+  if ($('hint-model') && S.settings.uiMode && S.settings.uiMode !== 'chat'){
+    var mn = modeById(S.settings.uiMode).title;
+    $('hint-model').textContent = mn + ' · ' + (PROVIDERS[p] ? PROVIDERS[p].name : p) + ' · ' + (modelInfo(p, m).label || m);
+  }
   var tok = 0;
   if (c) c.messages.forEach(function(msg){ tok += estTokens(msg.text || '') + ((msg.images || []).length * 900); });
   tok += estTokens($('input').value);
@@ -3164,7 +3493,7 @@ function handleSlash(text){
   var c = ensureConvo();
   switch (cmd){
     case 'help':
-      toast('Commands: /clear · /sys · /model · /tools · /council · /voice · /export · /agent', null, 4500);
+      toast('Commands: /clear · /sys · /model · /tools · /council · /voice · /agent · /research · /export', null, 4500);
       return true;
     case 'clear':
       c.messages = []; persistConvo(c); renderChat(); return true;
@@ -3177,14 +3506,13 @@ function handleSlash(text){
       c.toolsOn = !c.toolsOn; updateToolsBtn(); persistConvo(c);
       toast('Agent tools ' + (c.toolsOn ? 'ON' : 'OFF'), 'ok'); return true;
     case 'council':
-      S.settings.councilOn = !S.settings.councilOn; saveSettings(); updateCouncilBtn();
-      toast('Model Council ' + (S.settings.councilOn ? 'ON' : 'OFF') + (S.settings.councilOn && (S.settings.council.members||[]).length < 2 ? ' — add ≥2 members in Settings → Council' : ''), 'ok', 3800);
-      return true;
+      setUiMode(S.settings.uiMode === 'council' ? 'chat' : 'council'); return true;
     case 'agent':
-      c.toolsOn = true; S.settings.persona = 'agent'; saveSettings(); updateToolsBtn(); persistConvo(c);
-      toast('Agent persona + tools ON', 'ok'); return true;
+      setUiMode('agent'); return true;
+    case 'research':
+      setUiMode('research'); return true;
     case 'voice':
-      startVoiceMode(); return true;
+      setUiMode('voice'); return true;
     case 'export':
       exportConvoMarkdown(); return true;
   }
@@ -4832,6 +5160,8 @@ async function boot(){
   else { renderSidebar(); renderChat(); }
   updateModelBtn();
   updateCouncilBtn();
+  renderModeRail();
+  updateModeChrome();
   updateHints();
   updateSendBtn();
   if (!maybeAutoVoice()) initWelcome();
