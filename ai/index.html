@@ -737,6 +737,67 @@ a:hover{text-decoration:underline}
 
 
 
+
+/* Icon system — force professional SVGs to render clearly */
+.hb-ico{display:block; flex:none; stroke:currentColor}
+.ico-badge{
+  display:grid; place-items:center; flex:none; border-radius:12px;
+  width:36px; height:36px;
+  color:var(--hc, #4f46e5);
+  background:linear-gradient(160deg, color-mix(in srgb, var(--hc,#4f46e5) 18%, #fff), color-mix(in srgb, var(--hc,#4f46e5) 8%, transparent));
+  border:1px solid color-mix(in srgb, var(--hc,#4f46e5) 28%, transparent);
+  box-shadow:0 2px 8px color-mix(in srgb, var(--hc,#4f46e5) 18%, transparent);
+}
+[data-theme="dark"] .ico-badge{
+  background:linear-gradient(160deg, color-mix(in srgb, var(--hc,#818cf8) 28%, transparent), color-mix(in srgb, var(--hc,#818cf8) 10%, transparent));
+}
+.conn-card .cc-ico{
+  width:44px !important; height:44px !important; border-radius:14px;
+  display:grid !important; place-items:center; color:#fff !important;
+  box-shadow:0 6px 16px rgba(15,23,42,.18);
+}
+.conn-card .cc-ico .hb-ico{ stroke:#fff !important; color:#fff !important; }
+.hub-nav-item .hni-ico{
+  width:34px !important; height:34px !important; border-radius:10px;
+  display:grid !important; place-items:center;
+  color:var(--hc, #4f46e5) !important;
+  background:color-mix(in srgb, var(--hc,#4f46e5) 14%, transparent) !important;
+  border:1px solid color-mix(in srgb, var(--hc,#4f46e5) 22%, transparent);
+}
+.hub-nav-item .hni-ico .hb-ico{ stroke:currentColor !important; }
+.hub-tile .ht-ico{
+  width:44px !important; height:44px !important; border-radius:14px;
+  display:grid !important; place-items:center;
+  color:var(--hc, #4f46e5) !important;
+  background:color-mix(in srgb, var(--hc,#4f46e5) 14%, transparent) !important;
+  border:1px solid color-mix(in srgb, var(--hc,#4f46e5) 22%, transparent);
+}
+.hub-tile .ht-ico .hb-ico{ stroke:currentColor !important; width:22px; height:22px; }
+.d-head .d-ico{
+  width:32px !important; height:32px !important;
+  display:grid !important; place-items:center;
+  color:var(--hc, #4f46e5) !important;
+}
+.d-head .d-ico .hb-ico{ stroke:currentColor !important; }
+.mode-pill .mp-ico{
+  width:22px !important; height:22px !important; border-radius:7px;
+  display:grid !important; place-items:center;
+  background:var(--pill-grad, linear-gradient(145deg,#818cf8,#6366f1)) !important;
+  color:#fff !important; font-size:0 !important;
+  box-shadow:0 2px 8px rgba(79,70,229,.25);
+}
+.mode-pill .mp-ico .hb-ico{ stroke:#fff !important; width:13px; height:13px; }
+.brand .logo{
+  display:grid !important; place-items:center; overflow:hidden;
+}
+.brand .logo .hb-ico{ stroke:#fff !important; width:16px; height:16px; }
+.cf-orb{ display:grid !important; place-items:center; }
+.cf-orb .hb-ico{ stroke:#fff !important; width:16px; height:16px; }
+#chat-fab .fab-orb{ display:grid !important; place-items:center; }
+#chat-fab .fab-orb .hb-ico{ stroke:#fff !important; width:15px; height:15px; }
+.msg.assistant .avatar{ font-size:0 !important; }
+.msg.assistant .avatar .hb-ico{ stroke:#fff !important; width:15px; height:15px; }
+
 /* ============================= Homebase hub ============================= */
 .hub-nav{
   flex:none; max-height:42vh; overflow-y:auto; padding:0 8px 8px;
@@ -1323,7 +1384,7 @@ body.is-desktop .chat-float[data-state="open"]{
   <!-- ================= Sidebar ================= -->
   <aside id="sidebar">
     <div class="sb-head">
-      <div class="brand"><span class="logo">✦</span><span class="nm">Homebase</span></div>
+      <div class="brand"><span class="logo" id="brand-logo"></span><span class="nm">Homebase</span></div>
       <button class="icon-btn" id="sb-close" title="Close sidebar" aria-label="Close sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
     </div>
     <button type="button" class="new-chat" id="home-nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/></svg>Home dashboard</button>
@@ -1374,7 +1435,7 @@ body.is-desktop .chat-float[data-state="open"]{
     <div id="chat-float" class="chat-float" data-state="fab" aria-label="AI chat">
       <div class="cf-head">
         <div class="cf-brand">
-          <span class="cf-orb">✦</span>
+          <span class="cf-orb" id="cf-orb"></span>
           <div>
             <div class="cf-title">Homebase AI</div>
             <div class="cf-meta" id="cf-meta">Assistant</div>
@@ -1419,7 +1480,7 @@ body.is-desktop .chat-float[data-state="open"]{
       </div>
     </div>
     <button type="button" id="chat-fab" title="Open Homebase AI" aria-label="Open AI chat">
-      <span class="fab-orb">✦</span>
+      <span class="fab-orb" id="fab-orb"></span>
       <span class="fab-lab">AI</span>
     </button>
   </div>
@@ -1842,7 +1903,7 @@ var UI_MODES = [
     id: 'chat',
     title: 'Chat',
     desc: 'Fast answers, writing, brainstorming',
-    icon: '✦',
+    icon: 'chat',
     badge: null,
     color: '#818cf8',
     grad: 'linear-gradient(145deg,#a78bfa,#6366f1)',
@@ -1858,7 +1919,7 @@ var UI_MODES = [
     id: 'voice',
     title: 'Voice',
     desc: 'Hands-free talk · interrupt anytime',
-    icon: '🎙️',
+    icon: 'voice',
     badge: 'Live',
     color: '#38bdf8',
     grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
@@ -1869,7 +1930,7 @@ var UI_MODES = [
     id: 'agent',
     title: 'Agent',
     desc: 'Plans, tools, multi-step work',
-    icon: '⚡',
+    icon: 'agent',
     badge: 'Tools',
     color: '#f59e0b',
     grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
@@ -1885,7 +1946,7 @@ var UI_MODES = [
     id: 'research',
     title: 'Research',
     desc: 'Search, read sources, cite findings',
-    icon: '🔬',
+    icon: 'research',
     badge: 'Web',
     color: '#34d399',
     grad: 'linear-gradient(145deg,#34d399,#059669)',
@@ -1902,7 +1963,7 @@ var UI_MODES = [
     id: 'council',
     title: 'Council',
     desc: 'Multi-model debate & synthesis',
-    icon: '⚖️',
+    icon: 'council',
     badge: 'Pro',
     color: '#f472b6',
     grad: 'linear-gradient(145deg,#f472b6,#db2777)',
@@ -1917,7 +1978,7 @@ var UI_MODES = [
     id: 'memory',
     title: 'Memory',
     desc: 'Personal context that persists',
-    icon: '🧠',
+    icon: 'memory',
     badge: null,
     color: '#a78bfa',
     grad: 'linear-gradient(145deg,#c4b5fd,#7c3aed)',
@@ -1933,7 +1994,7 @@ var UI_MODES = [
     id: 'connectors',
     title: 'Connect',
     desc: 'Gmail, Calendar, GitHub, Dashboard…',
-    icon: '🔗',
+    icon: 'connect',
     badge: 'Hub',
     color: '#0ea5e9',
     grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
@@ -1996,7 +2057,7 @@ function renderModeRail(){
     b.style.setProperty('--pill-c', m.color);
     b.style.setProperty('--pill-grad', m.grad);
     b.innerHTML = '<span class="mp-ico"></span><span class="mp-label"></span>';
-    qs('.mp-ico', b).textContent = m.icon;
+    qs('.mp-ico', b).innerHTML = iconSvg(m.icon || 'spark', 13, {strokeWidth: 2});
     qs('.mp-label', b).textContent = m.title;
     b.title = m.desc;
     b.addEventListener('click', function(){
@@ -2025,42 +2086,57 @@ var LS_HUB = 'homebase_hub_v1';
 var APP_NAME = 'Homebase';
 
 var ICON_SVG = {
-  /* Distinctive professional marks — not generic emoji */
-  chat: '<path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v6a2.5 2.5 0 0 1-2.5 2.5H11l-3.5 3v-3H7.5A2.5 2.5 0 0 1 5 12.5v-6z"/><path d="M9 9h6M9 12h4"/>',
-  voice: '<path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M6.5 11a5.5 5.5 0 0 0 11 0M12 16.5V20"/>',
-  agent: '<path d="M12 3l2.1 5.2L20 9l-4.2 3.2L17 18l-5-3.2L7 18l1.2-5.8L4 9l5.9-.8L12 3z"/>',
-  research: '<circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15l5 5"/><path d="M8.5 10.5h4M10.5 8.5v4"/>',
-  council: '<path d="M8 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM16 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM12 19a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/><path d="M10 10.5l1.2 3M14 10.5l-1.2 3"/>',
-  memory: '<path d="M7 5h4a3 3 0 0 1 3 3v11l-5-2.5L4 19V8a3 3 0 0 1 3-3z"/><path d="M14 8h3a3 3 0 0 1 3 3v8l-3-1.5"/>',
-  connect: '<path d="M9 12h6"/><path d="M8 8.5A3.5 3.5 0 1 0 8 15.5"/><path d="M16 8.5a3.5 3.5 0 1 1 0 7"/>',
-  car: '<path d="M5 13l1.2-3.2A2 2 0 0 1 8.1 8.5h7.8a2 2 0 0 1 1.9 1.3L19 13"/><path d="M4 13h16v2.5a1.5 1.5 0 0 1-1.5 1.5H17"/><path d="M5.5 17H5a1 1 0 0 1-1-1v-1.5"/><circle cx="7.5" cy="15.2" r="1.3"/><circle cx="16.5" cy="15.2" r="1.3"/><path d="M9 10.5h6"/>',
-  chart: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16l3-5 3 3 5-7"/>',
-  calendar: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9.5h16M8 3.5v3M16 3.5v3M8 13h2M12 13h2M16 13h.01M8 16.5h2M12 16.5h2"/>',
-  mail: '<rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M4 8l8 5.5L20 8"/>',
-  tasks: '<path d="M10 7h10M10 12h10M10 17h10"/><path d="M5 7l.8.8L7.5 6M5 12l.8.8L7.5 11M5 17l.8.8L7.5 16"/>',
-  home: '<path d="M4 11.5 12 5l8 6.5"/><path d="M7 10.5V19h10v-8.5"/><path d="M10 19v-4.5h4V19"/>',
-  settings: '<circle cx="12" cy="12" r="2.8"/><path d="M12 3.5v2.2M12 18.3v2.2M4.8 6.2l1.6 1.5M17.6 16.3l1.6 1.5M3.5 12h2.2M18.3 12h2.2M4.8 17.8l1.6-1.5M17.6 7.7l1.6-1.5"/>',
-  link: '<path d="M10 13a4.5 4.5 0 0 0 6.7.4l1.8-1.8a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 11a4.5 4.5 0 0 0-6.7-.4L5.5 12.4a4.5 4.5 0 0 0 6.4 6.4l1-1"/>',
-  pharmacy: '<path d="M9 4h6v4H9z"/><path d="M8 8h8v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8z"/><path d="M12 11v6M9.5 14H14.5"/>',
-  family: '<circle cx="8.5" cy="8" r="2.4"/><circle cx="15.5" cy="8.5" r="2"/><path d="M3.8 18c.3-2.4 2.3-4 4.7-4s4.3 1.5 4.7 3.7"/><path d="M13 18c.2-1.7 1.6-3 3.4-3 1.7 0 3.1 1.1 3.4 2.6"/>',
-  spark: '<path d="M12 2.8l1.3 4.7 4.7 1.3-4.7 1.3L12 14.8l-1.3-4.7L6 8.8l4.7-1.3L12 2.8z"/><path d="M18.5 14.5l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"/>',
-  bank: '<path d="M4 10h16"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/><path d="M3 18h18"/><path d="M12 4l8 5H4l8-5z"/>',
-  cloud: '<path d="M7.5 17.5h10a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6-1.2A3.5 3.5 0 0 0 7.5 17.5z"/>',
-  music: '<circle cx="8" cy="17" r="2.5"/><circle cx="17" cy="15" r="2.5"/><path d="M10.5 17V7.5L19.5 6v9"/>',
-  map: '<path d="M9 4.5 4 6.5v13l5-2 6 2 5-2v-13l-5 2-6-2z"/><path d="M9 4.5v13M15 6.5v13"/>',
-  health: '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>',
-  work: '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6.5A2.5 2.5 0 0 1 10.5 4h3A2.5 2.5 0 0 1 16 6.5V8M3 13h18"/>',
-  code: '<path d="M8 8 4 12l4 4M16 8l4 4-4 4M13 5l-2 14"/>',
-  bolt: '<path d="M13 2 5 13h6l-1 9 9-13h-6l0-7z"/>',
-  shield: '<path d="M12 3 5 6v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6l-7-3z"/>',
-  camera: '<path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3"/>'
+  chat: '<path d="M4 6.5C4 5.1 5.1 4 6.5 4h11C18.9 4 20 5.1 20 6.5v7c0 1.4-1.1 2.5-2.5 2.5H11l-4 3.2V16H6.5C5.1 16 4 14.9 4 13.5v-7z" fill="currentColor" opacity=".15"/><path d="M4 6.5C4 5.1 5.1 4 6.5 4h11C18.9 4 20 5.1 20 6.5v7c0 1.4-1.1 2.5-2.5 2.5H11l-4 3.2V16H6.5C5.1 16 4 14.9 4 13.5v-7z"/><path d="M8 8.5h8M8 11.5h5"/>',
+  voice: '<rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" opacity=".15"/><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 12a6 6 0 0 0 12 0M12 18v3"/>',
+  agent: '<path d="M13 2L5.5 13.5H11l-1.2 8.5L19 10h-5.2L15.5 2z" fill="currentColor" opacity=".18"/><path d="M13 2L5.5 13.5H11l-1.2 8.5L19 10h-5.2L15.5 2z"/>',
+  research: '<circle cx="10.5" cy="10.5" r="5.75" fill="currentColor" opacity=".12"/><circle cx="10.5" cy="10.5" r="5.75"/><path d="M15.2 15.2 21 21"/><path d="M8.2 10.5h4.6M10.5 8.2v4.6"/>',
+  council: '<circle cx="8" cy="8.5" r="2.6" fill="currentColor" opacity=".15"/><circle cx="16" cy="8.5" r="2.6" fill="currentColor" opacity=".15"/><circle cx="12" cy="16" r="2.6" fill="currentColor" opacity=".15"/><circle cx="8" cy="8.5" r="2.6"/><circle cx="16" cy="8.5" r="2.6"/><circle cx="12" cy="16" r="2.6"/><path d="M10.2 9.8 11.2 13.2M13.8 9.8 12.8 13.2"/>',
+  memory: '<path d="M6.5 5h4A2.5 2.5 0 0 1 13 7.5V19l-4.5-2.2L4 19V7.5A2.5 2.5 0 0 1 6.5 5z" fill="currentColor" opacity=".15"/><path d="M6.5 5h4A2.5 2.5 0 0 1 13 7.5V19l-4.5-2.2L4 19V7.5A2.5 2.5 0 0 1 6.5 5z"/><path d="M13 8h3.5A2.5 2.5 0 0 1 19 10.5V18l-3-1.4"/>',
+  connect: '<path d="M9 12h6"/><path d="M8.2 8A3.8 3.8 0 1 0 8.2 16"/><path d="M15.8 8a3.8 3.8 0 1 1 0 8"/>',
+  car: '<path d="M4.5 13.2 5.8 9.6A2.2 2.2 0 0 1 7.9 8h8.2a2.2 2.2 0 0 1 2.1 1.5l1.3 3.7"/><path d="M3.8 13.2h16.4v2.2a1.6 1.6 0 0 1-1.6 1.6H17"/><circle cx="7.3" cy="15.6" r="1.45" fill="currentColor" opacity=".2"/><circle cx="16.7" cy="15.6" r="1.45" fill="currentColor" opacity=".2"/><circle cx="7.3" cy="15.6" r="1.45"/><circle cx="16.7" cy="15.6" r="1.45"/><path d="M9 10.5h6"/>',
+  chart: '<path d="M4 19V5M4 19h16"/><path d="M7.5 15.5 11 10l3 3.5L18.5 7"/><circle cx="11" cy="10" r="1.1" fill="currentColor"/><circle cx="14" cy="13.5" r="1.1" fill="currentColor"/><circle cx="18.5" cy="7" r="1.1" fill="currentColor"/>',
+  calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.2" fill="currentColor" opacity=".1"/><rect x="3.5" y="5" width="17" height="15.5" rx="2.2"/><path d="M3.5 9.5h17M8 3.2v3.5M16 3.2v3.5M8 13h2.2M12 13h2.2M16 13h.01M8 16.5h2.2M12 16.5h2.2"/>',
+  mail: '<rect x="3" y="6" width="18" height="12.5" rx="2.2" fill="currentColor" opacity=".12"/><rect x="3" y="6" width="18" height="12.5" rx="2.2"/><path d="M3.8 8.2 12 13.6l8.2-5.4"/>',
+  tasks: '<path d="M10 7h10M10 12h10M10 17h10"/><path d="M4.5 7.2 5.7 8.4 7.8 6"/><path d="M4.5 12.2 5.7 13.4 7.8 11"/><path d="M4.5 17.2 5.7 18.4 7.8 16"/>',
+  home: '<path d="M4 11.2 12 4.5l8 6.7"/><path d="M6.5 10.2V19h11v-8.8"/><path d="M10 19v-4.2h4V19" fill="currentColor" opacity=".12"/>',
+  settings: '<circle cx="12" cy="12" r="3" fill="currentColor" opacity=".15"/><circle cx="12" cy="12" r="3"/><path d="M12 3v2.4M12 18.6V21M4.6 6.2l1.7 1.7M17.7 16.1l1.7 1.7M3 12h2.4M18.6 12H21M4.6 17.8l1.7-1.7M17.7 7.9l1.7-1.7"/>',
+  link: '<path d="M9.8 13.2a4.2 4.2 0 0 0 6.2.3l1.7-1.7a4.2 4.2 0 1 0-5.9-5.9l-.9.9"/><path d="M14.2 10.8a4.2 4.2 0 0 0-6.2-.3L6.3 12.2a4.2 4.2 0 1 0 5.9 5.9l.9-.9"/>',
+  pharmacy: '<path d="M9 3.5h6v4.2H9z" fill="currentColor" opacity=".15"/><path d="M9 3.5h6v4.2H9z"/><path d="M8 7.7h8v11a2.2 2.2 0 0 1-2.2 2.2h-3.6A2.2 2.2 0 0 1 8 18.7v-11z"/><path d="M12 11v6M9.4 14H14.6"/>',
+  family: '<circle cx="8.5" cy="8" r="2.5" fill="currentColor" opacity=".15"/><circle cx="15.5" cy="8.6" r="2.1" fill="currentColor" opacity=".15"/><circle cx="8.5" cy="8" r="2.5"/><circle cx="15.5" cy="8.6" r="2.1"/><path d="M3.5 18.5c.4-2.5 2.5-4.2 5-4.2s4.5 1.6 5 4"/><path d="M13.2 18.5c.3-1.8 1.8-3.1 3.6-3.1 1.7 0 3.1 1.1 3.5 2.7"/>',
+  spark: '<path d="M12 2.5 13.6 8l5.5 1.5L13.6 11 12 16.5 10.4 11 4.9 9.5 10.4 8 12 2.5z" fill="currentColor" opacity=".18"/><path d="M12 2.5 13.6 8l5.5 1.5L13.6 11 12 16.5 10.4 11 4.9 9.5 10.4 8 12 2.5z"/><path d="M18.8 14.2 19.5 16.6 21.9 17.3 19.5 18 18.8 20.4 18.1 18 15.7 17.3 18.1 16.6z"/>',
+  bank: '<path d="M4 10.5h16"/><path d="M6 10.5v7.5M10 10.5v7.5M14 10.5v7.5M18 10.5v7.5"/><path d="M3 18h18"/><path d="M12 3.8 20 9H4l8-5.2z" fill="currentColor" opacity=".15"/><path d="M12 3.8 20 9H4l8-5.2z"/>',
+  cloud: '<path d="M7 17.5h10.2a3.6 3.6 0 0 0 .5-7.15 5.2 5.2 0 0 0-9.9-1.4A3.5 3.5 0 0 0 7 17.5z" fill="currentColor" opacity=".15"/><path d="M7 17.5h10.2a3.6 3.6 0 0 0 .5-7.15 5.2 5.2 0 0 0-9.9-1.4A3.5 3.5 0 0 0 7 17.5z"/>',
+  music: '<circle cx="8" cy="17" r="2.6" fill="currentColor" opacity=".15"/><circle cx="17" cy="15" r="2.6" fill="currentColor" opacity=".15"/><circle cx="8" cy="17" r="2.6"/><circle cx="17" cy="15" r="2.6"/><path d="M10.6 17V7l9-1.6v9.4"/>',
+  map: '<path d="M9 4 3.8 6.2v13.3L9 17.3l6 2.2 5.2-2.1V4.2L15 6.3 9 4z" fill="currentColor" opacity=".1"/><path d="M9 4 3.8 6.2v13.3L9 17.3l6 2.2 5.2-2.1V4.2L15 6.3 9 4z"/><path d="M9 4v13.3M15 6.3v13.2"/>',
+  health: '<path d="M12 20.6S5 16.2 5 10.8A3.9 3.9 0 0 1 12 8.5a3.9 3.9 0 0 1 7 2.3c0 5.4-7 9.8-7 9.8z" fill="currentColor" opacity=".15"/><path d="M12 20.6S5 16.2 5 10.8A3.9 3.9 0 0 1 12 8.5a3.9 3.9 0 0 1 7 2.3c0 5.4-7 9.8-7 9.8z"/>',
+  work: '<rect x="3" y="8" width="18" height="12" rx="2" fill="currentColor" opacity=".12"/><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6.3A2.3 2.3 0 0 1 10.3 4h3.4A2.3 2.3 0 0 1 16 6.3V8M3 13h18"/>',
+  code: '<path d="M8.5 8 4 12.2 8.5 16.5M15.5 8 20 12.2 15.5 16.5M13.2 5.5 10.8 18.5"/>',
+  bolt: '<path d="M13 2.5 5.2 13.5h6.1L9.8 21.5 19 10.2h-5.8L14.5 2.5z" fill="currentColor" opacity=".18"/><path d="M13 2.5 5.2 13.5h6.1L9.8 21.5 19 10.2h-5.8L14.5 2.5z"/>',
+  shield: '<path d="M12 3.2 4.8 6.2v5.1c0 4.6 3.1 8 7.2 9.2 4.1-1.2 7.2-4.6 7.2-9.2V6.2L12 3.2z" fill="currentColor" opacity=".15"/><path d="M12 3.2 4.8 6.2v5.1c0 4.6 3.1 8 7.2 9.2 4.1-1.2 7.2-4.6 7.2-9.2V6.2L12 3.2z"/><path d="M9.2 12.1 11.1 14l3.8-4"/>',
+  camera: '<path d="M4 8.2h2.8l1.4-2h7.6l1.4 2H20a1.2 1.2 0 0 1 1.2 1.2v8.4A1.2 1.2 0 0 1 20 19H4a1.2 1.2 0 0 1-1.2-1.2V9.4A1.2 1.2 0 0 1 4 8.2z" fill="currentColor" opacity=".12"/><path d="M4 8.2h2.8l1.4-2h7.6l1.4 2H20a1.2 1.2 0 0 1 1.2 1.2v8.4A1.2 1.2 0 0 1 20 19H4a1.2 1.2 0 0 1-1.2-1.2V9.4A1.2 1.2 0 0 1 4 8.2z"/><circle cx="12" cy="13" r="3.1"/>',
+  bank_alt: '<path d="M4 10h16M6 10v8M10 10v8M14 10v8M18 10v8M3 18h18M12 4l8 5H4l8-5z"/>'
 };
-
-function iconSvg(name, size){
+function iconSvg(name, size, opts){
+  opts = opts || {};
   size = size || 20;
   var path = ICON_SVG[name] || ICON_SVG.spark;
-  return '<svg class="hb-ico" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+path+'</svg>';
+  var sw = opts.strokeWidth != null ? opts.strokeWidth : 1.75;
+  return '<svg class="hb-ico" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+path+'</svg>';
 }
+function iconBadge(name, color, size){
+  size = size || 36;
+  var ico = iconSvg(name, Math.round(size * 0.52), {strokeWidth: 1.9});
+  return '<span class="ico-badge" style="--hc:'+(color||'#4f46e5')+';width:'+size+'px;height:'+size+'px">'+ico+'</span>';
+}
+
+function paintChromeIcons(){
+  try {
+    var bl = $('brand-logo'); if (bl && !bl.dataset.iconed){ bl.innerHTML = iconSvg('home', 16, {strokeWidth:2}); bl.dataset.iconed = '1'; }
+    var co = $('cf-orb'); if (co && !co.dataset.iconed){ co.innerHTML = iconSvg('spark', 16, {strokeWidth:2}); co.dataset.iconed = '1'; }
+    var fo = $('fab-orb'); if (fo && !fo.dataset.iconed){ fo.innerHTML = iconSvg('spark', 15, {strokeWidth:2}); fo.dataset.iconed = '1'; }
+  } catch(e){}
+}
+
 
 /** Default hub modules — David's life OS */
 var HUB_DEFAULTS = [
@@ -2177,7 +2253,7 @@ function renderHubNav(){
     b.type = 'button';
     b.className = 'hub-nav-item';
     b.innerHTML = '<span class="hni-ico" style="--hc:'+esc(mod.color||'#4f46e5')+'"></span><span class="hni-t"></span>';
-    qs('.hni-ico', b).innerHTML = iconSvg(mod.icon || 'spark', 18);
+    qs('.hni-ico', b).innerHTML = iconSvg(mod.icon || 'spark', 18, {strokeWidth: 1.9});
     qs('.hni-t', b).textContent = mod.title;
     b.title = mod.desc || mod.title;
     b.addEventListener('click', function(){ runHubModule(mod); closeSidebarMobile(); });
@@ -2186,7 +2262,7 @@ function renderHubNav(){
   var edit = document.createElement('button');
   edit.type = 'button';
   edit.className = 'hub-nav-item hub-nav-edit';
-  edit.innerHTML = '<span class="hni-ico" style="--hc:#64748b">'+iconSvg('settings',18)+'</span><span class="hni-t">Customize hub</span>';
+  edit.innerHTML = '<span class="hni-ico" style="--hc:#64748b">'+iconSvg('settings',18,{strokeWidth:1.9})+'</span><span class="hni-t">Customize hub</span>';
   edit.addEventListener('click', function(){
     openSettings();
     switchSetTab('hub');
@@ -2205,13 +2281,13 @@ function renderHubHome(){
   var mods = hubModulesEnabled();
   var tiles = mods.map(function(mod){
     return '<button type="button" class="hub-tile" data-hub="'+esc(mod.id)+'" style="--hc:'+esc(mod.color||'#4f46e5')+'">' +
-      '<span class="ht-ico">'+iconSvg(mod.icon||'spark',22)+'</span>' +
+      '<span class="ht-ico">'+iconSvg(mod.icon||'spark',22,{strokeWidth:1.9})+'</span>' +
       '<span class="ht-body"><span class="ht-title"></span><span class="ht-desc"></span></span>' +
       '</button>';
   }).join('');
   d.innerHTML =
     '<div class="hub-hero">' +
-      '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">'+iconSvg('home',28)+'</div></div>' +
+      '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">'+iconSvg('home',26,{strokeWidth:1.7})+'</div></div>' +
       '<h1>'+greet+', David</h1>' +
       '<p class="subhead">Homebase — your hub for AI, the Tesla dashboard, work, and life.</p>' +
     '</div>' +
@@ -2431,7 +2507,7 @@ function widgetShell(title, icon, color, span, bodyHtml, extraHead){
   span = span || 4;
   return '<section class="d-card span-'+span+'" style="--hc:'+esc(color)+'">' +
     '<div class="d-head">' +
-      '<span class="d-ico">'+iconSvg(icon, 16)+'</span>' +
+      '<span class="d-ico">'+iconSvg(icon, 17, {strokeWidth:1.9})+'</span>' +
       '<h3>'+esc(title)+'</h3>' +
       (extraHead || '') +
     '</div>' +
@@ -4209,7 +4285,7 @@ function mdRender(src){
   var blocks = [];
   src = src.replace(/```[ \t]*([\w+#.-]*)[^\n]*\n([\s\S]*?)(?:```|$)/g, function(_, lang, code){
     blocks.push({lang: lang, code: code.replace(/\n$/, '')});
-    return ' CB' + (blocks.length - 1) + ' ';
+    return 'CB' + (blocks.length - 1) + '';
   });
   var lines = esc(src).split('\n');
   var html = '', para = [], listStack = [], inQuote = false;
@@ -4222,7 +4298,7 @@ function mdRender(src){
   function closeQuote(){ if (inQuote){ flushPara(); html += '</blockquote>'; inQuote = false; } }
   for (var i = 0; i < lines.length; i++){
     var ln = lines[i];
-    var cb = ln.match(/^ CB(\d+) \s*$/);
+    var cb = ln.match(/^CB(\d+)\s*$/);
     if (cb){
       flushPara(); closeLists(0); closeQuote();
       var b = blocks[+cb[1]];
@@ -5446,7 +5522,7 @@ function emptyStateEl(){
   d.className = 'hub-home chat-empty';
   d.innerHTML =
     '<div class="hub-hero" style="margin-bottom:0">' +
-      '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">✦</div></div>' +
+      '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core" id="chat-empty-orb"></div></div>' +
       '<h1>Homebase AI</h1>' +
       '<p class="subhead">Ask anything — research, plan, remember, or run agent tools. Your dashboard stays behind this window.</p>' +
       '<div class="hub-foot" style="margin-top:14px">' +
@@ -5461,6 +5537,8 @@ function emptyStateEl(){
       autoresize(); updateSendBtn(); $('input').focus();
     });
   });
+  var eo = d.querySelector('#chat-empty-orb');
+  if (eo) eo.innerHTML = iconSvg('spark', 26, {strokeWidth: 1.7});
   return d;
 }
 function msgEl(m, convo){
@@ -5469,7 +5547,7 @@ function msgEl(m, convo){
   el.dataset.id = m.id;
   var av = document.createElement('div');
   av.className = 'avatar';
-  av.textContent = m.role === 'user' ? '🙂' : '✦';
+  if (m.role === 'user') { av.textContent = ''; av.innerHTML = iconSvg('family', 15); av.style.color = 'var(--text2)'; } else { av.textContent = ''; av.innerHTML = iconSvg('spark', 15); av.style.color = '#fff'; }
   el.appendChild(av);
   var body = document.createElement('div');
   body.className = 'body';
