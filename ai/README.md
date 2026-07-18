@@ -58,6 +58,40 @@ provider-side spend limits/alerts enabled too, because pricing changes, cached
 tokens, special tools, taxes, failed requests, and calls made outside Homebase
 may differ from the local ledger.
 
+## Automatic specialist teams
+
+For complex build, research, clinical, legal, and financial requests, Homebase
+can automatically split the work into 2–6 independent roles and run them in
+parallel. A dashboard build normally uses Architecture, Product & UI, Data &
+Connectors, and Implementation & QA. Research tasks use evidence, domain, and
+safety reviewers. Each role receives a narrow read-only tool allowlist and the
+least expensive ready model that meets its quality floor; local models are used
+for suitable roles, while advanced cloud models are reserved for roles that
+genuinely need them. The lead model reconciles the handoffs and owns the final
+answer or allowed action.
+
+The message card shows every role, assigned provider/model, progress, routing
+reason, and combined estimated usage. Configure this in **Settings → Chat**:
+Automatic specialist teams, maximum parallel agents (default 4), and a
+per-task projected cloud cap (default $1.50). All calls still share the hard
+$50 trailing-30-day guard. A manually enabled Model Council takes precedence
+when it has at least two configured members.
+
+## Guarded source development
+
+When the latest chat explicitly asks to build, update, fix, or improve the
+dashboard, the lead agent can inspect the configured GitHub repository through
+read-only file-list, file-read, and search tools. A source write is accepted
+only as 1–12 exact, uniquely matched edits (or explicit new files), is checked
+for parse errors and embedded secrets, and creates a new `homebase/ai-*` branch
+plus a **draft pull request**. It never writes directly to `main`, and the user
+is asked to confirm before the branch or commit is created.
+
+Setup is in **Settings → Development**. Public repository reads need no login.
+To enable draft pull requests, add a fine-grained GitHub token scoped only to
+`tesla-dashboard` with Metadata read, Contents read/write, and Pull requests
+read/write. The token stays in this browser and must never be committed.
+
 ### Local model setup notes
 
 - **Ollama** — allow the page's origin once, then restart Ollama:
@@ -97,7 +131,8 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
 
 ## Features
 
-- **Model Council (optional)** — fan a prompt to 2–5 models in parallel, then synthesize a consensus answer. Toggle ⚖️ in the top bar or `/council`. Configure members in Settings → Council.
+- **Automatic task teams** — task-shaped parallel specialists with per-role tools, cost-aware model assignment, and lead-agent synthesis. Configure in Settings → Chat.
+- **Model Council (optional)** — manually fan a prompt to 2–5 chosen models in parallel, then synthesize a consensus answer. Toggle ⚖️ in the top bar or `/council`. Configure members in Settings → Council.
 - **Agent mode** — multi-step tool loop (configurable rounds), `create_plan` / `update_plan_step`, `research`, memory CRUD, `run_js` sandbox. Personas: Agent & Researcher. `/agent` enables tools + agent persona.
 - **Neural Memory** — categorized, importance-ranked, pinned facts with smart relevance injection, search/filter UI, auto-extract, and agent tools (`search_memory`, `remember`, `update_memory`, `forget_memory`).
 - **Chat** — streaming responses, markdown + syntax-highlighted code with copy
@@ -108,7 +143,7 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
   PDFs natively to Claude / Gemini / OpenAI; text/code files inlined; voice in
   and out.
 - **Voice mode** — cinematic neural voice UI (rings, particle field, waveform bars) with hands-free listen → think → speak. Tap the orb to interrupt. Browser speech APIs; optional OpenAI Whisper + TTS (Settings → Voice).
-- **Agent tools** (wrench or `/tools`) — weather, web search, page reader, Wikipedia, calculator, clock, research (search+read), news, plan tools, memory CRUD, `run_js` sandbox, schedule tasks. Inline tool cards + plan board.
+- **Agent tools** (wrench or `/tools`) — weather, web search, page reader, Wikipedia, calculator, clock, research (search+read), news, plan tools, memory CRUD, `run_js` sandbox, schedule tasks, dashboard mutation, and guarded repository read/search/draft-PR tools. Inline tool cards + plan board.
 - **Memory** — neural memory store with categories, importance, pins, search, smart injection, and auto-extract. 🧠 panel or agent tools.
 - **Scheduled tasks** — daily / weekly / every-N-minutes / one-off prompts
   that run automatically, post results to a dedicated ⏰ chat and fire a

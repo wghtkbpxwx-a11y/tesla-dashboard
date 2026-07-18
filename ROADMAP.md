@@ -7,6 +7,18 @@ single-file `index.html`, GitHub Pages, cross-origin blocked, cache refreshed ho
 Tags: **[S/M/L]** effort · **⭐ impact** · **🎨 Fable-session candidate** (creative/design/
 copy work that pairs well with a Fable model) · **🧪 needs a spike/verify-on-car**.
 
+## Homebase AI operating model (shipped 2026-07-18)
+
+- ✅ Capability- and cost-aware model routing with local-first execution and a
+  hard estimated $50 trailing-30-day cloud budget.
+- ✅ Automatic task-shaped specialist teams with parallel role execution,
+  narrow tool/connector access, per-role model selection, and lead synthesis.
+- ✅ Guarded self-development: repository inspection plus exact multi-file
+  changes on a new branch and draft pull request after explicit confirmation.
+- Next: reconcile the local estimate with provider billing exports when a safe,
+  provider-neutral read-only API path is available; keep provider-side limits as
+  the authoritative backstop.
+
 ---
 
 ## The one number that drives most of this

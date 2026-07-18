@@ -1634,6 +1634,7 @@ body.is-desktop .chat-float[data-state="open"]{
       <button class="mo-tab" data-tab="toolsx">Tools</button>
       <button class="mo-tab" data-tab="hub">Hub</button>
       <button class="mo-tab" data-tab="council">Council</button>
+      <button class="mo-tab" data-tab="dev">Development</button>
       <button class="mo-tab" data-tab="look">Appearance</button>
       <button class="mo-tab" data-tab="data">Data</button>
     </div>
@@ -1644,6 +1645,7 @@ body.is-desktop .chat-float[data-state="open"]{
       <div class="set-pane" id="pane-toolsx" style="display:none"></div>
       <div class="set-pane" id="pane-hub" style="display:none"></div>
       <div class="set-pane" id="pane-council" style="display:none"></div>
+      <div class="set-pane" id="pane-dev" style="display:none"></div>
       <div class="set-pane" id="pane-look" style="display:none"></div>
       <div class="set-pane" id="pane-data" style="display:none"></div>
     </div>
@@ -1979,6 +1981,13 @@ var DEFAULT_SETTINGS = {
   autoRoute: true,
   localFirst: true,
   webllmFallback: true,
+  autoDelegate: true,
+  maxSubagents: 4,
+  teamBudgetUsd: 1.50,
+  developerMode: true,
+  devRepo: 'wghtkbpxwx-a11y/tesla-dashboard',
+  devBaseBranch: 'main',
+  devConfirmWrites: true,
   cloudBudget: { limitUsd: 50, windowDays: 30, hardStop: true },
   autoSpeak: false,
   agentMaxRounds: 12,
@@ -2552,7 +2561,7 @@ var HOMEBASE_CHANGELOG = {
     'pins','budget','weather','markets','news','scores','calendar','tasks',
     'pharmacy','links','memory','traffic','updates'
   ],
-  agent_tools: ['list_dashboard','update_dashboard','use_connector','get_weather'],
+  agent_tools: ['list_dashboard','update_dashboard','list_connectors','read_connector','use_connector','list_repository_files','read_repository_file','search_repository','propose_repository_changes','get_weather'],
   constraints: [
     'Single-file SPA on GitHub Pages — no private server; CORS limits bank/clinical APIs',
     'Never publish real account balances to the public repo/Pages site',
@@ -2560,9 +2569,27 @@ var HOMEBASE_CHANGELOG = {
     'Prefer professional SVG icons (ICON_SVG); avoid emoji for chrome',
     'Dashboard-first UI + floating chat (FAB/dock/expand); avoid redundant left+bottom menus',
     'Mobile shares same URL (body.is-mobile); do not break desktop layout',
-    'ChatGPT is actively developing the AI model selector / auto-route engine — do not rewrite that surface without coordinating; fix bugs only and preserve autoRoute + cloudBudget APIs'
+    'Preserve the central runChat cloud reservation path, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-agent-orchestrator',
+      date: '2026-07-18',
+      title: 'Task-shaped specialist teams and guarded self-development',
+      type: 'feat',
+      changes: [
+        'Complex requests automatically form 2–6 role-specific sub-agents and run them concurrently before lead-agent synthesis',
+        'Architecture, product/UI, data/connectors, implementation/QA, evidence, domain, and safety roles receive narrow read-only tool allowlists',
+        'Every role independently receives the lowest-cost ready model meeting its quality floor; suitable work stays local and all calls share the rolling cloud guard',
+        'Settings → Chat exposes automatic teams, parallel-agent cap, and projected per-task cloud cap; message cards show roles, models, progress, and routing rationale',
+        'Repository list/read/search tools plus exact multi-file source changes create only a new homebase/ai-* branch and draft pull request after explicit request and confirmation',
+        'Source guard rejects secrets, protected paths, ambiguous replacements, and parse-invalid HTML/JSON; sub-agents cannot write and the lead owns reviewed mutations'
+      ],
+      setup_required: [
+        'Optional: add a fine-grained GitHub token in Settings → Development with Metadata read, Contents read/write, and Pull requests read/write',
+        'Keep local LM Studio/Ollama/llama.cpp running for $0 specialist roles; configure cloud providers only for quality tiers that need them'
+      ]
+    },
     {
       id: '2026-07-18-eng-pass-2',
       date: '2026-07-18',
@@ -2609,7 +2636,7 @@ var HOMEBASE_CHANGELOG = {
         'Add provider API keys in Settings → Providers',
         'Start and verify Ollama, LM Studio, or llama.cpp, or allow the WebLLM first-use download for local routing'
       ],
-      ownership_note: 'ChatGPT is currently developing the AI model selector engine on top of this router — coordinate before large UI refactors'
+      ownership_note: 'The selector is integrated with automatic task teams; preserve central budget reservations and per-role quality floors during refactors'
     },
     {
       id: '2026-07-18-changelog-embed',
@@ -2693,10 +2720,10 @@ var HOMEBASE_CHANGELOG = {
   ],
   planned: [
     {
-      id: 'plan-model-selector-engine',
-      title: 'ChatGPT WIP: richer AI model selector engine (picker UX, capability matrix, routing UI)',
-      status: 'in_progress',
-      notes: 'Owned by ChatGPT session — other agents should only bugfix autoRoute/cloudBudget paths, not rewrite the selector'
+      id: 'plan-provider-billing-reconcile',
+      title: 'Optional read-only reconciliation with provider billing exports',
+      status: 'idea',
+      notes: 'Local rolling estimates remain privacy-first; provider billing and provider-side limits are authoritative'
     },
     {
       id: 'plan-gmail-live',
@@ -2726,7 +2753,7 @@ var HOMEBASE_CHANGELOG = {
     'Keep planned[] honest — move items to entries when shipped',
     'Call syncHomebaseChangelogDom() after editing entries if you need the DOM pre to update mid-session',
     'Do not surface this changelog as a visible dashboard card unless the user asks',
-    'Model selector / auto-router UI is under active ChatGPT development — coordinate; preserve selectAIRoute, cloudBudget, LS_USAGE, autoRoute settings keys'
+    'Preserve selectAIRoute, cloudBudget, LS_USAGE, autoRoute, buildAutoAgentTeam, bounded sub-agent tools, and draft-PR-only source write guards'
   ]
 };
 try { window.HOMEBASE_CHANGELOG = HOMEBASE_CHANGELOG; } catch(e){}
@@ -5240,6 +5267,7 @@ var PROFILE_SEEDS = [
   { id:'seed-communication', text:'Prefers clear, outcome-first, non-technical explanations with minimal jargon; important results should be easy to scan.', category:'preference', importance:4, pinned:false, tags:['communication','ux'] },
   { id:'seed-finance-privacy', text:'Treat personal financial data as private: keep balances and detailed account data local or in private storage, never on public GitHub Pages.', category:'preference', importance:5, pinned:false, tags:['finance','privacy'] },
   { id:'seed-ai-budget', text:'Keep estimated paid cloud AI usage below $50 across the trailing 30 days. Prefer local models for simple work and choose the least expensive cloud model that meets the task quality and capability requirements.', category:'preference', importance:5, pinned:true, tags:['ai','budget','routing'] },
+  { id:'seed-ai-agents', text:'For complex requests, automatically decompose the work across simultaneous specialist sub-agents with role-appropriate tools and cost-effective models. Reserve advanced cloud models for the subproblems and final integration that genuinely require them.', category:'preference', importance:5, pinned:true, tags:['ai','agents','delegation'] },
   { id:'seed-timezone', text:'Default timezone is America/Vancouver (Pacific Time); use local Pacific dates and times unless another timezone is specified.', category:'location', importance:5, pinned:false, tags:['timezone','locale'] },
   { id:'seed-workstation', text:'Uses a Mac and the Codex desktop app for local project work.', category:'fact', importance:3, pinned:false, tags:['mac','codex'] }
 ];
@@ -5732,7 +5760,8 @@ function classifyAIRequest(query, latestUser, convo){
   var maxQuality = /\b(most advanced|best (?:available )?model|maximum quality|highest quality|strongest model|frontier model|no matter the cost)\b/i.test(q);
   var needsTools = /\b(today|current|currently|latest|live|right now|news|weather|price|stock|score|schedule|search|browse|look up|verify|source|citation|dashboard|calendar|task|remind|update|change|modify|create|delete)\b/i.test(q);
   var highStakes = /\b(diagnos|dose|dosage|interaction|contraindication|patient|clinical|legal|lawsuit|tax|portfolio|investment|retirement|mortgage|financial plan)\b/i.test(q);
-  var advanced = hasVision || highStakes || /\b(architecture|debug|refactor|security audit|research|analy[sz]e|strategy|multi-step|proof|theorem|complex|compare.*trade-?off|production|migration|forecast|model this|write (?:an )?(?:app|program|contract))\b/i.test(q) || q.length > 1400;
+  var advanced = hasVision || highStakes || /\b(architecture|debug|refactor|security audit|research|analy[sz]e|strategy|multi-step|proof|theorem|complex|compare.*trade-?off|production|migration|forecast|model this|write (?:an )?(?:app|program|contract))\b/i.test(q) ||
+    /\b(build|develop|implement|redesign|refactor)\b[\s\S]{0,120}\b(app|dashboard|feature|integration|workflow|system|source|repository|repo)\b/i.test(q) || q.length > 1400;
   var simple = q.length < 550 && !hasVision && !highStakes && !advanced && !needsTools;
   var tier = maxQuality || named ? 4 : (advanced ? 3 : (simple ? 1 : 2));
   return {tier:tier, named:named, explicitMax:maxQuality, vision:hasVision, tools:needsTools,
@@ -5826,6 +5855,149 @@ function updateBudgetDisplays(){
     var mp = $('model-prov');
     if (mp && S.settings && S.settings.autoRoute) mp.textContent = '$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(0) + ' · ' + info.windowDays + 'd';
   } catch(e){}
+}
+
+/* ================= task-shaped agent teams ================= */
+function agentRolesForTask(query, cls){
+  var q = String(query || '').toLowerCase(), roles;
+  if (/\b(build|create|develop|implement|refactor|debug|fix|redesign|web ?app|dashboard|source code|repository|repo)\b/.test(q)){
+    roles = [
+      {label:'Architecture', quality:4, prompt:'Act as the architecture lead. Inspect the existing product and repository, define boundaries, dependencies, risks, and the smallest coherent implementation plan. Return concrete findings for the lead agent.', tools:['list_dashboard','list_repository_files','read_repository_file','search_repository']},
+      {label:'Product & UI', quality:3, prompt:'Act as the product and interface specialist. Check the existing user experience, workflows, responsive behaviour, accessibility, and consistency. Return specific implementation guidance, not generic design advice.', tools:['list_dashboard','read_repository_file','search_repository']},
+      {label:'Data & connectors', quality:3, prompt:'Act as the data and integrations specialist. Identify data contracts, connectors, API boundaries, privacy constraints, and failure states. Use only read-only connector actions and return implementation-ready findings.', tools:['list_connectors','read_connector','list_dashboard','read_repository_file','search_repository','web_search','read_url']},
+      {label:'Implementation & QA', quality:4, prompt:'Act as the implementation and QA specialist. Inspect relevant files, identify exact changes and regression risks, and propose focused verification. Do not mutate the repository; the lead agent owns reviewed writes.', tools:['list_dashboard','list_repository_files','read_repository_file','search_repository','calculate']}
+    ];
+  } else if (/\b(research|compare|evidence|clinical|drug|medication|medical|legal|tax|invest|portfolio|financial)\b/.test(q)){
+    roles = [
+      {label:'Evidence researcher', quality:3, prompt:'Find current primary or authoritative evidence and preserve source context. Separate sourced facts from inference.', tools:['research','web_search','read_url','search_memory']},
+      {label:'Domain specialist', quality:4, prompt:'Analyze the request as a careful domain specialist. Surface important constraints, calculations, uncertainty, and decisions.', tools:['calculate','research','search_memory','list_connectors']},
+      {label:'Skeptic & safety', quality:4, prompt:'Challenge assumptions, look for missing evidence and safety risks, and identify claims that need qualification or verification.', tools:['research','web_search','read_url','calculate']}
+    ];
+  } else {
+    roles = [
+      {label:'Planner', quality:3, prompt:'Decompose the task into concrete decisions and dependencies. Return a concise execution brief.', tools:['search_memory','list_dashboard','list_connectors']},
+      {label:'Specialist', quality:cls && cls.tier >= 3 ? 4 : 3, prompt:'Solve the hardest substantive part of the task. Be specific, practical, and evidence-aware.', tools:['search_memory','research','web_search','read_url','calculate']},
+      {label:'Reviewer', quality:3, prompt:'Review the likely answer for omissions, contradictions, safety issues, and unnecessary cost or complexity.', tools:['calculate','search_memory']}
+    ];
+  }
+  return roles.slice(0, clamp(+S.settings.maxSubagents || 4, 2, 6));
+}
+function shouldAutoDelegate(query, cls){
+  if (!S.settings.autoDelegate) return false;
+  var q = String(query || '');
+  if (/\b(do not|don't|dont) (?:use|delegate|spawn|assign).{0,18}(?:agents?|team)\b|\b(single agent|work alone)\b/i.test(q)) return false;
+  if (/\b(delegate|spawn|assign|parallel(?:ize)?|agent team|sub-?agents?|several agents?)\b/i.test(q)) return true;
+  if (/\b(build|develop|implement|redesign|refactor)\b[\s\S]{0,140}\b(app|dashboard|feature|integration|workflow|system|source|repository|repo)\b/i.test(q)) return true;
+  return !!(cls && cls.tier >= 3 && /\b(build|create|develop|implement|redesign|refactor|debug|audit|research|analy[sz]e|compare|strategy|migration|investigate|plan)\b/i.test(q));
+}
+function localModelForRole(role){
+  if (!S.settings.localFirst || +role.quality > 3) return null;
+  var locals = ['ollama','lmstudio','llamacpp','custom'];
+  for (var i = 0; i < locals.length; i++){
+    var p = locals[i], ids = (S.settings.modelCache[p] || []);
+    if (!localEndpoint(p) || !recentLocalProvider(p) || !ids.length) continue;
+    var caps = modelCaps(p, ids[0]);
+    if (role.tools.length && !caps.tools) continue;
+    return {provider:p, model:ids[0], estimatedCost:0, quality:modelQuality(p, ids[0]), local:true};
+  }
+  return null;
+}
+function cheapestRoleModel(role, fallback, msgs){
+  var local = localModelForRole(role);
+  if (local) return local;
+  var tier = +role.quality >= 5 ? 4 : (+role.quality >= 4 ? 3 : 2);
+  var cls = {tier:tier, explicitMax:false, vision:false, tools:role.tools.length > 0};
+  var maxOut = tier >= 3 ? 1600 : 1000;
+  var choices = cloudRouteCandidates(cls, '', msgs || [], maxOut);
+  choices.sort(function(a,b){ return a.estimatedCost - b.estimatedCost || b.quality - a.quality; });
+  if (choices.length) return Object.assign(choices[0], {maxTokens:maxOut});
+  if (fallback && PROVIDERS[fallback.provider] && providerReady(fallback.provider)){
+    return {provider:fallback.provider, model:fallback.model, estimatedCost:+fallback.estimatedCost || 0,
+      quality:modelQuality(fallback.provider, fallback.model), maxTokens:Math.min(fallback.maxTokens || maxOut, maxOut)};
+  }
+  return null;
+}
+function buildAutoAgentTeam(query, route, msgs){
+  var cls = (route && route.classification) || classifyAIRequest(query, {}, null);
+  if (!shouldAutoDelegate(query, cls)) return [];
+  var cap = Math.max(0.05, +S.settings.teamBudgetUsd || 1.5), projected = 0, team = [];
+  agentRolesForTask(query, cls).forEach(function(role){
+    var pick = cheapestRoleModel(role, route, msgs);
+    if (!pick) return;
+    var next = projected + (+pick.estimatedCost || 0);
+    if (team.length >= 2 && next > cap) return;
+    projected = next;
+    team.push({label:role.label, rolePrompt:role.prompt, toolNames:role.tools.slice(), quality:role.quality,
+      provider:pick.provider, model:pick.model, estimatedCost:+pick.estimatedCost || 0,
+      maxTokens:pick.maxTokens || (+role.quality >= 4 ? 1600 : 1000)});
+  });
+  if (team.length < 2) return [];
+  team.projectedCost = projected;
+  return team;
+}
+function toolsForNames(names){
+  names = names || [];
+  return enabledTools().filter(function(t){ return names.indexOf(t.name) >= 0; });
+}
+async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
+  if (!PROVIDERS[cm.provider] || !providerReady(cm.provider)) throw new Error('Provider not ready');
+  var history = msgs.slice(), roleTools = toolsForNames(cm.toolNames), finalText = '';
+  for (var round = 0; round < 3; round++){
+    var canCall = roleTools.length && round < 2 ? roleTools : null;
+    var res = await runChat({
+      provider:cm.provider, model:cm.model,
+      system:buildSystem(convo, {query:userQuery}) + '\n\nYou are a bounded sub-agent on a coordinated team. ' + cm.rolePrompt +
+        '\nUse only the tools supplied to you. Never perform repository writes, sends, deletions, or other external mutations. Return a compact handoff to the lead agent.',
+      msgs:history, temperature:Math.min(.5, S.settings.temperature), maxTokens:cm.maxTokens || 1200,
+      think:false, tools:canCall, signal:S.abort.signal, conversationId:convo.id, messageId:am.id,
+      onText:function(t){ cm.text += t; schedulePaint(am, convo); }, onThink:null, onProgress:null
+    });
+    addUsage(totalUsage, res.usage);
+    finalText = res.text || cm.text;
+    if (!(res.toolCalls && res.toolCalls.length && canCall)) break;
+    var results = [];
+    for (var i = 0; i < res.toolCalls.length; i++){
+      var call = res.toolCalls[i];
+      results.push({id:call.id, name:call.name, text:await execTool(call.name, call.args)});
+    }
+    history.push({role:'assistant', text:res.text || '', anthRaw:res.anthRaw, toolCalls:res.toolCalls});
+    history.push({role:'tool', results:results});
+    cm.text = '';
+  }
+  cm.text = finalText || cm.text;
+}
+async function runTeamLeadSynthesis(sp, sm, convo, history, userQuery, am, totalUsage, allowTools, maxTokens){
+  var leadTools = allowTools ? enabledTools() : null, final = null;
+  for (var round = 0; round < 5; round++){
+    var roundTools = leadTools && round < 4 ? leadTools : null;
+    var res = await runChat({
+      provider:sp, model:sm,
+      system:buildSystem(convo, {query:userQuery, councilSynth:true}) +
+        '\n\nYou are the lead agent. Reconcile the specialist handoffs, make the final decisions, and complete the user\'s request. You own any allowed mutations. Inspect before editing, keep changes scoped, and use a guarded draft pull request for source-code changes.',
+      msgs:history, temperature:Math.min(.7, S.settings.temperature), maxTokens:maxTokens,
+      think:S.settings.thinking, tools:roundTools, signal:S.abort.signal,
+      conversationId:convo.id, messageId:am.id,
+      onText:function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
+      onThink:function(t){ am.thinking += t; schedulePaint(am, convo); },
+      onProgress:function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
+    });
+    addUsage(totalUsage, res.usage); final = res;
+    if (!(res.toolCalls && res.toolCalls.length && roundTools)) break;
+    var rd = {text:res.text || '', anthRaw:res.anthRaw,
+      calls:res.toolCalls.map(function(c){ return {id:c.id, name:c.name, args:c.args, result:null, state:'run'}; })};
+    am.toolRounds.push(rd); am.liveText = ''; paintMsg(am, convo);
+    for (var i = 0; i < rd.calls.length; i++){
+      var call = rd.calls[i];
+      call.result = await execTool(call.name, call.args);
+      call.state = /^Error:/.test(call.result) ? 'err' : 'done';
+      paintMsg(am, convo);
+      if (S.abort.signal.aborted) throw domAbort();
+    }
+    history.push({role:'assistant', text:rd.text, anthRaw:rd.anthRaw,
+      toolCalls:rd.calls.map(function(c){ return {id:c.id, name:c.name, args:c.args}; })});
+    history.push({role:'tool', results:rd.calls.map(function(c){ return {id:c.id, name:c.name, text:c.result}; })});
+  }
+  return final || {text:am.liveText, usage:{}};
 }
 
 /* ============================ SSE reader ============================ */
@@ -6282,6 +6454,120 @@ async function runChat(o){
 /* ============================ agent tools ============================ */
 var WMO_CODES = {0:'clear sky',1:'mainly clear',2:'partly cloudy',3:'overcast',45:'fog',48:'rime fog',51:'light drizzle',53:'drizzle',55:'heavy drizzle',61:'light rain',63:'rain',65:'heavy rain',66:'freezing rain',67:'freezing rain',71:'light snow',73:'snow',75:'heavy snow',77:'snow grains',80:'light showers',81:'showers',82:'heavy showers',85:'snow showers',86:'snow showers',95:'thunderstorm',96:'thunderstorm w/ hail',99:'thunderstorm w/ hail'};
 
+function githubRepo(){
+  var repo = String(S.settings.devRepo || 'wghtkbpxwx-a11y/tesla-dashboard').trim();
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) throw new Error('Repository must be owner/name.');
+  return repo;
+}
+function githubHeaders(extra){
+  var h = Object.assign({'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}, extra || {});
+  var cfg = connectorCfg('github');
+  if (cfg && cfg.token) h.Authorization = 'Bearer ' + cfg.token;
+  return h;
+}
+async function githubApi(path, options){
+  options = options || {};
+  var resp = await withTimeout(function(sig){
+    return fetch('https://api.github.com' + path, Object.assign({}, options, {signal:sig,
+      headers:githubHeaders(options.headers)}));
+  }, 20000);
+  if (!resp.ok){
+    var msg = 'HTTP ' + resp.status;
+    try { var j = await resp.json(); if (j.message) msg += ' — ' + j.message; } catch(e){}
+    throw new Error(msg);
+  }
+  if (resp.status === 204) return {};
+  return resp.json();
+}
+function repoPath(path){
+  path = String(path || '').replace(/^\/+/, '').trim();
+  if (!path || path.indexOf('..') >= 0 || /(^|\/)(\.env|\.git|secrets?|credentials?)(\.|\/|$)/i.test(path) || /^\.github\/workflows\//i.test(path))
+    throw new Error('That repository path is not allowed.');
+  return path;
+}
+function encodeRepoPath(path){ return repoPath(path).split('/').map(encodeURIComponent).join('/'); }
+function b64DecodeUtf8(s){
+  var bin = atob(String(s || '').replace(/\s/g,'')), bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function b64EncodeUtf8(s){
+  var bytes = new TextEncoder().encode(String(s)), bin = '', chunk = 0x8000;
+  for (var i = 0; i < bytes.length; i += chunk) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  return btoa(bin);
+}
+async function repositoryFile(path, ref){
+  var data = await githubApi('/repos/' + githubRepo() + '/contents/' + encodeRepoPath(path) + '?ref=' + encodeURIComponent(ref || S.settings.devBaseBranch || 'main'));
+  if (data.type !== 'file' || !data.content) throw new Error('Path is not a readable file.');
+  return {path:data.path, sha:data.sha, text:b64DecodeUtf8(data.content), html_url:data.html_url};
+}
+async function repositoryTree(ref){
+  var data = await githubApi('/repos/' + githubRepo() + '/git/trees/' + encodeURIComponent(ref || S.settings.devBaseBranch || 'main') + '?recursive=1');
+  return (data.tree || []).filter(function(x){ return x.type === 'blob'; });
+}
+function validateSourceText(path, text){
+  if (/\b(?:api[_-]?key|access[_-]?token|secret)\b\s*[:=]\s*["'][A-Za-z0-9_\-.]{18,}["']/i.test(text))
+    throw new Error('Potential embedded secret detected in ' + path + '. Store credentials in browser settings instead.');
+  if (/\.json$/i.test(path)) JSON.parse(text);
+  if (/\.html?$/i.test(path)){
+    var re = /<script\b[^>]*>([\s\S]*?)<\/script>/gi, m;
+    while ((m = re.exec(text))){ if (m[1].trim()) new Function(m[1]); }
+  }
+  return true;
+}
+function sourceChangeAuthorized(){
+  var c = activeConvo(), last = '';
+  if (c) for (var i = c.messages.length - 1; i >= 0; i--) if (c.messages[i].role === 'user'){ last = c.messages[i].text || ''; break; }
+  return /\b(build|create|add|implement|update|change|modify|improve|fix|remove|delete|refactor|redesign|configure)\b/i.test(last);
+}
+async function proposeRepositoryChanges(a){
+  if (!S.settings.developerMode) return 'Error: source-development tools are off in Settings → Development.';
+  if (!sourceChangeAuthorized()) return 'Error: the latest user message must explicitly request a source change.';
+  var cfg = connectorCfg('github');
+  if (!cfg.token) return 'Error: add a fine-grained GitHub token in Settings → Development.';
+  var changes;
+  try { changes = typeof a.changes_json === 'string' ? JSON.parse(a.changes_json) : a.changes_json; }
+  catch(e){ return 'Error: changes_json must be a JSON array.'; }
+  if (!Array.isArray(changes) || !changes.length || changes.length > 12) return 'Error: provide 1–12 file changes.';
+  var base = String(S.settings.devBaseBranch || 'main'), seen = {}, prepared = [];
+  for (var i = 0; i < changes.length; i++){
+    var ch = changes[i] || {}, path = repoPath(ch.path), find = String(ch.find || ''), repl = String(ch.replace == null ? '' : ch.replace);
+    if (seen[path]) return 'Error: combine multiple edits to the same file into one replacement: ' + path;
+    seen[path] = 1;
+    var current = null;
+    try { current = await repositoryFile(path, base); }
+    catch(e){ if (find) return 'Error reading ' + path + ': ' + e.message; }
+    var next;
+    if (!current){ next = repl; }
+    else {
+      if (!find) return 'Error: find is required when editing existing file ' + path;
+      var parts = current.text.split(find);
+      if (parts.length !== 2) return 'Error: find text must occur exactly once in ' + path + ' (found ' + (parts.length - 1) + ').';
+      next = parts[0] + repl + parts[1];
+    }
+    validateSourceText(path, next);
+    prepared.push({path:path, sha:current && current.sha, text:next});
+  }
+  var title = String(a.title || 'Homebase agent update').trim().slice(0, 120);
+  var summary = prepared.map(function(x){ return '• ' + x.path; }).join('\n');
+  if (S.settings.devConfirmWrites !== false && !confirm('Homebase is ready to create a branch and draft pull request:\n\n' + title + '\n\n' + summary + '\n\nContinue?'))
+    return 'Cancelled: no repository changes were made.';
+  var ref = await githubApi('/repos/' + githubRepo() + '/git/ref/heads/' + encodeURIComponent(base));
+  var stamp = new Date().toISOString().replace(/[-:TZ.]/g,'').slice(0,14);
+  var branch = 'homebase/ai-' + stamp + '-' + uuid().slice(0,6);
+  await githubApi('/repos/' + githubRepo() + '/git/refs', {method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ref:'refs/heads/' + branch, sha:ref.object.sha})});
+  for (var pi = 0; pi < prepared.length; pi++){
+    var f = prepared[pi];
+    await githubApi('/repos/' + githubRepo() + '/contents/' + encodeRepoPath(f.path), {method:'PUT', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:title + ' · ' + f.path, content:b64EncodeUtf8(f.text), branch:branch, sha:f.sha || undefined})});
+  }
+  var pr = await githubApi('/repos/' + githubRepo() + '/pulls', {method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({title:title, head:branch, base:base, draft:true,
+      body:'Created by the Homebase lead agent after an explicit dashboard chat request.\n\n## Why\n' + String(a.reason || 'User-requested dashboard improvement.') + '\n\n## Files\n' + summary + '\n\nPlease review and test before merging.'})});
+  return 'Draft pull request created: ' + pr.html_url + '\nBranch: ' + branch + '\nFiles: ' + prepared.map(function(x){ return x.path; }).join(', ');
+}
+
 var TOOLS = [
   { name:'get_current_time',
     description:'Get the current local date and time of the user, including timezone.',
@@ -6599,6 +6885,17 @@ TOOLS.push(
         return (on ? 'ON ' : 'off') + ' · ' + d.id + ' — ' + d.name + ': ' + d.desc;
       }).join('\n');
     }},
+  { name:'read_connector',
+    description:'Use a connector in read-only mode for specialist research. Mutating actions such as compose, send, create, update, delete, or write are rejected.',
+    params:{ connector:{type:'string'}, action:{type:'string'}, query:{type:'string'}, repo:{type:'string'}, location:{type:'string'} }, required:['connector'],
+    run:async function(a){
+      var action = String(a.action || 'status').toLowerCase();
+      if (/\b(compose|send|create|update|delete|remove|write|push|post|upload|share|move|cancel)\b/.test(action))
+        return 'Error: read_connector only permits read-only actions.';
+      return runConnector(String(a.connector || '').toLowerCase(), action, {
+        query:a.query, repo:a.repo, location:a.location
+      });
+    }},
   { name:'use_connector',
     description:'Use a connected service. Connectors: dashboard, github, gmail, calendar, drive, weather, web, tasks. Actions e.g. dashboard:brief, github:repos|issues, gmail:compose|search, calendar:upcoming|open, weather:now, web:search, tasks:list.',
     params:{
@@ -6612,6 +6909,57 @@ TOOLS.push(
     run: async function(a){
       return runConnector(String(a.connector || '').toLowerCase(), String(a.action || '').toLowerCase() || undefined, a);
     }}
+);
+
+TOOLS.push(
+  { name:'list_repository_files',
+    description:'List files in the configured Homebase GitHub repository. Read-only. Use before planning source changes.',
+    params:{ path:{type:'string', description:'Optional path prefix'}, limit:{type:'number', description:'Maximum files, default 120'} }, required:[],
+    run:async function(a){
+      if (!S.settings.developerMode) return 'Error: source-development tools are off.';
+      var prefix = String(a.path || '').replace(/^\/+|\/+$/g,''), limit = clamp(+a.limit || 120, 1, 300);
+      var tree = await repositoryTree();
+      var paths = tree.map(function(x){ return x.path; }).filter(function(p){ return !prefix || p === prefix || p.indexOf(prefix + '/') === 0; }).slice(0, limit);
+      return 'Repository ' + githubRepo() + ' @ ' + (S.settings.devBaseBranch || 'main') + '\n' + (paths.length ? paths.join('\n') : '(no files under that path)');
+    }},
+  { name:'read_repository_file',
+    description:'Read one text/source file from the configured Homebase GitHub repository. Read-only.',
+    params:{ path:{type:'string'}, ref:{type:'string', description:'Optional branch; defaults to configured base'} }, required:['path'],
+    run:async function(a){
+      if (!S.settings.developerMode) return 'Error: source-development tools are off.';
+      var f = await repositoryFile(a.path, a.ref);
+      return 'File: ' + f.path + '\nSHA: ' + f.sha + '\n\n' + (f.text.length > 50000 ? f.text.slice(0,50000) + '\n…(truncated)' : f.text);
+    }},
+  { name:'search_repository',
+    description:'Search file paths and text within the configured Homebase repository. Read-only; returns compact matching excerpts.',
+    params:{ query:{type:'string'}, path:{type:'string', description:'Optional path prefix'}, limit:{type:'number'} }, required:['query'],
+    run:async function(a){
+      if (!S.settings.developerMode) return 'Error: source-development tools are off.';
+      var needle = String(a.query || '').trim().toLowerCase();
+      if (!needle) return 'Error: empty query.';
+      var prefix = String(a.path || '').replace(/^\/+|\/+$/g,''), limit = clamp(+a.limit || 12, 1, 24);
+      var tree = await repositoryTree(), textual = /\.(html?|css|js|mjs|cjs|ts|tsx|jsx|json|md|txt|ya?ml|toml|py|sh)$/i;
+      var candidates = tree.filter(function(x){ return textual.test(x.path) && (!prefix || x.path.indexOf(prefix) === 0); });
+      candidates.sort(function(x,y){ return (y.path.toLowerCase().indexOf(needle) >= 0) - (x.path.toLowerCase().indexOf(needle) >= 0); });
+      var hits = [];
+      for (var i = 0; i < candidates.length && hits.length < limit && i < 40; i++){
+        try {
+          var f = await repositoryFile(candidates[i].path), low = f.text.toLowerCase(), at = low.indexOf(needle);
+          if (at < 0 && candidates[i].path.toLowerCase().indexOf(needle) < 0) continue;
+          var start = Math.max(0, at < 0 ? 0 : at - 220), excerpt = f.text.slice(start, start + 700).replace(/\n{3,}/g,'\n\n');
+          hits.push('--- ' + f.path + ' ---\n' + excerpt);
+        } catch(e){}
+      }
+      return hits.length ? hits.join('\n\n') : 'No repository matches for "' + needle + '".';
+    }},
+  { name:'propose_repository_changes',
+    description:'After explicit user authorization and read-only inspection, create a NEW branch and DRAFT pull request containing 1–12 exact source-file edits. Never writes to the base branch. Existing files require an exact unique find string; new files use an empty find. The user is asked to confirm before any write.',
+    params:{
+      title:{type:'string', description:'Short pull request title'},
+      reason:{type:'string', description:'Why this change is needed and how it was checked'},
+      changes_json:{type:'string', description:'JSON array: [{"path":"ai/index.html","find":"exact old text","replace":"new text"}]. Empty find is only for a new file.'}
+    }, required:['title','reason','changes_json'],
+    run:proposeRepositoryChanges}
 );
 
 TOOLS.push(
@@ -6781,6 +7129,7 @@ TOOLS.forEach(function(t){ TOOLS_BY_NAME[t.name] = t; });
 function enabledTools(){
   return TOOLS.filter(function(t){
     if ((t.name === 'web_search' || t.name === 'read_url' || t.name === 'research' || t.name === 'get_news') && !S.settings.webSearchTool) return false;
+    if (/repository/.test(t.name) && !S.settings.developerMode) return false;
     return true;
   });
 }
@@ -6960,6 +7309,7 @@ function buildSystem(convo, opts){
       'Use search_memory before inventing personal facts; use remember / update_memory / forget_memory to maintain memory.',
       'When the user asks about email, calendar, Drive, GitHub, the Tesla dashboard, or connected services, call list_connectors / use_connector.',
       'You can UPDATE the Homebase life dashboard live: call list_dashboard then update_dashboard (pin_note, set_widget, reorder_widget, add_hub_link, refresh, set_home_location, etc.). When the user says things like “put this on my dashboard”, “hide sports”, “add a link to Monarch”, “refresh my dashboard”, or “pin a reminder”, use these tools — the UI updates immediately.',
+      'For requested SOURCE-CODE work, inspect with list_repository_files, search_repository, and read_repository_file. Only after an explicit user request, use propose_repository_changes with exact unique replacements. It creates a new branch and draft pull request; never place secrets in source, never write directly to the base branch, and never claim a source change happened unless the tool returns a pull-request URL.',
       'Dashboard history and roadmap for agents lives in HOMEBASE_CHANGELOG (window.HOMEBASE_CHANGELOG, hidden #homebase-changelog, and list_dashboard → Changelog section). When editing dashboard modules/APIs, append a new changelog entry (newest first) and update planned items — do not show the changelog as a user-facing card unless asked.',
       'After tools, answer naturally with key findings — do not dump raw tool JSON.'
     ];
@@ -6972,7 +7322,7 @@ function buildSystem(convo, opts){
     }).join('\n'));
   }
   if (opts.councilSynth){
-    parts.push('You are the Council synthesizer. Multiple models answered the user. Produce a single superior answer: reconcile disagreements, keep the best reasoning, note residual uncertainty, and be decisive. Do not mention "as an AI council" unless asked.');
+    parts.push('You are the lead synthesizer. Multiple specialists may have answered the user. Produce a single superior result: reconcile disagreements, keep the best reasoning, note residual uncertainty, and be decisive. Complete allowed actions instead of merely summarizing the team.');
   }
   return parts.join('\n\n');
 }
@@ -7296,10 +7646,13 @@ async function sendMessage(rawText, opts){
   var route = S.settings.autoRoute ? selectAIRoute(latestUser.text || '', latestUser, convo, previewMsgs) : null;
   var provider = route ? route.provider : convo.provider;
   var model = route ? route.model : convo.model;
+  var configuredCouncilReady = !!(S.settings.councilOn && (S.settings.council.members || []).length >= 2);
+  var autoTeam = (S.settings.autoRoute && !configuredCouncilReady) ? buildAutoAgentTeam(latestUser.text || '', route, previewMsgs) : [];
   var caps = modelCaps(provider, model);
   var am = { id: uuid(), role:'assistant', text:'', liveText:'', thinking:'', toolRounds:[],
     provider: provider, model: model, ts: Date.now(), streaming: true, usage:{},
-    routeReason: route ? route.reason : 'Manual model selection', routeTier: route ? route.tier : null };
+    routeReason: (route ? route.reason : 'Manual model selection') + (autoTeam.length ? ' · Auto team: ' + autoTeam.length + ' specialists' : ''),
+    routeTier: route ? route.tier : null };
   convo.messages.push(am);
   $('chat').appendChild(msgEl(am, convo));
   scrollBottom(true);
@@ -7309,7 +7662,9 @@ async function sendMessage(rawText, opts){
   var totalUsage = {inTok:0, outTok:0, costUsd:0};
   var toolsOn = convo.toolsOn && caps.tools;
   var tools = toolsOn ? enabledTools() : null;
-  var useCouncil = !!(S.settings.councilOn && (S.settings.council.members || []).length >= 2);
+  var manualCouncil = configuredCouncilReady;
+  var councilMembers = manualCouncil ? (S.settings.council.members || []).slice(0, 5) : autoTeam;
+  var useCouncil = councilMembers.length >= 2;
   try {
     var msgs = internalHistory(convo, convo.messages.length - 1);
     var userQuery = '';
@@ -7318,14 +7673,16 @@ async function sendMessage(rawText, opts){
     }
 
     if (useCouncil){
-      am.councilMode = S.settings.council.mode || 'debate';
-      am.council = (S.settings.council.members || []).slice(0, 5).map(function(mem, i){
+      am.councilMode = manualCouncil ? (S.settings.council.mode || 'debate') : 'task team';
+      am.council = councilMembers.map(function(mem, i){
         return {
           label: mem.label || ((PROVIDERS[mem.provider] && PROVIDERS[mem.provider].name) || mem.provider || 'Model') + ' ' + (i+1),
-          provider: mem.provider, model: mem.model, text: '', state: 'run', error: null
+          provider: mem.provider, model: mem.model, text: '', state: 'run', error: null,
+          rolePrompt:mem.rolePrompt || '', toolNames:(mem.toolNames || []).slice(), quality:mem.quality || 3,
+          maxTokens:mem.maxTokens || 1200, estimatedCost:+mem.estimatedCost || 0
         };
       });
-      am.statusNote = 'Council deliberating';
+      am.statusNote = manualCouncil ? 'Council deliberating' : 'Specialists working in parallel';
       paintMsg(am, convo);
       var memberJobs = am.council.map(function(cm){
         return (async function(){
@@ -7333,21 +7690,24 @@ async function sendMessage(rawText, opts){
             cm.state = 'err'; cm.error = 'Provider not ready'; return;
           }
           try {
-            var roleHint = (S.settings.council.mode === 'debate')
-              ? 'You are one expert on a model council. Give your best independent answer. Be concise but rigorous. Do not defer to other models.'
-              : 'Give a high-quality independent answer. Be concise.';
-            var res = await runChat({
-              provider: cm.provider, model: cm.model,
-              system: buildSystem(convo, {query: userQuery}) + '\n\n' + roleHint,
-              msgs: msgs, temperature: S.settings.temperature, maxTokens: Math.min(S.settings.maxTokens, 4096),
-              think: false, tools: null, signal: S.abort.signal,
-              conversationId:convo.id, messageId:am.id,
-              onText: function(t){ cm.text += t; schedulePaint(am, convo); },
-              onThink: null, onProgress: null
-            });
-            cm.text = res.text || cm.text;
+            if (!manualCouncil){
+              await runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage);
+            } else {
+              var roleHint = (S.settings.council.mode === 'debate')
+                ? 'You are one expert on a model council. Give your best independent answer. Be concise but rigorous. Do not defer to other models.'
+                : 'Give a high-quality independent answer. Be concise.';
+              var res = await runChat({
+                provider:cm.provider, model:cm.model,
+                system:buildSystem(convo, {query:userQuery}) + '\n\n' + roleHint,
+                msgs:msgs, temperature:S.settings.temperature, maxTokens:Math.min(S.settings.maxTokens, 4096),
+                think:false, tools:null, signal:S.abort.signal,
+                conversationId:convo.id, messageId:am.id,
+                onText:function(t){ cm.text += t; schedulePaint(am, convo); }, onThink:null, onProgress:null
+              });
+              cm.text = res.text || cm.text;
+              addUsage(totalUsage, res.usage);
+            }
             cm.state = 'done';
-            addUsage(totalUsage, res.usage);
           } catch(e){
             if (e && (e.name === 'AbortError' || e.code === 20)) throw e;
             cm.state = 'err'; cm.error = (e && e.message) || String(e);
@@ -7364,25 +7724,17 @@ async function sendMessage(rawText, opts){
       var sp = (synth && synth.provider) || provider;
       var sm = (synth && synth.model) || model;
       var dossier = am.council.map(function(cm, i){
-        return '### Council member ' + (i+1) + ' — ' + cm.label + ' (' + cm.provider + '/' + cm.model + ')\n' +
+        return '### ' + (manualCouncil ? 'Council member ' : 'Specialist ') + (i+1) + ' — ' + cm.label + ' (' + cm.provider + '/' + cm.model + ')\n' +
           (cm.error ? '[error] ' + cm.error : (cm.text || '(empty)'));
       }).join('\n\n');
       var synthMsgs = msgs.concat([{
-        role: 'user', text: 'Here are independent council answers to the user\'s latest question. Synthesize the best final answer.\n\n' + dossier,
+        role:'user', text:(manualCouncil ? 'Here are independent council answers. Synthesize the best final answer.' :
+          'Here are parallel specialist handoffs. Reconcile them, then complete the original task as the lead agent. Do not merely summarize the handoffs.') + '\n\n' + dossier,
         images: [], files: []
       }]);
       am.liveText = '';
-      var sres = await runChat({
-        provider: sp, model: sm,
-        system: buildSystem(convo, {query: userQuery, councilSynth: true}),
-        msgs: synthMsgs, temperature: Math.min(0.7, S.settings.temperature),
-        maxTokens: route ? route.maxTokens : S.settings.maxTokens, think: S.settings.thinking, tools: null, signal: S.abort.signal,
-        conversationId:convo.id, messageId:am.id,
-        onText: function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
-        onThink: function(t){ am.thinking += t; schedulePaint(am, convo); },
-        onProgress: function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
-      });
-      addUsage(totalUsage, sres.usage);
+      var sres = await runTeamLeadSynthesis(sp, sm, convo, synthMsgs, userQuery, am, totalUsage,
+        !manualCouncil && toolsOn, route ? route.maxTokens : S.settings.maxTokens);
       am.text = sres.text || am.liveText;
       am.provider = sp; am.model = sm;
     } else {
@@ -8769,6 +9121,7 @@ function renderSettings(expandProvider){
   renderToolsPane();
   renderHubSettingsPane();
   renderCouncilPane();
+  renderDevelopmentPane();
   renderLookPane();
   renderDataPane();
 }
@@ -9022,6 +9375,15 @@ function renderChatPane(){
     function(){ return S.settings.localFirst; }, function(v){ S.settings.localFirst = v; }));
   pane.appendChild(tglRow('In-browser local fallback', 'Use WebLLM for simple queries when no local server is ready (first use downloads the model)',
     function(){ return S.settings.webllmFallback; }, function(v){ S.settings.webllmFallback = v; }));
+  pane.appendChild(tglRow('Automatic specialist teams', 'For complex tasks, delegate independent sub-components in parallel and let a lead agent integrate the result',
+    function(){ return S.settings.autoDelegate; }, function(v){ S.settings.autoDelegate = v; }));
+  var teamRow = row('Team limits', 'Caps parallel roles and the projected cloud cost for one delegated team',
+    '<span style="display:flex;align-items:center;gap:6px"><input id="ps-agents" type="number" min="2" max="6" step="1" style="width:58px"><span style="color:var(--text3)">agents · $</span><input id="ps-team-budget" type="number" min="0.05" max="50" step="0.05" style="width:76px"><span style="color:var(--text3)">max/task</span></span>');
+  pane.appendChild(teamRow);
+  var sai = qs('#ps-agents', pane), tbi = qs('#ps-team-budget', pane);
+  sai.value = clamp(+S.settings.maxSubagents || 4, 2, 6); tbi.value = Math.max(.05, +S.settings.teamBudgetUsd || 1.5).toFixed(2);
+  sai.addEventListener('change', function(){ S.settings.maxSubagents = clamp(+this.value || 4, 2, 6); this.value = S.settings.maxSubagents; saveSettings(); });
+  tbi.addEventListener('change', function(){ S.settings.teamBudgetUsd = clamp(+this.value || 1.5, .05, 50); this.value = S.settings.teamBudgetUsd.toFixed(2); saveSettings(); });
   pane.appendChild(tglRow('Hard cloud spending guard', 'Reserve the estimated maximum before every paid API call; unknown-price models are blocked',
     function(){ return S.settings.cloudBudget.hardStop; }, function(v){ S.settings.cloudBudget.hardStop = v; }));
   var bRow = row('Rolling cloud limit', 'Combined estimated spend across every configured paid provider', '<span style="display:flex;align-items:center;gap:6px">$<input id="ps-budget" type="number" min="1" max="10000" step="1" style="width:90px"><span style="color:var(--text3)">/ trailing</span><input id="ps-window" type="number" min="1" max="365" step="1" style="width:70px"><span style="color:var(--text3)">days</span></span>');
@@ -9255,6 +9617,39 @@ function renderCouncilPane(){
   }
   sprov.addEventListener('change', saveSynth);
   qs('#co-smodel', pane).addEventListener('change', saveSynth);
+}
+
+function renderDevelopmentPane(){
+  var pane = $('pane-dev');
+  if (!pane) return;
+  var cfg = connectorCfg('github');
+  pane.innerHTML = '<div class="hint-box" style="margin:0 0 14px"><b>Guarded self-development.</b> The lead agent can inspect this repository and turn an exact, reviewed source edit into a new branch and <b>draft pull request</b>. It never writes directly to <code>main</code>, never commits API keys, and asks before every write.</div>';
+  pane.appendChild(tglRow('Allow source-development tools', 'Lets the lead agent read/search the configured repository and propose draft pull requests',
+    function(){ return S.settings.developerMode; }, function(v){ S.settings.developerMode = v; }));
+  pane.appendChild(tglRow('Confirm every source write', 'Required safety prompt before creating a branch, commit, or draft pull request',
+    function(){ return S.settings.devConfirmWrites !== false; }, function(v){ S.settings.devConfirmWrites = v; }));
+  var rr = row('Dashboard repository', 'GitHub owner/repository', '<input id="dev-repo" type="text" style="width:250px" placeholder="owner/repository">');
+  pane.appendChild(rr); qs('#dev-repo', pane).value = S.settings.devRepo || 'wghtkbpxwx-a11y/tesla-dashboard';
+  qs('#dev-repo', pane).addEventListener('change', function(){ S.settings.devRepo = this.value.trim(); saveSettings(); });
+  var br = row('Base branch', 'All agent branches start here', '<input id="dev-branch" type="text" style="width:150px" placeholder="main">');
+  pane.appendChild(br); qs('#dev-branch', pane).value = S.settings.devBaseBranch || 'main';
+  qs('#dev-branch', pane).addEventListener('change', function(){ S.settings.devBaseBranch = this.value.trim() || 'main'; saveSettings(); });
+  var tr = row('GitHub access token', 'Stored only in this browser; use a fine-grained token scoped to this repository', '<input id="dev-token" type="password" style="width:250px" placeholder="github_pat_…" autocomplete="off">');
+  pane.appendChild(tr); qs('#dev-token', pane).value = cfg.token || '';
+  qs('#dev-token', pane).addEventListener('change', function(){ cfg.token = this.value.trim(); saveConnectors(); });
+  var actions = document.createElement('div');
+  actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin:14px 0';
+  actions.innerHTML = '<button class="sm-btn pri" id="dev-test" type="button">Test repository access</button><a class="sm-btn" target="_blank" rel="noopener" href="https://github.com/settings/personal-access-tokens/new">Create fine-grained token ↗</a>';
+  pane.appendChild(actions);
+  qs('#dev-test', pane).addEventListener('click', async function(){
+    var b = this; b.disabled = true; b.textContent = 'Testing…';
+    try { var repo = await githubApi('/repos/' + githubRepo()); toast('Connected to ' + repo.full_name, 'ok'); }
+    catch(e){ toast('GitHub: ' + e.message, 'err', 6000); }
+    b.disabled = false; b.textContent = 'Test repository access';
+  });
+  var note = document.createElement('div'); note.className = 'hint-box';
+  note.innerHTML = '<b>Token permissions:</b> repository access to <code>tesla-dashboard</code>; Metadata: read; Contents: read/write; Pull requests: read/write. Read-only inspection works without a token while the repository is public. Source writes still require the token and your confirmation.';
+  pane.appendChild(note);
 }
 
 var ACCENTS = ['#4f46e5','#6366f1','#0ea5e9','#4285f4','#34a853','#fbbc04','#ea4335','#a78bfa'];

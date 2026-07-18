@@ -191,6 +191,21 @@ budget is stored in `nova_cloud_usage_v1`, reserves concurrent calls, and also
 tracks OpenAI premium speech/transcription. Unknown-price cloud models are
 blocked while the guard is enabled. Treat this as an app estimate, not provider
 billing truth; preserve the Settings → Chat tracker and per-reply route reason.
+Complex requests may create automatic task-shaped teams (normally architecture,
+product/UI, data/connectors, and implementation/QA). Role prompts and tool
+allowlists are intentionally bounded; sub-agents are read-only, models are
+selected independently by quality floor and estimated cost, and only the lead
+agent may perform allowed mutations. Preserve `autoDelegate`, `maxSubagents`,
+`teamBudgetUsd`, `buildAutoAgentTeam`, and the central `runChat` budget
+reservation path when changing this flow.
+
+Homebase source-development tools read/search the configured public GitHub repo
+and can create exact multi-file edits only on a new `homebase/ai-*` branch plus
+a draft PR after an explicit source-change request and browser confirmation.
+They reject secrets, protected paths (including `.github/workflows`), ambiguous
+replacements, and parse-invalid HTML/JSON. Never weaken these guards or add a
+direct-to-main write path. GitHub setup lives in Settings → Development; tokens
+remain browser-local in connector storage.
 Dashboard More→Apps has "✦ Nova AI" / "🎙️ Nova Voice" `data-href` submenu
 buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
 Nova uses `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
