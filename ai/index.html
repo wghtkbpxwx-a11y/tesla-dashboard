@@ -2569,7 +2569,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
-    state: 'PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, and PR #61 LM Studio token persistence are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery. LM Studio now requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call.',
+    state: 'PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, and PR #62 secure latency-aware local routing are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio now requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call.',
     start_here: [
       'HOMEBASE_CHANGELOG entry 2026-07-18-lmstudio-secure-mcp-live-verification',
       'HOMEBASE_CHANGELOG entry 2026-07-18-direct-provider-router-v2 plus the updated 2026-07-18-cross-device-vault-deployment entry',
@@ -2622,9 +2622,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-lmstudio-secure-mcp-live-verification',
       date: '2026-07-18',
-      commit: '1423561 (initial follow-up commit)',
+      commit: 'a022bc34fab43d32f53ead498132d4671348e0b5',
       branch: 'codex/record-lmstudio-secure-live',
-      pull_request: '#62 draft',
+      pull_request: '#62 merged',
       title: 'Lock down LM Studio and verify one budgeted installed-MCP search end to end',
       type: 'ops+security+verification+docs',
       depends_on: ['2026-07-18-lmstudio-token-auth-fix','2026-07-18-direct-provider-router-v2'],
@@ -2649,6 +2649,7 @@ var HOMEBASE_CHANGELOG = {
       ],
       verification: [
         'PR #61 merge commit 32d9542a54432ee1c65a7bc6b6bf1470eb76f487 is on main; its validation and Pages deployment runs completed successfully',
+        'PR #62 merge commit a022bc34fab43d32f53ead498132d4671348e0b5 is on main; validation run 29664300121 and Pages run 29664299788 completed successfully, and the live page serves localFastModel plus the updated routing and changelog entry',
         'Authenticated Homebase model discovery returned HTTP 200, while an unauthenticated /api/v1/models request returned HTTP 401',
         'LM Studio logs show the installed mcp/web-search connector registered, brave_web_search requested exactly once, and a tool result received',
         'Homebase fixed-cost accounting commits $0.005 only after /api/v1/chat returns a readable answer and releases the reservation on errors'
