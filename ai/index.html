@@ -763,7 +763,7 @@ a:hover{text-decoration:underline}
   display: none; align-items: center; gap: 6px;
   padding: 6px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 650;
   border: 1px solid var(--border); background: var(--surface-glass); color: var(--text2);
-  cursor: pointer; white-space: nowrap;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0; max-width: 42vw; overflow: hidden; text-overflow: ellipsis;
 }
 #sync-pill.on{ color: var(--ok); border-color: color-mix(in srgb, var(--ok) 35%, var(--border)); }
 #sync-pill.err{ color: var(--danger); }
@@ -1971,7 +1971,7 @@ function vaultSetStatus(st, msg){
     pill.textContent = st === 'syncing' ? 'Syncing…' : st === 'ok' ? 'Vault synced' : st === 'err' ? 'Sync error' : 'Drive vault';
     pill.classList.toggle('on', st === 'ok');
     pill.classList.toggle('err', st === 'err');
-    pill.style.display = (connectorOn('drive') && connectorCfg('drive').clientId) ? '' : 'none';
+    pill.style.display = (connectorOn('drive') && connectorCfg('drive').clientId) ? 'inline-flex' : 'none';
   }
 }
 
@@ -2078,10 +2078,16 @@ function applyVaultPayload(payload, opts){
     saveTasks();
   }
   if (payload.connectors && typeof payload.connectors === 'object'){
-    // merge, keep local drive tokens if newer
     var base = loadConnectorsState();
     Object.keys(payload.connectors).forEach(function(id){
-      base[id] = Object.assign({}, base[id] || {}, payload.connectors[id]);
+      var incoming = payload.connectors[id] || {};
+      var local = base[id] || {};
+      var merged = Object.assign({}, local, incoming);
+      // Never clobber non-empty local secrets/config with empty remote values
+      Object.keys(local).forEach(function(k){
+        if ((merged[k] === '' || merged[k] == null) && local[k]) merged[k] = local[k];
+      });
+      base[id] = merged;
     });
     S.connectors = base;
     saveConnectors();
@@ -2097,10 +2103,11 @@ function applyVaultPayload(payload, opts){
     saveSettings();
     applyTheme();
   }
+  try { seedProfileMemories(); } catch(e){}
   try { renderMemory(); } catch(e){}
   try { renderConnectors(); } catch(e){}
   try { renderModeRail(); updateModeChrome(); } catch(e){}
-  try { renderTasksIfOpen && renderTasksIfOpen(); } catch(e){}
+  try { if (typeof renderTasksIfOpen === 'function') renderTasksIfOpen(); } catch(e){}
 }
 
 function saveMemoryRaw(){ lsSet(LS_MEMORY, S.memory); }
@@ -2125,6 +2132,10 @@ function setVaultPassphrase(p){
 
 async function exportVaultFile(){
   var pass = getVaultPassphrase();
+  if (!pass){
+    var typed = $('vault-pass') && $('vault-pass').value.trim();
+    if (typed) pass = typed;
+  }
   if (!pass) throw new Error('Enter a vault passphrase first');
   setVaultPassphrase(pass);
   var vault = await encryptVault(pass, buildVaultPayload());
@@ -2140,6 +2151,10 @@ async function exportVaultFile(){
 
 async function importVaultFile(file){
   var pass = getVaultPassphrase();
+  if (!pass){
+    var typed = $('vault-pass') && $('vault-pass').value.trim();
+    if (typed) pass = typed;
+  }
   if (!pass) throw new Error('Enter the vault passphrase to unlock');
   var text = await file.text();
   var vault = JSON.parse(text);
@@ -2265,13 +2280,13 @@ async function driveUploadVault(vaultObj){
     '--' + boundary + '\r\n' +
     'Content-Type: application/json\r\n\r\n' +
     JSON.stringify(vaultObj) + '\r\n' +
-    '--' + boundary + '--';
+    '--' + boundary + '--\r\n';
   var path = existing && existing.id
     ? '/upload/drive/v3/files/' + existing.id + '?uploadType=multipart&fields=id,name,modifiedTime'
     : '/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime';
   var res = await driveApi(path, {
     method: existing && existing.id ? 'PATCH' : 'POST',
-    interactive: true,
+    interactive: false,
     headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
     body: body
   });
@@ -2298,16 +2313,25 @@ async function driveDownloadVault(){
     file = await driveFindVaultFile();
   }
   if (!file || !file.id) throw new Error('No vault file on Drive yet — push once first');
-  var res = await driveApi('/drive/v3/files/' + file.id + '?alt=media', { interactive: true });
+  var res = await driveApi('/drive/v3/files/' + file.id + '?alt=media', { interactive: false });
   if (!res.ok) throw new Error('Drive download HTTP ' + res.status);
   return res.json();
 }
 
-async function vaultPushToDrive(){
+async function vaultPushToDrive(opts){
+  opts = opts || {};
   var pass = getVaultPassphrase();
+  if (!pass){
+    var typed = $('vault-pass') && $('vault-pass').value.trim();
+    if (typed) { pass = typed; setVaultPassphrase(pass); }
+  }
   if (!pass) throw new Error('Enter vault passphrase before syncing');
   setVaultPassphrase(pass);
   vaultSetStatus('syncing', 'Encrypting & uploading…');
+  // Ensure auth for manual pushes
+  if (opts.interactive !== false){
+    try { await driveGetToken(true); } catch(e){ /* upload path retries */ }
+  }
   var vault = await encryptVault(pass, buildVaultPayload());
   var file = await driveUploadVault(vault);
   VAULT.lastSync = Date.now();
@@ -2318,8 +2342,13 @@ async function vaultPushToDrive(){
 
 async function vaultPullFromDrive(){
   var pass = getVaultPassphrase();
+  if (!pass){
+    var typed = $('vault-pass') && $('vault-pass').value.trim();
+    if (typed) { pass = typed; setVaultPassphrase(pass); }
+  }
   if (!pass) throw new Error('Enter vault passphrase to decrypt Drive backup');
   setVaultPassphrase(pass);
+  try { await driveGetToken(true); } catch(e){}
   vaultSetStatus('syncing', 'Downloading vault…');
   var vault = await driveDownloadVault();
   var payload = await decryptVault(pass, vault);
@@ -2336,7 +2365,8 @@ var scheduleDriveSync = debounce(function(){
     if (!connectorCfg('drive').autoSync) return;
     if (!connectorCfg('drive').clientId) return;
     if (!getVaultPassphrase()) return;
-    if (!driveAccessToken() && !loadDriveAuth()) return;
+    // Auto-sync only when a session token already exists (never pop OAuth unexpectedly)
+    if (!driveAccessToken()) return;
     vaultPushToDrive().catch(function(e){
       vaultSetStatus('err', e.message || String(e));
     });
@@ -2388,11 +2418,19 @@ function initVaultUi(){
     }).catch(function(e){ toast(e.message || String(e), 'err'); });
   });
   if ($('vault-drive-push')) $('vault-drive-push').addEventListener('click', function(){
-    vaultPushToDrive().catch(function(e){ toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message); });
+    var btn = $('vault-drive-push');
+    btn.disabled = true; btn.textContent = 'Pushing…';
+    vaultPushToDrive({interactive:true}).catch(function(e){
+      toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message);
+    }).finally(function(){ btn.disabled = false; btn.textContent = 'Push to Drive'; });
   });
   if ($('vault-drive-pull')) $('vault-drive-pull').addEventListener('click', function(){
-    if (!confirm('Pull vault from Drive and merge into this browser? Local memories will be replaced by the vault snapshot.')) return;
-    vaultPullFromDrive().catch(function(e){ toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message); });
+    if (!confirm('Pull vault from Drive and replace local memory/settings snapshot with the Drive vault?')) return;
+    var btn = $('vault-drive-pull');
+    btn.disabled = true; btn.textContent = 'Pulling…';
+    vaultPullFromDrive().catch(function(e){
+      toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message);
+    }).finally(function(){ btn.disabled = false; btn.textContent = 'Pull from Drive'; });
   });
   if ($('vault-autosync-tgl')){
     $('vault-autosync-tgl').classList.toggle('on', !!(connectorCfg('drive').autoSync));
@@ -2409,14 +2447,20 @@ function initVaultUi(){
     : 'Set a passphrase · optional Google Drive Client ID in Connectors');
 }
 
+function memoryLooksUninitialized(){
+  if (!S.memory || !S.memory.length) return true;
+  // Profile seeds alone should not block restoring a richer Drive vault
+  return S.memory.every(function(m){
+    return (m && (String(m.id || '').indexOf('seed-') === 0 || m.source === 'profile'));
+  });
+}
 async function bootVaultSync(){
   try {
     if (!connectorOn('drive') || !connectorCfg('drive').clientId) return;
     if (!connectorCfg('drive').autoSync) return;
     if (!getVaultPassphrase()) return;
     if (!driveAccessToken()) return;
-    // soft pull only if local memory empty
-    if (S.memory && S.memory.length) return;
+    if (!memoryLooksUninitialized()) return;
     await vaultPullFromDrive();
   } catch(e){
     console.info('[vault] boot pull skipped', e.message || e);
@@ -2491,7 +2535,7 @@ function seedProfileMemories(){
     });
     if (item){ S.memory.push(item); haveIds[item.id] = true; applied.push(seed.id); added++; }
   });
-  if (added){ saveMemory(); }
+  if (added){ saveMemoryRaw(); }
   lsSet(LS_SEED, applied);
   return added;
 }
@@ -3709,7 +3753,7 @@ function selectMemoriesForPrompt(query){
   var picked = items.slice(0, maxN);
   var dirty = false;
   picked.forEach(function(m){ m.lastUsed = Date.now(); m.useCount = (m.useCount || 0) + 1; dirty = true; });
-  if (dirty) saveMemory();
+  if (dirty) saveMemoryRaw();
   return picked;
 }
 function formatMemoryBlock(mems){
