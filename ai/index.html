@@ -3115,6 +3115,12 @@ var CONNECTOR_DEFS = [
     fields: [], defaults: { on:true }, actions: ['open']
   },
   {
+    id: 'telegram', name: 'Telegram', category: 'Comms',
+    desc: 'Web Telegram messenger.',
+    icon: 'chat', grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
     id: 'apple_music', name: 'Apple Music', category: 'Comms',
     icon: 'music', grad: 'linear-gradient(145deg,#f472b6,#be185d)',
     fields: [], defaults: { on:true }, actions: ['open']
@@ -3290,6 +3296,7 @@ function connectorOpenUrl(id){
     perplexity: 'https://www.perplexity.ai/',
     github: 'https://github.com/' + encodeURIComponent(cfg.user || 'wghtkbpxwx-a11y'),
     whatsapp: 'https://web.whatsapp.com/',
+    telegram: 'https://web.telegram.org/',
     apple_music: 'https://music.apple.com/',
     youtube: 'https://www.youtube.com/'
   };
