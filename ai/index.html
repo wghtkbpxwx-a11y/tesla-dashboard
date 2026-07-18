@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Nova">
+<meta name="apple-mobile-web-app-title" content="Homebase">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Nova · AI Chat</title>
+<title>Homebase</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c6cf5'/%3E%3Cstop offset='1' stop-color='%234cc2ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <style>
 /* ============================= Design tokens ============================= */
@@ -736,6 +736,96 @@ a:hover{text-decoration:underline}
 
 
 
+
+/* ============================= Homebase hub ============================= */
+.hub-nav{
+  flex:none; max-height:42vh; overflow-y:auto; padding:0 8px 8px;
+  border-bottom:1px solid var(--border); margin-bottom:4px;
+}
+.hub-nav .sb-sec{padding:10px 10px 6px}
+.hub-nav-item{
+  width:100%; display:flex; align-items:center; gap:10px;
+  padding:8px 10px; border-radius:10px; color:var(--text2);
+  font-size:13.5px; font-weight:550; letter-spacing:-.01em; text-align:left;
+  transition:background .12s, color .12s;
+}
+.hub-nav-item:hover{background:var(--bg3); color:var(--text)}
+.hub-nav-item .hni-ico{
+  width:30px; height:30px; border-radius:9px; display:grid; place-items:center; flex:none;
+  background:color-mix(in srgb, var(--hc, #4f46e5) 16%, transparent);
+  color:var(--hc, #4f46e5);
+  border:1px solid color-mix(in srgb, var(--hc, #4f46e5) 22%, transparent);
+}
+.hub-nav-item .hni-t{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hub-nav-edit{opacity:.85; font-weight:500}
+.hb-ico{display:block}
+.sb-dash-link{
+  display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600;
+  color:var(--text2); text-decoration:none; padding:4px 8px; border-radius:8px;
+}
+.sb-dash-link:hover{background:var(--bg3); color:var(--text); text-decoration:none}
+
+#empty-state.hub-home{
+  max-width:880px; width:100%; padding:28px 18px 20px; margin:auto;
+}
+.hub-hero{text-align:center; margin-bottom:22px}
+.hub-hero .orb-core{
+  display:grid; place-items:center; color:#fff;
+}
+.hub-hero .orb-core .hb-ico{stroke:#fff}
+.hub-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+  gap:12px; width:100%; margin:0 auto 18px;
+}
+.hub-tile{
+  display:flex; align-items:flex-start; gap:12px; text-align:left;
+  padding:14px 14px; border-radius:16px; min-height:88px;
+  background:var(--surface-glass);
+  border:1px solid var(--border);
+  box-shadow:0 4px 18px rgba(79,90,160,.06);
+  transition:transform .16s cubic-bezier(.22,1,.36,1), border-color .16s, box-shadow .16s;
+  cursor:pointer; color:var(--text);
+}
+.hub-tile:hover{
+  transform:translateY(-2px);
+  border-color:color-mix(in srgb, var(--hc, var(--acc)) 40%, var(--border));
+  box-shadow:0 12px 32px rgba(79,90,160,.12), 0 0 0 1px color-mix(in srgb, var(--hc, var(--acc)) 18%, transparent);
+}
+.hub-tile .ht-ico{
+  width:40px; height:40px; border-radius:12px; display:grid; place-items:center; flex:none;
+  background:color-mix(in srgb, var(--hc, #4f46e5) 14%, transparent);
+  color:var(--hc, #4f46e5);
+  border:1px solid color-mix(in srgb, var(--hc, #4f46e5) 20%, transparent);
+}
+.hub-tile .ht-body{display:flex; flex-direction:column; gap:3px; min-width:0}
+.hub-tile .ht-title{font-size:14px; font-weight:650; letter-spacing:-.02em}
+.hub-tile .ht-desc{font-size:12px; color:var(--text2); line-height:1.35}
+.hub-foot{display:flex; flex-wrap:wrap; gap:8px; justify-content:center}
+.hub-foot .prompt-chip{display:inline-flex}
+
+/* hide old dense mode-tiles if any remain */
+#empty-state .mode-tiles{display:none !important}
+
+.hub-config-list{display:flex; flex-direction:column; gap:8px}
+.hub-config-row{
+  display:flex; align-items:center; gap:10px; padding:10px 10px;
+  border:1px solid var(--border); border-radius:14px; background:var(--bg2);
+}
+.hub-config-row.dragging{opacity:.5}
+.hub-config-row.dragover{border-color:var(--acc)}
+.hcr-grip{cursor:grab; color:var(--text3); font-size:12px; user-select:none; padding:0 2px}
+.hcr-ico{
+  width:32px;height:32px;border-radius:9px; display:grid; place-items:center; flex:none;
+  background:color-mix(in srgb, var(--hc,#64748b) 14%, transparent); color:var(--hc,#64748b);
+}
+.hcr-main{flex:1; min-width:0; display:flex; flex-direction:column; gap:5px}
+.hcr-main input{width:100%; font-size:12.5px; padding:7px 10px}
+
+/* Sidebar layout: convo list shares remaining space */
+#sidebar{overflow:hidden}
+#convo-list{min-height:80px}
+
 /* ============================= Vault / Drive sync ============================= */
 .vault-panel{
   margin: 14px 0 6px; padding: 14px 14px 12px; border-radius: 18px;
@@ -944,17 +1034,18 @@ a:hover{text-decoration:underline}
   <!-- ================= Sidebar ================= -->
   <aside id="sidebar">
     <div class="sb-head">
-      <div class="brand"><span class="logo">✦</span><span class="nm">Nova</span></div>
+      <div class="brand"><span class="logo">✦</span><span class="nm">Homebase</span></div>
       <button class="icon-btn" id="sb-close" title="Close sidebar" aria-label="Close sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
     </div>
     <button class="new-chat" id="new-chat-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New chat</button>
+    <div id="hub-nav" class="hub-nav" aria-label="Homebase modules"></div>
     <div class="sb-search">
       <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="convo-search" type="text" placeholder="Search chats…" autocomplete="off">
     </div>
     <div id="convo-list"></div>
     <div class="sb-foot">
-      <a href="../" title="Back to Tesla dashboard" style="color:var(--text2)">⌂ Dashboard</a>
+      <a href="../" title="Tesla dashboard" class="sb-dash-link">Dashboard</a>
       <span class="grow"></span>
       <button class="icon-btn" id="theme-quick" title="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
       <button class="icon-btn" id="sb-settings" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
@@ -995,7 +1086,7 @@ a:hover{text-decoration:underline}
       <div id="pending-atts"></div>
       <div id="composer">
         <button class="icon-btn" id="attach-btn" title="Attach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <textarea id="input" rows="1" placeholder="Ask anything…"></textarea>
+        <textarea id="input" rows="1" placeholder="Message Homebase…"></textarea>
         <button class="icon-btn" id="mic-btn" title="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
         <button id="send-btn" title="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
       </div>
@@ -1059,6 +1150,7 @@ a:hover{text-decoration:underline}
       <button class="mo-tab" data-tab="chat">Chat</button>
       <button class="mo-tab" data-tab="voice">Voice</button>
       <button class="mo-tab" data-tab="toolsx">Tools</button>
+      <button class="mo-tab" data-tab="hub">Hub</button>
       <button class="mo-tab" data-tab="council">Council</button>
       <button class="mo-tab" data-tab="look">Appearance</button>
       <button class="mo-tab" data-tab="data">Data</button>
@@ -1068,6 +1160,7 @@ a:hover{text-decoration:underline}
       <div class="set-pane" id="pane-chat" style="display:none"></div>
       <div class="set-pane" id="pane-voice" style="display:none"></div>
       <div class="set-pane" id="pane-toolsx" style="display:none"></div>
+      <div class="set-pane" id="pane-hub" style="display:none"></div>
       <div class="set-pane" id="pane-council" style="display:none"></div>
       <div class="set-pane" id="pane-look" style="display:none"></div>
       <div class="set-pane" id="pane-data" style="display:none"></div>
@@ -1160,7 +1253,7 @@ a:hover{text-decoration:underline}
   <div class="modal wide">
     <div class="mo-head"><h2>Connectors</h2><button class="icon-btn" data-close="connectors-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="mo-body">
-      <div class="conn-banner"><b>Built for David.</b> Enable services Nova can use while you chat. <b>Google Drive</b> holds your <em>encrypted</em> memory vault for multi-device continuity — passphrase never leaves this device. Add an OAuth Client ID on the Drive card, then open Memory → Private vault.</div>
+      <div class="conn-banner"><b>Built for David.</b> Enable services Homebase can use while you chat. <b>Google Drive</b> holds your <em>encrypted</em> memory vault for multi-device continuity — passphrase never leaves this device. Add an OAuth Client ID on the Drive card, then open Memory → Private vault.</div>
       <div id="conn-grid" class="conn-grid"></div>
     </div>
   </div>
@@ -1171,7 +1264,7 @@ a:hover{text-decoration:underline}
   <div class="modal">
     <div class="mo-head"><h2>⏰ Scheduled tasks</h2><button class="icon-btn" data-close="tasks-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="mo-body">
-      <div class="hint-box" style="margin:0 0 13px">Tasks run their prompt automatically and post the result to a dedicated chat (with an optional notification). They run while Nova is open in a tab — runs missed while closed are caught up on your next visit.</div>
+      <div class="hint-box" style="margin:0 0 13px">Tasks run their prompt automatically and post the result to a dedicated chat (with an optional notification). They run while Homebase is open in a tab — runs missed while closed are caught up on your next visit.</div>
       <button class="sm-btn pri" id="task-new" style="margin-bottom:13px">＋ New task</button>
       <div id="task-list"></div>
     </div>
@@ -1184,7 +1277,7 @@ a:hover{text-decoration:underline}
     <div class="mo-head"><h2 id="task-ed-title">New task</h2><button class="icon-btn" data-close="task-ed-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="mo-body">
       <div class="set-row"><span class="lbl">Name</span><input id="te-name" type="text" placeholder="Morning briefing" style="flex:1"></div>
-      <div class="set-row" style="align-items:flex-start"><span class="lbl">Prompt<span class="sub">What should Nova do each run?</span></span><textarea id="te-prompt" rows="3" style="flex:1; min-width:200px" placeholder="Give me today's weather for Surrey BC and one interesting science fact."></textarea></div>
+      <div class="set-row" style="align-items:flex-start"><span class="lbl">Prompt<span class="sub">What should Homebase do each run?</span></span><textarea id="te-prompt" rows="3" style="flex:1; min-width:200px" placeholder="Give me today's weather for Surrey BC and one interesting science fact."></textarea></div>
       <div class="set-row"><span class="lbl">Repeat</span>
         <select id="te-type">
           <option value="daily">Daily</option>
@@ -1216,8 +1309,8 @@ a:hover{text-decoration:underline}
   <div class="modal">
     <div class="mo-body" style="padding:26px 26px 22px">
       <div class="w-orb">✦</div>
-      <h2 style="margin:0 0 6px">Welcome to Nova</h2>
-      <p style="color:var(--text2); margin:0; font-size:14px">A multi-provider AI command center — agent tools, neural memory, model council, voice & vision. Everything stays in your browser.</p>
+      <h2 style="margin:0 0 6px">Welcome to Homebase</h2>
+      <p style="color:var(--text2); margin:0; font-size:14px">Homebase is your personal hub — AI agents, memory vault, connectors, and links to the life you run from the car and desk.</p>
       <div class="w-opts">
         <button class="w-opt" id="w-keys"><span class="w-ico">🔑</span><span><span class="w-t">Add an API key</span><span class="w-d" style="display:block">Anthropic Claude, OpenAI, Gemini, Groq, OpenRouter, Mistral, DeepSeek, xAI…</span></span></button>
         <button class="w-opt" id="w-local"><span class="w-ico">💻</span><span><span class="w-t">Use a local LLM</span><span class="w-d" style="display:block">Connect Ollama / LM Studio / llama.cpp on this machine</span></span></button>
@@ -1233,7 +1326,7 @@ a:hover{text-decoration:underline}
 <script>
 'use strict';
 /* =====================================================================
-   Nova — multimodal multi-provider AI chat
+   Homebase — personal AI hub
    Single-file app. No build step, no dependencies.
    Data lives in this browser: localStorage (settings/keys/memory/tasks)
    + IndexedDB (conversations). Keys are only ever sent to the provider
@@ -1410,14 +1503,14 @@ var DEFAULT_SETTINGS = {
 };
 
 var PERSONAS = {
-  assistant: { name: 'Assistant', sys: 'You are Nova, a smart, warm and helpful AI assistant. Be direct and useful; use markdown when it helps.' },
-  concise:   { name: 'Concise', sys: 'You are Nova. Answer as briefly as possible while staying correct. No filler, no preamble.' },
-  coder:     { name: 'Coding expert', sys: 'You are Nova, an expert software engineer. Give working, idiomatic code with brief explanations. Point out pitfalls. Prefer modern best practices.' },
-  tutor:     { name: 'Tutor', sys: 'You are Nova, a patient tutor. Explain step by step, check understanding, and use simple analogies before formal definitions.' },
-  clinical:  { name: 'Clinical (drug info)', sys: 'You are Nova, assisting a licensed pharmacist. Provide precise, referenced drug information (mechanisms, interactions, dosing ranges, monitoring). Note when evidence is uncertain. This supports, never replaces, professional judgement.' },
-  creative:  { name: 'Creative writer', sys: 'You are Nova, a vivid creative writing partner. Take risks, avoid clichés, and match the tone the user sets.' },
-  agent:     { name: 'Agent (proactive)', sys: 'You are Nova in agent mode. Break complex requests into steps, use tools aggressively for live data, verify claims, keep a short plan when multi-step, and finish with a clear outcome. Prefer action over speculation.' },
-  researcher:{ name: 'Researcher', sys: 'You are Nova, a careful researcher. Search, read sources, cross-check, cite links, separate fact from inference, and flag uncertainty. Prefer primary sources when available.' }
+  assistant: { name: 'Assistant', sys: 'You are Homebase, a smart, warm and helpful AI assistant. Be direct and useful; use markdown when it helps.' },
+  concise:   { name: 'Concise', sys: 'You are Homebase. Answer as briefly as possible while staying correct. No filler, no preamble.' },
+  coder:     { name: 'Coding expert', sys: 'You are Homebase, an expert software engineer. Give working, idiomatic code with brief explanations. Point out pitfalls. Prefer modern best practices.' },
+  tutor:     { name: 'Tutor', sys: 'You are Homebase, a patient tutor. Explain step by step, check understanding, and use simple analogies before formal definitions.' },
+  clinical:  { name: 'Clinical (drug info)', sys: 'You are Homebase, assisting a licensed pharmacist. Provide precise, referenced drug information (mechanisms, interactions, dosing ranges, monitoring). Note when evidence is uncertain. This supports, never replaces, professional judgement.' },
+  creative:  { name: 'Creative writer', sys: 'You are Homebase, a vivid creative writing partner. Take risks, avoid clichés, and match the tone the user sets.' },
+  agent:     { name: 'Agent (proactive)', sys: 'You are Homebase in agent mode. Break complex requests into steps, use tools aggressively for live data, verify claims, keep a short plan when multi-step, and finish with a clear outcome. Prefer action over speculation.' },
+  researcher:{ name: 'Researcher', sys: 'You are Homebase, a careful researcher. Search, read sources, cross-check, cite links, separate fact from inference, and flag uncertainty. Prefer primary sources when available.' }
 };
 
 /* ============================ UI modes (Gemini-style) ============================ */
@@ -1521,7 +1614,7 @@ var UI_MODES = [
     badge: 'Hub',
     color: '#0ea5e9',
     grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
-    placeholder: 'Ask Nova to use a connected service…',
+    placeholder: 'Ask Homebase to use a connected service…',
     apply: function(){
       var c = ensureConvo();
       c.toolsOn = true;
@@ -1569,7 +1662,9 @@ function renderModeRail(){
   if (!rail) return;
   var cur = S.settings.uiMode || 'chat';
   rail.innerHTML = '';
-  UI_MODES.forEach(function(m){
+  // Keep rail focused on AI work modes; hub/sidebar holds vault, connectors, links
+  var railModes = UI_MODES.filter(function(m){ return ['chat','voice','agent','research','council'].indexOf(m.id) >= 0; });
+  railModes.forEach(function(m){
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'mode-pill' + (m.id === cur ? ' active' : '');
@@ -1596,6 +1691,293 @@ function updateModeChrome(){
   document.body.dataset.mode = mode.id;
   updateHints();
 }
+
+/* ============================ Homebase hub ============================ */
+var LS_HUB = 'homebase_hub_v1';
+var APP_NAME = 'Homebase';
+
+var ICON_SVG = {
+  chat: '<path d="M4 6h16v9H8l-4 3V6z"/>',
+  voice: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  agent: '<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>',
+  research: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-3.5-3.5"/>',
+  council: '<circle cx="8" cy="9" r="2.5"/><circle cx="16" cy="9" r="2.5"/><circle cx="12" cy="15.5" r="2.5"/>',
+  memory: '<path d="M6 8a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8zm6 0a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8z"/>',
+  connect: '<path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7.1-7.1l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7.1 7.1l1.2-1.2"/>',
+  car: '<path d="M4 14l1.5-4.5A3 3 0 0 1 8.4 7h7.2a3 3 0 0 1 2.9 2.5L20 14"/><path d="M4 14h16v3a1 1 0 0 1-1 1h-1"/><path d="M5 18H4a1 1 0 0 1-1-1v-2"/><circle cx="7.5" cy="15.5" r="1.5"/><circle cx="16.5" cy="15.5" r="1.5"/>',
+  chart: '<path d="M4 19V5M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-3"/>',
+  calendar: '<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M4 10h16M8 4v4M16 4v4"/>',
+  mail: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 8l9 6 9-6"/>',
+  tasks: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M5 6h.01M5 12h.01M5 18h.01"/>',
+  home: '<path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.5.5l1.5-1.5a5 5 0 0 0-7-7L11 6"/><path d="M14 11a5 5 0 0 0-7.5-.5L5 12.5a5 5 0 0 0 7 7L13 18"/>',
+  pharmacy: '<path d="M12 4v16M8 8h8"/><rect x="7" y="10" width="10" height="10" rx="2"/>',
+  family: '<circle cx="9" cy="8" r="2.5"/><circle cx="16" cy="9" r="2"/><path d="M4 18c0-2.5 2.2-4 5-4s5 1.5 5 4"/><path d="M14 18c0-1.8 1.5-3 3.5-3s3.2 1 3.5 2.5"/>',
+  spark: '<path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/>'
+};
+
+function iconSvg(name, size){
+  size = size || 20;
+  var path = ICON_SVG[name] || ICON_SVG.spark;
+  return '<svg class="hb-ico" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+path+'</svg>';
+}
+
+/** Default hub modules — David's life OS */
+var HUB_DEFAULTS = [
+  { id:'chat', title:'Chat', desc:'Think out loud with your models', kind:'mode', mode:'chat', icon:'chat', color:'#4f46e5', enabled:true },
+  { id:'voice', title:'Voice', desc:'Hands-free conversation', kind:'mode', mode:'voice', icon:'voice', color:'#0284c7', enabled:true },
+  { id:'agent', title:'Agent', desc:'Plans, tools, multi-step work', kind:'mode', mode:'agent', icon:'agent', color:'#d97706', enabled:true },
+  { id:'research', title:'Research', desc:'Search, read, cite', kind:'mode', mode:'research', icon:'research', color:'#059669', enabled:true },
+  { id:'dashboard', title:'Tesla Dashboard', desc:'Car HQ — weather, traffic, sports', kind:'link', url:'../', icon:'car', color:'#6366f1', enabled:true },
+  { id:'finance', title:'Markets & portfolio', desc:'Watchlist & market pulse on your dashboard', kind:'link', url:'../', icon:'chart', color:'#0f766e', enabled:true },
+  { id:'memory', title:'Memory vault', desc:'Personal context + Drive backup', kind:'action', action:'memory', icon:'memory', color:'#7c3aed', enabled:true },
+  { id:'connect', title:'Connectors', desc:'Gmail, Calendar, GitHub, Drive…', kind:'action', action:'connectors', icon:'connect', color:'#0284c7', enabled:true },
+  { id:'tasks', title:'Tasks & rituals', desc:'Scheduled Homebase runs', kind:'action', action:'tasks', icon:'tasks', color:'#ea580c', enabled:true },
+  { id:'council', title:'Council', desc:'Multi-model debate', kind:'mode', mode:'council', icon:'council', color:'#db2777', enabled:true },
+  { id:'calendar', title:'Calendar', desc:'Open Google Calendar', kind:'link', url:'https://calendar.google.com/', icon:'calendar', color:'#2563eb', enabled:true },
+  { id:'mail', title:'Gmail', desc:'Inbox & compose', kind:'link', url:'https://mail.google.com/', icon:'mail', color:'#dc2626', enabled:true },
+  { id:'pharmacy', title:'Clinical desk', desc:'Pharmacist persona + careful answers', kind:'action', action:'clinical', icon:'pharmacy', color:'#0d9488', enabled:true },
+  { id:'family', title:'Life & family', desc:'Notes for home logistics (uses memory)', kind:'action', action:'family', icon:'family', color:'#c026d3', enabled:false }
+];
+
+function loadHubConfig(){
+  var saved = lsGet(LS_HUB, null);
+  var byId = {};
+  HUB_DEFAULTS.forEach(function(m){ byId[m.id] = Object.assign({}, m); });
+  if (saved && Array.isArray(saved.modules)){
+    var order = [];
+    saved.modules.forEach(function(s){
+      if (!s || !s.id) return;
+      if (byId[s.id]){
+        byId[s.id] = Object.assign({}, byId[s.id], s, {
+          // preserve default icon/kind unless custom
+          icon: byId[s.id].icon,
+          kind: s.kind || byId[s.id].kind
+        });
+        // allow custom overrides for custom modules
+        if (String(s.id).indexOf('custom-') === 0){
+          byId[s.id] = Object.assign({ icon:'link', color:'#64748b', kind:'link', enabled:true }, s);
+        }
+        order.push(s.id);
+      } else if (String(s.id).indexOf('custom-') === 0){
+        byId[s.id] = Object.assign({ icon:'link', color:'#64748b', kind:'link', enabled:true, title:'Link', desc:'', url:'#' }, s);
+        order.push(s.id);
+      }
+    });
+    // append any new defaults not in saved order
+    HUB_DEFAULTS.forEach(function(m){ if (order.indexOf(m.id) < 0) order.push(m.id); });
+    return order.map(function(id){ return byId[id]; }).filter(Boolean);
+  }
+  return HUB_DEFAULTS.map(function(m){ return Object.assign({}, m); });
+}
+function saveHubConfig(modules){
+  lsSet(LS_HUB, { modules: modules.map(function(m){
+    return { id:m.id, title:m.title, desc:m.desc, kind:m.kind, mode:m.mode, action:m.action, url:m.url, icon:m.icon, color:m.color, enabled:!!m.enabled };
+  })});
+}
+function hubModulesEnabled(){
+  return (S.hubModules || loadHubConfig()).filter(function(m){ return m.enabled !== false; });
+}
+
+function runHubModule(mod){
+  if (!mod) return;
+  if (mod.kind === 'link' && mod.url){
+    window.open(mod.url, mod.url.indexOf('http') === 0 ? '_blank' : '_self', 'noopener');
+    return;
+  }
+  if (mod.kind === 'mode' && mod.mode){
+    setUiMode(mod.mode, { skipPanel: mod.mode !== 'connectors' && mod.mode !== 'memory' });
+    if (mod.mode === 'chat'){ try { $('input').focus(); } catch(e){} }
+    return;
+  }
+  if (mod.kind === 'action'){
+    if (mod.action === 'memory'){ renderMemory(); initVaultUi(); $('memory-ov').classList.add('open'); return; }
+    if (mod.action === 'connectors'){ renderConnectors(); $('connectors-ov').classList.add('open'); return; }
+    if (mod.action === 'tasks'){ renderTasks(); $('tasks-ov').classList.add('open'); return; }
+    if (mod.action === 'clinical'){
+      S.settings.persona = 'clinical'; saveSettings();
+      setUiMode('chat', { silent:true });
+      toast('Clinical persona on — careful, referenced answers', 'ok');
+      try { $('input').focus(); } catch(e){}
+      return;
+    }
+    if (mod.action === 'family'){
+      setUiMode('memory', { silent:true, skipPanel:true });
+      toast('Use memory for family logistics — or add a custom hub link in Settings → Hub', 'ok', 4000);
+      try { $('input').value = 'Help me organize family logistics for this week based on what you know about me.'; updateSendBtn(); $('input').focus(); } catch(e){}
+      return;
+    }
+  }
+}
+
+function renderHubNav(){
+  var nav = $('hub-nav');
+  if (!nav) return;
+  if (!S.hubModules) S.hubModules = loadHubConfig();
+  var mods = hubModulesEnabled();
+  nav.innerHTML = '';
+  var label = document.createElement('div');
+  label.className = 'sb-sec';
+  label.textContent = 'Homebase';
+  nav.appendChild(label);
+  mods.forEach(function(mod){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'hub-nav-item';
+    b.innerHTML = '<span class="hni-ico" style="--hc:'+esc(mod.color||'#4f46e5')+'"></span><span class="hni-t"></span>';
+    qs('.hni-ico', b).innerHTML = iconSvg(mod.icon || 'spark', 18);
+    qs('.hni-t', b).textContent = mod.title;
+    b.title = mod.desc || mod.title;
+    b.addEventListener('click', function(){ runHubModule(mod); closeSidebarMobile(); });
+    nav.appendChild(b);
+  });
+  var edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'hub-nav-item hub-nav-edit';
+  edit.innerHTML = '<span class="hni-ico" style="--hc:#64748b">'+iconSvg('settings',18)+'</span><span class="hni-t">Customize hub</span>';
+  edit.addEventListener('click', function(){
+    openSettings();
+    switchSetTab('hub');
+    closeSidebarMobile();
+  });
+  nav.appendChild(edit);
+}
+
+function renderHubHome(){
+  var d = document.createElement('div');
+  d.id = 'empty-state';
+  d.className = 'hub-home';
+  var hour = new Date().getHours();
+  var greet = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+  if (!S.hubModules) S.hubModules = loadHubConfig();
+  var mods = hubModulesEnabled();
+  var tiles = mods.map(function(mod){
+    return '<button type="button" class="hub-tile" data-hub="'+esc(mod.id)+'" style="--hc:'+esc(mod.color||'#4f46e5')+'">' +
+      '<span class="ht-ico">'+iconSvg(mod.icon||'spark',22)+'</span>' +
+      '<span class="ht-body"><span class="ht-title"></span><span class="ht-desc"></span></span>' +
+      '</button>';
+  }).join('');
+  d.innerHTML =
+    '<div class="hub-hero">' +
+      '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">'+iconSvg('home',28)+'</div></div>' +
+      '<h1>'+greet+', David</h1>' +
+      '<p class="subhead">Homebase — your hub for AI, the Tesla dashboard, work, and life.</p>' +
+    '</div>' +
+    '<div class="hub-grid">'+tiles+'</div>' +
+    '<div class="hub-foot">' +
+      '<button type="button" class="prompt-chip" data-hub-act="chat">Start a chat</button>' +
+      '<button type="button" class="prompt-chip" data-hub-act="brief">Morning brief</button>' +
+      '<button type="button" class="prompt-chip" data-hub-act="customize">Customize this screen</button>' +
+    '</div>';
+  // fill titles (avoid HTML inject issues)
+  var nodes = d.querySelectorAll('.hub-tile');
+  mods.forEach(function(mod, i){
+    if (!nodes[i]) return;
+    qs('.ht-title', nodes[i]).textContent = mod.title;
+    qs('.ht-desc', nodes[i]).textContent = mod.desc || '';
+    nodes[i].addEventListener('click', function(){ runHubModule(mod); });
+  });
+  qsa('[data-hub-act]', d).forEach(function(b){
+    b.addEventListener('click', function(){
+      var a = b.getAttribute('data-hub-act');
+      if (a === 'chat'){ setUiMode('chat', {silent:true}); $('input').focus(); }
+      else if (a === 'brief'){
+        setUiMode('agent', {silent:true});
+        $('input').value = 'Run my Surrey BC morning brief: weather, top local news, markets pulse, and one clinical pearl for a community pharmacist.';
+        autoresize(); updateSendBtn(); $('input').focus();
+      }
+      else if (a === 'customize'){ openSettings(); switchSetTab('hub'); }
+    });
+  });
+  return d;
+}
+
+function renderHubSettingsPane(){
+  var pane = $('pane-hub');
+  if (!pane) return;
+  if (!S.hubModules) S.hubModules = loadHubConfig();
+  pane.innerHTML = '';
+  var hint = document.createElement('div');
+  hint.className = 'hint-box';
+  hint.style.margin = '0 0 14px';
+  hint.innerHTML = '<b>Configure your Homebase screen.</b> Toggle modules, reorder them, and add personal links (family calendar, brokerage, pharmacy resources, etc.). Changes apply to the home hub and the sidebar under New chat.';
+  pane.appendChild(hint);
+
+  var list = document.createElement('div');
+  list.className = 'hub-config-list';
+  S.hubModules.forEach(function(mod, idx){
+    var row = document.createElement('div');
+    row.className = 'hub-config-row';
+    row.draggable = true;
+    row.dataset.idx = String(idx);
+    row.innerHTML =
+      '<span class="hcr-grip" title="Drag">⋮⋮</span>' +
+      '<span class="hcr-ico" style="--hc:'+esc(mod.color||'#64748b')+'">'+iconSvg(mod.icon||'link',18)+'</span>' +
+      '<div class="hcr-main">' +
+        '<input class="hcr-title" type="text" />' +
+        '<input class="hcr-desc" type="text" placeholder="Description" />' +
+        (mod.kind === 'link' || String(mod.id).indexOf('custom-')===0 ? '<input class="hcr-url" type="url" placeholder="https://…" />' : '') +
+      '</div>' +
+      '<div class="tgl'+(mod.enabled!==false?' on':'')+'" data-en></div>' +
+      (String(mod.id).indexOf('custom-')===0 ? '<button type="button" class="icon-btn hcr-del" title="Remove">✕</button>' : '');
+    qs('.hcr-title', row).value = mod.title || '';
+    qs('.hcr-desc', row).value = mod.desc || '';
+    var urlInp = qs('.hcr-url', row);
+    if (urlInp) urlInp.value = mod.url || '';
+    qs('[data-en]', row).addEventListener('click', function(){
+      mod.enabled = !mod.enabled;
+      this.classList.toggle('on', !!mod.enabled);
+      persistHub();
+    });
+    qs('.hcr-title', row).addEventListener('change', function(){ mod.title = this.value.trim() || mod.title; persistHub(); });
+    qs('.hcr-desc', row).addEventListener('change', function(){ mod.desc = this.value.trim(); persistHub(); });
+    if (urlInp) urlInp.addEventListener('change', function(){ mod.url = this.value.trim(); persistHub(); });
+    var del = qs('.hcr-del', row);
+    if (del) del.addEventListener('click', function(){
+      S.hubModules = S.hubModules.filter(function(x){ return x.id !== mod.id; });
+      persistHub(); renderHubSettingsPane();
+    });
+    // drag reorder
+    row.addEventListener('dragstart', function(e){ e.dataTransfer.setData('text/plain', String(idx)); row.classList.add('dragging'); });
+    row.addEventListener('dragend', function(){ row.classList.remove('dragging'); });
+    row.addEventListener('dragover', function(e){ e.preventDefault(); row.classList.add('dragover'); });
+    row.addEventListener('dragleave', function(){ row.classList.remove('dragover'); });
+    row.addEventListener('drop', function(e){
+      e.preventDefault(); row.classList.remove('dragover');
+      var from = +e.dataTransfer.getData('text/plain');
+      var to = idx;
+      if (isNaN(from) || from === to) return;
+      var item = S.hubModules.splice(from, 1)[0];
+      S.hubModules.splice(to, 0, item);
+      persistHub(); renderHubSettingsPane();
+    });
+    list.appendChild(row);
+  });
+  pane.appendChild(list);
+
+  var add = document.createElement('div');
+  add.style.cssText = 'margin-top:14px;display:flex;gap:8px;flex-wrap:wrap';
+  add.innerHTML = '<input id="hub-new-title" type="text" placeholder="New link title" style="flex:1;min-width:120px">' +
+    '<input id="hub-new-url" type="url" placeholder="https://…" style="flex:2;min-width:160px">' +
+    '<button type="button" class="sm-btn pri" id="hub-add-link">Add link</button>';
+  pane.appendChild(add);
+  qs('#hub-add-link', pane).addEventListener('click', function(){
+    var t = ($('hub-new-title') && $('hub-new-title').value.trim()) || 'Custom link';
+    var u = ($('hub-new-url') && $('hub-new-url').value.trim()) || '';
+    if (!u){ toast('Enter a URL', 'warn'); return; }
+    if (!/^https?:\/\//i.test(u) && u.charAt(0) !== '/'){ u = 'https://' + u; }
+    S.hubModules.push({ id:'custom-'+uuid().slice(0,8), title:t, desc:'Custom link', kind:'link', url:u, icon:'link', color:'#64748b', enabled:true });
+    persistHub(); renderHubSettingsPane();
+    toast('Added to Homebase', 'ok');
+  });
+}
+function persistHub(){
+  saveHubConfig(S.hubModules || []);
+  renderHubNav();
+  if ($('chat') && $('chat').querySelector('#empty-state')) renderChat();
+}
+
 /* ============================ Connectors ============================ */
 var CONNECTOR_DEFS = [
   {
@@ -1649,9 +2031,9 @@ var CONNECTOR_DEFS = [
     grad: 'linear-gradient(145deg,#fcd34d,#f59e0b)',
     fields: [
       {key:'clientId', label:'OAuth Client ID', placeholder:'xxxx.apps.googleusercontent.com', secret:false},
-      {key:'fileName', label:'Vault file name', placeholder:'nova-memory.vault.json', secret:false}
+      {key:'fileName', label:'Vault file name', placeholder:'homebase-memory.vault.json', secret:false}
     ],
-    defaults: { on:true, clientId:'', fileName:'nova-memory.vault.json', autoSync:true, fileId:'' },
+    defaults: { on:true, clientId:'', fileName:'homebase-memory.vault.json', autoSync:true, fileId:'' },
     actions: ['search','push','pull']
   },
   {
@@ -1676,7 +2058,7 @@ var CONNECTOR_DEFS = [
   },
   {
     id: 'tasks',
-    name: 'Nova Tasks',
+    name: 'Homebase Tasks',
     desc: 'Scheduled Nova tasks and reminders.',
     icon: '⏰',
     grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
@@ -1923,7 +2305,7 @@ async function runConnector(id, action, args){
   }
 
   if (id === 'tasks'){
-    if (!S.tasks || !S.tasks.length) return 'No scheduled Nova tasks.';
+    if (!S.tasks || !S.tasks.length) return 'No scheduled Homebase tasks.';
     return S.tasks.map(function(t){
       return '• ' + t.name + ' — ' + describeSchedule(t) + (t.enabled ? ', next: ' + fmtDateTime(t.nextRun) : ' (paused)');
     }).join('\n');
@@ -2004,9 +2386,9 @@ async function vaultDeriveKey(passphrase, saltU8){
 function buildVaultPayload(){
   return {
     v: 1,
-    app: 'nova-personal-ai',
+    app: 'homebase',
     exportedAt: Date.now(),
-    label: 'David personal vault',
+    label: 'David · Homebase vault',
     memory: S.memory || [],
     tasks: S.tasks || [],
     connectors: S.connectors || {},
@@ -2142,7 +2524,7 @@ async function exportVaultFile(){
   var blob = new Blob([JSON.stringify(vault, null, 2)], { type: 'application/json' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'nova-memory-' + new Date().toISOString().slice(0,10) + '.vault.json';
+  a.download = 'homebase-memory-' + new Date().toISOString().slice(0,10) + '.vault.json';
   document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   vaultSetStatus('ok', 'Encrypted vault downloaded');
@@ -2256,7 +2638,7 @@ async function driveApi(path, opts){
 }
 
 async function driveFindVaultFile(){
-  var name = (connectorCfg('drive').fileName || 'nova-memory.vault.json').replace(/'/g, '');
+  var name = (connectorCfg('drive').fileName || 'homebase-memory.vault.json').replace(/'/g, '');
   var q = "name='" + name + "' and trashed=false";
   var res = await driveApi('/drive/v3/files?pageSize=5&spaces=drive&fields=files(id,name,modifiedTime,size)&q=' + encodeURIComponent(q));
   if (!res.ok) throw new Error('Drive list failed HTTP ' + res.status);
@@ -2266,7 +2648,7 @@ async function driveFindVaultFile(){
 }
 
 async function driveUploadVault(vaultObj){
-  var name = connectorCfg('drive').fileName || 'nova-memory.vault.json';
+  var name = connectorCfg('drive').fileName || 'homebase-memory.vault.json';
   var meta = { name: name, mimeType: 'application/json' };
   var existing = await driveFindVaultFile();
   if (existing && existing.id){
@@ -2336,7 +2718,7 @@ async function vaultPushToDrive(opts){
   var file = await driveUploadVault(vault);
   VAULT.lastSync = Date.now();
   vaultSetStatus('ok', 'Synced to Drive · ' + (file.name || 'vault') + ' · ' + fmtDateTime(VAULT.lastSync));
-  toast('Memory vault encrypted & saved to Google Drive', 'ok', 3200);
+  toast('Homebase vault encrypted & saved to Google Drive', 'ok', 3200);
   return file;
 }
 
@@ -2549,8 +2931,9 @@ function loadState(){
   S.tasks = lsGet(LS_TASKS, []);
   S.agentPlan = null; S.memFilter = 'all'; S.memQuery = '';
   S.connectors = loadConnectorsState();
+  S.hubModules = loadHubConfig();
   var n = seedProfileMemories();
-  if (n) try { console.info('[Nova] Seeded ' + n + ' profile memories'); } catch(e){}
+  if (n) try { console.info('[Homebase] Seeded ' + n + ' profile memories'); } catch(e){}
 }
 function saveSettings(){ lsSet(LS_SETTINGS, S.settings); }
 function saveKeys(){ lsSet(LS_KEYS, S.keys); }
@@ -3428,10 +3811,10 @@ var TOOLS = [
       return 'Saved to memory [' + item.category + ' ★' + item.importance + ']: "' + fact + '"';
     }},
   { name:'schedule_task',
-    description:'Schedule a recurring or one-off task. At the scheduled time Nova runs the given prompt automatically and notifies the user. Use when the user asks for reminders, daily briefings, or anything periodic.',
+    description:'Schedule a recurring or one-off task. At the scheduled time Homebase runs the given prompt automatically and notifies the user. Use when the user asks for reminders, daily briefings, or anything periodic.',
     params:{
       name:{type:'string', description:'Short task name'},
-      prompt:{type:'string', description:'The prompt Nova should run at each occurrence'},
+      prompt:{type:'string', description:'The prompt Homebase should run at each occurrence'},
       schedule:{type:'string', 'enum':['daily','weekly','interval','once'], description:'Recurrence type'},
       time:{type:'string', description:'HH:MM 24h local time (for daily/weekly)'},
       day_of_week:{type:'string', description:'For weekly: monday…sunday'},
@@ -3453,7 +3836,7 @@ var TOOLS = [
       if (!t.nextRun) return 'Error: could not compute a future run time — check the datetime.';
       S.tasks.push(t); saveTasks(); renderTasks();
       askNotifyPermission();
-      return 'Task "' + t.name + '" scheduled. Next run: ' + fmtDateTime(t.nextRun) + '. (Runs while Nova is open in a tab; missed runs are caught up on next open.)';
+      return 'Task "' + t.name + '" scheduled. Next run: ' + fmtDateTime(t.nextRun) + '. (Runs while Homebase is open in a tab; missed runs are caught up on next open.)';
     }},
   { name:'list_scheduled_tasks',
     description:'List the user\'s scheduled tasks with their next run times.',
@@ -3647,7 +4030,7 @@ function createConvo(){
   S.convos.unshift(c);
   S.activeId = c.id;
   idb.put(c);
-  renderSidebar(); renderChat(); updateModelBtn(); updateHints(); updateModeChrome();
+  renderSidebar(); renderChat(); updateModelBtn(); updateHints(); updateModeChrome(); renderHubNav();
   return c;
 }
 function ensureConvo(){ return activeConvo() || createConvo(); }
@@ -3852,78 +4235,7 @@ function renderChat(){
   scrollBottom(true);
 }
 function emptyStateEl(){
-  var d = document.createElement('div');
-  d.id = 'empty-state';
-  var hour = new Date().getHours();
-  var greet = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
-  var cur = S.settings.uiMode || 'chat';
-  var chips = {
-    chat: [
-      {q:'Write a crisp weekly plan for deep work and pharmacy CE.', t:0},
-      {q:'Explain vector databases for a smart engineer new to the topic.', t:0}
-    ],
-    voice: [
-      {q:'', t:0, voice:1, label:'Start voice conversation'},
-      {q:'Give me a 30-second spoken briefing on markets.', t:0}
-    ],
-    agent: [
-      {q:'Build a plan, then run it: Surrey BC morning brief with news and a clinical pearl.', t:1},
-      {q:'Organize my next product milestone for Nova into concrete steps and schedule a reminder.', t:1}
-    ],
-    research: [
-      {q:'Research the latest EV battery breakthroughs and summarize with sources.', t:1},
-      {q:'What changed in GLP-1 therapy guidance recently? Cite sources.', t:1}
-    ],
-    council: [
-      {q:'Should a long-term Canadian investor prefer XEQT or a XGRO/VGRO blend? Argue both sides.', t:0},
-      {q:'Is now a good time to refinance a mortgage in BC? Steel-man both views.', t:0}
-    ],
-    memory: [
-      {q:'What do you already know about me from memory? Organize by category.', t:1},
-      {q:'Remember that I prefer concise answers with clear action items.', t:1}
-    ],
-    connectors: [
-      {q:'List my connectors and pull a Tesla Dashboard brief.', t:1},
-      {q:'Using connectors, draft a Gmail compose link to myself with subject Weekly plan.', t:1}
-    ]
-  };
-  var modeChips = chips[cur] || chips.chat;
-  var tilesHtml = UI_MODES.map(function(m){
-    return '<button type="button" class="mode-tile' + (m.id === cur ? ' active' : '') + '" data-mode="' + m.id + '" style="--tile-c:' + m.color + ';--tile-grad:' + m.grad + ';--tile-glow:color-mix(in srgb, ' + m.color + ' 28%, transparent)">' +
-      (m.badge ? '<span class="mt-badge">' + esc(m.badge) + '</span>' : '') +
-      '<span class="mt-ico">' + m.icon + '</span>' +
-      '<span class="mt-title">' + esc(m.title) + '</span>' +
-      '<span class="mt-desc">' + esc(m.desc) + '</span></button>';
-  }).join('');
-  var chipsHtml = modeChips.map(function(ch){
-    if (ch.voice) return '<button type="button" class="prompt-chip" data-voice="1">🎙️ Start voice conversation</button>';
-    return '<button type="button" class="prompt-chip" data-q="' + esc(ch.q).replace(/"/g, '&quot;') + '" data-tools="' + (ch.t ? '1' : '') + '">' + esc(ch.label || ch.q) + '</button>';
-  }).join('');
-  d.innerHTML =
-    '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">✦</div></div>' +
-    '<h1>' + greet + ', David</h1>' +
-    '<p class="subhead">Personal AI for David — agentic modes, connectors, and an encrypted Drive vault so memory survives every device.</p>' +
-    '<div class="mode-tiles">' + tilesHtml + '</div>' +
-    '<div class="prompt-chips">' + chipsHtml + '</div>';
-  qsa('.mode-tile', d).forEach(function(b){
-    b.addEventListener('click', function(){
-      var id = b.getAttribute('data-mode');
-      if (id === 'voice') setUiMode('voice');
-      else if (id === 'memory') setUiMode('memory', {openPanel: false});
-      else setUiMode(id);
-      $('input').focus();
-    });
-  });
-  qsa('.prompt-chip', d).forEach(function(b){
-    b.addEventListener('click', function(){
-      if (b.dataset.voice){ setUiMode('voice'); return; }
-      if (b.dataset.tools){ var c = ensureConvo(); c.toolsOn = true; updateToolsBtn(); }
-      $('input').value = b.getAttribute('data-q') || '';
-      autoresize(); updateSendBtn();
-      $('input').focus();
-    });
-  });
-  return d;
+  return renderHubHome();
 }
 function msgEl(m, convo){
   var el = document.createElement('div');
@@ -5097,7 +5409,7 @@ function renderMemory(){
   });
   if ($('mem-count')) $('mem-count').textContent = items.length + ' shown · ' + S.memory.length + ' total';
   if (!S.memory.length){
-    list.innerHTML = '<div style="color:var(--text3); text-align:center; padding:16px">No memories yet. Add one above, or ask Nova to “remember …” with tools on.</div>';
+    list.innerHTML = '<div style="color:var(--text3); text-align:center; padding:16px">No memories yet. Add one above, or ask Homebase to “remember …” with tools on.</div>';
     return;
   }
   if (!items.length){
@@ -5311,7 +5623,7 @@ function renderTasks(){
   var list = $('task-list');
   list.innerHTML = '';
   if (!S.tasks.length){
-    list.innerHTML = '<div style="color:var(--text3); text-align:center; padding:14px">No tasks yet. Create one, or ask Nova (with 🔧 tools on): “remind me every morning at 8 to …”</div>';
+    list.innerHTML = '<div style="color:var(--text3); text-align:center; padding:14px">No tasks yet. Create one, or ask Homebase (with 🔧 tools on): “remind me every morning at 8 to …”</div>';
     return;
   }
   S.tasks.forEach(function(t){
@@ -5576,6 +5888,7 @@ function renderSettings(expandProvider){
   renderChatPane();
   renderVoicePane();
   renderToolsPane();
+  renderHubSettingsPane();
   renderCouncilPane();
   renderLookPane();
   renderDataPane();
@@ -6040,7 +6353,7 @@ function renderDataPane(){
     rd.onload = function(){
       try {
         var d = JSON.parse(rd.result);
-        if (!d || d.v !== 1) throw new Error('not a Nova backup');
+        if (!d || d.v !== 1) throw new Error('not a Homebase backup');
         if (!confirm('Import backup from ' + (d.exportedAt || '?') + '? This replaces current chats, memory, tasks and settings.')) return;
         S.settings = Object.assign({}, DEFAULT_SETTINGS, d.settings || {});
         S.settings.speech = Object.assign({}, DEFAULT_SETTINGS.speech, (d.settings || {}).speech || {});
@@ -6068,10 +6381,10 @@ function renderDataPane(){
     createConvo();
     toast('Conversations deleted', 'ok');
   });
-  var rsRow = row('Full reset', 'Deletes everything including keys', '<button class="sm-btn dngr" id="rs-all">Reset Nova</button>');
+  var rsRow = row('Full reset', 'Deletes everything including keys', '<button class="sm-btn dngr" id="rs-all">Reset Homebase</button>');
   pane.appendChild(rsRow);
   qs('#rs-all', pane).addEventListener('click', function(){
-    if (!confirm('Full reset — delete ALL Nova data in this browser?')) return;
+    if (!confirm('Full reset — delete ALL Homebase data in this browser?')) return;
     if (!confirm('Really sure? This cannot be undone.')) return;
     [LS_SETTINGS, LS_KEYS, LS_MEMORY, LS_TASKS, LS_BOOT].forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
     idb.clear().then(function(){ location.reload(); });
@@ -6107,6 +6420,13 @@ function initShell(){
     var c = activeConvo();
     if (c && !c.messages.length){ closeSidebarMobile(); $('input').focus(); return; }
     createConvo(); closeSidebarMobile(); $('input').focus();
+  });
+  var brand = document.querySelector('.brand');
+  if (brand) brand.style.cursor = 'pointer';
+  if (brand) brand.addEventListener('click', function(){
+    var c = activeConvo();
+    if (c && !c.messages.length){ renderChat(); closeSidebarMobile(); return; }
+    createConvo(); closeSidebarMobile();
   });
   $('convo-search').addEventListener('input', renderSidebar);
   $('model-btn').addEventListener('click', function(e){
@@ -6226,6 +6546,7 @@ async function boot(){
   updateCouncilBtn();
   renderModeRail();
   updateModeChrome();
+  renderHubNav();
   updateHints();
   updateSendBtn();
   updateConnectorsBtn();

@@ -1,4 +1,8 @@
-# Nova — multimodal AI chat (`/ai/`)
+# Homebase
+
+Personal AI hub (formerly Nova) for David — chat, agents, connectors, and an encrypted Google Drive vault.
+
+# Homebase — multimodal AI chat (`/ai/`)
 
 A self-contained, dependency-free AI chat app served from this repo's GitHub
 Pages site at **`…/tesla-dashboard/ai/`**. One HTML file, no build step, no
@@ -6,7 +10,7 @@ backend — everything (keys, chats, memory, tasks) lives in your browser and is
 sent only to the AI provider you pick.
 
 **Quick links:** `ai/` opens the chat · `ai/?voice=1` opens straight into
-voice mode (this is what the dashboard's **More → 🎙️ Nova Voice** button uses).
+voice mode (this is what the dashboard's **More → 🎙️ Homebase Voice** button uses).
 
 ## Providers
 
@@ -50,7 +54,7 @@ into the model-picker search and used directly.
 - **Scheduled tasks** — daily / weekly / every-N-minutes / one-off prompts
   that run automatically, post results to a dedicated ⏰ chat and fire a
   browser notification. The model can create these itself ("remind me every
-  morning at 8 to…"). Runs while a Nova tab is open; missed runs are caught
+  morning at 8 to…"). Runs while a Homebase tab is open; missed runs are caught
   up on the next visit (toggleable per task).
 - **Personalization** — dark/light/system theme, accent colors, font size,
   personas (incl. a pharmacist clinical mode), default system prompt,
@@ -58,7 +62,7 @@ into the model-picker search and used directly.
 
 ## iOS / phone
 
-Open the URL in Safari → Share → **Add to Home Screen**: Nova installs as a
+Open the URL in Safari → Share → **Add to Home Screen**: Homebase installs as a
 full-screen app (custom icon, safe-area aware, no zoom-on-focus). Long-press
 the icon (Android/desktop PWA) for a direct **Voice mode** shortcut. Voice
 mode works with Safari's speech APIs; the OpenAI voice engine is a drop-in
@@ -66,7 +70,7 @@ upgrade if a key is present.
 
 ## In the car
 
-The dashboard's **More → Apps** menu has **✦ Nova AI** and **🎙️ Nova Voice**
+The dashboard's **More → Apps** menu has **✦ Homebase AI** and **🎙️ Homebase Voice**
 buttons. Heads-up: Tesla's browser blocks most cross-origin requests and has
 no microphone access, so in-car use is best-effort — chat may work with some
 providers, voice generally won't. The buttons shine when the dashboard is
