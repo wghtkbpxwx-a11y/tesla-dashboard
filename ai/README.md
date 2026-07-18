@@ -36,7 +36,9 @@ origin so a modified Base URL cannot redirect them. Do not use this feature on
 a shared device or commit keys to source control. Each provider
 has a **Get API key** shortcut, **Test connection**, and, where supported,
 **Fetch model list**; any model id can also be typed into the model-picker
-search and used directly.
+search and used directly. Credential fields update the active in-memory key as
+they are typed so an immediate connection test cannot use stale state; durable
+browser storage remains change-triggered.
 
 ## Automatic model routing and rolling budget
 

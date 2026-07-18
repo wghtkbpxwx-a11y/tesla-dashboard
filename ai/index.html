@@ -2571,6 +2571,7 @@ var HOMEBASE_CHANGELOG = {
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
     state: 'PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, and PR #62 secure latency-aware local routing are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio now requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call.',
     start_here: [
+      'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-live-activation',
       'HOMEBASE_CHANGELOG entry 2026-07-18-lmstudio-secure-mcp-live-verification',
       'HOMEBASE_CHANGELOG entry 2026-07-18-direct-provider-router-v2 plus the updated 2026-07-18-cross-device-vault-deployment entry',
       'HOMEBASE_CHANGELOG entries 2026-07-18-cross-device-vault-v2, 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
@@ -2619,6 +2620,42 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-cloud-key-live-activation',
+      date: '2026-07-18',
+      commit: '26a35cd (initial fix commit)',
+      branch: 'codex/fix-cloud-key-activation',
+      pull_request: '#64 draft',
+      title: 'Activate cloud API keys immediately while preserving change-triggered persistence',
+      type: 'fix+security+providers+docs',
+      depends_on: ['2026-07-18-direct-provider-router-v2','2026-07-18-lmstudio-token-auth-fix'],
+      files_changed: ['ai/index.html','ai/README.md','CLAUDE.md'],
+      settings_changed: ['keys.* provider credentials','keys.custom','keys.elevenlabs'],
+      interfaces_changed: ['renderProvidersPane','renderVoicePane','testProvider','fetchProviderModels'],
+      changes: [
+        'Updates the active in-memory credential on every provider-key input event so immediate Test connection, Fetch model list, and chat requests cannot run with a stale empty key',
+        'Keeps the existing change-triggered saveKeys path for browser-local persistence and optional encrypted private-vault inclusion',
+        'Applies the same behaviour to direct cloud providers, the optional custom endpoint key, and ElevenLabs instead of maintaining a one-off LM Studio exception'
+      ],
+      safety_guards: [
+        'No credential value is placed in source, logs, the changelog, or public deployment artifacts',
+        'Keys remain masked and official provider keys remain pinned to their provider API origins',
+        'Input events update memory only; durable browser storage still occurs on the existing change event',
+        'Connection and model-list checks do not request a paid model generation'
+      ],
+      verification: [
+        'Reproduced on live Pages: the masked xAI field contained the new key while the active keys.xai value remained empty, causing Test connection to return No credentials presented before any billable call',
+        'Pending: deploy, enter the xAI key, verify immediate active state, run the free connection/model-list checks, and then perform at most one minimal budget-accounted chat if needed'
+      ],
+      setup_required: [
+        'After deployment, re-enter the user-provided xAI key directly into the masked provider field; do not copy the key into source or documentation'
+      ],
+      known_limits: [
+        'Keys pasted into a chat or other communication channel should be rotated when the user can access the provider console directly',
+        'Cross-device key availability still requires explicit encrypted-secret sync and a successful private-vault push/pull'
+      ],
+      next_model: 'Preserve immediate in-memory activation plus change-triggered persistence for every credential field; never expose key values while testing provider setup.'
+    },
     {
       id: '2026-07-18-lmstudio-secure-mcp-live-verification',
       date: '2026-07-18',
@@ -9994,6 +10031,7 @@ function renderProvidersPane(expand){
       kr.innerHTML = '<label>API key</label><input type="password" autocomplete="off" spellcheck="false" placeholder="' + esc(pr.keyHint || '') + '"><button class="sm-btn show-k" type="button">👁</button>';
       var ki = qs('input', kr);
       ki.value = getKey(p);
+      ki.addEventListener('input', function(){ S.keys[p] = ki.value.trim(); });
       ki.addEventListener('change', function(){
         S.keys[p] = ki.value.trim(); saveKeys();
         qs('.p-dot', card).classList.toggle('ok', providerReady(p));
@@ -10073,6 +10111,7 @@ function renderProvidersPane(expand){
       ck.innerHTML = '<label>API key</label><input type="password" autocomplete="off" placeholder="(optional)">';
       var cki = qs('input', ck);
       cki.value = getKey('custom');
+      cki.addEventListener('input', function(){ S.keys.custom = cki.value.trim(); });
       cki.addEventListener('change', function(){ S.keys.custom = cki.value.trim(); saveKeys(); });
       body.insertBefore(ck, btns);
     }
@@ -10365,6 +10404,7 @@ function renderVoicePane(){
   pane.appendChild(ekRow);
   var eki = qs('#vs-ek', pane);
   eki.value = getKey('elevenlabs');
+  eki.addEventListener('input', function(){ S.keys.elevenlabs = this.value.trim(); });
   eki.addEventListener('change', function(){ S.keys.elevenlabs = this.value.trim(); saveKeys(); });
   qs('#vs-etest', pane).addEventListener('click', async function(){
     var b = this; b.textContent = 'Testing…';
