@@ -32,6 +32,32 @@ has a **Get API key** shortcut, **Test connection**, and, where supported,
 **Fetch model list**; any model id can also be typed into the model-picker
 search and used directly.
 
+## Automatic model routing and rolling budget
+
+Homebase defaults to **Auto · best value**. For every new message it:
+
+1. detects required capabilities (live tools, vision/PDF, complexity, and
+   high-stakes clinical/financial/legal context);
+2. uses a recently verified local server or in-browser WebLLM for simple work;
+3. when cloud quality is required, filters out models below the task's quality
+   floor and selects the lowest estimated-cost suitable model;
+4. raises the quality floor when the prompt names a model or says things such
+   as “use your most advanced model” or “maximum quality.”
+
+The default paid-cloud guard is **$50 across the trailing 30 days**, combined
+across all configured providers. It reserves a conservative maximum before
+each call (including concurrent Council calls), records the provider's token
+usage afterward, and continuously releases entries as they become 30 days old.
+OpenAI Whisper and premium text-to-speech are included; local models and browser
+speech cost $0. Unknown-price cloud models are blocked while the hard guard is
+enabled. The tracker and controls are in **Settings → Chat**, and every reply
+shows the selected model, route reason, tokens, and estimated cost.
+
+This is an application-side estimate, not a provider billing limit. Keep
+provider-side spend limits/alerts enabled too, because pricing changes, cached
+tokens, special tools, taxes, failed requests, and calls made outside Homebase
+may differ from the local ledger.
+
 ### Local model setup notes
 
 - **Ollama** — allow the page's origin once, then restart Ollama:
@@ -117,7 +143,8 @@ An end-to-end harness (mock OpenAI/Anthropic/Gemini SSE server + headless
 Chromium) exercises streaming, the tool loop for all three wire formats,
 tasks, memory, persistence and the voice deep link — see the PR/session notes.
 
-localStorage keys are namespaced `nova_*`; conversations live in IndexedDB
+localStorage keys are namespaced `nova_*` (including `nova_cloud_usage_v1` for
+the rolling cost ledger); conversations live in IndexedDB
 (`nova_chat`) so they never compete with the dashboard's localStorage quota.
 
 

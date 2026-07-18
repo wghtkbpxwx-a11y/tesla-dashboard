@@ -2541,9 +2541,42 @@ var HOMEBASE_CHANGELOG = {
     'Budget glance is localStorage / private import only (finance-glance.local.json gitignored)',
     'Prefer professional SVG icons (ICON_SVG); avoid emoji for chrome',
     'Dashboard-first UI + floating chat (FAB/dock/expand); avoid redundant left+bottom menus',
-    'Mobile shares same URL (body.is-mobile); do not break desktop layout'
+    'Mobile shares same URL (body.is-mobile); do not break desktop layout',
+    'ChatGPT is actively developing the AI model selector / auto-route engine — do not rewrite that surface without coordinating; fix bugs only and preserve autoRoute + cloudBudget APIs'
   ],
   entries: [
+    {
+      id: '2026-07-18-review-hardening',
+      date: '2026-07-18',
+      commit: 'ad243fa',
+      title: 'Full review hardening (bugs fixed; model-selector ownership noted)',
+      type: 'fix',
+      changes: [
+        'Auto-router respects agent/research/toolsOn (no longer routes tool work to WebLLM/local-only without tools)',
+        'DeepSeek base URL /v1 + priced catalog; OpenRouter catalog costs so hard budget guard can route them',
+        'Null-safe stockPrice, providerModels, getBase, modelCaps, runChatRaw, finishFixedCloud, updateBudgetDisplays',
+        'Dashboard re-render preserves scrollTop; live refresh skips while S.sending; stamp shows live+cache',
+        'Council preset Claude id fixed to claude-sonnet-5; memory widget truncates long facts',
+        'Did not redesign model picker — ChatGPT owns model-selector engine WIP'
+      ]
+    },
+    {
+      id: '2026-07-18-ai-credit-router',
+      date: '2026-07-18',
+      title: 'Cost-effective AI router and rolling cloud budget',
+      type: 'feat',
+      changes: [
+        'Auto-selects local AI for simple work and the least expensive configured cloud model meeting the task capability and quality floor',
+        'Explicit named-model / most-advanced requests raise the quality floor when the remaining budget permits',
+        'Hard $50 trailing-30-day estimated cloud guard with concurrency reservations, per-reply rationale, and embedded Settings tracker',
+        'Tracks chat, agent, Council, OpenAI premium speech, and Whisper transcription usage; unknown-price cloud models are blocked under the hard guard'
+      ],
+      setup_required: [
+        'Add provider API keys in Settings → Providers',
+        'Start and verify Ollama, LM Studio, or llama.cpp, or allow the WebLLM first-use download for local routing'
+      ],
+      ownership_note: 'ChatGPT is currently developing the AI model selector engine on top of this router — coordinate before large UI refactors'
+    },
     {
       id: '2026-07-18-changelog-embed',
       date: '2026-07-18',
@@ -2626,6 +2659,12 @@ var HOMEBASE_CHANGELOG = {
   ],
   planned: [
     {
+      id: 'plan-model-selector-engine',
+      title: 'ChatGPT WIP: richer AI model selector engine (picker UX, capability matrix, routing UI)',
+      status: 'in_progress',
+      notes: 'Owned by ChatGPT session — other agents should only bugfix autoRoute/cloudBudget paths, not rewrite the selector'
+    },
+    {
       id: 'plan-gmail-live',
       title: 'Optional Gmail/Calendar OAuth widgets (beyond iCal/deep-links)',
       status: 'idea',
@@ -2652,7 +2691,8 @@ var HOMEBASE_CHANGELOG = {
     'When you change widgets, APIs, layout defaults, or agent tools: append a new HOMEBASE_CHANGELOG.entries[] item (newest first) and bump HOMEBASE_CHANGELOG.updated',
     'Keep planned[] honest — move items to entries when shipped',
     'Call syncHomebaseChangelogDom() after editing entries if you need the DOM pre to update mid-session',
-    'Do not surface this changelog as a visible dashboard card unless the user asks'
+    'Do not surface this changelog as a visible dashboard card unless the user asks',
+    'Model selector / auto-router UI is under active ChatGPT development — coordinate; preserve selectAIRoute, cloudBudget, LS_USAGE, autoRoute settings keys'
   ]
 };
 try { window.HOMEBASE_CHANGELOG = HOMEBASE_CHANGELOG; } catch(e){}
@@ -3155,8 +3195,14 @@ function saveDashLayout(widgets){
 
 function stockPrice(entry){
   try {
-    var m = entry.chart.result[0].meta;
-    return { symbol: m.symbol, price: m.regularMarketPrice, prev: m.chartPreviousClose };
+    if (!entry || !entry.chart || !entry.chart.result || !entry.chart.result[0]) return null;
+    var m = entry.chart.result[0].meta || {};
+    if (m.regularMarketPrice == null && m.previousClose == null) return null;
+    return {
+      symbol: m.symbol || '',
+      price: m.regularMarketPrice != null ? m.regularMarketPrice : m.previousClose,
+      prev: m.chartPreviousClose != null ? m.chartPreviousClose : m.previousClose
+    };
   } catch(e){ return null; }
 }
 
@@ -3406,7 +3452,9 @@ function renderMemoryWidget(span){
   var vaultOn = !!(connectorCfg('drive').clientId);
   var body = mems.length
     ? mems.map(function(m){
-        return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px"><span>'+esc(m.text)+'</span><span class="meta">'+esc(m.category||'fact')+(m.pinned?' · pinned':'')+'</span></div>';
+        var t = String(m.text || '');
+        if (t.length > 140) t = t.slice(0, 137) + '…';
+        return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px"><span>'+esc(t)+'</span><span class="meta">'+esc(m.category||'fact')+(m.pinned?' · pinned':'')+'</span></div>';
       }).join('')
     : '<div class="d-empty">Memory is empty — teach Homebase about you</div>';
   body += '<div class="d-chips" style="margin-top:8px"><button type="button" class="d-chip" data-act="memory">Open vault</button>' +
@@ -3559,14 +3607,20 @@ function renderPinsWidget(span){
 function renderDashboard(){
   var root = $('dashboard');
   if (!root) return;
+  // Preserve dashboard scroll across live refreshes / re-renders
+  var sc = $('dash-scroll');
+  var keepScroll = sc ? sc.scrollTop : 0;
   if (!S.hubModules) S.hubModules = loadHubConfig();
   var c = DASH.cache;
   var hour = new Date().getHours();
   var greet = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
-  var stamp = c && c.updated ? ('Cache ' + c.updated) : (DASH.loading ? 'Loading…' : 'Connect Tesla Dashboard for live data');
+  var locLabel = (S.settings && S.settings.homeLocation) || 'Surrey';
+  var stamp = LIVE.updated
+    ? ('Live ' + fmtDateTime(LIVE.updated) + (c && c.updated ? ' · cache ' + String(c.updated).slice(0, 16) : ''))
+    : (c && c.updated ? ('Cache ' + c.updated) : (DASH.loading || LIVE.loading ? 'Loading…' : 'Refresh for live data'));
   var layout = loadDashLayout();
   var html = '<div class="dash-hero">' +
-    '<div><h1>'+greet+', David</h1><div class="dh-sub">Homebase · Surrey · your life OS</div></div>' +
+    '<div><h1>'+greet+', David</h1><div class="dh-sub">Homebase · '+esc(locLabel)+' · your life OS</div></div>' +
     '<div class="dh-stamp" id="dash-stamp">'+esc(stamp)+'</div></div><div class="dash-grid">';
 
   layout.forEach(function(w){
@@ -3633,6 +3687,9 @@ function renderDashboard(){
       if (mod) runHubModule(mod);
     });
   });
+  if (sc && keepScroll > 0){
+    try { sc.scrollTop = keepScroll; } catch(e){}
+  }
 }
 
 async function refreshDashboard(opts){
@@ -5318,10 +5375,10 @@ var PROVIDERS = {
   openrouter: { name:'OpenRouter', kind:'openai', base:'https://openrouter.ai/api/v1', needsKey:true, usage:true, fetchModels:true, color:'#8b5cf6',
     keyHint:'sk-or-…  (openrouter.ai — hundreds of models)', keyUrl:'https://openrouter.ai/settings/keys',
     models:[
-      {id:'openrouter/auto', label:'Auto (best available)', tools:1},
-      {id:'meta-llama/llama-3.3-70b-instruct', label:'Llama 3.3 70B', tools:1},
-      {id:'deepseek/deepseek-chat-v3-0324', label:'DeepSeek V3', tools:1},
-      {id:'google/gemini-2.5-flash', label:'Gemini 2.5 Flash', vision:1, tools:1}
+      {id:'openrouter/auto', label:'Auto (best available)', tools:1, quality:4, cost:[1.5,6]},
+      {id:'meta-llama/llama-3.3-70b-instruct', label:'Llama 3.3 70B', tools:1, quality:3, cost:[0.12,0.3]},
+      {id:'deepseek/deepseek-chat-v3-0324', label:'DeepSeek V3', tools:1, quality:3, cost:[0.3,0.9]},
+      {id:'google/gemini-2.5-flash', label:'Gemini 2.5 Flash', vision:1, tools:1, quality:3, cost:[0.3,2.5]}
     ]},
   mistral: { name:'Mistral', kind:'openai', base:'https://api.mistral.ai/v1', needsKey:true, usage:true, fetchModels:true, color:'#fa5511',
     keyHint:'(console.mistral.ai)', keyUrl:'https://console.mistral.ai/api-keys/',
@@ -5330,11 +5387,13 @@ var PROVIDERS = {
       {id:'mistral-small-latest', label:'Mistral Small', tools:1, cost:[0.1,0.3]},
       {id:'pixtral-large-latest', label:'Pixtral Large', vision:1, tools:1, cost:[2,6]}
     ]},
-  deepseek: { name:'DeepSeek', kind:'openai', base:'https://api.deepseek.com', needsKey:true, usage:true, fetchModels:true, color:'#4d6bfe',
+  deepseek: { name:'DeepSeek', kind:'openai', base:'https://api.deepseek.com/v1', needsKey:true, usage:true, fetchModels:true, color:'#4d6bfe',
     keyHint:'(platform.deepseek.com)', keyUrl:'https://platform.deepseek.com/api_keys',
     models:[
-      {id:'deepseek-v4-flash', label:'DeepSeek V4 Flash', tools:1},
-      {id:'deepseek-v4-pro', label:'DeepSeek V4 Pro', tools:1, think:'native'}
+      {id:'deepseek-v4-flash', label:'DeepSeek V4 Flash', tools:1, quality:3, cost:[0.28,0.42]},
+      {id:'deepseek-v4-pro', label:'DeepSeek V4 Pro', tools:1, think:'native', quality:4, cost:[1.1,2.2]},
+      {id:'deepseek-chat', label:'DeepSeek Chat', tools:1, quality:3, cost:[0.28,0.42]},
+      {id:'deepseek-reasoner', label:'DeepSeek Reasoner', tools:1, think:'native', quality:4, cost:[0.55,2.19]}
     ]},
   xai: { name:'xAI Grok', kind:'openai', base:'https://api.x.ai/v1', needsKey:true, usage:true, fetchModels:true, color:'#1c1c1c',
     keyHint:'xai-…  (console.x.ai)', keyUrl:'https://console.x.ai/',
@@ -5368,8 +5427,9 @@ var PROVIDER_ORDER = ['anthropic','openai','google','groq','openrouter','mistral
 
 function getKey(p){ return (S.keys[p] || '').trim(); }
 function getBase(p){
-  var o = (S.settings.baseURL[p] || '').trim();
-  return (o || PROVIDERS[p].base || '').replace(/\/+$/, '');
+  var o = ((S.settings.baseURL || {})[p] || '').trim();
+  var pr = PROVIDERS[p];
+  return (o || (pr && pr.base) || '').replace(/\/+$/, '');
 }
 function providerReady(p){
   var pr = PROVIDERS[p];
@@ -5380,6 +5440,7 @@ function providerReady(p){
 }
 function providerModels(p){
   var pr = PROVIDERS[p];
+  if (!pr) return [];
   var list = (pr.models || []).slice();
   var cached = (S.settings.modelCache || {})[p] || [];
   for (var i = 0; i < cached.length; i++){
@@ -5397,8 +5458,9 @@ function modelInfo(p, id){
 }
 function modelCaps(p, id){
   var mi = modelInfo(p, id);
+  var pr = PROVIDERS[p];
   var vision = mi.vision || /gpt-4o|gpt-4\.1|gpt-5|claude|gemini|pixtral|llava|vision|-vl\b|grok-4|llama-4|gemma-3|minicpm|moondream/i.test(id);
-  var tools = PROVIDERS[p].kind !== 'webllm' && (mi.tools || mi.fetched || PROVIDERS[p].local || p === 'custom' || p === 'demo');
+  var tools = !!(pr && pr.kind !== 'webllm' && (mi.tools || mi.fetched || pr.local || p === 'custom' || p === 'demo'));
   return { vision: !!vision, tools: !!tools, think: mi.think || (/reasoner|-r1|qwq|thinking/i.test(id) ? 'native' : null) };
 }
 function modelCost(p, id){
@@ -5515,7 +5577,8 @@ function reserveFixedCloud(provider, model, kind, estimatedCost){
   return {provider:provider, model:model, kind:kind, maximum:cost};
 }
 function finishFixedCloud(r, details){
-  CLOUD_RESERVED_USD = Math.max(0, CLOUD_RESERVED_USD - r.maximum);
+  if (!r) return;
+  CLOUD_RESERVED_USD = Math.max(0, CLOUD_RESERVED_USD - (r.maximum || 0));
   saveCloudUsage(Object.assign({provider:r.provider, model:r.model, kind:r.kind, costUsd:r.maximum, estimated:true}, details || {}));
 }
 function modelQuality(p, id){
@@ -5539,13 +5602,17 @@ function explicitModelRequest(query){
     });
   });
   if (!found && /\bgpt\s*5[ .-]?6\b/i.test(query)) found = {provider:'openai', model:'gpt-5.6-sol'};
+  if (!found && /\bsonnet\b/i.test(query)) found = {provider:'anthropic', model:'claude-sonnet-5'};
+  if (!found && /\bopus\b/i.test(query)) found = {provider:'anthropic', model:'claude-opus-4-8'};
+  if (!found && /\bgrok\b/i.test(query)) found = {provider:'xai', model:'grok-4.5'};
+  if (!found && /\bgemini\b.*\bpro\b|\bpro\b.*\bgemini\b/i.test(query)) found = {provider:'google', model:'gemini-2.5-pro'};
   return found;
 }
 function classifyAIRequest(query, latestUser, convo){
   var q = String(query || ''), hasVision = !!((latestUser.images || []).length || (latestUser.files || []).some(function(f){ return f.kind === 'pdf'; }));
   var named = explicitModelRequest(q);
   var maxQuality = /\b(most advanced|best (?:available )?model|maximum quality|highest quality|strongest model|frontier model|no matter the cost)\b/i.test(q);
-  var needsTools = /\b(today|current|currently|latest|live|right now|news|weather|price|stock|score|schedule|search|browse|look up|verify|source|citation|dashboard|calendar|task|remind|update|change|modify|create|delete)\b/i.test(q) || S.settings.uiMode === 'agent' || S.settings.uiMode === 'research';
+  var needsTools = /\b(today|current|currently|latest|live|right now|news|weather|price|stock|score|schedule|search|browse|look up|verify|source|citation|dashboard|calendar|task|remind|update|change|modify|create|delete)\b/i.test(q);
   var highStakes = /\b(diagnos|dose|dosage|interaction|contraindication|patient|clinical|legal|lawsuit|tax|portfolio|investment|retirement|mortgage|financial plan)\b/i.test(q);
   var advanced = hasVision || highStakes || /\b(architecture|debug|refactor|security audit|research|analy[sz]e|strategy|multi-step|proof|theorem|complex|compare.*trade-?off|production|migration|forecast|model this|write (?:an )?(?:app|program|contract))\b/i.test(q) || q.length > 1400;
   var simple = q.length < 550 && !hasVision && !highStakes && !advanced && !needsTools;
@@ -5556,7 +5623,7 @@ function classifyAIRequest(query, latestUser, convo){
 function recentLocalProvider(p){
   var h = (S.settings.providerHealth || {})[p];
   var cached = (S.settings.modelCache || {})[p] || [];
-  return !!(cached.length && h && h.ok && Date.now() - h.ts < 86400000);
+  return !!(cached.length && h && h.ok && Date.now() - h.ts < 360000);
 }
 function localRouteCandidate(cls){
   if (!S.settings.localFirst || cls.tier !== 1 || cls.vision || cls.tools) return null;
@@ -5589,7 +5656,14 @@ function cloudRouteCandidates(cls, query, msgs, maxOut){
   return out;
 }
 function selectAIRoute(query, latestUser, convo, msgs){
-  var cls = classifyAIRequest(query, latestUser || {}, convo), local = localRouteCandidate(cls);
+  var cls = classifyAIRequest(query, latestUser || {}, convo);
+  // Tools/agent modes must not auto-route to tool-incapable models (e.g. WebLLM)
+  if (convo && convo.toolsOn) cls.tools = true;
+  if (S.settings && (S.settings.uiMode === 'agent' || S.settings.uiMode === 'research')) cls.tools = true;
+  if (S.settings && S.settings.toolsDefault && !convo) cls.tools = true;
+  // Raise tier slightly when tools are required so cheap nano models aren't forced for agent work
+  if (cls.tools && cls.tier < 2) cls.tier = 2;
+  var local = localRouteCandidate(cls);
   var maxOut = Math.min(+S.settings.maxTokens || 4096, cls.tier >= 4 ? 4096 : (cls.tier === 3 ? 3072 : (cls.tier === 2 ? 1800 : 900)));
   if (local) return Object.assign(local, {maxTokens:maxOut, tier:cls.tier, classification:cls,
     reason:'Auto · local model for a ' + cls.label + ' · $0 cloud'});
@@ -5621,10 +5695,13 @@ function selectAIRoute(query, latestUser, convo, msgs){
     reason:'Auto · demo fallback; connect a priced cloud model or a local runtime'};
 }
 function updateBudgetDisplays(){
-  var info = cloudSpendInfo();
-  qsa('[data-cloud-budget-text]').forEach(function(el){ el.textContent = '$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(2) + ' · trailing ' + info.windowDays + ' days'; });
-  qsa('[data-cloud-budget-bar]').forEach(function(el){ el.style.width = Math.min(100, info.limit ? info.spent / info.limit * 100 : 0) + '%'; });
-  if ($('model-prov') && S.settings.autoRoute) $('model-prov').textContent = '$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(0) + ' · ' + info.windowDays + 'd';
+  try {
+    var info = cloudSpendInfo();
+    qsa('[data-cloud-budget-text]').forEach(function(el){ el.textContent = '$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(2) + ' · trailing ' + info.windowDays + ' days'; });
+    qsa('[data-cloud-budget-bar]').forEach(function(el){ el.style.width = Math.min(100, info.limit ? info.spent / info.limit * 100 : 0) + '%'; });
+    var mp = $('model-prov');
+    if (mp && S.settings && S.settings.autoRoute) mp.textContent = '$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(0) + ' · ' + info.windowDays + 'd';
+  } catch(e){}
 }
 
 /* ============================ SSE reader ============================ */
@@ -6058,7 +6135,9 @@ async function chatDemo(o){
 }
 
 function runChatRaw(o){
-  var kind = PROVIDERS[o.provider].kind;
+  var pr = PROVIDERS[o.provider];
+  if (!pr) throw new Error('Unknown provider: ' + (o.provider || '(none)'));
+  var kind = pr.kind;
   if (kind === 'anthropic') return chatAnthropic(o);
   if (kind === 'gemini') return chatGemini(o);
   if (kind === 'webllm') return chatWebLLM(o);
@@ -7602,13 +7681,21 @@ function ttsBrowser(text){
   speechSynthesis.speak(u);
 }
 async function ttsOpenAI(text){
-  var resp = await fetch(getBase('openai') + '/audio/speech', {
-    method:'POST',
-    headers:{'content-type':'application/json', 'Authorization':'Bearer ' + getKey('openai')},
-    body: JSON.stringify({model:'gpt-4o-mini-tts', voice: S.settings.speech.openaiVoice || 'alloy', input: text.slice(0, 3800), response_format:'mp3'})
-  });
-  if (!resp.ok) throw await httpError(resp);
-  var blob = await resp.blob();
+  var input = text.slice(0, 3800);
+  var minutes = Math.max(0.03, input.trim().split(/\s+/).length / 150);
+  // Conservative audio-output estimate plus the published $0.60/M text-input rate.
+  var reservation = reserveFixedCloud('openai', 'gpt-4o-mini-tts', 'speech', minutes * 0.02 + estTokens(input) * 0.6 / 1000000);
+  var blob;
+  try {
+    var resp = await fetch(getBase('openai') + '/audio/speech', {
+      method:'POST',
+      headers:{'content-type':'application/json', 'Authorization':'Bearer ' + getKey('openai')},
+      body: JSON.stringify({model:'gpt-4o-mini-tts', voice: S.settings.speech.openaiVoice || 'alloy', input: input, response_format:'mp3'})
+    });
+    if (!resp.ok) throw await httpError(resp);
+    blob = await resp.blob();
+    finishFixedCloud(reservation, {minutes:minutes, chars:input.length});
+  } catch(e){ releaseCloudReservation(reservation); throw e; }
   var url = URL.createObjectURL(blob);
   /* reuse the gesture-unlocked element on iOS so playback isn't blocked */
   var audio = TTSQ.sharedAudio || new Audio();
@@ -7901,7 +7988,10 @@ async function voiceListenWhisper(){
       if (!VOICE.active) return;
       if (!spoke){ if (!VOICE.muted) voiceListen(); return; }
       setVState('thinking'); vLine('(transcribing…)');
+      var durationMin = Math.max(0.01, (Date.now() - t0) / 60000);
+      var voiceReservation;
       try {
+        voiceReservation = reserveFixedCloud('openai', 'whisper-1', 'transcription', durationMin * 0.006);
         var mt = mr.mimeType || 'audio/webm';
         var blob = new Blob(chunks, {type: mt});
         /* Safari records audio/mp4 — Whisper detects the format from the
@@ -7914,10 +8004,12 @@ async function voiceListenWhisper(){
           method:'POST', headers:{'Authorization':'Bearer ' + getKey('openai')}, body: fd });
         if (!resp.ok) throw await httpError(resp);
         var j = await resp.json();
+        finishFixedCloud(voiceReservation, {minutes:durationMin}); voiceReservation = null;
         var txt = (j.text || '').trim();
         if (txt) voiceUtterance(txt);
         else if (!VOICE.muted) voiceListen();
       } catch(err){
+        if (voiceReservation) releaseCloudReservation(voiceReservation);
         toast('Transcription failed: ' + err.message, 'err');
         if (VOICE.active && !VOICE.muted) setTimeout(voiceListen, 800);
       }
@@ -8651,7 +8743,8 @@ function renderProvidersPane(expand){
         }).then(function(){
           st.textContent = '✅ Ready';
           bar.style.width = '100%';
-          selectModel('webllm', msel.value);
+          if (!S.settings.autoRoute) selectModel('webllm', msel.value);
+          else { S.settings.webllmModel = msel.value; saveSettings(); updateModelBtn(); }
         }).catch(function(e){ st.textContent = '⚠️ ' + e.message; });
       });
     }
@@ -8732,12 +8825,34 @@ async function fetchProviderModels(p, btn){
     S.settings.providerHealth[p] = {ok:true, ts:Date.now()};
     saveSettings();
     toast(ids.length + ' models loaded for ' + pr.name, 'ok');
-    if (ids.length && pr.local) selectModel(p, ids[0]);
+    if (ids.length && pr.local && !S.settings.autoRoute) selectModel(p, ids[0]);
   } catch(err){
     S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings();
     toast('Fetch failed: ' + (err.name === 'AbortError' ? 'timed out' : err.message), 'err', 5000);
   }
   btn.textContent = 'Fetch model list';
+}
+
+async function autoDiscoverLocalModels(){
+  var changed = false;
+  await Promise.all(['ollama','lmstudio','llamacpp'].map(async function(p){
+    try {
+      var url = p === 'ollama' ? getBase(p).replace(/\/v1$/, '') + '/api/tags' : getBase(p) + '/models';
+      var r = await withTimeout(function(sig){ return fetch(url, {signal:sig}); }, 2200);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var j = await r.json();
+      var ids = p === 'ollama' ? (j.models || []).map(function(m){ return m.name; }) : (j.data || []).map(function(m){ return m.id; });
+      S.settings.modelCache[p] = ids.slice(0, 100);
+      S.settings.providerHealth[p] = {ok:ids.length > 0, ts:Date.now()};
+      changed = true;
+    } catch(e){
+      S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; changed = true;
+    }
+  }));
+  if (changed){
+    saveSettings(); updateModelBtn();
+    if ($('model-menu') && $('model-menu').classList.contains('open')) renderModelMenu();
+  }
 }
 
 function renderChatPane(){
@@ -8951,7 +9066,7 @@ function renderCouncilPane(){
     var baseM = (c && c.model) || S.settings.model;
     var list = [{ label: 'Primary', provider: baseP, model: baseM }];
     if (providerReady('openai')) list.push({ label: 'OpenAI', provider: 'openai', model: S.keys.openai ? (S.settings.customModels.openai || 'gpt-4o-mini') : 'gpt-4o-mini' });
-    if (providerReady('anthropic')) list.push({ label: 'Claude', provider: 'anthropic', model: S.settings.customModels.anthropic || 'claude-sonnet-4-20250514' });
+    if (providerReady('anthropic')) list.push({ label: 'Claude', provider: 'anthropic', model: (S.settings.customModels && S.settings.customModels.anthropic) || 'claude-sonnet-5' });
     // unique by provider
     var seen = {};
     S.settings.council.members = list.filter(function(m){
@@ -9023,10 +9138,10 @@ function renderLookPane(){
 function renderDataPane(){
   var pane = $('pane-data');
   pane.innerHTML = '<div class="hint-box" style="margin:0 0 13px">Everything lives in this browser: settings, keys & memory in localStorage; conversations in IndexedDB. Nothing is sent anywhere except to the AI provider you choose.</div>';
-  var exRow = row('Export backup', 'Conversations, memory, tasks & settings as JSON', '<label style="font-size:12px; color:var(--text2); display:flex; gap:5px; align-items:center"><input type="checkbox" id="ex-keys" style="width:auto"> include API keys</label><button class="sm-btn" id="ex-btn">Export</button>');
+  var exRow = row('Export backup', 'Conversations, memory, tasks, usage estimates & settings as JSON', '<label style="font-size:12px; color:var(--text2); display:flex; gap:5px; align-items:center"><input type="checkbox" id="ex-keys" style="width:auto"> include API keys</label><button class="sm-btn" id="ex-btn">Export</button>');
   pane.appendChild(exRow);
   qs('#ex-btn', pane).addEventListener('click', function(){
-    var data = { v:1, exportedAt: new Date().toISOString(), settings: S.settings, memory: S.memory, tasks: S.tasks, convos: S.convos };
+    var data = { v:1, exportedAt: new Date().toISOString(), settings: S.settings, memory: S.memory, tasks: S.tasks, convos: S.convos, cloudUsage: usageLedger() };
     if (qs('#ex-keys', pane).checked) data.keys = S.keys;
     download('nova-backup-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(data, null, 1), 'application/json');
   });
@@ -9043,8 +9158,11 @@ function renderDataPane(){
         if (!confirm('Import backup from ' + (d.exportedAt || '?') + '? This replaces current chats, memory, tasks and settings.')) return;
         S.settings = Object.assign({}, DEFAULT_SETTINGS, d.settings || {});
         S.settings.speech = Object.assign({}, DEFAULT_SETTINGS.speech, (d.settings || {}).speech || {});
+        S.settings.council = Object.assign({}, DEFAULT_SETTINGS.council, (d.settings || {}).council || {});
+        S.settings.cloudBudget = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, (d.settings || {}).cloudBudget || {});
         S.memory = d.memory || []; S.tasks = d.tasks || [];
         if (d.keys) S.keys = d.keys;
+        if (Array.isArray(d.cloudUsage)) lsSet(LS_USAGE, d.cloudUsage);
         saveSettings(); saveMemory(); saveTasks(); saveKeys();
         S.convos = d.convos || [];
         idb.clear().then(function(){ S.convos.forEach(function(c){ idb.put(c); }); });
@@ -9072,7 +9190,7 @@ function renderDataPane(){
   qs('#rs-all', pane).addEventListener('click', function(){
     if (!confirm('Full reset — delete ALL Homebase data in this browser?')) return;
     if (!confirm('Really sure? This cannot be undone.')) return;
-    [LS_SETTINGS, LS_KEYS, LS_MEMORY, LS_TASKS, LS_BOOT].forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
+    [LS_SETTINGS, LS_KEYS, LS_MEMORY, LS_TASKS, LS_BOOT, LS_USAGE, LS_CONNECTORS].forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
     idb.clear().then(function(){ location.reload(); });
   });
 }
@@ -9244,6 +9362,7 @@ async function boot(){
   if (!S.activeId) createConvo();
   else { renderSidebar(); renderChat(); }
   updateModelBtn();
+  autoDiscoverLocalModels();
   updateCouncilBtn();
   renderModeRail();
   updateModeChrome();
@@ -9260,17 +9379,17 @@ async function boot(){
   var liveTick = 0;
   setInterval(function(){
     if (document.visibilityState !== 'visible') return;
+    // Don't thrash DOM while the user is mid-stream reply
+    if (S.sending) return;
     liveTick++;
     var jobs = [fetchLiveWeather(), fetchLiveScores()];
     if (liveTick % 2 === 0) jobs.push(fetchLiveCalendar());
     Promise.all(jobs).then(function(){
       LIVE.updated = Date.now();
-      if ($('dashboard') && (!document.body.classList.contains('chat-open') || document.body.classList.contains('is-mobile') === false)){
-        /* always safe to re-render dashboard grid */
-      }
       try { renderDashboard(); } catch(e){}
     }).catch(function(){});
   }, 180000);
+  setInterval(autoDiscoverLocalModels, 300000);
   bootVaultSync();
   // deep link ?chat=1 or ?voice=1 opens float
   try {

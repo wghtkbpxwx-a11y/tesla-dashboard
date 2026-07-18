@@ -183,6 +183,14 @@ Separate single-file app at `ai/index.html` (own README in `ai/`), served by
 the same Pages site. Multi-provider BYOK chat (Anthropic/OpenAI/Gemini/Groq/
 OpenRouter/Mistral/DeepSeek/xAI + Ollama/LM Studio/llama.cpp/WebLLM + demo),
 voice mode (`ai/?voice=1` deep link), agent tools, memory, scheduled tasks.
+Chat defaults to a capability-gated, cost-effective auto router: verified local
+models/WebLLM for simple requests; the cheapest configured cloud model meeting
+the task quality floor for harder requests; explicit “most advanced”/named-model
+prompts raise the floor. A hard estimated $50 trailing-30-day combined cloud
+budget is stored in `nova_cloud_usage_v1`, reserves concurrent calls, and also
+tracks OpenAI premium speech/transcription. Unknown-price cloud models are
+blocked while the guard is enabled. Treat this as an app estimate, not provider
+billing truth; preserve the Settings → Chat tracker and per-reply route reason.
 Dashboard More→Apps has "✦ Nova AI" / "🎙️ Nova Voice" `data-href` submenu
 buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
 Nova uses `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
