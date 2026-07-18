@@ -1893,7 +1893,7 @@ var PERSONAS = {
   tutor:     { name: 'Tutor', sys: 'You are Homebase, a patient tutor. Explain step by step, check understanding, and use simple analogies before formal definitions.' },
   clinical:  { name: 'Clinical (drug info)', sys: 'You are Homebase, assisting a licensed pharmacist. Provide precise, referenced drug information (mechanisms, interactions, dosing ranges, monitoring). Note when evidence is uncertain. This supports, never replaces, professional judgement.' },
   creative:  { name: 'Creative writer', sys: 'You are Homebase, a vivid creative writing partner. Take risks, avoid clichés, and match the tone the user sets.' },
-  agent:     { name: 'Agent (proactive)', sys: 'You are Homebase in agent mode. Break complex requests into steps, use tools aggressively for live data, verify claims, keep a short plan when multi-step, and finish with a clear outcome. Prefer action over speculation.' },
+  agent:     { name: 'Agent (proactive)', sys: 'You are Homebase in agent mode. Break complex requests into steps, use tools aggressively for live data and dashboard updates (update_dashboard / list_dashboard), verify claims, keep a short plan when multi-step, and finish with a clear outcome. Prefer action over speculation — if the user wants the home screen changed, do it with tools.' },
   researcher:{ name: 'Researcher', sys: 'You are Homebase, a careful researcher. Search, read sources, cross-check, cite links, separate fact from inference, and flag uncertainty. Prefer primary sources when available.' }
 };
 
@@ -2402,13 +2402,71 @@ function renderHubSettingsPane(){
 function persistHub(){
   saveHubConfig(S.hubModules || []);
   renderHubNav();
+  try { renderDashboard(); } catch(e){}
   if ($('chat') && $('chat').querySelector('#empty-state')) renderChat();
 }
 /* ============================ Life dashboard + floating chat shell ============================ */
 var LS_DASH = 'homebase_dash_v1';
 var LS_FINANCE = 'homebase_finance_glance_v1';
+var LS_DASH_NOTES = 'homebase_dash_notes_v1';
 var DASH = { cache: null, loading: false, updated: 0 };
 var FINANCE = { glance: null };
+
+function loadDashNotes(){
+  var n = lsGet(LS_DASH_NOTES, []);
+  return Array.isArray(n) ? n : [];
+}
+function saveDashNotes(notes){
+  lsSet(LS_DASH_NOTES, notes || []);
+}
+function ensureWidget(layout, id, span){
+  layout = layout || loadDashLayout();
+  var found = null;
+  layout.forEach(function(w){ if (w.id === id) found = w; });
+  if (!found){
+    layout.unshift({ id: id, enabled: true, span: span || 4 });
+  } else {
+    found.enabled = true;
+    if (span) found.span = span;
+  }
+  saveDashLayout(layout);
+  return layout;
+}
+function setWidgetEnabled(id, enabled){
+  var layout = loadDashLayout();
+  var hit = false;
+  layout.forEach(function(w){
+    if (w.id === id){ w.enabled = !!enabled; hit = true; }
+  });
+  if (!hit && enabled) layout.push({ id: id, enabled: true, span: 4 });
+  saveDashLayout(layout);
+  return layout;
+}
+function reorderWidget(id, position){
+  // position: 'first' | 'last' | 0-based index
+  var layout = loadDashLayout();
+  var item = null, rest = [];
+  layout.forEach(function(w){
+    if (w.id === id) item = w;
+    else rest.push(w);
+  });
+  if (!item){
+    item = { id: id, enabled: true, span: 4 };
+  }
+  if (position === 'first' || position === 0) rest.unshift(item);
+  else if (position === 'last' || position == null) rest.push(item);
+  else {
+    var i = Math.max(0, Math.min(rest.length, +position || 0));
+    rest.splice(i, 0, item);
+  }
+  saveDashLayout(rest);
+  return rest;
+}
+function refreshDashboardUi(msg){
+  try { renderHubNav(); } catch(e){}
+  try { renderDashboard(); } catch(e){}
+  if (msg) try { toast(msg, 'ok', 2200); } catch(e){}
+}
 
 function loadFinanceGlance(){
   FINANCE.glance = lsGet(LS_FINANCE, null);
@@ -2431,6 +2489,7 @@ async function tryLoadLocalFinanceFile(){
 
 function defaultDashLayout(){
   return [
+    { id:'pins', enabled:true, span:4 },
     { id:'budget', enabled:true, span:6 },
     { id:'weather', enabled:true, span:3 },
     { id:'markets', enabled:true, span:3 },
@@ -2698,6 +2757,22 @@ function renderUpdatesWidget(c, span){
     '<button type="button" class="linkish" data-act="connectors">Connectors</button>');
 }
 
+function renderPinsWidget(span){
+  var notes = loadDashNotes().slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }).slice(0, 8);
+  var body;
+  if (!notes.length){
+    body = '<div class="d-empty">Ask Homebase AI to pin something here — e.g. “put a reminder on my dashboard to pay LOC Friday.”</div>';
+  } else {
+    body = notes.map(function(n){
+      return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
+        '<span><b>'+esc(n.title||'Note')+'</b></span>' +
+        '<span>'+esc(n.body||'')+'</span>' +
+        '<span class="meta">'+esc(n.ts ? fmtDateTime(n.ts) : '')+(n.source ? ' · '+esc(n.source) : '')+'</span></div>';
+    }).join('');
+  }
+  return widgetShell('Agent pins', 'bolt', '#7c3aed', span, body, '');
+}
+
 function renderDashboard(){
   var root = $('dashboard');
   if (!root) return;
@@ -2714,7 +2789,8 @@ function renderDashboard(){
   layout.forEach(function(w){
     if (w.enabled === false) return;
     var span = w.span || 4;
-    if (w.id === 'budget') html += renderBudgetWidget(span === 4 ? 6 : span);
+    if (w.id === 'pins') html += renderPinsWidget(span);
+    else if (w.id === 'budget') html += renderBudgetWidget(span === 4 ? 6 : span);
     else if (w.id === 'weather') html += renderWeatherWidget(c, span);
     else if (w.id === 'finance' || w.id === 'markets') html += renderFinanceWidget(c, span);
     else if (w.id === 'scores') html += renderScoresWidget(c, span);
@@ -5276,6 +5352,164 @@ TOOLS.push(
       return runConnector(String(a.connector || '').toLowerCase(), String(a.action || '').toLowerCase() || undefined, a);
     }}
 );
+
+TOOLS.push(
+  { name:'list_dashboard',
+    description:'Inspect the Homebase dashboard: which widgets are on/off, hub modules, and agent pins. Call before update_dashboard when the user wants layout changes.',
+    params:{}, required:[],
+    run: async function(){
+      var layout = loadDashLayout();
+      var hub = S.hubModules || loadHubConfig();
+      var notes = loadDashNotes();
+      var lines = ['== Widgets =='];
+      layout.forEach(function(w, i){
+        lines.push((i+1)+'. '+w.id+' — '+(w.enabled===false?'OFF':'ON')+' (span '+(w.span||4)+')');
+      });
+      lines.push('== Hub modules (sidebar/home links) ==');
+      hub.forEach(function(m, i){
+        lines.push((i+1)+'. '+m.id+' — '+(m.enabled===false?'OFF':'ON')+' — '+m.title+(m.url?(' → '+m.url):''));
+      });
+      lines.push('== Agent pins ('+notes.length+') ==');
+      notes.slice(0,12).forEach(function(n){
+        lines.push('• ['+n.id+'] '+(n.title||'Note')+': '+(n.body||'').slice(0,120));
+      });
+      return lines.join('\\n');
+    }},
+  { name:'update_dashboard',
+    description:'Mutate the Homebase life dashboard immediately (widgets, hub links, pins). The UI refreshes live. Actions: refresh | pin_note | unpin_note | clear_pins | set_widget | reorder_widget | set_hub_module | add_hub_link | remove_hub_module | set_home_location. Examples: pin_note title="LOC" body="Pay Friday"; set_widget id="scores" enabled=false; add_hub_link title="Monarch" url="https://app.monarchmoney.com"; reorder_widget id="budget" position="first"; refresh.',
+    params:{
+      action:{type:'string', description:'refresh|pin_note|unpin_note|clear_pins|set_widget|reorder_widget|set_hub_module|add_hub_link|remove_hub_module|set_home_location'},
+      id:{type:'string', description:'Widget id (weather,budget,markets,news,scores,calendar,tasks,pharmacy,links,memory,traffic,updates,pins) or hub module id'},
+      enabled:{type:'boolean'},
+      position:{type:'string', description:'first|last|or index number'},
+      title:{type:'string'},
+      body:{type:'string', description:'Pin body text'},
+      url:{type:'string'},
+      location:{type:'string', description:'For set_home_location'},
+      note_id:{type:'string', description:'For unpin_note'}
+    },
+    required:['action'],
+    run: async function(a){
+      var action = String(a.action || '').toLowerCase().trim();
+      if (!S.hubModules) S.hubModules = loadHubConfig();
+
+      if (action === 'refresh'){
+        try {
+          await refreshDashboard({toast:false});
+          return 'Dashboard data refreshed from Tesla Dashboard cache' + (DASH.cache && DASH.cache.updated ? ' (cache '+DASH.cache.updated+').' : '.');
+        } catch(e){
+          renderDashboard();
+          return 'Refresh attempted with fallback cache: ' + (e.message || e);
+        }
+      }
+
+      if (action === 'pin_note'){
+        var title = String(a.title || 'Note').trim().slice(0, 80);
+        var body = String(a.body || a.text || '').trim().slice(0, 500);
+        if (!body) return 'Error: pin_note needs body text.';
+        var notes = loadDashNotes();
+        var note = { id: uuid(), title: title, body: body, ts: Date.now(), source: 'agent' };
+        notes.unshift(note);
+        if (notes.length > 40) notes = notes.slice(0, 40);
+        saveDashNotes(notes);
+        ensureWidget(null, 'pins', 4);
+        refreshDashboardUi('Pinned to dashboard');
+        return 'Pinned to dashboard ['+note.id+']: '+title+' — '+body;
+      }
+
+      if (action === 'unpin_note'){
+        var nid = String(a.note_id || a.id || '').trim();
+        if (!nid) return 'Error: unpin_note needs note_id from list_dashboard.';
+        var before = loadDashNotes();
+        var after = before.filter(function(n){ return n.id !== nid; });
+        if (after.length === before.length) return 'Error: note_id not found.';
+        saveDashNotes(after);
+        refreshDashboardUi('Pin removed');
+        return 'Removed pin '+nid+'.';
+      }
+
+      if (action === 'clear_pins'){
+        saveDashNotes([]);
+        refreshDashboardUi('Pins cleared');
+        return 'All agent pins cleared.';
+      }
+
+      if (action === 'set_widget'){
+        var wid = String(a.id || '').trim();
+        if (!wid) return 'Error: set_widget needs id (weather, budget, markets, news, scores, …).';
+        var en = a.enabled;
+        if (en == null) return 'Error: set_widget needs enabled true|false.';
+        setWidgetEnabled(wid, !!en);
+        refreshDashboardUi(en ? ('Show '+wid) : ('Hide '+wid));
+        return 'Widget "'+wid+'" is now '+(en?'ON':'OFF')+'.';
+      }
+
+      if (action === 'reorder_widget'){
+        var rid = String(a.id || '').trim();
+        if (!rid) return 'Error: reorder_widget needs id.';
+        var pos = a.position != null ? a.position : 'first';
+        reorderWidget(rid, pos);
+        setWidgetEnabled(rid, true);
+        refreshDashboardUi('Moved '+rid);
+        return 'Widget "'+rid+'" moved to '+pos+'.';
+      }
+
+      if (action === 'set_hub_module'){
+        var hid = String(a.id || '').trim();
+        if (!hid) return 'Error: set_hub_module needs module id.';
+        var mod = null;
+        S.hubModules.forEach(function(m){ if (m.id === hid) mod = m; });
+        if (!mod) return 'Error: hub module "'+hid+'" not found. Use add_hub_link for new links.';
+        if (a.enabled != null) mod.enabled = !!a.enabled;
+        if (a.title) mod.title = String(a.title).trim();
+        if (a.body || a.desc) mod.desc = String(a.body || a.desc).trim();
+        if (a.url) mod.url = String(a.url).trim();
+        persistHub();
+        return 'Hub module "'+hid+'" updated (enabled='+mod.enabled+', title='+mod.title+').';
+      }
+
+      if (action === 'add_hub_link'){
+        var title = String(a.title || 'Link').trim().slice(0, 48);
+        var url = String(a.url || '').trim();
+        if (!url) return 'Error: add_hub_link needs url.';
+        if (!/^https?:\/\//i.test(url) && url.charAt(0) !== '/') url = 'https://' + url;
+        var id = 'custom-' + uuid().slice(0, 8);
+        S.hubModules.push({
+          id: id, title: title, desc: String(a.body || 'Custom link').trim().slice(0, 80),
+          kind: 'link', url: url, icon: 'link', color: '#64748b', enabled: true
+        });
+        persistHub();
+        return 'Added hub link "'+title+'" ('+id+') → '+url;
+      }
+
+      if (action === 'remove_hub_module'){
+        var rm = String(a.id || '').trim();
+        if (!rm) return 'Error: remove_hub_module needs id.';
+        if (String(rm).indexOf('custom-') !== 0) return 'Error: only custom-* hub links can be removed (not built-ins). Disable with set_hub_module instead.';
+        var len0 = S.hubModules.length;
+        S.hubModules = S.hubModules.filter(function(m){ return m.id !== rm; });
+        if (S.hubModules.length === len0) return 'Error: module not found.';
+        persistHub();
+        return 'Removed hub module '+rm+'.';
+      }
+
+      if (action === 'set_home_location'){
+        var loc = String(a.location || a.body || '').trim();
+        if (!loc) return 'Error: set_home_location needs location.';
+        S.settings.homeLocation = loc;
+        saveSettings();
+        if (S.connectors && S.connectors.weather){
+          S.connectors.weather.location = loc;
+          saveConnectors();
+        }
+        try { await refreshDashboard({toast:false}); } catch(e){ renderDashboard(); }
+        return 'Home location set to "'+loc+'". Weather connector & dashboard will use it.';
+      }
+
+      return 'Error: unknown action "'+action+'". Use list_dashboard first. Actions: refresh, pin_note, unpin_note, clear_pins, set_widget, reorder_widget, set_hub_module, add_hub_link, remove_hub_module, set_home_location.';
+    }}
+);
+
 var TOOLS_BY_NAME = {};
 TOOLS.forEach(function(t){ TOOLS_BY_NAME[t.name] = t; });
 
@@ -5460,6 +5694,7 @@ function buildSystem(convo, opts){
       'For multi-step work: call create_plan first, execute tools, mark steps with update_plan_step, then answer clearly.',
       'Use search_memory before inventing personal facts; use remember / update_memory / forget_memory to maintain memory.',
       'When the user asks about email, calendar, Drive, GitHub, the Tesla dashboard, or connected services, call list_connectors / use_connector.',
+      'You can UPDATE the Homebase life dashboard live: call list_dashboard then update_dashboard (pin_note, set_widget, reorder_widget, add_hub_link, refresh, set_home_location, etc.). When the user says things like “put this on my dashboard”, “hide sports”, “add a link to Monarch”, “refresh my dashboard”, or “pin a reminder”, use these tools — the UI updates immediately.',
       'After tools, answer naturally with key findings — do not dump raw tool JSON.'
     ];
     if (S.settings.agentPlanFirst) agentBits.push('Prefer planning before more than two tool calls.');
