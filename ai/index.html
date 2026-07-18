@@ -1031,6 +1031,88 @@ body.chat-open #chat-fab{opacity:0; pointer-events:none; transform:scale(.9)}
   .d-card.span-8{grid-column:span 12}
 }
 
+
+/* ============================= Mobile Homebase (shared URL) ============================= */
+body.is-mobile #topbar{
+  padding: 8px 10px; gap: 6px; min-height: 52px;
+  padding-top: max(8px, env(safe-area-inset-top));
+}
+body.is-mobile .tb-title{display:none}
+body.is-mobile .home-btn span{display:none}
+body.is-mobile .home-btn{padding:10px; border-radius:12px}
+body.is-mobile #sync-pill{display:none !important}
+body.is-mobile #connectors-btn, body.is-mobile #dash-refresh{width:40px;height:40px}
+
+body.is-mobile #dash-scroll{
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  -webkit-overflow-scrolling: touch;
+}
+body.is-mobile .dashboard{padding:12px 12px 28px; gap:12px}
+body.is-mobile .dash-hero h1{font-size:24px}
+body.is-mobile .dash-hero{padding:4px 2px}
+body.is-mobile .dash-grid{gap:10px}
+body.is-mobile .d-card,
+body.is-mobile .d-card.span-3,
+body.is-mobile .d-card.span-4,
+body.is-mobile .d-card.span-5,
+body.is-mobile .d-card.span-6,
+body.is-mobile .d-card.span-8,
+body.is-mobile .d-card.span-12{
+  grid-column: span 12;
+  min-height: 0;
+  padding: 14px;
+  border-radius: 16px;
+}
+body.is-mobile .d-metric{font-size:24px}
+body.is-mobile .hub-nav{max-height:34vh}
+body.is-mobile .hub-nav-item{padding:11px 10px; min-height:44px}
+body.is-mobile .hub-nav-item .hni-ico{width:34px;height:34px}
+body.is-mobile .new-chat{padding:12px 14px; font-size:14.5px}
+body.is-mobile .sb-mini{width:36px;height:36px}
+
+/* Mobile chat = full-screen sheet */
+body.is-mobile .chat-float[data-state="open"],
+body.is-mobile .chat-float[data-state="expanded"]{
+  inset: 0;
+  width: 100vw !important;
+  height: 100dvh !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border-radius: 0 !important;
+  border: none;
+  max-width: none;
+}
+body.is-mobile .cf-head{
+  padding: 10px 8px calc(8px + env(safe-area-inset-top));
+  padding-top: max(10px, env(safe-area-inset-top));
+  gap: 6px;
+}
+body.is-mobile .cf-modes{display:flex; width:100%; order:5; overflow-x:auto; padding-bottom:2px}
+body.is-mobile .cf-actions .m-prov, body.is-mobile .cf-actions #council-btn{display:none}
+body.is-mobile .chat-float #composer-wrap{
+  padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
+}
+body.is-mobile .chat-float #composer{padding:8px; border-radius:22px}
+body.is-mobile .chat-float #input{font-size:16px} /* prevent iOS zoom */
+body.is-mobile #chat-fab{
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  padding: 14px 18px 14px 14px;
+  min-height: 52px;
+  box-shadow: 0 14px 40px rgba(79,70,229,.5);
+}
+body.is-mobile #chat-fab .fab-lab{font-size:14px}
+body.is-mobile .modal{max-width:100%; border-radius:16px 16px 0 0; max-height:92dvh}
+body.is-mobile .modal-scrim{align-items:flex-end; padding:0}
+body.is-mobile .mo-tabs{gap:0}
+body.is-mobile .icon-btn{width:40px;height:40px;min-width:40px}
+
+/* Desktop-only affordances */
+body.is-desktop .chat-float[data-state="open"]{
+  width: min(420px, calc(100vw - 24px));
+  height: min(640px, calc(100dvh - 100px));
+}
+
 /* ============================= Vault / Drive sync ============================= */
 .vault-panel{
   margin: 14px 0 6px; padding: 14px 14px 12px; border-radius: 18px;
@@ -1341,6 +1423,7 @@ body.chat-open #chat-fab{opacity:0; pointer-events:none; transform:scale(.9)}
   </div>
 
 <!-- hidden file inputs -->
+<input type="file" id="finance-file" accept="application/json,.json" style="display:none">
 <input type="file" id="file-input" multiple accept="image/*,.pdf,.txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.xml,.yaml,.yml,.log,.sh,.c,.cpp,.java,.rs,.go,.rb,.sql,.toml,.ini" style="display:none">
 <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none">
 
@@ -1940,24 +2023,35 @@ var LS_HUB = 'homebase_hub_v1';
 var APP_NAME = 'Homebase';
 
 var ICON_SVG = {
-  chat: '<path d="M4 6h16v9H8l-4 3V6z"/>',
-  voice: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
-  agent: '<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>',
-  research: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-3.5-3.5"/>',
-  council: '<circle cx="8" cy="9" r="2.5"/><circle cx="16" cy="9" r="2.5"/><circle cx="12" cy="15.5" r="2.5"/>',
-  memory: '<path d="M6 8a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8zm6 0a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8z"/>',
-  connect: '<path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7.1-7.1l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7.1 7.1l1.2-1.2"/>',
-  car: '<path d="M4 14l1.5-4.5A3 3 0 0 1 8.4 7h7.2a3 3 0 0 1 2.9 2.5L20 14"/><path d="M4 14h16v3a1 1 0 0 1-1 1h-1"/><path d="M5 18H4a1 1 0 0 1-1-1v-2"/><circle cx="7.5" cy="15.5" r="1.5"/><circle cx="16.5" cy="15.5" r="1.5"/>',
-  chart: '<path d="M4 19V5M4 19h16"/><path d="M8 16v-5M12 16V8M16 16v-3"/>',
-  calendar: '<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M4 10h16M8 4v4M16 4v4"/>',
-  mail: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 8l9 6 9-6"/>',
-  tasks: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M5 6h.01M5 12h.01M5 18h.01"/>',
-  home: '<path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/>',
-  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
-  link: '<path d="M10 13a5 5 0 0 0 7.5.5l1.5-1.5a5 5 0 0 0-7-7L11 6"/><path d="M14 11a5 5 0 0 0-7.5-.5L5 12.5a5 5 0 0 0 7 7L13 18"/>',
-  pharmacy: '<path d="M12 4v16M8 8h8"/><rect x="7" y="10" width="10" height="10" rx="2"/>',
-  family: '<circle cx="9" cy="8" r="2.5"/><circle cx="16" cy="9" r="2"/><path d="M4 18c0-2.5 2.2-4 5-4s5 1.5 5 4"/><path d="M14 18c0-1.8 1.5-3 3.5-3s3.2 1 3.5 2.5"/>',
-  spark: '<path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/>'
+  /* Distinctive professional marks — not generic emoji */
+  chat: '<path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v6a2.5 2.5 0 0 1-2.5 2.5H11l-3.5 3v-3H7.5A2.5 2.5 0 0 1 5 12.5v-6z"/><path d="M9 9h6M9 12h4"/>',
+  voice: '<path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M6.5 11a5.5 5.5 0 0 0 11 0M12 16.5V20"/>',
+  agent: '<path d="M12 3l2.1 5.2L20 9l-4.2 3.2L17 18l-5-3.2L7 18l1.2-5.8L4 9l5.9-.8L12 3z"/>',
+  research: '<circle cx="10.5" cy="10.5" r="5.5"/><path d="M15 15l5 5"/><path d="M8.5 10.5h4M10.5 8.5v4"/>',
+  council: '<path d="M8 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM16 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM12 19a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/><path d="M10 10.5l1.2 3M14 10.5l-1.2 3"/>',
+  memory: '<path d="M7 5h4a3 3 0 0 1 3 3v11l-5-2.5L4 19V8a3 3 0 0 1 3-3z"/><path d="M14 8h3a3 3 0 0 1 3 3v8l-3-1.5"/>',
+  connect: '<path d="M9 12h6"/><path d="M8 8.5A3.5 3.5 0 1 0 8 15.5"/><path d="M16 8.5a3.5 3.5 0 1 1 0 7"/>',
+  car: '<path d="M5 13l1.2-3.2A2 2 0 0 1 8.1 8.5h7.8a2 2 0 0 1 1.9 1.3L19 13"/><path d="M4 13h16v2.5a1.5 1.5 0 0 1-1.5 1.5H17"/><path d="M5.5 17H5a1 1 0 0 1-1-1v-1.5"/><circle cx="7.5" cy="15.2" r="1.3"/><circle cx="16.5" cy="15.2" r="1.3"/><path d="M9 10.5h6"/>',
+  chart: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16l3-5 3 3 5-7"/>',
+  calendar: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9.5h16M8 3.5v3M16 3.5v3M8 13h2M12 13h2M16 13h.01M8 16.5h2M12 16.5h2"/>',
+  mail: '<rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M4 8l8 5.5L20 8"/>',
+  tasks: '<path d="M10 7h10M10 12h10M10 17h10"/><path d="M5 7l.8.8L7.5 6M5 12l.8.8L7.5 11M5 17l.8.8L7.5 16"/>',
+  home: '<path d="M4 11.5 12 5l8 6.5"/><path d="M7 10.5V19h10v-8.5"/><path d="M10 19v-4.5h4V19"/>',
+  settings: '<circle cx="12" cy="12" r="2.8"/><path d="M12 3.5v2.2M12 18.3v2.2M4.8 6.2l1.6 1.5M17.6 16.3l1.6 1.5M3.5 12h2.2M18.3 12h2.2M4.8 17.8l1.6-1.5M17.6 7.7l1.6-1.5"/>',
+  link: '<path d="M10 13a4.5 4.5 0 0 0 6.7.4l1.8-1.8a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 11a4.5 4.5 0 0 0-6.7-.4L5.5 12.4a4.5 4.5 0 0 0 6.4 6.4l1-1"/>',
+  pharmacy: '<path d="M9 4h6v4H9z"/><path d="M8 8h8v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V8z"/><path d="M12 11v6M9.5 14H14.5"/>',
+  family: '<circle cx="8.5" cy="8" r="2.4"/><circle cx="15.5" cy="8.5" r="2"/><path d="M3.8 18c.3-2.4 2.3-4 4.7-4s4.3 1.5 4.7 3.7"/><path d="M13 18c.2-1.7 1.6-3 3.4-3 1.7 0 3.1 1.1 3.4 2.6"/>',
+  spark: '<path d="M12 2.8l1.3 4.7 4.7 1.3-4.7 1.3L12 14.8l-1.3-4.7L6 8.8l4.7-1.3L12 2.8z"/><path d="M18.5 14.5l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"/>',
+  bank: '<path d="M4 10h16"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/><path d="M3 18h18"/><path d="M12 4l8 5H4l8-5z"/>',
+  cloud: '<path d="M7.5 17.5h10a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6-1.2A3.5 3.5 0 0 0 7.5 17.5z"/>',
+  music: '<circle cx="8" cy="17" r="2.5"/><circle cx="17" cy="15" r="2.5"/><path d="M10.5 17V7.5L19.5 6v9"/>',
+  map: '<path d="M9 4.5 4 6.5v13l5-2 6 2 5-2v-13l-5 2-6-2z"/><path d="M9 4.5v13M15 6.5v13"/>',
+  health: '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>',
+  work: '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6.5A2.5 2.5 0 0 1 10.5 4h3A2.5 2.5 0 0 1 16 6.5V8M3 13h18"/>',
+  code: '<path d="M8 8 4 12l4 4M16 8l4 4-4 4M13 5l-2 14"/>',
+  bolt: '<path d="M13 2 5 13h6l-1 9 9-13h-6l0-7z"/>',
+  shield: '<path d="M12 3 5 6v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6l-7-3z"/>',
+  camera: '<path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3"/>'
 };
 
 function iconSvg(name, size){
@@ -1973,7 +2067,8 @@ var HUB_DEFAULTS = [
   { id:'agent', title:'Agent', desc:'Plans, tools, multi-step work', kind:'mode', mode:'agent', icon:'agent', color:'#d97706', enabled:true },
   { id:'research', title:'Research', desc:'Search, read, cite', kind:'mode', mode:'research', icon:'research', color:'#059669', enabled:true },
   { id:'dashboard', title:'Tesla Dashboard', desc:'Car HQ — weather, traffic, sports', kind:'link', url:'../', icon:'car', color:'#6366f1', enabled:true },
-  { id:'finance', title:'Markets & portfolio', desc:'Watchlist & market pulse on your dashboard', kind:'link', url:'../', icon:'chart', color:'#0f766e', enabled:true },
+  { id:'budget', title:'Budget Project', desc:'iCloud finances · cash & debt glance', kind:'action', action:'budget', icon:'bank', color:'#0f766e', enabled:true },
+  { id:'finance', title:'Markets', desc:'XEQT & watchlist on Tesla Dashboard', kind:'link', url:'../', icon:'chart', color:'#2563eb', enabled:true },
   { id:'memory', title:'Memory vault', desc:'Personal context + Drive backup', kind:'action', action:'memory', icon:'memory', color:'#7c3aed', enabled:true },
   { id:'connect', title:'Connectors', desc:'Gmail, Calendar, GitHub, Drive…', kind:'action', action:'connectors', icon:'connect', color:'#0284c7', enabled:true },
   { id:'tasks', title:'Tasks & rituals', desc:'Scheduled Homebase runs', kind:'action', action:'tasks', icon:'tasks', color:'#ea580c', enabled:true },
@@ -2049,6 +2144,17 @@ function runHubModule(mod){
       setUiMode('memory', { silent:true, skipPanel:true });
       toast('Use memory for family logistics — or add a custom hub link in Settings → Hub', 'ok', 4000);
       try { $('input').value = 'Help me organize family logistics for this week based on what you know about me.'; updateSendBtn(); $('input').focus(); } catch(e){}
+      return;
+    }
+    if (mod.action === 'budget'){
+      goHomeDashboard();
+      setTimeout(function(){
+        var el = document.querySelector('.d-card .d-head h3');
+        // scroll to budget card
+        qsa('.d-card', $('dashboard')||document).forEach(function(card){
+          if (qs('h3', card) && /Budget/i.test(qs('h3', card).textContent||'')) card.scrollIntoView({behavior:'smooth', block:'center'});
+        });
+      }, 100);
       return;
     }
   }
@@ -2222,21 +2328,43 @@ function persistHub(){
 }
 /* ============================ Life dashboard + floating chat shell ============================ */
 var LS_DASH = 'homebase_dash_v1';
+var LS_FINANCE = 'homebase_finance_glance_v1';
 var DASH = { cache: null, loading: false, updated: 0 };
+var FINANCE = { glance: null };
+
+function loadFinanceGlance(){
+  FINANCE.glance = lsGet(LS_FINANCE, null);
+  return FINANCE.glance;
+}
+function saveFinanceGlance(g){
+  FINANCE.glance = g;
+  lsSet(LS_FINANCE, g);
+}
+async function tryLoadLocalFinanceFile(){
+  // Optional same-origin local file (dev only; gitignored on Pages)
+  try {
+    var r = await fetch('./finance-glance.local.json', { cache:'no-store' });
+    if (!r.ok) return null;
+    var g = await r.json();
+    if (g && g.schema){ saveFinanceGlance(g); return g; }
+  } catch(e){}
+  return null;
+}
 
 function defaultDashLayout(){
   return [
+    { id:'budget', enabled:true, span:6 },
     { id:'weather', enabled:true, span:3 },
-    { id:'finance', enabled:true, span:5 },
-    { id:'scores', enabled:true, span:4 },
+    { id:'markets', enabled:true, span:3 },
     { id:'news', enabled:true, span:6 },
+    { id:'scores', enabled:true, span:3 },
     { id:'calendar', enabled:true, span:3 },
     { id:'tasks', enabled:true, span:3 },
-    { id:'pharmacy', enabled:true, span:4 },
+    { id:'pharmacy', enabled:true, span:3 },
     { id:'links', enabled:true, span:4 },
     { id:'memory', enabled:true, span:4 },
-    { id:'traffic', enabled:true, span:6 },
-    { id:'updates', enabled:true, span:6 }
+    { id:'traffic', enabled:true, span:4 },
+    { id:'updates', enabled:true, span:4 }
   ];
 }
 function loadDashLayout(){
@@ -2327,6 +2455,35 @@ function renderWeatherWidget(c, span){
     '<a href="../" target="_blank" rel="noopener">Dashboard</a>');
 }
 
+function renderBudgetWidget(span){
+  var g = FINANCE.glance || loadFinanceGlance();
+  var extra = '<button type="button" class="linkish" data-act="budget-open">Open project</button>' +
+    '<button type="button" class="linkish" data-act="budget-import">Import</button>';
+  if (!g || g.status === 'not_loaded' || (!g.kpis && !(g.accounts||[]).length)){
+    var body = '<div class="d-empty">Pederson Budget Project (iCloud → 03 - Finance → Budget Project)</div>' +
+      '<div class="d-chips" style="margin-top:8px">' +
+      '<button type="button" class="d-chip" data-act="budget-import">Import glance JSON</button>' +
+      '<button type="button" class="d-chip" data-act="budget-open">Show path</button>' +
+      '</div>';
+    return widgetShell('Budget & cash', 'bank', '#0f766e', span, body, extra);
+  }
+  var k = g.kpis || {};
+  var lines = [];
+  if (k.projected_income) lines.push('<div class="d-row"><span>July income</span><span class="up">'+esc(String(k.projected_income))+'</span></div>');
+  if (k.projected_expenses) lines.push('<div class="d-row"><span>July expenses</span><span class="down">'+esc(String(k.projected_expenses))+'</span></div>');
+  if (k.projected_cash_net) lines.push('<div class="d-row"><span>Cash net</span><span>'+esc(String(k.projected_cash_net))+'</span></div>');
+  if (k.safe_to_spend_cad != null) lines.push('<div class="d-row"><span>Safe to spend</span><span class="up">$'+esc(String(k.safe_to_spend_cad))+'</span></div>');
+  (g.accounts || []).slice(0,4).forEach(function(a){
+    var amt = a.amount_cad != null ? ('$'+Number(a.amount_cad).toLocaleString('en-CA',{minimumFractionDigits:2, maximumFractionDigits:2})) : '—';
+    lines.push('<div class="d-row"><span>'+esc(a.account||'Account')+'</span><span class="num">'+esc(amt)+'</span></div>');
+  });
+  if (g.status) lines.push('<div class="d-row"><span>System</span><span class="meta">'+esc(String(g.status))+'</span></div>');
+  if ((g.alerts||[]).length) lines.push('<div class="d-empty" style="margin-top:6px">⚠ '+esc(String(g.alerts[0]).slice(0,120))+'</div>');
+  var body = lines.length ? lines.join('') : '<div class="d-empty">Glance loaded but empty</div>';
+  var head = '<span class="meta" style="font-size:10px">'+esc((g.as_of||'').slice(0,10))+'</span>';
+  return widgetShell('Budget & cash', 'bank', '#0f766e', span, body, head + extra);
+}
+
 function renderFinanceWidget(c, span){
   var stocks = (c && c.stocks) || {};
   var prefer = ['XEQT.TO','XGRO.TO','VGRO.TO','VFV.TO','TSLA','AAPL','MSFT','NVDA'];
@@ -2354,8 +2511,8 @@ function renderFinanceWidget(c, span){
     });
   }
   var body = rows.length ? rows.join('') : '<div class="d-empty">No market data yet</div>';
-  return widgetShell('Portfolio pulse', 'chart', '#0f766e', span, body,
-    '<a href="../" target="_blank" rel="noopener">Markets</a>');
+  return widgetShell('Markets', 'chart', '#2563eb', span, body,
+    '<a href="../" target="_blank" rel="noopener">Dashboard</a>');
 }
 
 function renderNewsWidget(c, span){
@@ -2479,10 +2636,11 @@ function renderDashboard(){
   layout.forEach(function(w){
     if (w.enabled === false) return;
     var span = w.span || 4;
-    if (w.id === 'weather') html += renderWeatherWidget(c, span);
-    else if (w.id === 'finance') html += renderFinanceWidget(c, 5);
-    else if (w.id === 'scores') html += renderScoresWidget(c, 4);
-    else if (w.id === 'news') html += renderNewsWidget(c, 6);
+    if (w.id === 'budget') html += renderBudgetWidget(span === 4 ? 6 : span);
+    else if (w.id === 'weather') html += renderWeatherWidget(c, span);
+    else if (w.id === 'finance' || w.id === 'markets') html += renderFinanceWidget(c, span);
+    else if (w.id === 'scores') html += renderScoresWidget(c, span);
+    else if (w.id === 'news') html += renderNewsWidget(c, span);
     else if (w.id === 'pharmacy') html += renderPharmacyWidget(c, 4);
     else if (w.id === 'tasks') html += renderTasksWidget(3);
     else if (w.id === 'memory') html += renderMemoryWidget(4);
@@ -2504,6 +2662,16 @@ function renderDashboard(){
       else if (a === 'calendar') window.open('https://calendar.google.com/', '_blank', 'noopener');
       else if (a === 'hub'){ openSettings(); switchSetTab('hub'); }
       else if (a === 'connectors'){ renderConnectors(); $('connectors-ov').classList.add('open'); }
+      else if (a === 'budget-open'){
+        var g = FINANCE.glance || loadFinanceGlance() || {};
+        var hint = g.path_hint || 'iCloud Drive / 03 - Finance / Budget Project / dashboard.html';
+        toast('Budget Project: ' + hint, null, 5200);
+        try { navigator.clipboard.writeText(hint); } catch(e){}
+      }
+      else if (a === 'budget-import'){
+        var inp = $('finance-file');
+        if (inp) inp.click();
+      }
     });
   });
   qsa('[data-hub]', root).forEach(function(b){
@@ -2520,9 +2688,13 @@ async function refreshDashboard(opts){
   try {
     if ($('dash-stamp')) $('dash-stamp').textContent = 'Refreshing…';
     await fetchDashboardCache();
+    if (!FINANCE.glance) await tryLoadLocalFinanceFile();
+    loadFinanceGlance();
     renderDashboard();
     if (opts.toast) toast('Dashboard updated', 'ok', 1800);
   } catch(e){
+    try { if (!FINANCE.glance) await tryLoadLocalFinanceFile(); } catch(e2){}
+    loadFinanceGlance();
     renderDashboard();
     if (opts.toast) toast('Using cached data — ' + (e.message || e), 'warn', 3200);
   }
@@ -2561,6 +2733,30 @@ function goHomeDashboard(){
 }
 
 function initDashboardShell(){
+  applyDeviceClass();
+  if ($('finance-file')) $('finance-file').addEventListener('change', function(){
+    var f = this.files && this.files[0]; this.value = '';
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){
+      try {
+        var g = JSON.parse(rd.result);
+        if (!g || g.schema !== 'homebase.finance_glance.v1') throw new Error('Need homebase.finance_glance.v1 JSON');
+        saveFinanceGlance(g);
+        renderDashboard();
+        toast('Budget glance loaded (' + ((g.accounts||[]).length) + ' accounts)', 'ok');
+      } catch(err){ toast('Import failed: ' + err.message, 'err'); }
+    };
+    rd.readAsText(f);
+  });
+  try {
+    if (window.matchMedia){
+      var mq = matchMedia('(max-width: 820px)');
+      if (mq.addEventListener) mq.addEventListener('change', applyDeviceClass);
+      else if (mq.addListener) mq.addListener(applyDeviceClass);
+    }
+    window.addEventListener('resize', debounce(applyDeviceClass, 150));
+  } catch(e){}
   if ($('home-btn')) $('home-btn').addEventListener('click', goHomeDashboard);
   if ($('home-nav-btn')) $('home-nav-btn').addEventListener('click', goHomeDashboard);
   if ($('dash-refresh')) $('dash-refresh').addEventListener('click', function(){ refreshDashboard({toast:true}); });
@@ -2588,7 +2784,7 @@ var CONNECTOR_DEFS = [
   {
     id: 'dashboard',
     name: 'Tesla Dashboard',
-    desc: 'Your live car dashboard — weather, news, sports, traffic, stocks.',
+    desc: 'Car HQ — weather, traffic, sports, stocks cache.',
     icon: '🚗',
     grad: 'linear-gradient(145deg,#818cf8,#4f46e5)',
     fields: [{key:'url', label:'Dashboard URL', placeholder:'https://…/tesla-dashboard/', secret:false}],
@@ -2596,42 +2792,26 @@ var CONNECTOR_DEFS = [
     actions: ['brief']
   },
   {
-    id: 'github',
-    name: 'GitHub',
-    desc: 'Repos, issues, and PRs (token stays in this browser).',
-    icon: '⌥',
-    grad: 'linear-gradient(145deg,#475569,#0f172a)',
+    id: 'budget',
+    name: 'Budget Project',
+    desc: 'iCloud · 03 - Finance · Budget Project — encrypted local glance, never auto-published.',
+    icon: '🏦',
+    grad: 'linear-gradient(145deg,#0d9488,#0f766e)',
     fields: [
-      {key:'token', label:'Personal access token', placeholder:'ghp_…', secret:true},
-      {key:'user', label:'Username / org', placeholder:'wghtkbpxwx-a11y', secret:false}
+      {key:'pathHint', label:'Project path', placeholder:'iCloud/03 - Finance/Budget Project', secret:false},
+      {key:'glanceNote', label:'Notes', placeholder:'Optional note for agent', secret:false}
     ],
-    defaults: { on:false, token:'', user:'wghtkbpxwx-a11y' },
-    actions: ['repos','issues']
-  },
-  {
-    id: 'gmail',
-    name: 'Gmail',
-    desc: 'Compose and search deep-links into Gmail.',
-    icon: '✉️',
-    grad: 'linear-gradient(145deg,#f87171,#ea4335)',
-    fields: [{key:'email', label:'Your Gmail', placeholder:'you@gmail.com', secret:false}],
-    defaults: { on:true, email:'' },
-    actions: ['compose','search']
-  },
-  {
-    id: 'calendar',
-    name: 'Google Calendar',
-    desc: 'Open Calendar or read a public/secret iCal feed.',
-    icon: '📅',
-    grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
-    fields: [{key:'ical', label:'iCal URL (optional)', placeholder:'https://calendar.google.com/…', secret:false}],
-    defaults: { on:true, ical:'' },
-    actions: ['open','upcoming']
+    defaults: {
+      on:true,
+      pathHint:'iCloud Drive / 03 - Finance / Budget Project / dashboard.html',
+      glanceNote:'Pederson household finances — import glance JSON for live widget'
+    },
+    actions: ['status','summary']
   },
   {
     id: 'drive',
     name: 'Google Drive',
-    desc: 'Encrypted memory vault sync + Drive search links. OAuth Client ID required for sync.',
+    desc: 'Encrypted Homebase vault sync + Drive search.',
     icon: '📁',
     grad: 'linear-gradient(145deg,#fcd34d,#f59e0b)',
     fields: [
@@ -2642,9 +2822,42 @@ var CONNECTOR_DEFS = [
     actions: ['search','push','pull']
   },
   {
+    id: 'gmail',
+    name: 'Gmail',
+    desc: 'Compose and search deep-links.',
+    icon: '✉️',
+    grad: 'linear-gradient(145deg,#f87171,#ea4335)',
+    fields: [{key:'email', label:'Your Gmail', placeholder:'you@gmail.com', secret:false}],
+    defaults: { on:true, email:'' },
+    actions: ['compose','search']
+  },
+  {
+    id: 'calendar',
+    name: 'Google Calendar',
+    desc: 'Open Calendar or read an iCal feed.',
+    icon: '📅',
+    grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
+    fields: [{key:'ical', label:'iCal URL (optional)', placeholder:'https://calendar.google.com/…', secret:false}],
+    defaults: { on:true, ical:'' },
+    actions: ['open','upcoming']
+  },
+  {
+    id: 'github',
+    name: 'GitHub',
+    desc: 'Repos and issues (PAT stays local).',
+    icon: '⌥',
+    grad: 'linear-gradient(145deg,#475569,#0f172a)',
+    fields: [
+      {key:'token', label:'Personal access token', placeholder:'ghp_…', secret:true},
+      {key:'user', label:'Username / org', placeholder:'wghtkbpxwx-a11y', secret:false}
+    ],
+    defaults: { on:false, token:'', user:'wghtkbpxwx-a11y' },
+    actions: ['repos','issues']
+  },
+  {
     id: 'weather',
     name: 'Weather',
-    desc: 'Live open-meteo conditions for your home city.',
+    desc: 'Open-meteo for home location.',
     icon: '🌤️',
     grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
     fields: [{key:'location', label:'Default location', placeholder:'Surrey, BC', secret:false}],
@@ -2654,7 +2867,7 @@ var CONNECTOR_DEFS = [
   {
     id: 'web',
     name: 'Web research',
-    desc: 'Search + page reader for agent research loops.',
+    desc: 'Search + page reader for agents.',
     icon: '🌐',
     grad: 'linear-gradient(145deg,#34d399,#059669)',
     fields: [],
@@ -2664,12 +2877,302 @@ var CONNECTOR_DEFS = [
   {
     id: 'tasks',
     name: 'Homebase Tasks',
-    desc: 'Scheduled Nova tasks and reminders.',
+    desc: 'Scheduled rituals and reminders.',
     icon: '⏰',
     grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
     fields: [],
     defaults: { on:true },
     actions: ['list']
+  },
+  {
+    id: 'icloud',
+    name: 'iCloud',
+    desc: 'Open iCloud Drive / apps in browser.',
+    icon: '☁️',
+    grad: 'linear-gradient(145deg,#60a5fa,#3b82f6)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'dropbox',
+    name: 'Dropbox',
+    desc: 'Open Dropbox web.',
+    icon: '📦',
+    grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
+    fields: [],
+    defaults: { on:false },
+    actions: ['open']
+  },
+  {
+    id: 'onedrive',
+    name: 'OneDrive',
+    desc: 'Microsoft OneDrive files.',
+    icon: '☁️',
+    grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
+    fields: [],
+    defaults: { on:false },
+    actions: ['open']
+  },
+  {
+    id: 'rbc',
+    name: 'RBC Online',
+    desc: 'Royal Bank of Canada sign-in.',
+    icon: '🏦',
+    grad: 'linear-gradient(145deg,#0051a5,#003366)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'bmo',
+    name: 'BMO Online',
+    desc: 'Bank of Montreal banking.',
+    icon: '🏦',
+    grad: 'linear-gradient(145deg,#0079c1,#005a8c)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'wealthsimple',
+    name: 'Wealthsimple',
+    desc: 'Investing & tax-advantaged accounts.',
+    icon: '📈',
+    grad: 'linear-gradient(145deg,#a3e635,#65a30d)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'cra',
+    name: 'CRA My Account',
+    desc: 'Canada Revenue Agency.',
+    icon: '🧾',
+    grad: 'linear-gradient(145deg,#dc2626,#991b1b)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'bcservices',
+    name: 'BC Services',
+    desc: 'Service BC / Health Gateway entry.',
+    icon: '🍁',
+    grad: 'linear-gradient(145deg,#f59e0b,#b45309)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'drivebc',
+    name: 'DriveBC',
+    desc: 'BC highways, cams, and conditions.',
+    icon: '🛣️',
+    grad: 'linear-gradient(145deg,#64748b,#334155)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'maps',
+    name: 'Google Maps',
+    desc: 'Directions and places (Surrey default).',
+    icon: '🗺️',
+    grad: 'linear-gradient(145deg,#34d399,#059669)',
+    fields: [{key:'home', label:'Home label', placeholder:'Surrey, BC', secret:false}],
+    defaults: { on:true, home:'Surrey, BC' },
+    actions: ['open','directions']
+  },
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    desc: 'Open OpenAI ChatGPT web.',
+    icon: '✦',
+    grad: 'linear-gradient(145deg,#10a37f,#0d8c6d)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'claude',
+    name: 'Claude',
+    desc: 'Open Anthropic Claude.',
+    icon: '◈',
+    grad: 'linear-gradient(145deg,#d4a27f,#c4785a)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'gemini',
+    name: 'Gemini',
+    desc: 'Open Google Gemini.',
+    icon: '✧',
+    grad: 'linear-gradient(145deg,#8b5cf6,#6366f1)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'perplexity',
+    name: 'Perplexity',
+    desc: 'Open Perplexity research chat.',
+    icon: '◎',
+    grad: 'linear-gradient(145deg,#20b8cd,#0e7490)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama (local)',
+    desc: 'List local models via localhost API.',
+    icon: '🦙',
+    grad: 'linear-gradient(145deg,#94a3b8,#475569)',
+    fields: [{key:'base', label:'Base URL', placeholder:'http://127.0.0.1:11434', secret:false}],
+    defaults: { on:true, base:'http://127.0.0.1:11434' },
+    actions: ['models']
+  },
+  {
+    id: 'lmstudio',
+    name: 'LM Studio',
+    desc: 'Local OpenAI-compatible server.',
+    icon: '💻',
+    grad: 'linear-gradient(145deg,#a78bfa,#7c3aed)',
+    fields: [{key:'base', label:'Base URL', placeholder:'http://127.0.0.1:1234', secret:false}],
+    defaults: { on:true, base:'http://127.0.0.1:1234' },
+    actions: ['models']
+  },
+  {
+    id: 'whatsapp',
+    name: 'WhatsApp Web',
+    desc: 'Message from the browser.',
+    icon: '💬',
+    grad: 'linear-gradient(145deg,#4ade80,#16a34a)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'teams',
+    name: 'Microsoft Teams',
+    desc: 'Work chat & meetings.',
+    icon: '👔',
+    grad: 'linear-gradient(145deg,#5b5fc7,#4f46e5)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'slack',
+    name: 'Slack',
+    desc: 'Workspace messaging.',
+    icon: '💬',
+    grad: 'linear-gradient(145deg,#e11d48,#be123c)',
+    fields: [{key:'workspace', label:'Workspace URL (optional)', placeholder:'https://app.slack.com', secret:false}],
+    defaults: { on:false, workspace:'https://app.slack.com' },
+    actions: ['open']
+  },
+  {
+    id: 'canucks',
+    name: 'Canucks',
+    desc: 'Vancouver Canucks official site.',
+    icon: '🏒',
+    grad: 'linear-gradient(145deg,#00205b,#041e42)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'sportsnet',
+    name: 'Sportsnet',
+    desc: 'Scores and Canadian sports news.',
+    icon: '📺',
+    grad: 'linear-gradient(145deg,#e11d48,#9f1239)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'youtube',
+    name: 'YouTube',
+    desc: 'Search or open YouTube.',
+    icon: '▶',
+    grad: 'linear-gradient(145deg,#f87171,#dc2626)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open','search']
+  },
+  {
+    id: 'spotify',
+    name: 'Spotify',
+    desc: 'Open Spotify web player.',
+    icon: '♫',
+    grad: 'linear-gradient(145deg,#4ade80,#15803d)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'notion',
+    name: 'Notion',
+    desc: 'Notes & wikis.',
+    icon: '📓',
+    grad: 'linear-gradient(145deg,#a3a3a3,#404040)',
+    fields: [{key:'url', label:'Workspace URL', placeholder:'https://www.notion.so/…', secret:false}],
+    defaults: { on:false, url:'https://www.notion.so' },
+    actions: ['open']
+  },
+  {
+    id: 'linear',
+    name: 'Linear',
+    desc: 'Issue tracking for product work.',
+    icon: '📐',
+    grad: 'linear-gradient(145deg,#a5b4fc,#4f46e5)',
+    fields: [],
+    defaults: { on:false },
+    actions: ['open']
+  },
+  {
+    id: 'vscode',
+    name: 'VS Code Web',
+    desc: 'vscode.dev in the browser.',
+    icon: '<>',
+    grad: 'linear-gradient(145deg,#38bdf8,#0369a1)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'homeassistant',
+    name: 'Home Assistant',
+    desc: 'Smart home dashboard (your URL).',
+    icon: '🏠',
+    grad: 'linear-gradient(145deg,#41bdf5,#0284c7)',
+    fields: [{key:'url', label:'HA URL', placeholder:'http://homeassistant.local:8123', secret:false}],
+    defaults: { on:false, url:'' },
+    actions: ['open']
+  },
+  {
+    id: 'translate',
+    name: 'Google Translate',
+    desc: 'Quick translation.',
+    icon: '文',
+    grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['open']
+  },
+  {
+    id: 'notes',
+    name: 'Quick notes',
+    desc: 'Local scratchpad stored in this browser.',
+    icon: '📝',
+    grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
+    fields: [{key:'pad', label:'Scratchpad', placeholder:'Ideas…', secret:false}],
+    defaults: { on:true, pad:'' },
+    actions: ['read','write']
   }
 ];
 
@@ -2739,12 +3242,19 @@ function renderConnectors(){
       testBtn.disabled = false; testBtn.textContent = 'Test';
     });
     acts.appendChild(testBtn);
-    if (['dashboard','gmail','calendar','drive','github'].indexOf(def.id) >= 0){
+    if (connectorOpenUrl(def.id) || def.id === 'budget'){
       var openBtn = document.createElement('button');
       openBtn.className = 'sm-btn pri'; openBtn.type = 'button'; openBtn.textContent = 'Open';
       openBtn.addEventListener('click', function(){
+        if (def.id === 'budget'){
+          var hint = connectorCfg('budget').pathHint || 'iCloud Drive / 03 - Finance / Budget Project';
+          toast(hint, null, 5000);
+          try { navigator.clipboard.writeText(hint); } catch(e){}
+          return;
+        }
         var url = connectorOpenUrl(def.id);
         if (url) window.open(url, '_blank', 'noopener');
+        else toast('Set a URL for this connector', 'warn');
       });
       acts.appendChild(openBtn);
     }
@@ -2767,12 +3277,41 @@ function updateConnectorsBtn(){
 }
 function connectorOpenUrl(id){
   var cfg = connectorCfg(id);
-  if (id === 'dashboard') return cfg.url || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/';
-  if (id === 'gmail') return 'https://mail.google.com/';
-  if (id === 'calendar') return 'https://calendar.google.com/';
-  if (id === 'drive') return 'https://drive.google.com/';
-  if (id === 'github') return 'https://github.com/' + encodeURIComponent(cfg.user || '');
-  return null;
+  var map = {
+    dashboard: cfg.url || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/',
+    gmail: 'https://mail.google.com/',
+    calendar: 'https://calendar.google.com/',
+    drive: 'https://drive.google.com/',
+    github: 'https://github.com/' + encodeURIComponent(cfg.user || ''),
+    icloud: 'https://www.icloud.com/',
+    dropbox: 'https://www.dropbox.com/home',
+    onedrive: 'https://onedrive.live.com/',
+    rbc: 'https://www.rbcroyalbank.com/onlinebanking/',
+    bmo: 'https://www1.bmo.com/onlinebanking/',
+    wealthsimple: 'https://my.wealthsimple.com/',
+    cra: 'https://www.canada.ca/en/revenue-agency/services/e-services/digital-services-individuals/account-individuals.html',
+    bcservices: 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card',
+    drivebc: 'https://www.drivebc.ca/',
+    maps: 'https://www.google.com/maps/search/' + encodeURIComponent(cfg.home || 'Surrey, BC'),
+    chatgpt: 'https://chatgpt.com/',
+    claude: 'https://claude.ai/',
+    gemini: 'https://gemini.google.com/',
+    perplexity: 'https://www.perplexity.ai/',
+    whatsapp: 'https://web.whatsapp.com/',
+    teams: 'https://teams.microsoft.com/',
+    slack: cfg.workspace || 'https://app.slack.com/',
+    canucks: 'https://www.nhl.com/canucks',
+    sportsnet: 'https://www.sportsnet.ca/',
+    youtube: 'https://www.youtube.com/',
+    spotify: 'https://open.spotify.com/',
+    notion: cfg.url || 'https://www.notion.so/',
+    linear: 'https://linear.app/',
+    vscode: 'https://vscode.dev/',
+    homeassistant: cfg.url || '',
+    translate: 'https://translate.google.com/',
+    budget: null
+  };
+  return map[id] != null ? map[id] : null;
 }
 async function runConnector(id, action, args){
   args = args || {};
@@ -2909,11 +3448,72 @@ async function runConnector(id, action, args){
     return 'Error: web tools unavailable';
   }
 
-  if (id === 'tasks'){
+    if (id === 'tasks'){
     if (!S.tasks || !S.tasks.length) return 'No scheduled Homebase tasks.';
     return S.tasks.map(function(t){
       return '• ' + t.name + ' — ' + describeSchedule(t) + (t.enabled ? ', next: ' + fmtDateTime(t.nextRun) : ' (paused)');
     }).join('\n');
+  }
+
+  if (id === 'budget'){
+    var g = FINANCE.glance || loadFinanceGlance();
+    var cfgb = connectorCfg('budget');
+    if (action === 'status' || !g){
+      return 'Budget Project path: ' + (cfgb.pathHint || 'iCloud / 03 - Finance / Budget Project') +
+        '\nGlance loaded: ' + (g ? 'yes (' + ((g.accounts||[]).length) + ' accounts, status ' + (g.status||'?') + ')' : 'no — import JSON from dashboard widget') +
+        (cfgb.glanceNote ? '\nNote: ' + cfgb.glanceNote : '');
+    }
+    var lines = ['Budget glance: ' + (g.title || 'Budget Project'), 'Status: ' + (g.status || '?'), 'As of: ' + (g.as_of || '?')];
+    var k = g.kpis || {};
+    Object.keys(k).forEach(function(key){ if (k[key]!=null && k[key]!=='') lines.push(key + ': ' + k[key]); });
+    (g.accounts||[]).forEach(function(a){ lines.push((a.account||'?') + ': ' + a.amount_cad); });
+    (g.alerts||[]).slice(0,3).forEach(function(a){ lines.push('Alert: ' + a); });
+    return lines.join('\n');
+  }
+
+  if (id === 'ollama' || id === 'lmstudio'){
+    var base = (cfg.base || (id==='ollama' ? 'http://127.0.0.1:11434' : 'http://127.0.0.1:1234')).replace(/\/$/, '');
+    try {
+      if (id === 'ollama'){
+        var tags = await withTimeout(function(sig){
+          return fetch(base + '/api/tags', {signal:sig}).then(function(r){ if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+        }, 5000);
+        var models = (tags.models || []).map(function(m){ return m.name; });
+        return models.length ? ('Ollama models:\n• ' + models.join('\n• ')) : 'Ollama reachable but no models listed.';
+      }
+      var md = await withTimeout(function(sig){
+        return fetch(base + '/v1/models', {signal:sig}).then(function(r){ if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+      }, 5000);
+      var list = (md.data || []).map(function(m){ return m.id; });
+      return list.length ? ('LM Studio models:\n• ' + list.join('\n• ')) : 'LM Studio reachable but no models.';
+    } catch(e){
+      return 'Error: cannot reach ' + id + ' at ' + base + ' (' + e.message + '). Start the app and allow CORS/origins.';
+    }
+  }
+
+  if (id === 'maps' && (action === 'directions' || args.destination)){
+    var dest = args.destination || args.query || '';
+    var origin = cfg.home || S.settings.homeLocation || 'Surrey, BC';
+    return 'Maps: https://www.google.com/maps/dir/' + encodeURIComponent(origin) + '/' + encodeURIComponent(dest);
+  }
+
+  if (id === 'youtube' && (action === 'search' || args.query)){
+    return 'YouTube search: https://www.youtube.com/results?search_query=' + encodeURIComponent(args.query || '');
+  }
+
+  if (id === 'notes'){
+    if (action === 'write' && args.text){
+      cfg.pad = String(args.text);
+      S.connectors.notes = cfg; saveConnectors();
+      return 'Quick note saved (' + cfg.pad.length + ' chars).';
+    }
+    return cfg.pad ? ('Quick notes:\n' + cfg.pad) : 'Quick notes pad is empty.';
+  }
+
+  // Generic open for link-style connectors
+  var openUrl = connectorOpenUrl(id);
+  if (openUrl){
+    return (CONNECTOR_DEFS.find(function(d){ return d.id === id; }) || {name:id}).name + ' → ' + openUrl;
   }
 
   return 'Error: unknown connector or action';
@@ -3498,6 +4098,7 @@ var PROFILE_SEEDS = [
   { id:'seed-nova', text:'Uses Nova (this app) as a multi-provider AI chat with agent tools, memory, voice, and model council — served from the same GitHub Pages site as the Tesla dashboard.', category:'project', importance:3, pinned:false, tags:['project','nova'] },
   { id:'seed-tech', text:'Comfortable with local LLMs (Ollama / LM Studio), GitHub, and browser-based tooling; prefers practical, high-quality UX for car and phone.', category:'preference', importance:3, pinned:false, tags:['tech'] },
   { id:'seed-units', text:'In Canada — prefer metric units (°C, km) unless asked otherwise.', category:'preference', importance:3, pinned:false, tags:['locale'] },
+  { id:'seed-budget', text:'Household finances live in iCloud Drive under 03 - Finance / Budget Project (dashboard.html) and Documents/Money v2. Homebase Budget widget imports a private finance glance JSON — balances are not published to GitHub Pages.', category:'project', importance:4, pinned:true, tags:['finance','budget'] },
   { id:'seed-tone', text:'Appreciates advanced, high-tech, professional product design — glanceable in the car, polished on desktop/phone.', category:'preference', importance:3, pinned:false, tags:['ux'] }
 ];
 function seedProfileMemories(){
@@ -7020,10 +7621,25 @@ function renderDataPane(){
 }
 
 /* ============================ theme ============================ */
+function applyDeviceClass(){
+  var mobile = false;
+  try {
+    mobile = window.matchMedia && (
+      matchMedia('(max-width: 820px)').matches ||
+      matchMedia('(pointer: coarse) and (max-width: 1024px)').matches
+    );
+    // iPad landscape still "tablet" — treat < 900 as mobile shell
+    if (window.innerWidth && window.innerWidth <= 820) mobile = true;
+  } catch(e){}
+  document.body.classList.toggle('is-mobile', !!mobile);
+  document.body.classList.toggle('is-desktop', !mobile);
+  return mobile;
+}
 function applyTheme(){
   var t = S.settings.theme;
   if (t === 'system') t = (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', t);
+  applyDeviceClass();
   document.documentElement.style.setProperty('--acc', S.settings.accent);
   document.documentElement.style.setProperty('--acc-soft', 'color-mix(in srgb, ' + S.settings.accent + ' 16%, transparent)');
   document.documentElement.style.setProperty('--acc-soft2', 'color-mix(in srgb, ' + S.settings.accent + ' 30%, transparent)');

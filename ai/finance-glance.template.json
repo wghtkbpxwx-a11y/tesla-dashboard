@@ -1,0 +1,15 @@
+{
+  "schema": "homebase.finance_glance.v1",
+  "title": "Pederson Budget Project",
+  "source": "Import your glance from Budget Project (Settings \u2192 Finance or Connectors \u2192 Budget)",
+  "path_hint": "iCloud Drive / 03 - Finance / Budget Project / dashboard.html",
+  "as_of": null,
+  "status": "not_loaded",
+  "kpis": {},
+  "accounts": [],
+  "alerts": [
+    "Import a finance glance to see hub cash, debts, and budget status."
+  ],
+  "budgets": [],
+  "notes": "Template only \u2014 no personal balances. Use Import in Homebase."
+}
