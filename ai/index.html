@@ -2571,6 +2571,7 @@ var HOMEBASE_CHANGELOG = {
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
     state: 'PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, and PR #62 secure latency-aware local routing are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio now requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call.',
     start_here: [
+      'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-debounced-persistence',
       'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-live-activation',
       'HOMEBASE_CHANGELOG entry 2026-07-18-lmstudio-secure-mcp-live-verification',
       'HOMEBASE_CHANGELOG entry 2026-07-18-direct-provider-router-v2 plus the updated 2026-07-18-cross-device-vault-deployment entry',
@@ -2620,6 +2621,41 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-cloud-key-debounced-persistence',
+      date: '2026-07-18',
+      commit: 'pending (credential persistence correction)',
+      branch: 'codex/persist-cloud-keys-on-input',
+      pull_request: 'pending',
+      title: 'Persist remotely entered provider keys after input settles',
+      type: 'fix+security+providers+docs',
+      depends_on: ['2026-07-18-cloud-key-live-activation'],
+      files_changed: ['ai/index.html','ai/README.md','CLAUDE.md'],
+      settings_changed: ['keys.* provider credentials','keys.lmstudio','keys.custom','keys.elevenlabs'],
+      interfaces_changed: ['saveKeys','persistKeys','renderProvidersPane','renderVoicePane'],
+      changes: [
+        'Adds a 250 ms debounced persistence path for credential input events, retaining immediate in-memory activation without writing browser storage on every keystroke',
+        'Keeps the change handler as an immediate final save while making paste, password-manager, automation, phone-remote, and other nonstandard input paths survive reloads',
+        'Applies the same activation and persistence contract to direct cloud, LM Studio, custom endpoint, and ElevenLabs credential fields'
+      ],
+      safety_guards: [
+        'Credentials remain masked, browser-local by default, and eligible for cross-device upload only inside the explicitly enabled client-side encrypted vault',
+        'The debounce stores only after input settles and does not print, log, or commit any secret value',
+        'Official provider keys remain pinned to their provider API origins'
+      ],
+      verification: [
+        'PR #64 deployed successfully and immediate xAI Test connection plus Fetch model list succeeded, loading 10 models without a paid generation',
+        'Reload testing then showed the remotely entered field was empty because the browser did not emit the expected change event; this entry explicitly corrects the prior change-only persistence assumption',
+        'Pending: deploy, enter the xAI key, wait for the debounce, reload, confirm the masked field remains populated, and re-run the free connection check'
+      ],
+      setup_required: [
+        'Re-enter the user-provided xAI key once after deployment; rotate it later because it was supplied through chat rather than entered directly in the provider console/browser field'
+      ],
+      known_limits: [
+        'Authoritative provider spend still lives in each provider console; Homebase records application-originated estimates only'
+      ],
+      next_model: 'Preserve both immediate activation and debounced persistence for all credential fields; verify persistence by reload without inspecting or exposing the stored value.'
+    },
     {
       id: '2026-07-18-cloud-key-live-activation',
       date: '2026-07-18',
@@ -5989,6 +6025,7 @@ function saveSettings(opts){
   if (!opts || opts.sync !== false) vaultMarkChanged('settings');
 }
 function saveKeys(){ lsSet(LS_KEYS, S.keys); vaultMarkChanged('keys'); }
+var persistKeys = debounce(function(){ saveKeys(); }, 250);
 function saveTasks(){ lsSet(LS_TASKS, S.tasks); vaultMarkChanged('tasks'); }
 
 var persistConvo = debounce(function(convo){ if (convo) idb.put(convo); }, 350);
@@ -10031,7 +10068,7 @@ function renderProvidersPane(expand){
       kr.innerHTML = '<label>API key</label><input type="password" autocomplete="off" spellcheck="false" placeholder="' + esc(pr.keyHint || '') + '"><button class="sm-btn show-k" type="button">👁</button>';
       var ki = qs('input', kr);
       ki.value = getKey(p);
-      ki.addEventListener('input', function(){ S.keys[p] = ki.value.trim(); });
+      ki.addEventListener('input', function(){ S.keys[p] = ki.value.trim(); persistKeys(); });
       ki.addEventListener('change', function(){
         S.keys[p] = ki.value.trim(); saveKeys();
         qs('.p-dot', card).classList.toggle('ok', providerReady(p));
@@ -10046,7 +10083,7 @@ function renderProvidersPane(expand){
       lkr.innerHTML = '<label>Scoped API token</label><input type="password" autocomplete="off" spellcheck="false" placeholder="optional · needed for installed MCPs"><button class="sm-btn show-k" type="button">👁</button>';
       var lki = qs('input', lkr);
       lki.value = getKey('lmstudio');
-      lki.addEventListener('input', function(){ S.keys.lmstudio = lki.value.trim(); });
+      lki.addEventListener('input', function(){ S.keys.lmstudio = lki.value.trim(); persistKeys(); });
       lki.addEventListener('change', function(){ S.keys.lmstudio = lki.value.trim(); saveKeys(); });
       qs('.show-k', lkr).addEventListener('click', function(){ lki.type = lki.type === 'password' ? 'text' : 'password'; });
       body.appendChild(lkr);
@@ -10111,7 +10148,7 @@ function renderProvidersPane(expand){
       ck.innerHTML = '<label>API key</label><input type="password" autocomplete="off" placeholder="(optional)">';
       var cki = qs('input', ck);
       cki.value = getKey('custom');
-      cki.addEventListener('input', function(){ S.keys.custom = cki.value.trim(); });
+      cki.addEventListener('input', function(){ S.keys.custom = cki.value.trim(); persistKeys(); });
       cki.addEventListener('change', function(){ S.keys.custom = cki.value.trim(); saveKeys(); });
       body.insertBefore(ck, btns);
     }
@@ -10404,7 +10441,7 @@ function renderVoicePane(){
   pane.appendChild(ekRow);
   var eki = qs('#vs-ek', pane);
   eki.value = getKey('elevenlabs');
-  eki.addEventListener('input', function(){ S.keys.elevenlabs = this.value.trim(); });
+  eki.addEventListener('input', function(){ S.keys.elevenlabs = this.value.trim(); persistKeys(); });
   eki.addEventListener('change', function(){ S.keys.elevenlabs = this.value.trim(); saveKeys(); });
   qs('#vs-etest', pane).addEventListener('click', async function(){
     var b = this; b.textContent = 'Testing…';

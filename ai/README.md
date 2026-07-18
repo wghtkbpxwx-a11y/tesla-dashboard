@@ -37,8 +37,10 @@ a shared device or commit keys to source control. Each provider
 has a **Get API key** shortcut, **Test connection**, and, where supported,
 **Fetch model list**; any model id can also be typed into the model-picker
 search and used directly. Credential fields update the active in-memory key as
-they are typed so an immediate connection test cannot use stale state; durable
-browser storage remains change-triggered.
+they are typed so an immediate connection test cannot use stale state; a short
+debounce persists the settled value for paste, password-manager, remote-control,
+and ordinary typing paths, with the change event retained as the immediate final
+save.
 
 ## Automatic model routing and rolling budget
 
