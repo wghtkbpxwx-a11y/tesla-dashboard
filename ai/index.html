@@ -2569,7 +2569,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
-    state: 'PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, and PR #62 secure latency-aware local routing are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio now requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call.',
+    state: 'PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, PR #62 secure latency-aware local routing, PR #64 immediate cloud-key activation, and PR #65 debounced credential persistence are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted LM Studio token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call. xAI is now connected with a masked key that survives reload, 10 models are discovered, and one Grok 3 mini beta reply was recorded at approximately $0.0003 before Auto best-value routing and Agent tools were restored.',
     start_here: [
       'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-debounced-persistence',
       'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-live-activation',
@@ -2624,9 +2624,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-cloud-key-debounced-persistence',
       date: '2026-07-18',
-      commit: '5153969 (initial persistence commit)',
+      commit: '7c7192c3a5145e7a1b3ebadda5f71ff5cd5627b4',
       branch: 'codex/persist-cloud-keys-on-input',
-      pull_request: '#65 draft',
+      pull_request: '#65 merged',
       title: 'Persist remotely entered provider keys after input settles',
       type: 'fix+security+providers+docs',
       depends_on: ['2026-07-18-cloud-key-live-activation'],
@@ -2646,10 +2646,13 @@ var HOMEBASE_CHANGELOG = {
       verification: [
         'PR #64 deployed successfully and immediate xAI Test connection plus Fetch model list succeeded, loading 10 models without a paid generation',
         'Reload testing then showed the remotely entered field was empty because the browser did not emit the expected change event; this entry explicitly corrects the prior change-only persistence assumption',
-        'Pending: deploy, enter the xAI key, wait for the debounce, reload, confirm the masked field remains populated, and re-run the free connection check'
+        'PR #65 merge commit 7c7192c3a5145e7a1b3ebadda5f71ff5cd5627b4 passed validation run 29665659465 and Pages run 29665659079',
+        'After deployment, the xAI key activated immediately, remained masked and populated after a full reload, passed the post-reload Test connection check, and loaded 10 models',
+        'One manual Grok 3 mini beta request returned the exact expected reply using 899 input and 4 output tokens; Homebase estimated approximately $0.0003 and recorded it through the rolling budget path',
+        'Automatic best-value model selection and Agent tools were restored after the manual beta test'
       ],
       setup_required: [
-        'Re-enter the user-provided xAI key once after deployment; rotate it later because it was supplied through chat rather than entered directly in the provider console/browser field'
+        'Rotate the xAI key later when the user can access the provider console directly because this key was supplied through chat; replace it in the masked field and revoke the old key after the replacement passes the free connection check'
       ],
       known_limits: [
         'Authoritative provider spend still lives in each provider console; Homebase records application-originated estimates only'
