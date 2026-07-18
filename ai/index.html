@@ -1149,6 +1149,8 @@ body.is-desktop .chat-float[data-state="open"]{
 /* ============================= Connectors ============================= */
 #connectors-ov .modal{max-width:740px}
 .conn-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
+.conn-cat{grid-column:1/-1;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:14px 2px 2px;margin-top:4px}
+.conn-cat:first-child{padding-top:4px}
 @media (max-width:640px){.conn-grid{grid-template-columns:1fr}}
 .conn-card{
   position:relative; border:1px solid var(--border); border-radius:18px; padding:14px;
@@ -1574,7 +1576,7 @@ body.is-desktop .chat-float[data-state="open"]{
   <div class="modal wide">
     <div class="mo-head"><h2>Connectors</h2><button class="icon-btn" data-close="connectors-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="mo-body">
-      <div class="conn-banner"><b>Built for David.</b> Enable services Homebase can use while you chat. <b>Google Drive</b> holds your <em>encrypted</em> memory vault for multi-device continuity — passphrase never leaves this device. Add an OAuth Client ID on the Drive card, then open Memory → Private vault.</div>
+      <div class="conn-banner"><b>Built for David.</b> Curated for David: Budget Project, Monarch, pharmacy refs, ICBC/Tesla, teams, AI tools, and an encrypted Drive vault. Toggle only what you use.</div>
       <div id="conn-grid" class="conn-grid"></div>
     </div>
   </div>
@@ -2781,398 +2783,347 @@ function initDashboardShell(){
 
 /* ============================ Connectors ============================ */
 var CONNECTOR_DEFS = [
+  /* —— Life OS / home —— */
   {
-    id: 'dashboard',
-    name: 'Tesla Dashboard',
-    desc: 'Car HQ — weather, traffic, sports, stocks cache.',
-    icon: '🚗',
-    grad: 'linear-gradient(145deg,#818cf8,#4f46e5)',
-    fields: [{key:'url', label:'Dashboard URL', placeholder:'https://…/tesla-dashboard/', secret:false}],
+    id: 'dashboard', name: 'Tesla Dashboard', category: 'Home',
+    desc: 'In-car HQ: weather, traffic cams, sports, watchlist.',
+    icon: 'car', grad: 'linear-gradient(145deg,#6366f1,#4f46e5)',
+    fields: [{key:'url', label:'URL', placeholder:'https://…/tesla-dashboard/', secret:false}],
     defaults: { on:true, url:'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/' },
     actions: ['brief']
   },
   {
-    id: 'budget',
-    name: 'Budget Project',
-    desc: 'iCloud · 03 - Finance · Budget Project — encrypted local glance, never auto-published.',
-    icon: '🏦',
-    grad: 'linear-gradient(145deg,#0d9488,#0f766e)',
+    id: 'family', name: 'Family Command Center', category: 'Home',
+    desc: 'iCloud · 01 - Family · Family_Command_Center.html',
+    icon: 'family', grad: 'linear-gradient(145deg,#e879f9,#a21caf)',
+    fields: [{key:'pathHint', label:'Path hint', placeholder:'iCloud/01 - Family/…', secret:false}],
+    defaults: { on:true, pathHint:'iCloud Drive / 01 - Family / Family_Command_Center.html' },
+    actions: ['status']
+  },
+  {
+    id: 'tasks', name: 'Homebase rituals', category: 'Home',
+    desc: 'Scheduled Homebase prompts & reminders.',
+    icon: 'tasks', grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
+    fields: [], defaults: { on:true }, actions: ['list']
+  },
+  {
+    id: 'notes', name: 'Quick notes', category: 'Home',
+    desc: 'Local scratchpad in this browser only.',
+    icon: 'memory', grad: 'linear-gradient(145deg,#f59e0b,#b45309)',
+    fields: [{key:'pad', label:'Scratchpad', placeholder:'Ideas…', secret:false}],
+    defaults: { on:true, pad:'' }, actions: ['read','write']
+  },
+
+  /* —— Money (your real stack) —— */
+  {
+    id: 'budget', name: 'Budget Project', category: 'Money',
+    desc: 'iCloud · 03 - Finance · Budget Project (private glance import).',
+    icon: 'bank', grad: 'linear-gradient(145deg,#0d9488,#0f766e)',
     fields: [
       {key:'pathHint', label:'Project path', placeholder:'iCloud/03 - Finance/Budget Project', secret:false},
-      {key:'glanceNote', label:'Notes', placeholder:'Optional note for agent', secret:false}
+      {key:'glanceNote', label:'Agent note', placeholder:'Optional context', secret:false}
     ],
     defaults: {
       on:true,
       pathHint:'iCloud Drive / 03 - Finance / Budget Project / dashboard.html',
-      glanceNote:'Pederson household finances — import glance JSON for live widget'
+      glanceNote:'Household finances — use Budget widget import for balances (never publish to Pages)'
     },
     actions: ['status','summary']
   },
   {
-    id: 'drive',
-    name: 'Google Drive',
-    desc: 'Encrypted Homebase vault sync + Drive search.',
-    icon: '📁',
-    grad: 'linear-gradient(145deg,#fcd34d,#f59e0b)',
+    id: 'monarch', name: 'Monarch Money', category: 'Money',
+    desc: 'Transaction export source for Money v2 (inbox/monarch).',
+    icon: 'chart', grad: 'linear-gradient(145deg,#34d399,#059669)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'rbc', name: 'RBC Online', category: 'Money',
+    desc: 'Hub chequing, ION+, mortgage, credit line.',
+    icon: 'bank', grad: 'linear-gradient(145deg,#0051a5,#003366)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'bmo', name: 'BMO Online', category: 'Money',
+    desc: 'BMO chequing & student LOC.',
+    icon: 'bank', grad: 'linear-gradient(145deg,#0079c1,#005a8c)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'wealthsimple', name: 'Wealthsimple', category: 'Money',
+    desc: 'Investing / registered accounts.',
+    icon: 'chart', grad: 'linear-gradient(145deg,#a3e635,#65a30d)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'nslsc', name: 'NSLSC student loans', category: 'Money',
+    desc: 'National Student Loans Service Centre.',
+    icon: 'bank', grad: 'linear-gradient(145deg,#64748b,#334155)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'cra', name: 'CRA My Account', category: 'Money',
+    desc: 'Canada Revenue Agency.',
+    icon: 'shield', grad: 'linear-gradient(145deg,#dc2626,#991b1b)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+
+  /* —— Work: pharmacy (BC) —— */
+  {
+    id: 'bcpha', name: 'BC Pharmacy Assoc.', category: 'Pharmacy',
+    desc: 'bcpharmacists.org — college / professional.',
+    icon: 'pharmacy', grad: 'linear-gradient(145deg,#0d9488,#115e59)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'rxfiles', name: 'RxFiles', category: 'Pharmacy',
+    desc: 'Canadian drug comparison charts & academic detailing.',
+    icon: 'pharmacy', grad: 'linear-gradient(145deg,#14b8a6,#0f766e)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'cps', name: 'CPS / RxTx', category: 'Pharmacy',
+    desc: 'Compendium of Pharmaceuticals (CPhA login).',
+    icon: 'pharmacy', grad: 'linear-gradient(145deg,#2dd4bf,#0f766e)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'pharmacare', name: 'BC PharmaCare', category: 'Pharmacy',
+    desc: 'Formulary & coverage info.',
+    icon: 'health', grad: 'linear-gradient(145deg,#38bdf8,#0369a1)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'medsask', name: 'medSask', category: 'Pharmacy',
+    desc: 'Drug information service (SK / often used by RPhs).',
+    icon: 'pharmacy', grad: 'linear-gradient(145deg,#67e8f9,#0891b2)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'lexicomp', name: 'Lexicomp', category: 'Pharmacy',
+    desc: 'Clinical drug database (institutional login).',
+    icon: 'pharmacy', grad: 'linear-gradient(145deg,#818cf8,#4338ca)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'healthcanada', name: 'Health Canada DPD', category: 'Pharmacy',
+    desc: 'Drug Product Database search.',
+    icon: 'health', grad: 'linear-gradient(145deg,#f87171,#b91c1c)',
+    fields: [], defaults: { on:true }, actions: ['open','search']
+  },
+  {
+    id: 'work_pharmacy', name: 'Work · Pharmacy folder', category: 'Pharmacy',
+    desc: 'iCloud · 05 - Work - Pharmacy (CE, monographs, bylaws).',
+    icon: 'work', grad: 'linear-gradient(145deg,#94a3b8,#475569)',
+    fields: [{key:'pathHint', label:'Path', placeholder:'iCloud/05 - Work - Pharmacy', secret:false}],
+    defaults: { on:true, pathHint:'iCloud Drive / 05 - Work - Pharmacy' },
+    actions: ['status']
+  },
+
+  /* —— Auto / BC —— */
+  {
+    id: 'drivebc', name: 'DriveBC', category: 'Auto & BC',
+    desc: 'Highways, cams, conditions (Coquihalla etc.).',
+    icon: 'car', grad: 'linear-gradient(145deg,#64748b,#1e293b)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'icbc', name: 'ICBC', category: 'Auto & BC',
+    desc: 'Insurance, claims, Autplan.',
+    icon: 'shield', grad: 'linear-gradient(145deg,#fbbf24,#b45309)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'tesla', name: 'Tesla Account', category: 'Auto & BC',
+    desc: 'tesla.com account / support.',
+    icon: 'bolt', grad: 'linear-gradient(145deg,#ef4444,#991b1b)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'bcservices', name: 'BC Services Card', category: 'Auto & BC',
+    desc: 'Provincial ID & service login hub.',
+    icon: 'shield', grad: 'linear-gradient(145deg,#f59e0b,#92400e)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'maps', name: 'Google Maps', category: 'Auto & BC',
+    desc: 'Directions from Surrey default.',
+    icon: 'map', grad: 'linear-gradient(145deg,#34d399,#047857)',
+    fields: [{key:'home', label:'Home', placeholder:'Surrey, BC', secret:false}],
+    defaults: { on:true, home:'Surrey, BC' }, actions: ['open','directions']
+  },
+  {
+    id: 'weather', name: 'Weather', category: 'Auto & BC',
+    desc: 'Open-meteo live conditions.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#38bdf8,#0369a1)',
+    fields: [{key:'location', label:'Location', placeholder:'Surrey, BC', secret:false}],
+    defaults: { on:true, location:'Surrey, BC' }, actions: ['now']
+  },
+
+  /* —— Sports you follow —— */
+  {
+    id: 'canucks', name: 'Canucks', category: 'Sports',
+    desc: 'Vancouver Canucks.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#00205b,#041e42)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'bluejays', name: 'Blue Jays', category: 'Sports',
+    desc: 'Toronto Blue Jays.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#134a8e,#1d2d5c)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'raptors', name: 'Raptors', category: 'Sports',
+    desc: 'Toronto Raptors.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#ce1141,#000000)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'whitecaps', name: 'Whitecaps', category: 'Sports',
+    desc: 'Vancouver Whitecaps FC.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#92c1e9,#00245d)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'bclions', name: 'BC Lions', category: 'Sports',
+    desc: 'CFL — BC Lions.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#f15524,#1a1a1a)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'sportsnet', name: 'Sportsnet', category: 'Sports',
+    desc: 'Canadian sports news & scores.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#e11d48,#7f1d1d)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+  {
+    id: 'espn', name: 'ESPN', category: 'Sports',
+    desc: 'Scores hub.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#d20a11,#6b0000)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+
+  /* —— Google workspace you already use —— */
+  {
+    id: 'gmail', name: 'Gmail', category: 'Google',
+    desc: 'Compose / search deep-links.',
+    icon: 'mail', grad: 'linear-gradient(145deg,#f87171,#dc2626)',
+    fields: [{key:'email', label:'Address', placeholder:'you@gmail.com', secret:false}],
+    defaults: { on:true, email:'' }, actions: ['compose','search']
+  },
+  {
+    id: 'calendar', name: 'Google Calendar', category: 'Google',
+    desc: 'Open or read iCal feed.',
+    icon: 'calendar', grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
+    fields: [{key:'ical', label:'iCal URL', placeholder:'https://calendar.google.com/…', secret:false}],
+    defaults: { on:true, ical:'' }, actions: ['open','upcoming']
+  },
+  {
+    id: 'drive', name: 'Google Drive vault', category: 'Google',
+    desc: 'Encrypted Homebase memory sync.',
+    icon: 'cloud', grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
     fields: [
-      {key:'clientId', label:'OAuth Client ID', placeholder:'xxxx.apps.googleusercontent.com', secret:false},
-      {key:'fileName', label:'Vault file name', placeholder:'homebase-memory.vault.json', secret:false}
+      {key:'clientId', label:'OAuth Client ID', placeholder:'….apps.googleusercontent.com', secret:false},
+      {key:'fileName', label:'Vault file', placeholder:'homebase-memory.vault.json', secret:false}
     ],
     defaults: { on:true, clientId:'', fileName:'homebase-memory.vault.json', autoSync:true, fileId:'' },
     actions: ['search','push','pull']
   },
   {
-    id: 'gmail',
-    name: 'Gmail',
-    desc: 'Compose and search deep-links.',
-    icon: '✉️',
-    grad: 'linear-gradient(145deg,#f87171,#ea4335)',
-    fields: [{key:'email', label:'Your Gmail', placeholder:'you@gmail.com', secret:false}],
-    defaults: { on:true, email:'' },
-    actions: ['compose','search']
+    id: 'icloud', name: 'iCloud.com', category: 'Google',
+    desc: 'Apple web apps (Drive, Photos, Notes).',
+    icon: 'cloud', grad: 'linear-gradient(145deg,#93c5fd,#3b82f6)',
+    fields: [], defaults: { on:true }, actions: ['open']
+  },
+
+  /* —— AI you actually run —— */
+  {
+    id: 'claude', name: 'Claude', category: 'AI',
+    desc: 'Anthropic Claude web.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#d4a27f,#b45309)',
+    fields: [], defaults: { on:true }, actions: ['open']
   },
   {
-    id: 'calendar',
-    name: 'Google Calendar',
-    desc: 'Open Calendar or read an iCal feed.',
-    icon: '📅',
-    grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
-    fields: [{key:'ical', label:'iCal URL (optional)', placeholder:'https://calendar.google.com/…', secret:false}],
-    defaults: { on:true, ical:'' },
-    actions: ['open','upcoming']
+    id: 'chatgpt', name: 'ChatGPT / Codex', category: 'AI',
+    desc: 'OpenAI chat & Codex entry.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#10a37f,#065f46)',
+    fields: [], defaults: { on:true }, actions: ['open']
   },
   {
-    id: 'github',
-    name: 'GitHub',
-    desc: 'Repos and issues (PAT stays local).',
-    icon: '⌥',
-    grad: 'linear-gradient(145deg,#475569,#0f172a)',
-    fields: [
-      {key:'token', label:'Personal access token', placeholder:'ghp_…', secret:true},
-      {key:'user', label:'Username / org', placeholder:'wghtkbpxwx-a11y', secret:false}
-    ],
-    defaults: { on:false, token:'', user:'wghtkbpxwx-a11y' },
-    actions: ['repos','issues']
+    id: 'grok', name: 'Grok', category: 'AI',
+    desc: 'xAI Grok on X.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#e5e5e5,#525252)',
+    fields: [], defaults: { on:true }, actions: ['open']
   },
   {
-    id: 'weather',
-    name: 'Weather',
-    desc: 'Open-meteo for home location.',
-    icon: '🌤️',
-    grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
-    fields: [{key:'location', label:'Default location', placeholder:'Surrey, BC', secret:false}],
-    defaults: { on:true, location:'Surrey, BC' },
-    actions: ['now']
+    id: 'gemini', name: 'Gemini', category: 'AI',
+    desc: 'Google Gemini.',
+    icon: 'spark', grad: 'linear-gradient(145deg,#a78bfa,#4f46e5)',
+    fields: [], defaults: { on:true }, actions: ['open']
   },
   {
-    id: 'web',
-    name: 'Web research',
-    desc: 'Search + page reader for agents.',
-    icon: '🌐',
-    grad: 'linear-gradient(145deg,#34d399,#059669)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['search']
+    id: 'perplexity', name: 'Perplexity', category: 'AI',
+    desc: 'Research-oriented chat.',
+    icon: 'research', grad: 'linear-gradient(145deg,#22d3ee,#0e7490)',
+    fields: [], defaults: { on:true }, actions: ['open']
   },
   {
-    id: 'tasks',
-    name: 'Homebase Tasks',
-    desc: 'Scheduled rituals and reminders.',
-    icon: '⏰',
-    grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['list']
-  },
-  {
-    id: 'icloud',
-    name: 'iCloud',
-    desc: 'Open iCloud Drive / apps in browser.',
-    icon: '☁️',
-    grad: 'linear-gradient(145deg,#60a5fa,#3b82f6)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'dropbox',
-    name: 'Dropbox',
-    desc: 'Open Dropbox web.',
-    icon: '📦',
-    grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
-    fields: [],
-    defaults: { on:false },
-    actions: ['open']
-  },
-  {
-    id: 'onedrive',
-    name: 'OneDrive',
-    desc: 'Microsoft OneDrive files.',
-    icon: '☁️',
-    grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
-    fields: [],
-    defaults: { on:false },
-    actions: ['open']
-  },
-  {
-    id: 'rbc',
-    name: 'RBC Online',
-    desc: 'Royal Bank of Canada sign-in.',
-    icon: '🏦',
-    grad: 'linear-gradient(145deg,#0051a5,#003366)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'bmo',
-    name: 'BMO Online',
-    desc: 'Bank of Montreal banking.',
-    icon: '🏦',
-    grad: 'linear-gradient(145deg,#0079c1,#005a8c)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'wealthsimple',
-    name: 'Wealthsimple',
-    desc: 'Investing & tax-advantaged accounts.',
-    icon: '📈',
-    grad: 'linear-gradient(145deg,#a3e635,#65a30d)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'cra',
-    name: 'CRA My Account',
-    desc: 'Canada Revenue Agency.',
-    icon: '🧾',
-    grad: 'linear-gradient(145deg,#dc2626,#991b1b)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'bcservices',
-    name: 'BC Services',
-    desc: 'Service BC / Health Gateway entry.',
-    icon: '🍁',
-    grad: 'linear-gradient(145deg,#f59e0b,#b45309)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'drivebc',
-    name: 'DriveBC',
-    desc: 'BC highways, cams, and conditions.',
-    icon: '🛣️',
-    grad: 'linear-gradient(145deg,#64748b,#334155)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'maps',
-    name: 'Google Maps',
-    desc: 'Directions and places (Surrey default).',
-    icon: '🗺️',
-    grad: 'linear-gradient(145deg,#34d399,#059669)',
-    fields: [{key:'home', label:'Home label', placeholder:'Surrey, BC', secret:false}],
-    defaults: { on:true, home:'Surrey, BC' },
-    actions: ['open','directions']
-  },
-  {
-    id: 'chatgpt',
-    name: 'ChatGPT',
-    desc: 'Open OpenAI ChatGPT web.',
-    icon: '✦',
-    grad: 'linear-gradient(145deg,#10a37f,#0d8c6d)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'claude',
-    name: 'Claude',
-    desc: 'Open Anthropic Claude.',
-    icon: '◈',
-    grad: 'linear-gradient(145deg,#d4a27f,#c4785a)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'gemini',
-    name: 'Gemini',
-    desc: 'Open Google Gemini.',
-    icon: '✧',
-    grad: 'linear-gradient(145deg,#8b5cf6,#6366f1)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'perplexity',
-    name: 'Perplexity',
-    desc: 'Open Perplexity research chat.',
-    icon: '◎',
-    grad: 'linear-gradient(145deg,#20b8cd,#0e7490)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'ollama',
-    name: 'Ollama (local)',
-    desc: 'List local models via localhost API.',
-    icon: '🦙',
-    grad: 'linear-gradient(145deg,#94a3b8,#475569)',
+    id: 'ollama', name: 'Ollama (local)', category: 'AI',
+    desc: 'List models on this machine.',
+    icon: 'code', grad: 'linear-gradient(145deg,#94a3b8,#334155)',
     fields: [{key:'base', label:'Base URL', placeholder:'http://127.0.0.1:11434', secret:false}],
-    defaults: { on:true, base:'http://127.0.0.1:11434' },
-    actions: ['models']
+    defaults: { on:true, base:'http://127.0.0.1:11434' }, actions: ['models']
   },
   {
-    id: 'lmstudio',
-    name: 'LM Studio',
+    id: 'lmstudio', name: 'LM Studio', category: 'AI',
     desc: 'Local OpenAI-compatible server.',
-    icon: '💻',
-    grad: 'linear-gradient(145deg,#a78bfa,#7c3aed)',
+    icon: 'code', grad: 'linear-gradient(145deg,#c4b5fd,#6d28d9)',
     fields: [{key:'base', label:'Base URL', placeholder:'http://127.0.0.1:1234', secret:false}],
-    defaults: { on:true, base:'http://127.0.0.1:1234' },
-    actions: ['models']
+    defaults: { on:true, base:'http://127.0.0.1:1234' }, actions: ['models']
   },
   {
-    id: 'whatsapp',
-    name: 'WhatsApp Web',
-    desc: 'Message from the browser.',
-    icon: '💬',
-    grad: 'linear-gradient(145deg,#4ade80,#16a34a)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
+    id: 'web', name: 'Web research', category: 'AI',
+    desc: 'Agent web_search + read_url tools.',
+    icon: 'research', grad: 'linear-gradient(145deg,#34d399,#047857)',
+    fields: [], defaults: { on:true }, actions: ['search']
+  },
+
+  /* —— Build / code —— */
+  {
+    id: 'github', name: 'GitHub', category: 'Build',
+    desc: 'Repos & issues (PAT local).',
+    icon: 'code', grad: 'linear-gradient(145deg,#64748b,#0f172a)',
+    fields: [
+      {key:'token', label:'PAT', placeholder:'ghp_…', secret:true},
+      {key:'user', label:'User/org', placeholder:'wghtkbpxwx-a11y', secret:false}
+    ],
+    defaults: { on:true, token:'', user:'wghtkbpxwx-a11y' }, actions: ['repos','issues']
   },
   {
-    id: 'teams',
-    name: 'Microsoft Teams',
-    desc: 'Work chat & meetings.',
-    icon: '👔',
-    grad: 'linear-gradient(145deg,#5b5fc7,#4f46e5)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
+    id: 'mythic', name: 'MythicPocket', category: 'Build',
+    desc: 'Your game project (local Documents).',
+    icon: 'spark', grad: 'linear-gradient(145deg,#f472b6,#9d174d)',
+    fields: [{key:'pathHint', label:'Path', placeholder:'Documents/MythicPocket', secret:false}],
+    defaults: { on:true, pathHint:'Documents/MythicPocket' }, actions: ['status']
+  },
+
+  /* —— Comms (kept lean) —— */
+  {
+    id: 'whatsapp', name: 'WhatsApp Web', category: 'Comms',
+    desc: 'Family messaging in browser.',
+    icon: 'chat', grad: 'linear-gradient(145deg,#4ade80,#15803d)',
+    fields: [], defaults: { on:true }, actions: ['open']
   },
   {
-    id: 'slack',
-    name: 'Slack',
-    desc: 'Workspace messaging.',
-    icon: '💬',
-    grad: 'linear-gradient(145deg,#e11d48,#be123c)',
-    fields: [{key:'workspace', label:'Workspace URL (optional)', placeholder:'https://app.slack.com', secret:false}],
-    defaults: { on:false, workspace:'https://app.slack.com' },
-    actions: ['open']
+    id: 'apple_music', name: 'Apple Music', category: 'Comms',
+    icon: 'music', grad: 'linear-gradient(145deg,#f472b6,#be185d)',
+    fields: [], defaults: { on:true }, actions: ['open']
   },
   {
-    id: 'canucks',
-    name: 'Canucks',
-    desc: 'Vancouver Canucks official site.',
-    icon: '🏒',
-    grad: 'linear-gradient(145deg,#00205b,#041e42)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'sportsnet',
-    name: 'Sportsnet',
-    desc: 'Scores and Canadian sports news.',
-    icon: '📺',
-    grad: 'linear-gradient(145deg,#e11d48,#9f1239)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'youtube',
-    name: 'YouTube',
-    desc: 'Search or open YouTube.',
-    icon: '▶',
-    grad: 'linear-gradient(145deg,#f87171,#dc2626)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open','search']
-  },
-  {
-    id: 'spotify',
-    name: 'Spotify',
-    desc: 'Open Spotify web player.',
-    icon: '♫',
-    grad: 'linear-gradient(145deg,#4ade80,#15803d)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'notion',
-    name: 'Notion',
-    desc: 'Notes & wikis.',
-    icon: '📓',
-    grad: 'linear-gradient(145deg,#a3a3a3,#404040)',
-    fields: [{key:'url', label:'Workspace URL', placeholder:'https://www.notion.so/…', secret:false}],
-    defaults: { on:false, url:'https://www.notion.so' },
-    actions: ['open']
-  },
-  {
-    id: 'linear',
-    name: 'Linear',
-    desc: 'Issue tracking for product work.',
-    icon: '📐',
-    grad: 'linear-gradient(145deg,#a5b4fc,#4f46e5)',
-    fields: [],
-    defaults: { on:false },
-    actions: ['open']
-  },
-  {
-    id: 'vscode',
-    name: 'VS Code Web',
-    desc: 'vscode.dev in the browser.',
-    icon: '<>',
-    grad: 'linear-gradient(145deg,#38bdf8,#0369a1)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'homeassistant',
-    name: 'Home Assistant',
-    desc: 'Smart home dashboard (your URL).',
-    icon: '🏠',
-    grad: 'linear-gradient(145deg,#41bdf5,#0284c7)',
-    fields: [{key:'url', label:'HA URL', placeholder:'http://homeassistant.local:8123', secret:false}],
-    defaults: { on:false, url:'' },
-    actions: ['open']
-  },
-  {
-    id: 'translate',
-    name: 'Google Translate',
-    desc: 'Quick translation.',
-    icon: '文',
-    grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['open']
-  },
-  {
-    id: 'notes',
-    name: 'Quick notes',
-    desc: 'Local scratchpad stored in this browser.',
-    icon: '📝',
-    grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
-    fields: [{key:'pad', label:'Scratchpad', placeholder:'Ideas…', secret:false}],
-    defaults: { on:true, pad:'' },
-    actions: ['read','write']
+    id: 'youtube', name: 'YouTube', category: 'Comms',
+    desc: 'Open or search.',
+    icon: 'camera', grad: 'linear-gradient(145deg,#f87171,#b91c1c)',
+    fields: [], defaults: { on:true }, actions: ['open','search']
   }
 ];
 
@@ -3198,7 +3149,17 @@ function renderConnectors(){
   if (!grid) return;
   if (!S.connectors) S.connectors = loadConnectorsState();
   grid.innerHTML = '';
-  CONNECTOR_DEFS.forEach(function(def){
+  var cats = [];
+  CONNECTOR_DEFS.forEach(function(d){
+    var c = d.category || 'Other';
+    if (cats.indexOf(c) < 0) cats.push(c);
+  });
+  cats.forEach(function(cat){
+    var head = document.createElement('div');
+    head.className = 'conn-cat';
+    head.textContent = cat;
+    grid.appendChild(head);
+    CONNECTOR_DEFS.filter(function(d){ return (d.category || 'Other') === cat; }).forEach(function(def){
     var st = S.connectors[def.id] || Object.assign({}, def.defaults);
     var card = document.createElement('div');
     card.className = 'conn-card' + (st.on ? ' on' : '');
@@ -3212,7 +3173,12 @@ function renderConnectors(){
       '</div>' +
       '<div class="cc-fields" data-fields></div>' +
       '<div class="cc-actions" data-actions></div>';
-    qs('.cc-ico', card).textContent = def.icon;
+    if (typeof ICON_SVG !== 'undefined' && ICON_SVG[def.icon]) {
+      qs('.cc-ico', card).innerHTML = iconSvg(def.icon, 20);
+      qs('.cc-ico', card).style.color = '#fff';
+    } else {
+      qs('.cc-ico', card).textContent = def.icon;
+    }
     qs('.cc-title', card).textContent = def.name;
     qs('.cc-desc', card).textContent = def.desc;
     qs('.cc-status', card).textContent = st.on ? 'Connected' : 'Off';
@@ -3242,13 +3208,14 @@ function renderConnectors(){
       testBtn.disabled = false; testBtn.textContent = 'Test';
     });
     acts.appendChild(testBtn);
-    if (connectorOpenUrl(def.id) || def.id === 'budget'){
+    var pathIds = {budget:1, family:1, work_pharmacy:1, mythic:1};
+    if (connectorOpenUrl(def.id) || pathIds[def.id]){
       var openBtn = document.createElement('button');
-      openBtn.className = 'sm-btn pri'; openBtn.type = 'button'; openBtn.textContent = 'Open';
+      openBtn.className = 'sm-btn pri'; openBtn.type = 'button'; openBtn.textContent = pathIds[def.id] ? 'Path' : 'Open';
       openBtn.addEventListener('click', function(){
-        if (def.id === 'budget'){
-          var hint = connectorCfg('budget').pathHint || 'iCloud Drive / 03 - Finance / Budget Project';
-          toast(hint, null, 5000);
+        if (pathIds[def.id]){
+          var hint = connectorCfg(def.id).pathHint || def.defaults.pathHint || def.desc;
+          toast(hint, null, 5200);
           try { navigator.clipboard.writeText(hint); } catch(e){}
           return;
         }
@@ -3258,6 +3225,12 @@ function renderConnectors(){
       });
       acts.appendChild(openBtn);
     }
+    if (def.id === 'budget'){
+      var imp = document.createElement('button');
+      imp.className = 'sm-btn'; imp.type = 'button'; imp.textContent = 'Import glance';
+      imp.addEventListener('click', function(){ var f = $('finance-file'); if (f) f.click(); });
+      acts.appendChild(imp);
+    }
     qs('[data-conn-tgl]', card).addEventListener('click', function(){
       if (!S.connectors[def.id]) S.connectors[def.id] = Object.assign({}, def.defaults);
       S.connectors[def.id].on = !S.connectors[def.id].on;
@@ -3266,9 +3239,11 @@ function renderConnectors(){
       updateConnectorsBtn();
     });
     grid.appendChild(card);
+    });
   });
   updateConnectorsBtn();
 }
+
 function updateConnectorsBtn(){
   if (!$('connectors-btn')) return;
   var n = CONNECTOR_DEFS.filter(function(d){ return connectorOn(d.id); }).length;
@@ -3276,42 +3251,49 @@ function updateConnectorsBtn(){
   $('connectors-btn').title = 'Connectors (' + n + ' on)';
 }
 function connectorOpenUrl(id){
-  var cfg = connectorCfg(id);
-  var map = {
+  var cfg = connectorCfg(id) || {};
+  var urls = {
     dashboard: cfg.url || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/',
-    gmail: 'https://mail.google.com/',
-    calendar: 'https://calendar.google.com/',
-    drive: 'https://drive.google.com/',
-    github: 'https://github.com/' + encodeURIComponent(cfg.user || ''),
-    icloud: 'https://www.icloud.com/',
-    dropbox: 'https://www.dropbox.com/home',
-    onedrive: 'https://onedrive.live.com/',
+    monarch: 'https://app.monarchmoney.com/',
     rbc: 'https://www.rbcroyalbank.com/onlinebanking/',
     bmo: 'https://www1.bmo.com/onlinebanking/',
     wealthsimple: 'https://my.wealthsimple.com/',
+    nslsc: 'https://www.csnpe-nslsc.canada.ca/',
     cra: 'https://www.canada.ca/en/revenue-agency/services/e-services/digital-services-individuals/account-individuals.html',
-    bcservices: 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card',
+    bcpha: 'https://www.bcpharmacists.org/',
+    rxfiles: 'https://www.rxfiles.ca/',
+    cps: 'https://www.pharmacists.ca/products-services/rxtx/',
+    pharmacare: 'https://www2.gov.bc.ca/gov/content/health/health-drug-coverage/pharmacare-for-bc-residents',
+    medsask: 'https://medsask.usask.ca/',
+    lexicomp: 'https://online.lexi.com/',
+    healthcanada: 'https://www.canada.ca/en/health-canada/services/drugs-health-products/drug-products/drug-product-database.html',
     drivebc: 'https://www.drivebc.ca/',
+    icbc: 'https://www.icbc.com/',
+    tesla: 'https://www.tesla.com/teslaaccount',
+    bcservices: 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card',
     maps: 'https://www.google.com/maps/search/' + encodeURIComponent(cfg.home || 'Surrey, BC'),
-    chatgpt: 'https://chatgpt.com/',
+    canucks: 'https://www.nhl.com/canucks',
+    bluejays: 'https://www.mlb.com/bluejays',
+    raptors: 'https://www.nba.com/raptors',
+    whitecaps: 'https://www.whitecapsfc.com/',
+    bclions: 'https://www.bclions.com/',
+    sportsnet: 'https://www.sportsnet.ca/',
+    espn: 'https://www.espn.com/',
+    gmail: 'https://mail.google.com/',
+    calendar: 'https://calendar.google.com/',
+    drive: 'https://drive.google.com/',
+    icloud: 'https://www.icloud.com/',
     claude: 'https://claude.ai/',
+    chatgpt: 'https://chatgpt.com/',
+    grok: 'https://x.com/i/grok',
     gemini: 'https://gemini.google.com/',
     perplexity: 'https://www.perplexity.ai/',
+    github: 'https://github.com/' + encodeURIComponent(cfg.user || 'wghtkbpxwx-a11y'),
     whatsapp: 'https://web.whatsapp.com/',
-    teams: 'https://teams.microsoft.com/',
-    slack: cfg.workspace || 'https://app.slack.com/',
-    canucks: 'https://www.nhl.com/canucks',
-    sportsnet: 'https://www.sportsnet.ca/',
-    youtube: 'https://www.youtube.com/',
-    spotify: 'https://open.spotify.com/',
-    notion: cfg.url || 'https://www.notion.so/',
-    linear: 'https://linear.app/',
-    vscode: 'https://vscode.dev/',
-    homeassistant: cfg.url || '',
-    translate: 'https://translate.google.com/',
-    budget: null
+    apple_music: 'https://music.apple.com/',
+    youtube: 'https://www.youtube.com/'
   };
-  return map[id] != null ? map[id] : null;
+  return urls[id] || null;
 }
 async function runConnector(id, action, args){
   args = args || {};
@@ -3508,6 +3490,15 @@ async function runConnector(id, action, args){
       return 'Quick note saved (' + cfg.pad.length + ' chars).';
     }
     return cfg.pad ? ('Quick notes:\n' + cfg.pad) : 'Quick notes pad is empty.';
+  }
+
+
+  if (id === 'family' || id === 'work_pharmacy' || id === 'mythic'){
+    var p = connectorCfg(id).pathHint || '';
+    return (CONNECTOR_DEFS.find(function(d){return d.id===id;})||{}).name + ' path:\n' + (p || 'Set path hint in Connectors');
+  }
+  if (id === 'healthcanada' && (action === 'search' || args.query)){
+    return 'Health Canada DPD search:\nhttps://health-products.canada.ca/dpd-bdpp/search?term=' + encodeURIComponent(args.query||'');
   }
 
   // Generic open for link-style connectors
