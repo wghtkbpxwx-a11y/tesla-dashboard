@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0b">
+<meta name="theme-color" content="#eef2ff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,56 +14,91 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c6cf5'/%3E%3Cstop offset='1' stop-color='%234cc2ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <style>
 /* ============================= Design tokens ============================= */
+/* Commercial Google AI aesthetic — bright, polished, product-grade */
 :root{
-  --bg:#0a0a0b;
-  --bg2:#141416;
-  --bg3:#1c1c1f;
-  --bg4:#27272a;
-  --border:rgba(255,255,255,.08);
-  --border2:rgba(255,255,255,.12);
-  --text:#ececee;
-  --text2:#a1a1aa;
-  --text3:#71717a;
-  --acc:#8b7cf7;
-  --acc2:#38bdf8;
-  --acc-soft:rgba(139,124,247,.14);
-  --acc-soft2:rgba(139,124,247,.28);
-  --ok:#34d399;
-  --warn:#fbbf24;
-  --danger:#f43f5e;
-  --glow:0 0 0 transparent;
-  --shadow:0 8px 30px rgba(0,0,0,.35);
-  --r:18px;
-  --r-sm:12px;
-  --font:"Söhne",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --bg:#eef2ff;
+  --bg2:#ffffff;
+  --bg3:#e8eefc;
+  --bg4:#dce6fa;
+  --border:rgba(60,80,140,.12);
+  --border2:rgba(60,80,140,.2);
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#64748b;
+  --acc:#4f46e5;
+  --acc2:#0ea5e9;
+  --acc-soft:rgba(79,70,229,.12);
+  --acc-soft2:rgba(79,70,229,.24);
+  --ok:#059669;
+  --warn:#d97706;
+  --danger:#e11d48;
+  --glow:0 0 48px rgba(99,102,241,.16);
+  --shadow:0 12px 40px rgba(79,90,160,.12);
+  --r:20px;
+  --r-sm:14px;
+  --font:"Google Sans",Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   --fs:16px;
-  --sidebar-w:272px;
+  --sidebar-w:280px;
   --chat-w:48rem;
   --composer-r:28px;
   --mesh:none;
-  --user-bubble:#2f2f33;
+  --user-bubble:#e0e7ff;
   --asst-fg:var(--text);
-  --sidebar-bg:#0d0d0f;
-  --topbar-h:56px;
+  --sidebar-bg:rgba(255,255,255,.78);
+  --topbar-h:58px;
+  --aurora-a:rgba(129,140,248,.42);
+  --aurora-b:rgba(56,189,248,.32);
+  --aurora-c:rgba(244,114,182,.24);
+  --surface-glass:rgba(255,255,255,.82);
+}
+[data-theme="dark"]{
+  --bg:#12162a;
+  --bg2:#1a2038;
+  --bg3:#242b48;
+  --bg4:#303a5c;
+  --border:rgba(180,200,255,.14);
+  --border2:rgba(180,200,255,.22);
+  --text:#f1f5ff;
+  --text2:#b8c2de;
+  --text3:#8e9ab8;
+  --acc:#818cf8;
+  --acc2:#38bdf8;
+  --acc-soft:rgba(129,140,248,.2);
+  --acc-soft2:rgba(129,140,248,.34);
+  --ok:#34d399;
+  --warn:#fbbf24;
+  --danger:#fb7185;
+  --glow:0 0 48px rgba(129,140,248,.22);
+  --shadow:0 14px 48px rgba(0,0,0,.4);
+  --user-bubble:#2d365c;
+  --sidebar-bg:rgba(20,26,48,.88);
+  --aurora-a:rgba(129,140,248,.3);
+  --aurora-b:rgba(56,189,248,.2);
+  --aurora-c:rgba(244,114,182,.14);
+  --surface-glass:rgba(26,32,56,.82);
 }
 [data-theme="light"]{
-  --bg:#f7f7f8;
+  --bg:#eef2ff;
   --bg2:#ffffff;
-  --bg3:#efeff1;
-  --bg4:#e5e5e8;
-  --border:rgba(0,0,0,.08);
-  --border2:rgba(0,0,0,.12);
-  --text:#0d0d0f;
-  --text2:#5c5c66;
-  --text3:#8b8b96;
-  --acc-soft:rgba(139,124,247,.10);
-  --acc-soft2:rgba(139,124,247,.20);
-  --shadow:0 8px 28px rgba(15,15,20,.08);
-  --user-bubble:#ebebef;
-  --sidebar-bg:#f0f0f2;
-  --glow:none;
-  --mesh:none;
+  --bg3:#e8eefc;
+  --bg4:#dce6fa;
+  --border:rgba(60,80,140,.12);
+  --border2:rgba(60,80,140,.2);
+  --text:#0f172a;
+  --text2:#475569;
+  --text3:#64748b;
+  --acc:#4f46e5;
+  --acc2:#0ea5e9;
+  --acc-soft:rgba(79,70,229,.12);
+  --acc-soft2:rgba(79,70,229,.24);
+  --shadow:0 12px 40px rgba(79,90,160,.12);
+  --user-bubble:#e0e7ff;
+  --sidebar-bg:rgba(255,255,255,.78);
+  --aurora-a:rgba(129,140,248,.42);
+  --aurora-b:rgba(56,189,248,.32);
+  --aurora-c:rgba(244,114,182,.24);
+  --surface-glass:rgba(255,255,255,.82);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
@@ -78,16 +113,11 @@ body{
 body::before{
   content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
   background:
-    radial-gradient(900px 520px at 15% -5%, rgba(129,140,248,.22), transparent 55%),
-    radial-gradient(800px 480px at 90% 8%, rgba(56,189,248,.14), transparent 50%),
-    radial-gradient(700px 420px at 50% 110%, rgba(244,114,182,.10), transparent 55%);
+    radial-gradient(1100px 640px at 10% -10%, var(--aurora-a), transparent 58%),
+    radial-gradient(920px 560px at 95% 0%, var(--aurora-b), transparent 52%),
+    radial-gradient(820px 500px at 50% 108%, var(--aurora-c), transparent 55%),
+    radial-gradient(640px 420px at 72% 42%, rgba(167,139,250,.16), transparent 50%);
   opacity:1;
-}
-[data-theme="light"] body::before{
-  background:
-    radial-gradient(900px 520px at 15% -5%, rgba(129,140,248,.14), transparent 55%),
-    radial-gradient(800px 480px at 90% 8%, rgba(56,189,248,.10), transparent 50%),
-    radial-gradient(700px 420px at 50% 110%, rgba(244,114,182,.08), transparent 55%);
 }
 button{font-family:inherit; font-size:inherit; color:inherit; background:none; border:none; cursor:pointer; padding:0}
 input,textarea,select{font-family:inherit; font-size:inherit; color:var(--text)}
@@ -109,9 +139,11 @@ a:hover{text-decoration:underline}
 #sidebar{
   width:var(--sidebar-w); min-width:var(--sidebar-w); height:100%;
   background:var(--sidebar-bg);
+  backdrop-filter:blur(24px) saturate(1.35); -webkit-backdrop-filter:blur(24px) saturate(1.35);
   border-right:1px solid var(--border);
   display:flex; flex-direction:column; z-index:40;
   transition:transform .28s cubic-bezier(.22,1,.36,1), margin-left .28s cubic-bezier(.22,1,.36,1);
+  box-shadow:4px 0 32px rgba(79,90,160,.07);
 }
 #main{flex:1; display:flex; flex-direction:column; min-width:0; position:relative; background:transparent}
 
@@ -135,14 +167,15 @@ a:hover{text-decoration:underline}
 .icon-btn.on{box-shadow:none}
 .icon-btn svg{width:18px;height:18px; display:block}
 .new-chat{
-  margin:6px 12px 12px; padding:11px 14px; border-radius:12px; font-weight:600;
-  background:transparent; color:var(--text);
-  border:1px solid var(--border2);
+  margin:6px 12px 12px; padding:11px 14px; border-radius:14px; font-weight:600;
+  background:linear-gradient(135deg,#6366f1,#4f46e5 50%,#0ea5e9);
+  color:#fff; border:none;
   display:flex; align-items:center; gap:10px; justify-content:flex-start;
-  box-shadow:none; transition:background .15s, border-color .15s, transform .12s;
+  box-shadow:0 8px 24px rgba(79,70,229,.3); transition:filter .15s, transform .12s, box-shadow .15s;
   letter-spacing:-.01em;
 }
-.new-chat:hover{background:var(--bg3); border-color:var(--text3); filter:none; transform:none; box-shadow:none}
+.new-chat:hover{filter:brightness(1.06); transform:translateY(-1px); box-shadow:0 12px 28px rgba(79,70,229,.36)}
+.new-chat svg{stroke:#fff}
 .sb-search{margin:0 12px 10px; position:relative}
 .sb-search input{
   width:100%; padding:9px 12px 9px 34px; background:var(--bg3); font-size:13.5px;
@@ -223,9 +256,15 @@ a:hover{text-decoration:underline}
   font-size:15.5px; letter-spacing:-.011em;
 }
 .msg.user .bubble{
-  background:var(--user-bubble); border:none; white-space:pre-wrap; max-width:100%;
-  padding:12px 16px; border-radius:22px;
+  background:linear-gradient(160deg,#e0e7ff,#dbeafe);
+  border:1px solid rgba(99,102,241,.16); white-space:pre-wrap; max-width:100%;
+  padding:12px 16px; border-radius:22px 22px 8px 22px;
   color:var(--text); font-size:15.5px;
+  box-shadow:0 4px 16px rgba(79,70,229,.1);
+}
+[data-theme="dark"] .msg.user .bubble{
+  background:linear-gradient(160deg,#2d365c,#1e3a5f);
+  border-color:rgba(129,140,248,.22);
 }
 .msg.assistant .bubble{
   background:transparent; border:none; width:100%; box-shadow:none;
@@ -399,13 +438,13 @@ a:hover{text-decoration:underline}
 @keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes orbSpin{to{transform:rotate(360deg)}}
 #empty-state h1{
-  font-size:clamp(30px, 5vw, 42px); font-weight:600; margin:0 0 10px;
-  letter-spacing:-.04em; line-height:1.12; color:var(--text);
-  background:linear-gradient(115deg, #fff 0%, #c4b5fd 40%, #7dd3fc 75%, #f9a8d4 100%);
+  font-size:clamp(32px, 5.2vw, 44px); font-weight:650; margin:0 0 10px;
+  letter-spacing:-.045em; line-height:1.1;
+  background:linear-gradient(115deg, #312e81 0%, #4f46e5 32%, #0284c7 68%, #db2777 100%);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
 }
-[data-theme="light"] #empty-state h1{
-  background:linear-gradient(115deg, #1e1b4b 0%, #6366f1 40%, #0284c7 75%, #db2777 100%);
+[data-theme="dark"] #empty-state h1{
+  background:linear-gradient(115deg, #e0e7ff 0%, #c4b5fd 35%, #7dd3fc 70%, #f9a8d4 100%);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
 }
 #empty-state .subhead{
@@ -413,15 +452,16 @@ a:hover{text-decoration:underline}
   letter-spacing:-.01em;
 }
 #empty-state .mode-tiles{
-  display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
-  width:100%; max-width:640px; margin-bottom:22px;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(148px, 1fr)); gap:12px;
+  width:100%; max-width:720px; margin-bottom:22px;
 }
 #empty-state .mode-tile{
   position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:12px;
   padding:16px 15px 15px; border-radius:18px; text-align:left;
-  background:color-mix(in srgb, var(--bg2) 72%, transparent);
+  background:var(--surface-glass);
   border:1px solid var(--border);
-  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(18px) saturate(1.25); -webkit-backdrop-filter:blur(18px) saturate(1.25);
+  box-shadow:0 4px 20px rgba(79,90,160,.07);
   color:var(--text); cursor:pointer;
   transition:transform .18s cubic-bezier(.22,1,.36,1), border-color .18s, box-shadow .18s, background .18s;
   min-height:118px; overflow:hidden;
@@ -525,14 +565,17 @@ a:hover{text-decoration:underline}
 }
 #composer{
   display:flex; align-items:flex-end; gap:4px;
-  background:color-mix(in srgb, var(--bg2) 88%, transparent);
-  backdrop-filter:blur(20px) saturate(1.2); -webkit-backdrop-filter:blur(20px) saturate(1.2);
+  background:var(--surface-glass);
+  backdrop-filter:blur(22px) saturate(1.35); -webkit-backdrop-filter:blur(22px) saturate(1.35);
   border:1px solid var(--border2);
   border-radius:var(--composer-r);
   padding:10px 10px 10px 8px;
-  box-shadow:0 0 0 1px rgba(255,255,255,.03), 0 16px 48px rgba(0,0,0,.32), 0 0 80px rgba(129,140,248,.06);
+  box-shadow:0 10px 40px rgba(79,90,160,.14), inset 0 0 0 1px rgba(255,255,255,.55);
   transition:border-color .15s, box-shadow .15s;
   max-width:var(--chat-w); margin:0 auto;
+}
+[data-theme="dark"] #composer{
+  box-shadow:0 16px 48px rgba(0,0,0,.35), 0 0 60px rgba(129,140,248,.1);
 }
 [data-theme="light"] #composer{
   box-shadow:0 4px 24px rgba(0,0,0,.06), 0 0 0 1px var(--border);
@@ -553,13 +596,14 @@ a:hover{text-decoration:underline}
 #send-btn{
   width:36px;height:36px; min-width:36px; border-radius:999px;
   display:grid; place-items:center;
-  background:var(--text); color:var(--bg);
-  transition:opacity .15s, transform .12s, background .15s;
+  background:linear-gradient(135deg,#6366f1,#4f46e5);
+  color:#fff; box-shadow:0 4px 14px rgba(79,70,229,.35);
+  transition:opacity .15s, transform .12s, background .15s, box-shadow .15s;
   margin-bottom:1px;
 }
-#send-btn:disabled{opacity:.28; cursor:default}
-#send-btn:not(:disabled):hover{transform:scale(1.05)}
-#send-btn.stop{background:var(--danger); color:#fff; opacity:1}
+#send-btn:disabled{opacity:.32; cursor:default; box-shadow:none}
+#send-btn:not(:disabled):hover{transform:scale(1.06); box-shadow:0 6px 18px rgba(79,70,229,.45)}
+#send-btn.stop{background:var(--danger); color:#fff; opacity:1; box-shadow:0 4px 14px rgba(225,29,72,.35)}
 #send-btn svg{width:18px;height:18px}
 #comp-hint{
   display:flex; align-items:center; gap:10px; padding:8px 8px 0;
@@ -689,6 +733,33 @@ a:hover{text-decoration:underline}
 .task-card .t-name{font-weight:650; flex:1}
 .task-card .t-sched,.task-card .t-next,.task-card .t-prompt{font-size:12.5px; color:var(--text3); line-height:1.4}
 .task-card .t-btns{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap}
+
+
+/* ============================= Connectors ============================= */
+#connectors-ov .modal{max-width:740px}
+.conn-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
+@media (max-width:640px){.conn-grid{grid-template-columns:1fr}}
+.conn-card{
+  position:relative; border:1px solid var(--border); border-radius:18px; padding:14px;
+  background:var(--surface-glass); backdrop-filter:blur(12px);
+  display:flex; flex-direction:column; gap:10px;
+  box-shadow:0 4px 18px rgba(79,90,160,.07);
+  transition:border-color .15s, box-shadow .15s;
+}
+.conn-card:hover{border-color:var(--border2); box-shadow:0 8px 28px rgba(79,90,160,.11)}
+.conn-card.on{border-color:color-mix(in srgb, var(--acc) 42%, var(--border)); box-shadow:0 0 0 1px var(--acc-soft), 0 8px 24px rgba(79,70,229,.1)}
+.conn-card .cc-top{display:flex; align-items:flex-start; gap:12px}
+.conn-card .cc-ico{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:20px;flex:none;color:#fff;box-shadow:0 6px 16px rgba(79,70,229,.18)}
+.conn-card .cc-title{font-weight:650;font-size:14.5px;letter-spacing:-.02em}
+.conn-card .cc-desc{font-size:12.5px;color:var(--text2);line-height:1.4;margin-top:2px}
+.conn-card .cc-status{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+.conn-card.on .cc-status{color:var(--ok)}
+.conn-card .cc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.conn-card .cc-fields{display:flex;flex-direction:column;gap:6px}
+.conn-card .cc-fields input{width:100%;font-size:12.5px;padding:8px 10px;border-radius:10px}
+.conn-banner{border-radius:16px;padding:14px 16px;background:linear-gradient(120deg,rgba(99,102,241,.14),rgba(14,165,233,.12),rgba(244,114,182,.1));border:1px solid var(--border);font-size:13.5px;color:var(--text2);line-height:1.5}
+.conn-banner b{color:var(--text)}
+#connectors-btn.on{color:var(--acc);background:var(--acc-soft)}
 
 /* ============================= Voice overlay ============================= */
 #voice-ov{
@@ -875,6 +946,7 @@ a:hover{text-decoration:underline}
       <button class="icon-btn" id="voice-btn" title="Voice mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
       <button class="icon-btn" id="tasks-btn" title="Scheduled tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></button>
       <button class="icon-btn" id="memory-btn" title="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a3.5 3.5 0 0 0-3.5 3.5c-1.9.3-3.5 1.8-3.5 3.9 0 1.1.5 2.1 1.2 2.8A3.4 3.4 0 0 0 8 20.5c1.5 0 2.9-.9 3.4-2.2h1.2a3.7 3.7 0 0 0 3.4 2.2 3.4 3.4 0 0 0 1.8-6.3c.7-.7 1.2-1.7 1.2-2.8 0-2.1-1.6-3.6-3.5-3.9A3.5 3.5 0 0 0 12 4z"/><path d="M12 4v14"/></svg></button>
+      <button class="icon-btn" id="connectors-btn" title="Connectors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
       <button class="icon-btn" id="settings-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
     </header>
 
@@ -1025,6 +1097,17 @@ a:hover{text-decoration:underline}
   </div>
 </div>
 
+<!-- Connectors modal -->
+<div class="modal-scrim" id="connectors-ov">
+  <div class="modal wide">
+    <div class="mo-head"><h2>Connectors</h2><button class="icon-btn" data-close="connectors-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="mo-body">
+      <div class="conn-banner"><b>Built for David.</b> Enable services Nova can use while you chat — Tesla Dashboard, GitHub, Gmail, Calendar, Drive, weather, and research. Secrets stay in this browser only.</div>
+      <div id="conn-grid" class="conn-grid"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Tasks modal -->
 <div class="modal-scrim" id="tasks-ov">
   <div class="modal">
@@ -1159,7 +1242,8 @@ function splitDataUrl(dataUrl){
 
 /* ============================ storage ============================ */
 var LS_SETTINGS = 'nova_settings_v1', LS_KEYS = 'nova_keys_v1',
-    LS_MEMORY = 'nova_memory_v1', LS_TASKS = 'nova_tasks_v1', LS_BOOT = 'nova_onboarded_v1';
+    LS_MEMORY = 'nova_memory_v1', LS_TASKS = 'nova_tasks_v1', LS_BOOT = 'nova_onboarded_v1',
+    LS_CONNECTORS = 'nova_connectors_v1';
 
 function lsGet(key, fallback){
   try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -1236,8 +1320,8 @@ var idb = {
 
 /* ============================ state ============================ */
 var DEFAULT_SETTINGS = {
-  theme: 'dark',
-  accent: '#8b7cf7',
+  theme: 'light',
+  accent: '#4f46e5',
   fontSize: 15,
   provider: 'demo',
   model: 'demo',
@@ -1370,6 +1454,21 @@ var UI_MODES = [
       S.settings.injectMemory = true;
       S.settings.councilOn = false;
     }
+  },
+  {
+    id: 'connectors',
+    title: 'Connect',
+    desc: 'Gmail, Calendar, GitHub, Dashboard…',
+    icon: '🔗',
+    badge: 'Hub',
+    color: '#0ea5e9',
+    grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
+    placeholder: 'Ask Nova to use a connected service…',
+    apply: function(){
+      var c = ensureConvo();
+      c.toolsOn = true;
+      S.settings.councilOn = false;
+    }
   }
 ];
 function modeById(id){
@@ -1395,6 +1494,9 @@ function setUiMode(id, opts){
   }
   if (mode.id === 'memory' && opts.openPanel){
     renderMemory(); $('memory-ov').classList.add('open');
+  }
+  if (mode.id === 'connectors' && !opts.skipPanel){
+    renderConnectors(); $('connectors-ov').classList.add('open');
   }
   if (mode.id === 'council' && (S.settings.council.members || []).length < 2){
     toast('Add at least 2 council models in Settings → Council', 'warn', 4000);
@@ -1436,6 +1538,337 @@ function updateModeChrome(){
   document.body.dataset.mode = mode.id;
   updateHints();
 }
+/* ============================ Connectors ============================ */
+var CONNECTOR_DEFS = [
+  {
+    id: 'dashboard',
+    name: 'Tesla Dashboard',
+    desc: 'Your live car dashboard — weather, news, sports, traffic, stocks.',
+    icon: '🚗',
+    grad: 'linear-gradient(145deg,#818cf8,#4f46e5)',
+    fields: [{key:'url', label:'Dashboard URL', placeholder:'https://…/tesla-dashboard/', secret:false}],
+    defaults: { on:true, url:'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/' },
+    actions: ['brief']
+  },
+  {
+    id: 'github',
+    name: 'GitHub',
+    desc: 'Repos, issues, and PRs (token stays in this browser).',
+    icon: '⌥',
+    grad: 'linear-gradient(145deg,#475569,#0f172a)',
+    fields: [
+      {key:'token', label:'Personal access token', placeholder:'ghp_…', secret:true},
+      {key:'user', label:'Username / org', placeholder:'wghtkbpxwx-a11y', secret:false}
+    ],
+    defaults: { on:false, token:'', user:'wghtkbpxwx-a11y' },
+    actions: ['repos','issues']
+  },
+  {
+    id: 'gmail',
+    name: 'Gmail',
+    desc: 'Compose and search deep-links into Gmail.',
+    icon: '✉️',
+    grad: 'linear-gradient(145deg,#f87171,#ea4335)',
+    fields: [{key:'email', label:'Your Gmail', placeholder:'you@gmail.com', secret:false}],
+    defaults: { on:true, email:'' },
+    actions: ['compose','search']
+  },
+  {
+    id: 'calendar',
+    name: 'Google Calendar',
+    desc: 'Open Calendar or read a public/secret iCal feed.',
+    icon: '📅',
+    grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
+    fields: [{key:'ical', label:'iCal URL (optional)', placeholder:'https://calendar.google.com/…', secret:false}],
+    defaults: { on:true, ical:'' },
+    actions: ['open','upcoming']
+  },
+  {
+    id: 'drive',
+    name: 'Google Drive',
+    desc: 'Jump into Drive search for docs and files.',
+    icon: '📁',
+    grad: 'linear-gradient(145deg,#fcd34d,#f59e0b)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['search']
+  },
+  {
+    id: 'weather',
+    name: 'Weather',
+    desc: 'Live open-meteo conditions for your home city.',
+    icon: '🌤️',
+    grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
+    fields: [{key:'location', label:'Default location', placeholder:'Surrey, BC', secret:false}],
+    defaults: { on:true, location:'Surrey, BC' },
+    actions: ['now']
+  },
+  {
+    id: 'web',
+    name: 'Web research',
+    desc: 'Search + page reader for agent research loops.',
+    icon: '🌐',
+    grad: 'linear-gradient(145deg,#34d399,#059669)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['search']
+  },
+  {
+    id: 'tasks',
+    name: 'Nova Tasks',
+    desc: 'Scheduled Nova tasks and reminders.',
+    icon: '⏰',
+    grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
+    fields: [],
+    defaults: { on:true },
+    actions: ['list']
+  }
+];
+
+function defaultConnectorsState(){
+  var o = {};
+  CONNECTOR_DEFS.forEach(function(d){ o[d.id] = Object.assign({}, d.defaults); });
+  return o;
+}
+function loadConnectorsState(){
+  var saved = lsGet(LS_CONNECTORS, null) || {};
+  var base = defaultConnectorsState();
+  Object.keys(base).forEach(function(id){
+    base[id] = Object.assign({}, base[id], saved[id] || {});
+  });
+  return base;
+}
+function saveConnectors(){ lsSet(LS_CONNECTORS, S.connectors || {}); }
+function connectorOn(id){ return !!(S.connectors && S.connectors[id] && S.connectors[id].on); }
+function connectorCfg(id){ return (S.connectors && S.connectors[id]) || {}; }
+
+function renderConnectors(){
+  var grid = $('conn-grid');
+  if (!grid) return;
+  if (!S.connectors) S.connectors = loadConnectorsState();
+  grid.innerHTML = '';
+  CONNECTOR_DEFS.forEach(function(def){
+    var st = S.connectors[def.id] || Object.assign({}, def.defaults);
+    var card = document.createElement('div');
+    card.className = 'conn-card' + (st.on ? ' on' : '');
+    card.innerHTML =
+      '<div class="cc-top">' +
+        '<div class="cc-ico" style="background:' + def.grad + '"></div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="cc-title"></div><div class="cc-desc"></div><div class="cc-status"></div>' +
+        '</div>' +
+        '<div class="tgl' + (st.on ? ' on' : '') + '" data-conn-tgl></div>' +
+      '</div>' +
+      '<div class="cc-fields" data-fields></div>' +
+      '<div class="cc-actions" data-actions></div>';
+    qs('.cc-ico', card).textContent = def.icon;
+    qs('.cc-title', card).textContent = def.name;
+    qs('.cc-desc', card).textContent = def.desc;
+    qs('.cc-status', card).textContent = st.on ? 'Connected' : 'Off';
+    var fields = qs('[data-fields]', card);
+    (def.fields || []).forEach(function(f){
+      var inp = document.createElement('input');
+      inp.type = f.secret ? 'password' : 'text';
+      inp.placeholder = f.placeholder || f.label;
+      inp.value = st[f.key] || '';
+      inp.setAttribute('aria-label', f.label);
+      inp.addEventListener('change', function(){
+        if (!S.connectors[def.id]) S.connectors[def.id] = Object.assign({}, def.defaults);
+        S.connectors[def.id][f.key] = inp.value.trim();
+        saveConnectors();
+      });
+      fields.appendChild(inp);
+    });
+    var acts = qs('[data-actions]', card);
+    var testBtn = document.createElement('button');
+    testBtn.className = 'sm-btn'; testBtn.type = 'button'; testBtn.textContent = 'Test';
+    testBtn.addEventListener('click', async function(){
+      testBtn.disabled = true; testBtn.textContent = '…';
+      try {
+        var r = await runConnector(def.id, (def.actions && def.actions[0]) || 'status', {});
+        toast(String(r).slice(0, 140), /^Error/.test(String(r)) ? 'err' : 'ok', 3600);
+      } catch(e){ toast(e.message || String(e), 'err'); }
+      testBtn.disabled = false; testBtn.textContent = 'Test';
+    });
+    acts.appendChild(testBtn);
+    if (['dashboard','gmail','calendar','drive','github'].indexOf(def.id) >= 0){
+      var openBtn = document.createElement('button');
+      openBtn.className = 'sm-btn pri'; openBtn.type = 'button'; openBtn.textContent = 'Open';
+      openBtn.addEventListener('click', function(){
+        var url = connectorOpenUrl(def.id);
+        if (url) window.open(url, '_blank', 'noopener');
+      });
+      acts.appendChild(openBtn);
+    }
+    qs('[data-conn-tgl]', card).addEventListener('click', function(){
+      if (!S.connectors[def.id]) S.connectors[def.id] = Object.assign({}, def.defaults);
+      S.connectors[def.id].on = !S.connectors[def.id].on;
+      saveConnectors();
+      renderConnectors();
+      updateConnectorsBtn();
+    });
+    grid.appendChild(card);
+  });
+  updateConnectorsBtn();
+}
+function updateConnectorsBtn(){
+  if (!$('connectors-btn')) return;
+  var n = CONNECTOR_DEFS.filter(function(d){ return connectorOn(d.id); }).length;
+  $('connectors-btn').classList.toggle('on', n > 0);
+  $('connectors-btn').title = 'Connectors (' + n + ' on)';
+}
+function connectorOpenUrl(id){
+  var cfg = connectorCfg(id);
+  if (id === 'dashboard') return cfg.url || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/';
+  if (id === 'gmail') return 'https://mail.google.com/';
+  if (id === 'calendar') return 'https://calendar.google.com/';
+  if (id === 'drive') return 'https://drive.google.com/';
+  if (id === 'github') return 'https://github.com/' + encodeURIComponent(cfg.user || '');
+  return null;
+}
+async function runConnector(id, action, args){
+  args = args || {};
+  if (!connectorOn(id) && id !== 'web') return 'Error: connector "' + id + '" is off. Enable it in Connectors.';
+  var cfg = connectorCfg(id);
+  action = (action || 'status').toLowerCase();
+
+  if (id === 'dashboard'){
+    var base = (cfg.url || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/').replace(/\/?$/, '/');
+    try {
+      var html = await withTimeout(function(sig){
+        return fetch(base, {signal:sig, mode:'cors'}).then(function(r){
+          if (!r.ok) throw new Error('HTTP ' + r.status); return r.text();
+        });
+      }, 12000);
+      var m = html.match(/var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n/);
+      if (!m) return 'Dashboard reachable but cache block not found. Open: ' + base;
+      var cache = JSON.parse(m[1]);
+      var lines = ['Tesla Dashboard snapshot (' + (cache.updated || 'unknown time') + ')'];
+      if (cache.weather){
+        var w = cache.weather;
+        lines.push('Weather: ' + (w.temp != null ? w.temp + '°' : '') + (w.desc ? ' ' + w.desc : '') + (w.location ? ' @ ' + w.location : ''));
+      }
+      if (cache.news && cache.news.length){
+        lines.push('Headlines:');
+        cache.news.slice(0, 5).forEach(function(n, i){ lines.push('  ' + (i+1) + '. ' + (n.title || n)); });
+      }
+      if (cache.sports && cache.sports.length){
+        lines.push('Sports:');
+        cache.sports.slice(0, 4).forEach(function(s){ lines.push('  • ' + (s.title || JSON.stringify(s))); });
+      }
+      if (cache.stocks){
+        var keys = Object.keys(cache.stocks).slice(0, 6);
+        if (keys.length){
+          lines.push('Stocks: ' + keys.map(function(k){
+            var v = cache.stocks[k];
+            return k + (v && v.price != null ? ' ' + v.price : '');
+          }).join(' · '));
+        }
+      }
+      return lines.join('\n');
+    } catch(e){
+      return 'Error reading dashboard: ' + e.message + ' — URL: ' + base;
+    }
+  }
+
+  if (id === 'github'){
+    if (!cfg.token) return 'Error: add a GitHub personal access token in Connectors.';
+    var user = cfg.user || 'wghtkbpxwx-a11y';
+    var headers = { 'Accept':'application/vnd.github+json', 'Authorization':'Bearer ' + cfg.token };
+    try {
+      if (action === 'issues'){
+        var repo = args.repo || 'tesla-dashboard';
+        var full = repo.indexOf('/') >= 0 ? repo : (user + '/' + repo);
+        var issues = await withTimeout(function(sig){
+          return fetch('https://api.github.com/repos/' + full + '/issues?state=open&per_page=8', {signal:sig, headers:headers})
+            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+        }, 12000);
+        if (!issues.length) return 'No open issues on ' + full;
+        return 'Open issues on ' + full + ':\n' + issues.map(function(it, i){
+          return (i+1) + '. #' + it.number + ' ' + it.title + (it.html_url ? '\n   ' + it.html_url : '');
+        }).join('\n');
+      }
+      var repos = await withTimeout(function(sig){
+        return fetch('https://api.github.com/users/' + encodeURIComponent(user) + '/repos?sort=updated&per_page=8', {signal:sig, headers:headers})
+          .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+      }, 12000);
+      return 'Recent repos for ' + user + ':\n' + repos.map(function(r, i){
+        return (i+1) + '. ' + r.full_name + (r.description ? ' — ' + r.description : '') + (r.html_url ? '\n   ' + r.html_url : '');
+      }).join('\n');
+    } catch(e){ return 'Error: GitHub ' + e.message; }
+  }
+
+  if (id === 'gmail'){
+    if (action === 'compose' || args.to || args.subject || args.body){
+      var params = [];
+      if (args.to) params.push('to=' + encodeURIComponent(args.to));
+      if (args.subject) params.push('su=' + encodeURIComponent(args.subject));
+      if (args.body) params.push('body=' + encodeURIComponent(args.body));
+      return 'Gmail compose link:\nhttps://mail.google.com/mail/?view=cm&fs=1' + (params.length ? '&' + params.join('&') : '');
+    }
+    var q = args.query || 'is:inbox';
+    return 'Gmail search link:\nhttps://mail.google.com/mail/u/0/#search/' + encodeURIComponent(q);
+  }
+
+  if (id === 'calendar'){
+    if (action === 'upcoming' && cfg.ical){
+      try {
+        var ical = await withTimeout(function(sig){
+          return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(cfg.ical), {signal:sig})
+            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); });
+        }, 14000);
+        var events = [];
+        var blocks = ical.split('BEGIN:VEVENT');
+        for (var i = 1; i < blocks.length && events.length < 8; i++){
+          var b = blocks[i];
+          var sum = (b.match(/SUMMARY[^:]*:(.+)/) || [])[1];
+          var dt = (b.match(/DTSTART[^:]*:(\d{8}T?\d*)/) || [])[1];
+          if (sum) events.push('• ' + sum.replace(/\\,/g, ',').replace(/\\n/g, ' ').trim() + (dt ? ' @ ' + dt : ''));
+        }
+        return events.length ? ('Upcoming (from iCal):\n' + events.join('\n')) : 'iCal fetched but no events parsed.';
+      } catch(e){ return 'Error reading calendar feed: ' + e.message; }
+    }
+    return 'Google Calendar: https://calendar.google.com/' + (cfg.ical ? '\n(iCal configured — use action "upcoming")' : '\nTip: paste an iCal URL in Connectors for event readout.');
+  }
+
+  if (id === 'drive'){
+    var dq = args.query || '';
+    return 'Google Drive' + (dq ? ' search for "' + dq + '"' : '') + ':\nhttps://drive.google.com/drive/search?q=' + encodeURIComponent(dq || '');
+  }
+
+  if (id === 'weather'){
+    var loc = args.location || cfg.location || S.settings.homeLocation || 'Surrey, BC';
+    if (TOOLS_BY_NAME.get_weather) return TOOLS_BY_NAME.get_weather.run({location: loc});
+    return 'Weather connector ready for ' + loc;
+  }
+
+  if (id === 'web'){
+    var query = args.query || args.q || '';
+    if (!query) return 'Error: provide query';
+    if (TOOLS_BY_NAME.research) return TOOLS_BY_NAME.research.run({query: query, depth: args.depth || 1});
+    if (TOOLS_BY_NAME.web_search) return TOOLS_BY_NAME.web_search.run({query: query});
+    return 'Error: web tools unavailable';
+  }
+
+  if (id === 'tasks'){
+    if (!S.tasks || !S.tasks.length) return 'No scheduled Nova tasks.';
+    return S.tasks.map(function(t){
+      return '• ' + t.name + ' — ' + describeSchedule(t) + (t.enabled ? ', next: ' + fmtDateTime(t.nextRun) : ' (paused)');
+    }).join('\n');
+  }
+
+  return 'Error: unknown connector or action';
+}
+function initConnectors(){
+  if ($('connectors-btn')){
+    $('connectors-btn').addEventListener('click', function(){
+      renderConnectors();
+      $('connectors-ov').classList.add('open');
+    });
+  }
+  updateConnectorsBtn();
+}
+
 
 
 var S = {
@@ -1516,6 +1949,7 @@ function loadState(){
   S.memory = (lsGet(LS_MEMORY, []) || []).map(normalizeMemoryItem).filter(Boolean);
   S.tasks = lsGet(LS_TASKS, []);
   S.agentPlan = null; S.memFilter = 'all'; S.memQuery = '';
+  S.connectors = loadConnectorsState();
   var n = seedProfileMemories();
   if (n) try { console.info('[Nova] Seeded ' + n + ' profile memories'); } catch(e){}
 }
@@ -2557,6 +2991,30 @@ TOOLS.push(
       } catch(err){ return 'Error: ' + err.message; }
     }}
 );
+TOOLS.push(
+  { name:'list_connectors',
+    description:'List available service connectors (Gmail, Calendar, GitHub, Tesla Dashboard, etc.) and whether each is enabled.',
+    params:{}, required:[],
+    run: async function(){
+      return CONNECTOR_DEFS.map(function(d){
+        var on = connectorOn(d.id);
+        return (on ? 'ON ' : 'off') + ' · ' + d.id + ' — ' + d.name + ': ' + d.desc;
+      }).join('\n');
+    }},
+  { name:'use_connector',
+    description:'Use a connected service. Connectors: dashboard, github, gmail, calendar, drive, weather, web, tasks. Actions e.g. dashboard:brief, github:repos|issues, gmail:compose|search, calendar:upcoming|open, weather:now, web:search, tasks:list.',
+    params:{
+      connector:{type:'string'},
+      action:{type:'string'},
+      query:{type:'string'},
+      repo:{type:'string'},
+      to:{type:'string'}, subject:{type:'string'}, body:{type:'string'},
+      location:{type:'string'}
+    }, required:['connector'],
+    run: async function(a){
+      return runConnector(String(a.connector || '').toLowerCase(), String(a.action || '').toLowerCase() || undefined, a);
+    }}
+);
 var TOOLS_BY_NAME = {};
 TOOLS.forEach(function(t){ TOOLS_BY_NAME[t.name] = t; });
 
@@ -2739,6 +3197,7 @@ function buildSystem(convo, opts){
       'You have agent tools — use them when they improve accuracy (live data, math, research, memory, planning, scheduling).',
       'For multi-step work: call create_plan first, execute tools, mark steps with update_plan_step, then answer clearly.',
       'Use search_memory before inventing personal facts; use remember / update_memory / forget_memory to maintain memory.',
+      'When the user asks about email, calendar, Drive, GitHub, the Tesla dashboard, or connected services, call list_connectors / use_connector.',
       'After tools, answer naturally with key findings — do not dump raw tool JSON.'
     ];
     if (S.settings.agentPlanFirst) agentBits.push('Prefer planning before more than two tool calls.');
@@ -2824,6 +3283,10 @@ function emptyStateEl(){
     memory: [
       {q:'What do you already know about me from memory? Organize by category.', t:1},
       {q:'Remember that I prefer concise answers with clear action items.', t:1}
+    ],
+    connectors: [
+      {q:'List my connectors and pull a Tesla Dashboard brief.', t:1},
+      {q:'Using connectors, draft a Gmail compose link to myself with subject Weekly plan.', t:1}
     ]
   };
   var modeChips = chips[cur] || chips.chat;
@@ -2841,7 +3304,7 @@ function emptyStateEl(){
   d.innerHTML =
     '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">✦</div></div>' +
     '<h1>' + greet + ', David</h1>' +
-    '<p class="subhead">Pick a mode, then ask anything. Built for serious work — research, voice, agents, and multi-model council.</p>' +
+    '<p class="subhead">Your personal AI suite — bright, connected, and built around how you actually work.</p>' +
     '<div class="mode-tiles">' + tilesHtml + '</div>' +
     '<div class="prompt-chips">' + chipsHtml + '</div>';
   qsa('.mode-tile', d).forEach(function(b){
@@ -4931,7 +5394,7 @@ function renderCouncilPane(){
   qs('#co-smodel', pane).addEventListener('change', saveSynth);
 }
 
-var ACCENTS = ['#8b7cf7','#6366f1','#38bdf8','#34d399','#fbbf24','#f43f5e','#f06bd8','#a1a1aa'];
+var ACCENTS = ['#4f46e5','#6366f1','#0ea5e9','#4285f4','#34a853','#fbbc04','#ea4335','#a78bfa'];
 function renderLookPane(){
   var pane = $('pane-look');
   pane.innerHTML = '';
@@ -5154,6 +5617,7 @@ async function boot(){
   initScroll();
   initVoice();
   initMemory();
+  initConnectors();
   initTasks();
   initScheduler();
   if (!S.activeId) createConvo();
