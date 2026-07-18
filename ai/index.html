@@ -1005,6 +1005,20 @@ a:hover{text-decoration:underline}
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .d-cond{font-size:13px; font-weight:650; color:var(--text); margin:2px 0 6px}
+.d-pin-x{
+  position:absolute; top:2px; right:0;
+  width:26px; height:26px; border:none; border-radius:8px;
+  background:transparent; color:var(--text3); font-size:18px; line-height:1;
+  cursor:pointer; display:grid; place-items:center;
+}
+.d-pin-x:hover{ background:var(--bg3); color:var(--danger); }
+.d-card.is-loading{ opacity:.72; }
+.d-card.is-loading .d-body{ position:relative; min-height:48px; }
+.dash-hero .dh-stamp.pulse{ animation: stampPulse 1.2s ease-in-out infinite; }
+@keyframes stampPulse{ 0%,100%{ opacity:1 } 50%{ opacity:.45 } }
+#chat-fab:focus-visible, .icon-btn:focus-visible, .d-chip:focus-visible, .home-btn:focus-visible{
+  outline:2px solid var(--acc); outline-offset:2px;
+}
 /* Agent-facing changelog: not shown in UI (hidden attr + CSS) */
 .homebase-changelog,
 #homebase-changelog{
@@ -1839,10 +1853,14 @@ function withTimeout(promiseFn, ms){
   return promiseFn(ctrl.signal).finally(function(){ clearTimeout(timer); });
 }
 function toast(msg, kind, ms){
+  var host = $('toasts');
+  if (!host) return;
+  host.setAttribute('aria-live', kind === 'err' ? 'assertive' : 'polite');
   var el = document.createElement('div');
   el.className = 'toast' + (kind ? ' ' + kind : '');
+  el.setAttribute('role', kind === 'err' ? 'alert' : 'status');
   el.textContent = msg;
-  $('toasts').appendChild(el);
+  host.appendChild(el);
   setTimeout(function(){ el.classList.add('out'); setTimeout(function(){ el.remove(); }, 350); }, ms || 2600);
 }
 function download(filename, text, mime){
@@ -2546,6 +2564,22 @@ var HOMEBASE_CHANGELOG = {
   ],
   entries: [
     {
+      id: '2026-07-18-eng-pass-2',
+      date: '2026-07-18',
+      commit: 'bbda493',
+      title: 'Engineering pass 2 — router, agent loop, dashboard UX, a11y',
+      type: 'fix',
+      changes: [
+        'Auto-router honors hardStop=false (was still filtering by remaining budget); named-model null cost no longer treated as free',
+        'Agent loop disables tools on final round so users get a real answer after tool calls',
+        'Live scores always replace array (no stale games); FX label CAD→USD; layout span honored on all widgets',
+        'Budget path vs open app split; widget allowlist (no ghost ids); markets tick on quiet refresh',
+        'Scheduled tasks yield while chat is sending; edit&resend actually resends; pin dismiss + clear',
+        'Esc closes chat/modals; ⌘/Ctrl+Shift+R refreshes; toast aria-live; focus rings; refresh debounce + stamp pulse',
+        'Calendar connector uses shared iCal parser; tool details only force-open while running'
+      ]
+    },
+    {
       id: '2026-07-18-review-hardening',
       date: '2026-07-18',
       commit: '9cdf722',
@@ -2943,12 +2977,10 @@ async function fetchLiveScores(){
     };
     return rank(a) - rank(b);
   });
-  if (results.length){
-    LIVE.scores = results;
-    delete LIVE.errors.scores;
-  } else {
-    LIVE.errors.scores = 'No team games on ESPN boards right now';
-  }
+  // Always replace so finished games don't stick as "Live" forever
+  LIVE.scores = results;
+  if (results.length) delete LIVE.errors.scores;
+  else LIVE.errors.scores = 'No team games on ESPN boards right now';
   return results;
 }
 
@@ -3081,11 +3113,29 @@ function ensureWidget(layout, id, span){
   saveDashLayout(layout);
   return layout;
 }
+var DASH_WIDGET_IDS = {
+  pins:1, budget:1, weather:1, markets:1, finance:1, news:1, scores:1,
+  calendar:1, tasks:1, pharmacy:1, links:1, memory:1, traffic:1, updates:1
+};
+function normalizeWidgetId(id){
+  id = String(id || '').trim().toLowerCase();
+  if (id === 'finance') return 'markets';
+  if (id === 'sports' || id === 'scores_widget' || id === 'my_teams') return 'scores';
+  if (id === 'clinical' || id === 'rx') return 'pharmacy';
+  if (id === 'system') return 'updates';
+  if (id === 'notes' || id === 'pin') return 'pins';
+  return id;
+}
+function isKnownWidgetId(id){
+  return !!DASH_WIDGET_IDS[normalizeWidgetId(id)];
+}
 function setWidgetEnabled(id, enabled){
+  id = normalizeWidgetId(id);
+  if (!isKnownWidgetId(id)) return { error: 'unknown widget id', layout: loadDashLayout() };
   var layout = loadDashLayout();
   var hit = false;
   layout.forEach(function(w){
-    if (w.id === id){ w.enabled = !!enabled; hit = true; }
+    if (w.id === id || (id === 'markets' && w.id === 'finance')){ w.enabled = !!enabled; w.id = id; hit = true; }
   });
   if (!hit && enabled) layout.push({ id: id, enabled: true, span: 4 });
   saveDashLayout(layout);
@@ -3093,14 +3143,18 @@ function setWidgetEnabled(id, enabled){
 }
 function reorderWidget(id, position){
   // position: 'first' | 'last' | 0-based index
+  id = normalizeWidgetId(id);
+  if (!isKnownWidgetId(id)) return { error: 'unknown widget id', layout: loadDashLayout() };
   var layout = loadDashLayout();
   var item = null, rest = [];
   layout.forEach(function(w){
-    if (w.id === id) item = w;
+    if (w.id === id || (id === 'markets' && w.id === 'finance')) item = w;
     else rest.push(w);
   });
   if (!item){
     item = { id: id, enabled: true, span: 4 };
+  } else {
+    item.id = id;
   }
   if (position === 'first' || position === 0) rest.unshift(item);
   else if (position === 'last' || position == null) rest.push(item);
@@ -3306,13 +3360,15 @@ function renderWeatherWidget(c, span){
 
 function renderBudgetWidget(span){
   var g = FINANCE.glance || loadFinanceGlance();
-  var extra = '<button type="button" class="linkish" data-act="budget-open">Open finance app</button>' +
+  var extra = '<button type="button" class="linkish" data-act="budget-open">Open app</button>' +
+    '<button type="button" class="linkish" data-act="budget-path">Path</button>' +
     '<button type="button" class="linkish" data-act="budget-import">Import</button>';
   if (!g || g.status === 'not_loaded' || (!g.kpis && !(g.accounts||[]).length)){
     var bodyEmpty = '<div class="d-empty">Private Budget Project glance (never published to GitHub Pages).</div>' +
       '<div class="d-chips" style="margin-top:8px">' +
       '<button type="button" class="d-chip" data-act="budget-import">Import glance JSON</button>' +
-      '<button type="button" class="d-chip" data-act="budget-open">Show iCloud path</button>' +
+      '<button type="button" class="d-chip" data-act="budget-path">Show iCloud path</button>' +
+      '<button type="button" class="d-chip" data-act="budget-open">Open finance app</button>' +
       '<a class="d-chip" href="./finance-glance.template.json" target="_blank" rel="noopener">Template</a>' +
       '</div>' +
       '<div class="d-empty" style="margin-top:6px">Banks (RBC/BMO/Monarch) open via Connectors — no public bank API in-browser.</div>';
@@ -3353,7 +3409,8 @@ function renderFinanceWidget(c, span){
     var chg = (p.prev != null && p.prev !== 0) ? ((p.price - p.prev) / p.prev * 100) : null;
     var cls = chg == null ? '' : (chg >= 0 ? 'up' : 'down');
     var chgS = chg == null ? '' : ((chg>=0?'+':'') + chg.toFixed(2) + '%');
-    var label = p.symbol === 'CADUSD=X' ? 'USD/CAD≈' : (p.symbol === '^GSPTSE' ? 'TSX' : p.symbol);
+    // Yahoo CADUSD=X = how many USD per 1 CAD (~0.73), not USD/CAD
+    var label = p.symbol === 'CADUSD=X' ? 'CAD→USD' : (p.symbol === 'USDCAD=X' ? 'USD→CAD' : (p.symbol === '^GSPTSE' ? 'TSX' : p.symbol));
     var priceStr = (typeof p.price === 'number') ? p.price.toFixed(p.price < 5 ? 4 : 2) : String(p.price);
     rows.push('<div class="d-row"><span>'+esc(label)+'</span><span><b>'+esc(priceStr)+'</b> <span class="'+cls+'">'+esc(chgS)+'</span></span></div>');
   });
@@ -3390,8 +3447,11 @@ function renderNewsWidget(c, span){
 }
 
 function renderScoresWidget(c, span){
-  var scores = (LIVE.scores && LIVE.scores.length) ? LIVE.scores : ((c && c.scores) || []);
-  var src = (LIVE.scores && LIVE.scores.length) ? 'live' : (scores.length ? 'cache' : null);
+  // LIVE.scores is always replaced on poll (may be []). Prefer non-empty live; else cache (not stale live).
+  var scores, src;
+  if (LIVE.scores && LIVE.scores.length){ scores = LIVE.scores; src = 'live'; }
+  else if (c && c.scores && c.scores.length){ scores = c.scores; src = 'cache'; }
+  else { scores = []; src = LIVE.scores != null ? 'live' : null; }
   var body = scores.length
     ? scores.slice(0,6).map(function(g){
         var home = g.home || {}; var away = g.away || {};
@@ -3595,13 +3655,15 @@ function renderPinsWidget(span){
     body = '<div class="d-empty">Ask Homebase AI to pin something here — e.g. “put a reminder on my dashboard to pay LOC Friday.”</div>';
   } else {
     body = notes.map(function(n){
-      return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
+      return '<div class="d-row d-pin" style="flex-direction:column;align-items:flex-start;gap:2px;position:relative;padding-right:28px">' +
         '<span><b>'+esc(n.title||'Note')+'</b></span>' +
         '<span>'+esc(n.body||'')+'</span>' +
-        '<span class="meta">'+esc(n.ts ? fmtDateTime(n.ts) : '')+(n.source ? ' · '+esc(n.source) : '')+'</span></div>';
+        '<span class="meta">'+esc(n.ts ? fmtDateTime(n.ts) : '')+(n.source ? ' · '+esc(n.source) : '')+'</span>' +
+        '<button type="button" class="d-pin-x" data-unpin="'+esc(n.id)+'" title="Remove pin" aria-label="Remove pin">×</button></div>';
     }).join('');
   }
-  return widgetShell('Agent pins', 'bolt', '#7c3aed', span, body, '');
+  return widgetShell('Agent pins', 'bolt', '#7c3aed', span, body,
+    notes.length ? '<button type="button" class="linkish" data-act="pins-clear">Clear</button>' : '');
 }
 
 function renderDashboard(){
@@ -3632,13 +3694,13 @@ function renderDashboard(){
     else if (w.id === 'finance' || w.id === 'markets') html += renderFinanceWidget(c, span);
     else if (w.id === 'scores') html += renderScoresWidget(c, span);
     else if (w.id === 'news') html += renderNewsWidget(c, span);
-    else if (w.id === 'pharmacy') html += renderPharmacyWidget(c, 4);
-    else if (w.id === 'tasks') html += renderTasksWidget(3);
-    else if (w.id === 'memory') html += renderMemoryWidget(4);
-    else if (w.id === 'calendar') html += renderCalendarWidget(3);
-    else if (w.id === 'links') html += renderLinksWidget(4);
-    else if (w.id === 'traffic') html += renderTrafficWidget(c, 6);
-    else if (w.id === 'updates') html += renderUpdatesWidget(c, 6);
+    else if (w.id === 'pharmacy') html += renderPharmacyWidget(c, span);
+    else if (w.id === 'tasks') html += renderTasksWidget(span);
+    else if (w.id === 'memory') html += renderMemoryWidget(span);
+    else if (w.id === 'calendar') html += renderCalendarWidget(span);
+    else if (w.id === 'links') html += renderLinksWidget(span);
+    else if (w.id === 'traffic') html += renderTrafficWidget(c, span === 4 ? 6 : span);
+    else if (w.id === 'updates') html += renderUpdatesWidget(c, span === 4 ? 6 : span);
   });
   html += '</div>';
   root.innerHTML = html;
@@ -3653,9 +3715,21 @@ function renderDashboard(){
       else if (a === 'calendar') window.open('https://calendar.google.com/', '_blank', 'noopener');
       else if (a === 'hub'){ openSettings(); switchSetTab('hub'); }
       else if (a === 'connectors'){ renderConnectors(); $('connectors-ov').classList.add('open'); }
+      else if (a === 'budget-path'){
+        var gPath = FINANCE.glance || loadFinanceGlance() || {};
+        var hint = gPath.path_hint || connectorCfg('budget').pathHint || 'iCloud Drive / 03 - Finance / Budget Project / dashboard.html';
+        toast('Budget Project: ' + hint, null, 5200);
+        try { navigator.clipboard.writeText(hint); } catch(e){}
+      }
       else if (a === 'budget-open'){
-        var g = FINANCE.glance || loadFinanceGlance() || {};
-        window.location.href = g.open_url || '../finance/';
+        var gOpen = FINANCE.glance || loadFinanceGlance() || {};
+        var url = gOpen.open_url || '../finance/';
+        // Only navigate to https or same-origin relative paths
+        if (/^https:\/\//i.test(url) || (url.charAt(0) === '.' || url.charAt(0) === '/')){
+          window.open(url, '_blank', 'noopener');
+        } else {
+          toast('No finance app URL — use Path or Import', 'warn', 3200);
+        }
       }
       else if (a === 'budget-import'){
         var inp = $('finance-file');
@@ -3678,6 +3752,13 @@ function renderDashboard(){
           toast(LIVE.calendar && LIVE.calendar.needConfig ? 'Add iCal URL in Connectors' : (n + ' events'), n || (LIVE.calendar && LIVE.calendar.needConfig) ? 'warn' : 'ok', 2200);
         }).catch(function(e){ toast(e.message || 'Calendar failed', 'err'); });
       }
+      else if (a === 'pins-clear'){
+        if (!loadDashNotes().length) return;
+        if (!confirm('Clear all agent pins?')) return;
+        saveDashNotes([]);
+        renderDashboard();
+        toast('Pins cleared', 'ok', 1600);
+      }
     });
   });
   qsa('[data-hub]', root).forEach(function(b){
@@ -3687,15 +3768,32 @@ function renderDashboard(){
       if (mod) runHubModule(mod);
     });
   });
+  qsa('[data-unpin]', root).forEach(function(b){
+    b.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var nid = b.getAttribute('data-unpin');
+      var notes = loadDashNotes().filter(function(n){ return n.id !== nid; });
+      saveDashNotes(notes);
+      renderDashboard();
+      toast('Pin removed', 'ok', 1600);
+    });
+  });
   if (sc && keepScroll > 0){
     try { sc.scrollTop = keepScroll; } catch(e){}
   }
 }
 
+var _dashRefreshBusy = false;
 async function refreshDashboard(opts){
   opts = opts || {};
+  if (_dashRefreshBusy){
+    if (opts.toast) toast('Refresh already running…', null, 1400);
+    return;
+  }
+  _dashRefreshBusy = true;
   try {
-    if ($('dash-stamp')) $('dash-stamp').textContent = 'Refreshing live + cache…';
+    var stamp = $('dash-stamp');
+    if (stamp){ stamp.textContent = 'Refreshing live + cache…'; stamp.classList.add('pulse'); }
     var cachePromise = fetchDashboardCache().catch(function(e){ return { __err: e }; });
     var livePromise = refreshLiveModules().catch(function(e){ return { __err: e }; });
     var results = await Promise.all([cachePromise, livePromise]);
@@ -3719,6 +3817,10 @@ async function refreshDashboard(opts){
     try { await refreshLiveModules(); } catch(e3){}
     renderDashboard();
     if (opts.toast) toast('Using available data — ' + (e.message || e), 'warn', 3200);
+  } finally {
+    _dashRefreshBusy = false;
+    var st2 = $('dash-stamp');
+    if (st2) st2.classList.remove('pulse');
   }
 }
 
@@ -3799,6 +3901,29 @@ function initDashboardShell(){
   if (brand){
     brand.onclick = function(){ goHomeDashboard(); };
   }
+  // Global keyboard: Esc closes overlays; ⌘/Ctrl+Shift+R refreshes dashboard
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape'){
+      var openOv = document.querySelector('.modal-scrim.open, .overlay.open, [class*="-ov"].open');
+      if (openOv){
+        openOv.classList.remove('open');
+        e.preventDefault();
+        return;
+      }
+      var fl = $('chat-float');
+      if (fl && fl.dataset.state !== 'fab'){
+        closeChatFloat();
+        e.preventDefault();
+      }
+      return;
+    }
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) return;
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'R' || e.key === 'r')){
+      e.preventDefault();
+      refreshDashboard({toast:true});
+    }
+  });
 }
 
 
@@ -4410,19 +4535,12 @@ async function runConnector(id, action, args){
   if (id === 'calendar'){
     if (action === 'upcoming' && cfg.ical){
       try {
-        var ical = await withTimeout(function(sig){
-          return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(cfg.ical), {signal:sig})
-            .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); });
-        }, 14000);
-        var events = [];
-        var blocks = ical.split('BEGIN:VEVENT');
-        for (var i = 1; i < blocks.length && events.length < 8; i++){
-          var b = blocks[i];
-          var sum = (b.match(/SUMMARY[^:]*:(.+)/) || [])[1];
-          var dt = (b.match(/DTSTART[^:]*:(\d{8}T?\d*)/) || [])[1];
-          if (sum) events.push('• ' + sum.replace(/\\,/g, ',').replace(/\\n/g, ' ').trim() + (dt ? ' @ ' + dt : ''));
-        }
-        return events.length ? ('Upcoming (from iCal):\n' + events.join('\n')) : 'iCal fetched but no events parsed.';
+        var icalText = await fetchTextCors(cfg.ical, 14000, true);
+        var parsed = parseIcalEvents(icalText, 8);
+        if (!parsed.length) return 'iCal fetched but no upcoming events in the next window.';
+        return 'Upcoming (from iCal):\n' + parsed.map(function(ev){
+          return '• ' + ev.title + (ev.start ? ' @ ' + fmtDateTime(ev.start) : '') + (ev.location ? ' · ' + ev.location : '');
+        }).join('\n');
       } catch(e){ return 'Error reading calendar feed: ' + e.message; }
     }
     return 'Google Calendar: https://calendar.google.com/' + (cfg.ical ? '\n(iCal configured — use action "upcoming")' : '\nTip: paste an iCal URL in Connectors for event readout.');
@@ -5626,7 +5744,7 @@ function recentLocalProvider(p){
   return !!(cached.length && h && h.ok && Date.now() - h.ts < 360000);
 }
 function localRouteCandidate(cls){
-  if (!S.settings.localFirst || cls.tier !== 1 || cls.vision || cls.tools) return null;
+  if (!S.settings.localFirst || cls.tier > 2 || cls.vision || cls.tools) return null;
   var locals = ['ollama','lmstudio','llamacpp','custom'];
   for (var i = 0; i < locals.length; i++){
     var p = locals[i];
@@ -5641,6 +5759,8 @@ function localRouteCandidate(cls){
 }
 function cloudRouteCandidates(cls, query, msgs, maxOut){
   var minQ = cls.tier >= 4 ? 5 : (cls.tier === 3 ? 4 : (cls.tier === 2 ? 3 : 2));
+  var hard = cloudBudgetCfg().hardStop;
+  var remaining = cloudSpendInfo().remaining;
   var out = [], sample = {system:'', msgs:msgs, tools:cls.tools ? TOOLS : null};
   PROVIDER_ORDER.forEach(function(p){
     if (!cloudProvider(p) || !providerReady(p)) return;
@@ -5649,7 +5769,9 @@ function cloudRouteCandidates(cls, query, msgs, maxOut){
       if (!price || quality < minQ || (cls.vision && !caps.vision) || (cls.tools && !caps.tools)) return;
       sample.provider = p; sample.model = m.id; sample.maxTokens = maxOut;
       var est = modelRequestCost(p, m.id, estimateRequestInput(sample), maxOut);
-      if (est == null || est > cloudSpendInfo().remaining + 1e-9) return;
+      if (est == null) return;
+      // Only enforce rolling budget in routing when hard stop is on
+      if (hard && est > remaining + 1e-9) return;
       out.push({provider:p, model:m.id, quality:quality, estimatedCost:est, caps:caps});
     });
   });
@@ -5672,7 +5794,9 @@ function selectAIRoute(query, latestUser, convo, msgs){
     if (namedCost && (!cls.vision || namedCaps.vision) && (!cls.tools || namedCaps.tools)){
       var check = {provider:cls.named.provider, model:cls.named.model, system:'', msgs:msgs, tools:cls.tools ? TOOLS : null, maxTokens:maxOut};
       var namedEstimate = modelRequestCost(check.provider, check.model, estimateRequestInput(check), maxOut);
-      if (namedEstimate <= cloudSpendInfo().remaining + 1e-9){
+      var hardN = cloudBudgetCfg().hardStop;
+      // null estimate must NOT coerce to free (JS: null <= n is true)
+      if (namedEstimate != null && isFinite(namedEstimate) && (!hardN || namedEstimate <= cloudSpendInfo().remaining + 1e-9)){
         return {provider:check.provider, model:check.model, maxTokens:maxOut, tier:cls.tier, classification:cls,
           estimatedCost:namedEstimate, reason:'Auto · explicitly requested ' + modelInfo(check.provider, check.model).label};
       }
@@ -5690,9 +5814,9 @@ function selectAIRoute(query, latestUser, convo, msgs){
   }
   var emergency = localRouteCandidate(Object.assign({}, cls, {tier:1, vision:false, tools:false}));
   if (emergency) return Object.assign(emergency, {maxTokens:Math.min(maxOut, 1200), tier:cls.tier, classification:cls,
-    reason:'Auto · local fallback because no suitable cloud model fits the rolling budget'});
+    reason:'Auto · local fallback; no suitable cloud model is configured and budget-eligible'});
   return {provider:'demo', model:'demo', maxTokens:900, tier:cls.tier, classification:cls,
-    reason:'Auto · demo fallback; connect a priced cloud model or a local runtime'};
+    reason:'Auto · demo fallback; no priced cloud model is configured and budget-eligible, and no local runtime is ready'};
 }
 function updateBudgetDisplays(){
   try {
@@ -6574,8 +6698,9 @@ TOOLS.push(
       }
 
       if (action === 'set_widget'){
-        var wid = String(a.id || '').trim();
+        var wid = normalizeWidgetId(a.id || '');
         if (!wid) return 'Error: set_widget needs id (weather, budget, markets, news, scores, …).';
+        if (!isKnownWidgetId(wid)) return 'Error: unknown widget "'+wid+'". Known: '+Object.keys(DASH_WIDGET_IDS).filter(function(k){ return k !== 'finance'; }).join(', ');
         var en = a.enabled;
         if (en == null) return 'Error: set_widget needs enabled true|false.';
         setWidgetEnabled(wid, !!en);
@@ -6584,8 +6709,9 @@ TOOLS.push(
       }
 
       if (action === 'reorder_widget'){
-        var rid = String(a.id || '').trim();
+        var rid = normalizeWidgetId(a.id || '');
         if (!rid) return 'Error: reorder_widget needs id.';
+        if (!isKnownWidgetId(rid)) return 'Error: unknown widget "'+rid+'".';
         var pos = a.position != null ? a.position : 'first';
         reorderWidget(rid, pos);
         setWidgetEnabled(rid, true);
@@ -7012,8 +7138,11 @@ function paintMsg(m, convo){
       pre.appendChild(mdRender(rd.text));
       body.appendChild(pre);
     }
-    var tb = document.createElement('details'); tb.className = 'tool-box'; tb.open = !!m.streaming;
+    var tb = document.createElement('details'); tb.className = 'tool-box';
     var done = rd.calls.every(function(c){ return c.state === 'done' || c.state === 'err'; });
+    var anyRun = rd.calls.some(function(c){ return c.state === 'run'; });
+    // Only force-open while a call is actively running (don't re-expand every stream paint)
+    tb.open = anyRun || (!done && !!m.streaming);
     tb.innerHTML = '<summary>🔧 ' + rd.calls.length + ' tool call' + (rd.calls.length > 1 ? 's' : '') +
       (done ? '' : ' <span class="spin"></span>') + '</summary>';
     rd.calls.forEach(function(c){
@@ -7259,20 +7388,23 @@ async function sendMessage(rawText, opts){
     } else {
       var maxR = maxAgentRounds();
       for (var round = 0; round < maxR; round++){
-        am.statusNote = (provider === 'webllm' && !WL.engine) ? 'Loading model' : (toolsOn ? 'Agent thinking' : 'Thinking');
+        // Last round: no tools so the model must synthesize a final answer
+        var roundTools = (toolsOn && tools && round < maxR - 1) ? tools : null;
+        am.statusNote = (provider === 'webllm' && !WL.engine) ? 'Loading model'
+          : (roundTools ? 'Agent thinking' : (toolsOn && round === maxR - 1 ? 'Writing final answer' : 'Thinking'));
         if (S.agentPlan) am.agentPlan = JSON.parse(JSON.stringify(S.agentPlan));
         var res = await runChat({
           provider: provider, model: model,
           system: buildSystem(convo, {query: userQuery}), msgs: msgs,
           temperature: S.settings.temperature, maxTokens: route ? route.maxTokens : S.settings.maxTokens,
-          think: S.settings.thinking, tools: tools, signal: S.abort.signal,
+          think: S.settings.thinking, tools: roundTools, signal: S.abort.signal,
           conversationId:convo.id, messageId:am.id,
           onText: function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
           onThink: function(t){ am.thinking += t; schedulePaint(am, convo); },
           onProgress: function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
         });
         addUsage(totalUsage, res.usage);
-        if (res.toolCalls && res.toolCalls.length && toolsOn){
+        if (res.toolCalls && res.toolCalls.length && roundTools){
           var rd = { text: res.text || '', anthRaw: res.anthRaw,
             calls: res.toolCalls.map(function(c){ return {id:c.id, name:c.name, args:c.args, result:null, state:'run'}; }) };
           am.toolRounds.push(rd);
@@ -7297,7 +7429,7 @@ async function sendMessage(rawText, opts){
         if (S.agentPlan) am.agentPlan = JSON.parse(JSON.stringify(S.agentPlan));
         break;
       }
-      if (round >= maxR && !am.text) am.text = am.liveText || '(agent loop limit reached)';
+      if (round >= maxR && !am.text) am.text = am.liveText || '(agent loop limit reached — try a shorter request or raise agent rounds)';
     }
   } catch(err){
     if (err && (err.name === 'AbortError' || err.code === 20)){
@@ -7376,11 +7508,17 @@ function regenMsg(id){
 function editMsg(id){
   if (S.sending) return;
   var f = findMsg(id); if (!f || f.m.role !== 'user') return;
-  $('input').value = f.m.text || '';
+  var text = f.m.text || '';
+  var hadAtt = !!(f.m.images || []).length || !!(f.m.files || []).length;
   f.convo.messages.splice(f.i);
   persistConvo(f.convo); renderChat();
-  autoresize(); updateSendBtn(); $('input').focus();
-  if ((f.m.images || []).length || (f.m.files || []).length) toast('Attachments were removed — re-attach if needed', 'warn');
+  if (hadAtt) toast('Attachments were removed — re-attach if needed', 'warn');
+  // Actually resend (matches "Edit & resend" label)
+  if (text.trim()) sendMessage(text);
+  else {
+    $('input').value = '';
+    autoresize(); updateSendBtn(); $('input').focus();
+  }
 }
 function branchAt(id){
   var f = findMsg(id); if (!f) return;
@@ -8234,6 +8372,12 @@ function taskConvo(t){
 }
 async function runTask(t, manual){
   if (t.running) return;
+  // Don't interleave scheduled agent work with interactive chat
+  if (S.sending){
+    t.nextRun = Date.now() + 15000;
+    saveTasks();
+    return;
+  }
   t.running = true;
   var now = Date.now();
   t.lastRun = now;
@@ -8253,19 +8397,24 @@ async function runTask(t, manual){
   var isActive = convo.id === S.activeId;
   if (isActive) renderChat();
   var tools = t.useTools ? enabledTools() : null;
-  var totalUsage = {inTok:0, outTok:0};
+  var totalUsage = {inTok:0, outTok:0, costUsd:0};
+  var prevPlan = S.agentPlan;
+  S.agentPlan = null;
   try {
     var msgs = internalHistory(convo, convo.messages.length - 1);
     if (msgs.length > 12) msgs = normalizeMsgs(msgs.slice(-12));
     if (!msgs.length) msgs = [{role:'user', text: t.prompt, images:[], files:[]}];
-    for (var round = 0; round < maxAgentRounds(); round++){
+    var maxR = maxAgentRounds();
+    for (var round = 0; round < maxR; round++){
+      if (S.sending){ am.error = 'Interrupted by interactive chat'; break; }
+      var roundTools = (tools && round < maxR - 1) ? tools : null;
       var res = await runChat({ provider:provider, model:model, system: buildSystem(convo),
         msgs:msgs, temperature: S.settings.temperature, maxTokens: S.settings.maxTokens,
-        think:false, tools:tools, signal:null,
+        think:false, tools:roundTools, signal:null,
+        conversationId:convo.id, messageId:am.id,
         onText:null, onThink:null });
-      totalUsage.inTok += (res.usage && res.usage.inTok) || 0;
-      totalUsage.outTok += (res.usage && res.usage.outTok) || 0;
-      if (res.toolCalls && res.toolCalls.length && tools){
+      addUsage(totalUsage, res.usage);
+      if (res.toolCalls && res.toolCalls.length && roundTools){
         var rd = { text: res.text || '', anthRaw: res.anthRaw,
           calls: res.toolCalls.map(function(c){ return {id:c.id, name:c.name, args:c.args, result:null, state:'run'}; }) };
         am.toolRounds.push(rd);
@@ -8283,6 +8432,7 @@ async function runTask(t, manual){
   } catch(err){
     am.error = (err && err.message) || String(err);
   }
+  S.agentPlan = prevPlan;
   am.usage = totalUsage;
   t.running = false;
   saveTasks(); renderTasksIfOpen();
@@ -9375,7 +9525,7 @@ async function boot(){
   syncHomebaseChangelogDom();
   renderDashboard();
   refreshDashboard({toast:false}).catch(function(){});
-  // Quiet live refresh while tab is open (weather + scores; calendar every other tick)
+  // Quiet live refresh while tab is open
   var liveTick = 0;
   setInterval(function(){
     if (document.visibilityState !== 'visible') return;
@@ -9384,6 +9534,8 @@ async function boot(){
     liveTick++;
     var jobs = [fetchLiveWeather(), fetchLiveScores()];
     if (liveTick % 2 === 0) jobs.push(fetchLiveCalendar());
+    // Markets every 3rd tick (~9 min) to limit Yahoo/proxy load
+    if (liveTick % 3 === 0) jobs.push(fetchLiveMarkets());
     Promise.all(jobs).then(function(){
       LIVE.updated = Date.now();
       try { renderDashboard(); } catch(e){}

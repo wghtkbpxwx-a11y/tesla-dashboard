@@ -68,6 +68,11 @@ may differ from the local ledger.
 - **WebLLM** — needs WebGPU (Chrome/Edge 113+); pick a model in Settings →
   Providers → WebLLM and hit *Load model now*.
 
+Homebase quietly probes the three standard local ports at startup and every
+five minutes. A server model is eligible for auto-routing only after a recent,
+successful model-list check; otherwise the router uses WebLLM or an eligible
+cloud model instead of assuming the local server is alive.
+
 ## Agent changelog (hidden)
 
 Machine-readable history for other models lives in **`HOMEBASE_CHANGELOG`** inside `ai/index.html` (also `#homebase-changelog` in the DOM, hidden from the UI, and returned by the **`list_dashboard`** tool). When you change the dashboard, **append** a new entry (newest first) and refresh `planned[]`.
