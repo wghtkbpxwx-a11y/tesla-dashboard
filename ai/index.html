@@ -8,9 +8,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Homebase">
+<meta name="homebase-changelog-id" content="homebase-changelog">
+<meta name="homebase-for-agents" content="Read #homebase-changelog (hidden) or call list_dashboard / window.HOMEBASE_CHANGELOG for dashboard history and roadmap.">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Homebase</title>
+<!-- HOMEBASE_CHANGELOG: machine-readable history for AI agents — also #homebase-changelog + JS HOMEBASE_CHANGELOG -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c6cf5'/%3E%3Cstop offset='1' stop-color='%234cc2ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <style>
 /* ============================= Design tokens ============================= */
@@ -1002,6 +1005,16 @@ a:hover{text-decoration:underline}
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .d-cond{font-size:13px; font-weight:650; color:var(--text); margin:2px 0 6px}
+/* Agent-facing changelog: not shown in UI (hidden attr + CSS) */
+.homebase-changelog,
+#homebase-changelog{
+  position:absolute !important;
+  width:1px !important; height:1px !important;
+  padding:0 !important; margin:-1px !important;
+  overflow:hidden !important; clip:rect(0,0,0,0) !important;
+  white-space:nowrap !important; border:0 !important;
+  opacity:0 !important; pointer-events:none !important;
+}
 
 .home-btn{
   display:inline-flex; align-items:center; gap:7px;
@@ -1495,6 +1508,11 @@ body.is-desktop .chat-float[data-state="open"]{
     <!-- ========== Scrollable life dashboard ========== -->
     <div id="dash-scroll">
       <div id="dashboard" class="dashboard"></div>
+      <!-- Hidden from humans; kept in DOM/source for other models & agents -->
+      <section id="homebase-changelog" class="homebase-changelog" hidden aria-hidden="true" data-for-agents="true" data-role="changelog">
+        <h2>Homebase dashboard changelog (for AI agents)</h2>
+        <pre id="homebase-changelog-body"></pre>
+      </section>
     </div>
 
     <!-- ========== Floating AI chat (stays while dashboard scrolls) ========== -->
@@ -1844,7 +1862,7 @@ function splitDataUrl(dataUrl){
 /* ============================ storage ============================ */
 var LS_SETTINGS = 'nova_settings_v1', LS_KEYS = 'nova_keys_v1',
     LS_MEMORY = 'nova_memory_v1', LS_TASKS = 'nova_tasks_v1', LS_BOOT = 'nova_onboarded_v1',
-    LS_CONNECTORS = 'nova_connectors_v1';
+    LS_CONNECTORS = 'nova_connectors_v1', LS_USAGE = 'nova_cloud_usage_v1';
 
 function lsGet(key, fallback){
   try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -1928,6 +1946,8 @@ var DEFAULT_SETTINGS = {
   model: 'demo',
   customModels: {},            // provider -> free-text model id
   modelCache: {},              // provider -> [ids] fetched from API
+  modelPricing: {},            // provider -> model -> [input, output] USD / 1M tokens
+  providerHealth: {},          // provider -> {ok, ts}; local routing only trusts recent checks
   temperature: 0.3,
   maxTokens: 4096,
   thinking: false,
@@ -1938,6 +1958,10 @@ var DEFAULT_SETTINGS = {
   webSearchTool: true,
   homeLocation: 'Surrey, BC',
   showCosts: true,
+  autoRoute: true,
+  localFirst: true,
+  webllmFallback: true,
+  cloudBudget: { limitUsd: 50, windowDays: 30, hardStop: true },
   autoSpeak: false,
   agentMaxRounds: 12,
   agentPlanFirst: true,
@@ -2482,9 +2506,205 @@ function persistHub(){
 /* ============================ Life dashboard + floating chat shell ============================ */
 var LS_DASH = 'homebase_dash_v1';
 var LS_FINANCE = 'homebase_finance_glance_v1';
-var LS_DASH_NOTES = 'homebase_dash_notes_v1';
-var DASH = { cache: null, loading: false, updated: 0 };
+var LS_DASH_NOTES = 'homebase_dash_notes_v1';var DASH = { cache: null, loading: false, updated: 0 };
 var FINANCE = { glance: null };
+
+/**
+ * HOMEBASE_CHANGELOG — single source of truth for other models/agents.
+ * Exposed as: window.HOMEBASE_CHANGELOG, #homebase-changelog, list_dashboard tool,
+ * and meta[name=homebase-for-agents]. Update this when shipping dashboard changes.
+ * Newest first. Do not remove historical entries; append only.
+ */
+var HOMEBASE_CHANGELOG = {
+  schema: 'homebase.changelog.v1',
+  product: 'Homebase',
+  path: 'ai/index.html',
+  pages_url: 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/ai/',
+  repo: 'wghtkbpxwx-a11y/tesla-dashboard',
+  updated: '2026-07-18',
+  audience: 'AI agents and models editing or reasoning about this dashboard — not end-user UI',
+  how_to_read: [
+    'DOM: document.getElementById("homebase-changelog") or #homebase-changelog-body',
+    'JS: window.HOMEBASE_CHANGELOG (object) or formatHomebaseChangelog()',
+    'Agent tool: list_dashboard (includes == Changelog == section)',
+    'HTML meta: name=homebase-for-agents',
+    'Page source always contains this block even when hidden'
+  ],
+  widgets: [
+    'pins','budget','weather','markets','news','scores','calendar','tasks',
+    'pharmacy','links','memory','traffic','updates'
+  ],
+  agent_tools: ['list_dashboard','update_dashboard','use_connector','get_weather'],
+  constraints: [
+    'Single-file SPA on GitHub Pages — no private server; CORS limits bank/clinical APIs',
+    'Never publish real account balances to the public repo/Pages site',
+    'Budget glance is localStorage / private import only (finance-glance.local.json gitignored)',
+    'Prefer professional SVG icons (ICON_SVG); avoid emoji for chrome',
+    'Dashboard-first UI + floating chat (FAB/dock/expand); avoid redundant left+bottom menus',
+    'Mobile shares same URL (body.is-mobile); do not break desktop layout'
+  ],
+  entries: [
+    {
+      id: '2026-07-18-changelog-embed',
+      date: '2026-07-18',
+      commit: 'e353af4',
+      title: 'Embed agent-facing dashboard changelog',
+      type: 'feat',
+      changes: [
+        'Added HOMEBASE_CHANGELOG JS object + hidden #homebase-changelog DOM block',
+        'list_dashboard now returns changelog summary for other models',
+        'meta homebase-for-agents points models at the hidden log'
+      ]
+    },
+    {
+      id: '2026-07-18-live-modules',
+      date: '2026-07-18',
+      commit: 'e02b337',
+      title: 'All dashboard modules live with APIs',
+      type: 'feat',
+      changes: [
+        'Open-Meteo live weather + AQI + 3-day strip; ESPN live scores for Jays/Canucks/Raptors/Whitecaps/Lions',
+        'iCal calendar fetch (secret URL); DriveBC cam thumbs + incidents; markets live Yahoo with cache fallback',
+        'News/pharmacy from Tesla Dashboard hourly DASHBOARD_CACHE; budget glance local',
+        'Mobile chat header CSS grid fix; weather/sports domain icons; quiet 3-min live refresh'
+      ],
+      setup_required: [
+        'Calendar: Connectors → secret iCal URL',
+        'Budget: import finance glance JSON',
+        'Drive vault: OAuth Client ID + Google sign-in + passphrase'
+      ]
+    },
+    {
+      id: '2026-07-18-agent-dashboard',
+      date: '2026-07-18',
+      commit: '08837aa',
+      title: 'Agent can update dashboard live',
+      type: 'feat',
+      changes: [
+        'Tools: list_dashboard, update_dashboard (pin_note, set_widget, reorder_widget, hub links, refresh, set_home_location)',
+        'Agent pins widget; speech/agent can mutate layout without reloading the page'
+      ]
+    },
+    {
+      id: '2026-07-18-icons',
+      date: '2026-07-18',
+      commit: '01fb95e',
+      title: 'Force professional SVG icons across UI',
+      type: 'fix',
+      changes: ['ICON_SVG + iconSvg used for hub, connectors, widgets, chrome']
+    },
+    {
+      id: '2026-07-17-connectors-mobile',
+      date: '2026-07-17',
+      commit: '9a4184a',
+      title: 'Mobile shell, budget glance, connectors',
+      type: 'feat',
+      changes: [
+        'Mobile-optimized shared URL; Budget Project glance import; large connector set (David life OS)',
+        'Telegram added; Spotify removed; family/pharmacy/money deep-links'
+      ]
+    },
+    {
+      id: '2026-07-17-dashboard-first',
+      date: '2026-07-17',
+      commit: 'b5618c8',
+      title: 'Dashboard-first shell + floating AI chat',
+      type: 'feat',
+      changes: [
+        'Life dashboard grid is home; chat is FAB/dock/expanded float',
+        'Hub modules configurable; Homebase rename from Nova'
+      ]
+    },
+    {
+      id: '2026-07-16-vault',
+      date: '2026-07-16',
+      commit: 'b3dffdf',
+      title: 'Encrypted Google Drive memory vault',
+      type: 'feat',
+      changes: ['AES-GCM vault, GIS OAuth drive.file, push/pull/autosync']
+    }
+  ],
+  planned: [
+    {
+      id: 'plan-gmail-live',
+      title: 'Optional Gmail/Calendar OAuth widgets (beyond iCal/deep-links)',
+      status: 'idea',
+      notes: 'Needs Google Cloud OAuth scopes; keep privacy-first'
+    },
+    {
+      id: 'plan-budget-sync',
+      title: 'Optional local script / private channel to refresh finance glance without manual import',
+      status: 'idea',
+      notes: 'Must never commit balances to public Pages'
+    },
+    {
+      id: 'plan-widget-config-ui',
+      title: 'In-UI drag/reorder + span editor for widgets (mirrors update_dashboard)',
+      status: 'idea'
+    },
+    {
+      id: 'plan-tesla-browser',
+      title: 'Graceful degradation notes when Tesla browser blocks CORS/mic',
+      status: 'ongoing'
+    }
+  ],
+  conventions_for_future_editors: [
+    'When you change widgets, APIs, layout defaults, or agent tools: append a new HOMEBASE_CHANGELOG.entries[] item (newest first) and bump HOMEBASE_CHANGELOG.updated',
+    'Keep planned[] honest — move items to entries when shipped',
+    'Call syncHomebaseChangelogDom() after editing entries if you need the DOM pre to update mid-session',
+    'Do not surface this changelog as a visible dashboard card unless the user asks'
+  ]
+};
+try { window.HOMEBASE_CHANGELOG = HOMEBASE_CHANGELOG; } catch(e){}
+
+function formatHomebaseChangelog(opts){
+  opts = opts || {};
+  var maxEntries = opts.maxEntries != null ? opts.maxEntries : 8;
+  var includePlanned = opts.includePlanned !== false;
+  var c = HOMEBASE_CHANGELOG;
+  var lines = [
+    'HOMEBASE_CHANGELOG schema=' + c.schema,
+    'product=' + c.product + ' path=' + c.path,
+    'updated=' + c.updated + ' pages=' + c.pages_url,
+    'audience=' + c.audience,
+    'widgets: ' + (c.widgets || []).join(', '),
+    'agent_tools: ' + (c.agent_tools || []).join(', '),
+    'constraints:',
+  ];
+  (c.constraints || []).forEach(function(x){ lines.push('  - ' + x); });
+  lines.push('entries (newest first):');
+  (c.entries || []).slice(0, maxEntries).forEach(function(e){
+    lines.push('## [' + e.date + '] ' + e.title + (e.commit ? ' (' + e.commit + ')' : '') + ' {' + (e.type || 'change') + '}');
+    (e.changes || []).forEach(function(ch){ lines.push('  * ' + ch); });
+    if (e.setup_required && e.setup_required.length){
+      lines.push('  setup:');
+      e.setup_required.forEach(function(s){ lines.push('    - ' + s); });
+    }
+  });
+  if (includePlanned && c.planned && c.planned.length){
+    lines.push('planned / roadmap:');
+    c.planned.forEach(function(p){
+      lines.push('  - [' + (p.status || 'idea') + '] ' + p.title + (p.notes ? ' — ' + p.notes : ''));
+    });
+  }
+  lines.push('conventions:');
+  (c.conventions_for_future_editors || []).forEach(function(x){ lines.push('  - ' + x); });
+  return lines.join('\n');
+}
+
+function syncHomebaseChangelogDom(){
+  try {
+    var pre = $('homebase-changelog-body') || document.getElementById('homebase-changelog-body');
+    var text = formatHomebaseChangelog({ maxEntries: 12, includePlanned: true });
+    if (pre) pre.textContent = text;
+    var root = $('homebase-changelog') || document.getElementById('homebase-changelog');
+    if (root){
+      root.setAttribute('data-updated', HOMEBASE_CHANGELOG.updated || '');
+      root.setAttribute('data-schema', HOMEBASE_CHANGELOG.schema || '');
+    }
+  } catch(e){}
+}
+
 /** Live browser-side feeds (Open-Meteo, ESPN, iCal) — complements hourly Tesla Dashboard cache */
 var LIVE = {
   weather: null,
@@ -4844,6 +5064,7 @@ var PROFILE_SEEDS = [
   { id:'seed-tone', text:'Appreciates advanced, high-tech, professional product design — glanceable in the car, polished on desktop/phone.', category:'preference', importance:3, pinned:false, tags:['ux'] },
   { id:'seed-communication', text:'Prefers clear, outcome-first, non-technical explanations with minimal jargon; important results should be easy to scan.', category:'preference', importance:4, pinned:false, tags:['communication','ux'] },
   { id:'seed-finance-privacy', text:'Treat personal financial data as private: keep balances and detailed account data local or in private storage, never on public GitHub Pages.', category:'preference', importance:5, pinned:false, tags:['finance','privacy'] },
+  { id:'seed-ai-budget', text:'Keep estimated paid cloud AI usage below $50 across the trailing 30 days. Prefer local models for simple work and choose the least expensive cloud model that meets the task quality and capability requirements.', category:'preference', importance:5, pinned:true, tags:['ai','budget','routing'] },
   { id:'seed-timezone', text:'Default timezone is America/Vancouver (Pacific Time); use local Pacific dates and times unless another timezone is specified.', category:'location', importance:5, pinned:false, tags:['timezone','locale'] },
   { id:'seed-workstation', text:'Uses a Mac and the Codex desktop app for local project work.', category:'fact', importance:3, pinned:false, tags:['mac','codex'] }
 ];
@@ -4877,6 +5098,9 @@ function loadState(){
   S.settings = Object.assign({}, DEFAULT_SETTINGS, lsGet(LS_SETTINGS, {}));
   S.settings.speech = Object.assign({}, DEFAULT_SETTINGS.speech, S.settings.speech || {});
   S.settings.council = Object.assign({}, DEFAULT_SETTINGS.council, S.settings.council || {});
+  S.settings.cloudBudget = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, S.settings.cloudBudget || {});
+  S.settings.modelPricing = S.settings.modelPricing || {};
+  S.settings.providerHealth = S.settings.providerHealth || {};
   if (!Array.isArray(S.settings.council.members)) S.settings.council.members = [];
   S.keys = lsGet(LS_KEYS, {});
   S.memory = (lsGet(LS_MEMORY, []) || []).map(normalizeMemoryItem).filter(Boolean);
@@ -5060,6 +5284,13 @@ var PROVIDERS = {
   openai: { name:'OpenAI', kind:'openai', base:'https://api.openai.com/v1', needsKey:true, usage:true, fetchModels:true, color:'#10a37f',
     keyHint:'sk-…  (platform.openai.com)', keyUrl:'https://platform.openai.com/settings/organization/api-keys',
     models:[
+      {id:'gpt-5.6-sol', label:'GPT-5.6 Sol', vision:1, tools:1, think:'native', quality:5, cost:[5,30]},
+      {id:'gpt-5.6-terra', label:'GPT-5.6 Terra', vision:1, tools:1, think:'native', quality:4, cost:[2.5,15]},
+      {id:'gpt-5.6-luna', label:'GPT-5.6 Luna', vision:1, tools:1, think:'native', quality:3, cost:[1,6]},
+      {id:'gpt-5.5', label:'GPT-5.5', vision:1, tools:1, think:'native', quality:5, cost:[5,30]},
+      {id:'gpt-5.4', label:'GPT-5.4', vision:1, tools:1, think:'native', quality:4, cost:[2.5,15]},
+      {id:'gpt-5.4-mini', label:'GPT-5.4 mini', vision:1, tools:1, think:'native', quality:3, cost:[0.75,4.5]},
+      {id:'gpt-5.4-nano', label:'GPT-5.4 nano', vision:1, tools:1, think:'native', quality:2, cost:[0.2,1.25]},
       {id:'gpt-5', label:'GPT-5', vision:1, tools:1, cost:[1.25,10]},
       {id:'gpt-5-mini', label:'GPT-5 mini', vision:1, tools:1, cost:[0.25,2]},
       {id:'gpt-5-nano', label:'GPT-5 nano', vision:1, tools:1, cost:[0.05,0.4]},
@@ -5108,6 +5339,7 @@ var PROVIDERS = {
   xai: { name:'xAI Grok', kind:'openai', base:'https://api.x.ai/v1', needsKey:true, usage:true, fetchModels:true, color:'#1c1c1c',
     keyHint:'xai-…  (console.x.ai)', keyUrl:'https://console.x.ai/',
     models:[
+      {id:'grok-4.5', label:'Grok 4.5', vision:1, tools:1, think:'native', quality:5, cost:[2,6]},
       {id:'grok-4', label:'Grok 4', vision:1, tools:1, cost:[3,15]},
       {id:'grok-3', label:'Grok 3', tools:1, cost:[3,15]},
       {id:'grok-3-mini', label:'Grok 3 mini', tools:1, cost:[0.3,0.5]}
@@ -5171,10 +5403,229 @@ function modelCaps(p, id){
 }
 function modelCost(p, id){
   var mi = modelInfo(p, id);
-  return mi.cost || null;
+  var dynamic = S.settings.modelPricing && S.settings.modelPricing[p] && S.settings.modelPricing[p][id];
+  return dynamic || mi.cost || null;
 }
 function isReasoningOpenAI(id){ return /^(o[134])(-|$)|^gpt-5/.test(id); }
 function anthropicAllowsTemp(id){ return !/opus-4-[78]|sonnet-5/.test(id); }
+
+/* ================= cloud budget + model router ================= */
+var CLOUD_RESERVED_USD = 0;
+function cloudBudgetCfg(){
+  var b = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, S.settings.cloudBudget || {});
+  b.limitUsd = clamp(+b.limitUsd || 50, 1, 10000);
+  b.windowDays = clamp(+b.windowDays || 30, 1, 365);
+  b.hardStop = b.hardStop !== false;
+  return b;
+}
+function localEndpoint(p){
+  if (PROVIDERS[p] && PROVIDERS[p].local) return true;
+  if (p !== 'custom') return false;
+  return /^(https?:\/\/)?(localhost|127\.0\.0\.1|\[?::1\]?)(:|\/|$)/i.test(getBase(p));
+}
+function cloudProvider(p){
+  var pr = PROVIDERS[p];
+  return !!(pr && pr.kind !== 'demo' && pr.kind !== 'webllm' && !localEndpoint(p));
+}
+function usageLedger(){
+  var list = lsGet(LS_USAGE, []);
+  if (!Array.isArray(list)) list = [];
+  var cutoff = Date.now() - cloudBudgetCfg().windowDays * 86400000;
+  var clean = list.filter(function(x){ return x && isFinite(+x.costUsd) && +x.costUsd >= 0 && +x.ts >= cutoff && +x.ts <= Date.now() + 300000; });
+  if (clean.length !== list.length) lsSet(LS_USAGE, clean);
+  return clean;
+}
+function cloudSpendInfo(){
+  var cfg = cloudBudgetCfg(), entries = usageLedger();
+  var spent = entries.reduce(function(n, x){ return n + (+x.costUsd || 0); }, 0);
+  var oldest = entries.length ? Math.min.apply(Math, entries.map(function(x){ return +x.ts; })) : 0;
+  return {spent:spent, limit:cfg.limitUsd, remaining:Math.max(0, cfg.limitUsd - spent - CLOUD_RESERVED_USD),
+    reserved:CLOUD_RESERVED_USD, windowDays:cfg.windowDays, entries:entries,
+    nextExpiry:oldest ? oldest + cfg.windowDays * 86400000 : 0};
+}
+function saveCloudUsage(entry){
+  var list = usageLedger();
+  list.push(Object.assign({id:uuid(), ts:Date.now(), estimated:true}, entry || {}));
+  lsSet(LS_USAGE, list.slice(-3000));
+  updateBudgetDisplays();
+}
+function clearCloudUsage(){
+  if (!confirm('Clear the local cloud-usage estimate history? This does not change provider billing.')) return;
+  lsSet(LS_USAGE, []); updateBudgetDisplays(); renderChatPane();
+  toast('Local usage history cleared', 'ok');
+}
+function modelRequestCost(p, id, inTok, outTok){
+  var price = modelCost(p, id);
+  if (!price) return null;
+  return ((Math.max(0, +inTok || 0) * price[0]) + (Math.max(0, +outTok || 0) * price[1])) / 1000000;
+}
+function estimateRequestInput(o){
+  var n = estTokens(o.system || '') + 24;
+  (o.msgs || []).forEach(function(m){
+    n += estTokens(m.text || '') + 8;
+    (m.images || []).forEach(function(){ n += 1200; });
+    (m.files || []).forEach(function(f){ n += f.text ? estTokens(f.text) : (f.kind === 'pdf' ? 5000 : 300); });
+    if (m.toolCalls) n += estTokens(JSON.stringify(m.toolCalls));
+    if (m.results) n += estTokens(JSON.stringify(m.results));
+  });
+  if (o.tools) n += estTokens(JSON.stringify(o.tools));
+  return Math.ceil(n * 1.2); // conservative allowance for provider framing/tokenization
+}
+function reserveCloudChat(o){
+  if (!cloudProvider(o.provider)) return null;
+  var cfg = cloudBudgetCfg(), inTok = estimateRequestInput(o), outTok = Math.max(64, +o.maxTokens || 2048);
+  var maximum = modelRequestCost(o.provider, o.model, inTok, outTok);
+  if (maximum == null){
+    if (cfg.hardStop) throw new Error('Cloud budget guard: pricing is unknown for ' + o.model + '. Choose a priced model or add its pricing before using paid cloud credits.');
+    maximum = 0;
+  }
+  var info = cloudSpendInfo();
+  if (cfg.hardStop && maximum > info.remaining + 1e-9){
+    throw new Error('Cloud budget guard: this request could cost up to $' + maximum.toFixed(3) +
+      ', but only $' + info.remaining.toFixed(2) + ' remains in the trailing ' + cfg.windowDays + '-day budget.');
+  }
+  CLOUD_RESERVED_USD += maximum;
+  updateBudgetDisplays();
+  return {maximum:maximum, inTok:inTok, outTok:outTok};
+}
+function finishCloudChat(o, reservation, result){
+  if (!reservation) return result;
+  CLOUD_RESERVED_USD = Math.max(0, CLOUD_RESERVED_USD - reservation.maximum);
+  var u = result.usage || (result.usage = {});
+  var inTok = +u.inTok || reservation.inTok;
+  var outTok = +u.outTok || estTokens(result.text || '');
+  var cost = isFinite(+u.costUsd) ? +u.costUsd : modelRequestCost(o.provider, o.model, inTok, outTok);
+  if (cost == null) cost = reservation.maximum;
+  u.costUsd = cost;
+  saveCloudUsage({provider:o.provider, model:o.model, kind:'chat', inTok:inTok, outTok:outTok,
+    costUsd:cost, estimated:!isFinite(+u.providerCostUsd), conversationId:o.conversationId || null, messageId:o.messageId || null});
+  return result;
+}
+function releaseCloudReservation(reservation){
+  if (!reservation) return;
+  CLOUD_RESERVED_USD = Math.max(0, CLOUD_RESERVED_USD - reservation.maximum);
+  updateBudgetDisplays();
+}
+function reserveFixedCloud(provider, model, kind, estimatedCost){
+  var cfg = cloudBudgetCfg(), info = cloudSpendInfo(), cost = Math.max(0, +estimatedCost || 0);
+  if (cfg.hardStop && cost > info.remaining + 1e-9){
+    throw new Error('Cloud budget guard: only $' + info.remaining.toFixed(2) + ' remains in the trailing ' + cfg.windowDays + '-day budget.');
+  }
+  CLOUD_RESERVED_USD += cost; updateBudgetDisplays();
+  return {provider:provider, model:model, kind:kind, maximum:cost};
+}
+function finishFixedCloud(r, details){
+  CLOUD_RESERVED_USD = Math.max(0, CLOUD_RESERVED_USD - r.maximum);
+  saveCloudUsage(Object.assign({provider:r.provider, model:r.model, kind:r.kind, costUsd:r.maximum, estimated:true}, details || {}));
+}
+function modelQuality(p, id){
+  var mi = modelInfo(p, id), s = String(id || '').toLowerCase();
+  if (mi.quality) return mi.quality;
+  if (/opus|sonnet-5|gpt-5\.6-sol|gpt-5\.5|grok-4\.5|grok-4\b|gemini-3\.1-pro|deepseek-v4-pro/.test(s)) return 5;
+  if (/sonnet|gpt-5\.6-terra|gpt-5\.4(?!-)|gemini.*pro|mistral-large|pixtral-large|70b|32b/.test(s)) return 4;
+  if (/haiku|luna|mini|flash(?!-lite)|small|scout|8b|3b|qwen/.test(s)) return 3;
+  return 2;
+}
+function normalizedModelName(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
+function explicitModelRequest(query){
+  var q = normalizedModelName(query), found = null;
+  PROVIDER_ORDER.some(function(p){
+    return providerModels(p).some(function(m){
+      var id = normalizedModelName(m.id), label = normalizedModelName(m.label);
+      if ((id.length >= 5 && q.indexOf(id) >= 0) || (label.length >= 5 && q.indexOf(label) >= 0)){
+        found = {provider:p, model:m.id}; return true;
+      }
+      return false;
+    });
+  });
+  if (!found && /\bgpt\s*5[ .-]?6\b/i.test(query)) found = {provider:'openai', model:'gpt-5.6-sol'};
+  return found;
+}
+function classifyAIRequest(query, latestUser, convo){
+  var q = String(query || ''), hasVision = !!((latestUser.images || []).length || (latestUser.files || []).some(function(f){ return f.kind === 'pdf'; }));
+  var named = explicitModelRequest(q);
+  var maxQuality = /\b(most advanced|best (?:available )?model|maximum quality|highest quality|strongest model|frontier model|no matter the cost)\b/i.test(q);
+  var needsTools = /\b(today|current|currently|latest|live|right now|news|weather|price|stock|score|schedule|search|browse|look up|verify|source|citation|dashboard|calendar|task|remind|update|change|modify|create|delete)\b/i.test(q) || S.settings.uiMode === 'agent' || S.settings.uiMode === 'research';
+  var highStakes = /\b(diagnos|dose|dosage|interaction|contraindication|patient|clinical|legal|lawsuit|tax|portfolio|investment|retirement|mortgage|financial plan)\b/i.test(q);
+  var advanced = hasVision || highStakes || /\b(architecture|debug|refactor|security audit|research|analy[sz]e|strategy|multi-step|proof|theorem|complex|compare.*trade-?off|production|migration|forecast|model this|write (?:an )?(?:app|program|contract))\b/i.test(q) || q.length > 1400;
+  var simple = q.length < 550 && !hasVision && !highStakes && !advanced && !needsTools;
+  var tier = maxQuality || named ? 4 : (advanced ? 3 : (simple ? 1 : 2));
+  return {tier:tier, named:named, explicitMax:maxQuality, vision:hasVision, tools:needsTools,
+    label:tier === 4 ? 'frontier requested' : (tier === 3 ? 'advanced task' : (tier === 2 ? 'balanced task' : 'simple task'))};
+}
+function recentLocalProvider(p){
+  var h = (S.settings.providerHealth || {})[p];
+  var cached = (S.settings.modelCache || {})[p] || [];
+  return !!(cached.length && h && h.ok && Date.now() - h.ts < 86400000);
+}
+function localRouteCandidate(cls){
+  if (!S.settings.localFirst || cls.tier !== 1 || cls.vision || cls.tools) return null;
+  var locals = ['ollama','lmstudio','llamacpp','custom'];
+  for (var i = 0; i < locals.length; i++){
+    var p = locals[i];
+    if (!localEndpoint(p) || !recentLocalProvider(p)) continue;
+    var ids = (S.settings.modelCache[p] || []);
+    if (ids.length) return {provider:p, model:ids[0], local:true};
+  }
+  if (S.settings.webllmFallback && navigator.gpu){
+    return {provider:'webllm', model:S.settings.webllmModel || PROVIDERS.webllm.models[0].id, local:true};
+  }
+  return null;
+}
+function cloudRouteCandidates(cls, query, msgs, maxOut){
+  var minQ = cls.tier >= 4 ? 5 : (cls.tier === 3 ? 4 : (cls.tier === 2 ? 3 : 2));
+  var out = [], sample = {system:'', msgs:msgs, tools:cls.tools ? TOOLS : null};
+  PROVIDER_ORDER.forEach(function(p){
+    if (!cloudProvider(p) || !providerReady(p)) return;
+    providerModels(p).forEach(function(m){
+      var price = modelCost(p, m.id), caps = modelCaps(p, m.id), quality = modelQuality(p, m.id);
+      if (!price || quality < minQ || (cls.vision && !caps.vision) || (cls.tools && !caps.tools)) return;
+      sample.provider = p; sample.model = m.id; sample.maxTokens = maxOut;
+      var est = modelRequestCost(p, m.id, estimateRequestInput(sample), maxOut);
+      if (est == null || est > cloudSpendInfo().remaining + 1e-9) return;
+      out.push({provider:p, model:m.id, quality:quality, estimatedCost:est, caps:caps});
+    });
+  });
+  return out;
+}
+function selectAIRoute(query, latestUser, convo, msgs){
+  var cls = classifyAIRequest(query, latestUser || {}, convo), local = localRouteCandidate(cls);
+  var maxOut = Math.min(+S.settings.maxTokens || 4096, cls.tier >= 4 ? 4096 : (cls.tier === 3 ? 3072 : (cls.tier === 2 ? 1800 : 900)));
+  if (local) return Object.assign(local, {maxTokens:maxOut, tier:cls.tier, classification:cls,
+    reason:'Auto · local model for a ' + cls.label + ' · $0 cloud'});
+  if (cls.named && providerReady(cls.named.provider)){
+    var namedCost = modelCost(cls.named.provider, cls.named.model), namedCaps = modelCaps(cls.named.provider, cls.named.model);
+    if (namedCost && (!cls.vision || namedCaps.vision) && (!cls.tools || namedCaps.tools)){
+      var check = {provider:cls.named.provider, model:cls.named.model, system:'', msgs:msgs, tools:cls.tools ? TOOLS : null, maxTokens:maxOut};
+      var namedEstimate = modelRequestCost(check.provider, check.model, estimateRequestInput(check), maxOut);
+      if (namedEstimate <= cloudSpendInfo().remaining + 1e-9){
+        return {provider:check.provider, model:check.model, maxTokens:maxOut, tier:cls.tier, classification:cls,
+          estimatedCost:namedEstimate, reason:'Auto · explicitly requested ' + modelInfo(check.provider, check.model).label};
+      }
+    }
+  }
+  var candidates = cloudRouteCandidates(cls, query, msgs, maxOut);
+  candidates.sort(function(a,b){
+    if (cls.explicitMax && b.quality !== a.quality) return b.quality - a.quality;
+    return a.estimatedCost - b.estimatedCost || b.quality - a.quality;
+  });
+  if (candidates.length){
+    var best = candidates[0];
+    return Object.assign(best, {maxTokens:maxOut, tier:cls.tier, classification:cls,
+      reason:'Auto · ' + cls.label + ' · lowest estimated cost meeting quality floor (~$' + best.estimatedCost.toFixed(3) + ' max)'});
+  }
+  var emergency = localRouteCandidate(Object.assign({}, cls, {tier:1, vision:false, tools:false}));
+  if (emergency) return Object.assign(emergency, {maxTokens:Math.min(maxOut, 1200), tier:cls.tier, classification:cls,
+    reason:'Auto · local fallback because no suitable cloud model fits the rolling budget'});
+  return {provider:'demo', model:'demo', maxTokens:900, tier:cls.tier, classification:cls,
+    reason:'Auto · demo fallback; connect a priced cloud model or a local runtime'};
+}
+function updateBudgetDisplays(){
+  var info = cloudSpendInfo();
+  qsa('[data-cloud-budget-text]').forEach(function(el){ el.textContent = '$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(2) + ' · trailing ' + info.windowDays + ' days'; });
+  qsa('[data-cloud-budget-bar]').forEach(function(el){ el.style.width = Math.min(100, info.limit ? info.spent / info.limit * 100 : 0) + '%'; });
+  if ($('model-prov') && S.settings.autoRoute) $('model-prov').textContent = '$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(0) + ' · ' + info.windowDays + 'd';
+}
 
 /* ============================ SSE reader ============================ */
 async function readSSE(resp, onEvent){
@@ -5379,7 +5830,10 @@ async function chatOpenAI(o){
     if (ev.data === '[DONE]') return;
     var j; try { j = JSON.parse(ev.data); } catch(e){ return; }
     if (j.error) throw new Error(j.error.message || 'stream error');
-    if (j.usage){ usage.inTok = j.usage.prompt_tokens; usage.outTok = j.usage.completion_tokens; }
+    if (j.usage){
+      usage.inTok = j.usage.prompt_tokens; usage.outTok = j.usage.completion_tokens;
+      if (isFinite(+j.usage.cost)){ usage.providerCostUsd = +j.usage.cost; usage.costUsd = +j.usage.cost; }
+    }
     var ch = j.choices && j.choices[0];
     if (!ch) return;
     if (ch.finish_reason) stopReason = ch.finish_reason;
@@ -5603,13 +6057,23 @@ async function chatDemo(o){
   return {text:text, thinking:'', toolCalls:[], usage:{inTok: estTokens(lastUser), outTok: estTokens(text)}, stopReason:'stop'};
 }
 
-function runChat(o){
+function runChatRaw(o){
   var kind = PROVIDERS[o.provider].kind;
   if (kind === 'anthropic') return chatAnthropic(o);
   if (kind === 'gemini') return chatGemini(o);
   if (kind === 'webllm') return chatWebLLM(o);
   if (kind === 'demo') return chatDemo(o);
   return chatOpenAI(o);
+}
+async function runChat(o){
+  var reservation = reserveCloudChat(o);
+  try {
+    var result = await runChatRaw(o);
+    return finishCloudChat(o, reservation, result);
+  } catch(e){
+    releaseCloudReservation(reservation);
+    throw e;
+  }
 }
 
 /* ============================ agent tools ============================ */
@@ -5949,7 +6413,7 @@ TOOLS.push(
 
 TOOLS.push(
   { name:'list_dashboard',
-    description:'Inspect the Homebase dashboard: which widgets are on/off, hub modules, and agent pins. Call before update_dashboard when the user wants layout changes.',
+    description:'Inspect the Homebase dashboard: widgets on/off, hub modules, agent pins, and the hidden HOMEBASE_CHANGELOG (history + roadmap for other models). Call before update_dashboard. Also available as window.HOMEBASE_CHANGELOG and #homebase-changelog in the DOM.',
     params:{}, required:[],
     run: async function(){
       var layout = loadDashLayout();
@@ -5967,7 +6431,9 @@ TOOLS.push(
       notes.slice(0,12).forEach(function(n){
         lines.push('• ['+n.id+'] '+(n.title||'Note')+': '+(n.body||'').slice(0,120));
       });
-      return lines.join('\\n');
+      lines.push('== Changelog (for agents; hidden in UI) ==');
+      lines.push(formatHomebaseChangelog({ maxEntries: 6, includePlanned: true }));
+      return lines.join('\n');
     }},
   { name:'update_dashboard',
     description:'Mutate the Homebase life dashboard immediately (widgets, hub links, pins). The UI refreshes live. Actions: refresh | pin_note | unpin_note | clear_pins | set_widget | reorder_widget | set_hub_module | add_hub_link | remove_hub_module | set_home_location. Examples: pin_note title="LOC" body="Pay Friday"; set_widget id="scores" enabled=false; add_hub_link title="Monarch" url="https://app.monarchmoney.com"; reorder_widget id="budget" position="first"; refresh.',
@@ -6289,6 +6755,7 @@ function buildSystem(convo, opts){
       'Use search_memory before inventing personal facts; use remember / update_memory / forget_memory to maintain memory.',
       'When the user asks about email, calendar, Drive, GitHub, the Tesla dashboard, or connected services, call list_connectors / use_connector.',
       'You can UPDATE the Homebase life dashboard live: call list_dashboard then update_dashboard (pin_note, set_widget, reorder_widget, add_hub_link, refresh, set_home_location, etc.). When the user says things like “put this on my dashboard”, “hide sports”, “add a link to Monarch”, “refresh my dashboard”, or “pin a reminder”, use these tools — the UI updates immediately.',
+      'Dashboard history and roadmap for agents lives in HOMEBASE_CHANGELOG (window.HOMEBASE_CHANGELOG, hidden #homebase-changelog, and list_dashboard → Changelog section). When editing dashboard modules/APIs, append a new changelog entry (newest first) and update planned items — do not show the changelog as a user-facing card unless asked.',
       'After tools, answer naturally with key findings — do not dump raw tool JSON.'
     ];
     if (S.settings.agentPlanFirst) agentBits.push('Prefer planning before more than two tool calls.');
@@ -6513,14 +6980,14 @@ function metaRow(m, convo){
   meta.className = 'meta';
   var bits = [];
   if (m.role === 'assistant' && m.model) bits.push(modelInfo(m.provider || 'demo', m.model).label || m.model);
+  if (m.role === 'assistant' && m.routeReason) bits.push(m.routeReason);
   bits.push(fmtTime(m.ts));
   if (m.role === 'assistant' && m.usage && (m.usage.inTok || m.usage.outTok)){
     var u = m.usage;
     var s = (u.inTok || 0) + '→' + (u.outTok || 0) + ' tok';
     if (S.settings.showCosts){
-      var cost = modelCost(m.provider, m.model);
-      if (cost){
-        var dollars = ((u.inTok || 0) * cost[0] + (u.outTok || 0) * cost[1]) / 1e6;
+      var dollars = isFinite(+u.costUsd) ? +u.costUsd : modelRequestCost(m.provider, m.model, u.inTok, u.outTok);
+      if (dollars != null){
         if (dollars >= 0.00005) s += ' · ~$' + (dollars < 0.01 ? dollars.toFixed(4) : dollars.toFixed(3));
       }
     }
@@ -6586,6 +7053,12 @@ function initScroll(){
 
 /* ============================ send pipeline ============================ */
 var PIPE_HOOKS = { onDelta:null, onDone:null, onUserEcho:null };
+function addUsage(total, usage){
+  usage = usage || {};
+  total.inTok = (total.inTok || 0) + (+usage.inTok || 0);
+  total.outTok = (total.outTok || 0) + (+usage.outTok || 0);
+  total.costUsd = (total.costUsd || 0) + (+usage.costUsd || 0);
+}
 
 async function sendMessage(rawText, opts){
   opts = opts || {};
@@ -6607,17 +7080,25 @@ async function sendMessage(rawText, opts){
     else { $('chat').appendChild(msgEl(um, convo)); }
     S.stick = true; scrollBottom(true);
   }
-  var provider = convo.provider, model = convo.model;
+  var previewMsgs = internalHistory(convo, convo.messages.length);
+  var latestUser = {text:'', images:[], files:[]};
+  for (var pi = convo.messages.length - 1; pi >= 0; pi--){
+    if (convo.messages[pi].role === 'user'){ latestUser = convo.messages[pi]; break; }
+  }
+  var route = S.settings.autoRoute ? selectAIRoute(latestUser.text || '', latestUser, convo, previewMsgs) : null;
+  var provider = route ? route.provider : convo.provider;
+  var model = route ? route.model : convo.model;
   var caps = modelCaps(provider, model);
   var am = { id: uuid(), role:'assistant', text:'', liveText:'', thinking:'', toolRounds:[],
-    provider: provider, model: model, ts: Date.now(), streaming: true, usage:{} };
+    provider: provider, model: model, ts: Date.now(), streaming: true, usage:{},
+    routeReason: route ? route.reason : 'Manual model selection', routeTier: route ? route.tier : null };
   convo.messages.push(am);
   $('chat').appendChild(msgEl(am, convo));
   scrollBottom(true);
   S.sending = true;
   S.abort = new AbortController();
   updateSendBtn();
-  var totalUsage = {inTok:0, outTok:0};
+  var totalUsage = {inTok:0, outTok:0, costUsd:0};
   var toolsOn = convo.toolsOn && caps.tools;
   var tools = toolsOn ? enabledTools() : null;
   var useCouncil = !!(S.settings.councilOn && (S.settings.council.members || []).length >= 2);
@@ -6652,13 +7133,13 @@ async function sendMessage(rawText, opts){
               system: buildSystem(convo, {query: userQuery}) + '\n\n' + roleHint,
               msgs: msgs, temperature: S.settings.temperature, maxTokens: Math.min(S.settings.maxTokens, 4096),
               think: false, tools: null, signal: S.abort.signal,
+              conversationId:convo.id, messageId:am.id,
               onText: function(t){ cm.text += t; schedulePaint(am, convo); },
               onThink: null, onProgress: null
             });
             cm.text = res.text || cm.text;
             cm.state = 'done';
-            totalUsage.inTok += (res.usage && res.usage.inTok) || 0;
-            totalUsage.outTok += (res.usage && res.usage.outTok) || 0;
+            addUsage(totalUsage, res.usage);
           } catch(e){
             if (e && (e.name === 'AbortError' || e.code === 20)) throw e;
             cm.state = 'err'; cm.error = (e && e.message) || String(e);
@@ -6687,13 +7168,13 @@ async function sendMessage(rawText, opts){
         provider: sp, model: sm,
         system: buildSystem(convo, {query: userQuery, councilSynth: true}),
         msgs: synthMsgs, temperature: Math.min(0.7, S.settings.temperature),
-        maxTokens: S.settings.maxTokens, think: S.settings.thinking, tools: null, signal: S.abort.signal,
+        maxTokens: route ? route.maxTokens : S.settings.maxTokens, think: S.settings.thinking, tools: null, signal: S.abort.signal,
+        conversationId:convo.id, messageId:am.id,
         onText: function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
         onThink: function(t){ am.thinking += t; schedulePaint(am, convo); },
         onProgress: function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
       });
-      totalUsage.inTok += (sres.usage && sres.usage.inTok) || 0;
-      totalUsage.outTok += (sres.usage && sres.usage.outTok) || 0;
+      addUsage(totalUsage, sres.usage);
       am.text = sres.text || am.liveText;
       am.provider = sp; am.model = sm;
     } else {
@@ -6704,14 +7185,14 @@ async function sendMessage(rawText, opts){
         var res = await runChat({
           provider: provider, model: model,
           system: buildSystem(convo, {query: userQuery}), msgs: msgs,
-          temperature: S.settings.temperature, maxTokens: S.settings.maxTokens,
+          temperature: S.settings.temperature, maxTokens: route ? route.maxTokens : S.settings.maxTokens,
           think: S.settings.thinking, tools: tools, signal: S.abort.signal,
+          conversationId:convo.id, messageId:am.id,
           onText: function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
           onThink: function(t){ am.thinking += t; schedulePaint(am, convo); },
           onProgress: function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
         });
-        totalUsage.inTok += (res.usage && res.usage.inTok) || 0;
-        totalUsage.outTok += (res.usage && res.usage.outTok) || 0;
+        addUsage(totalUsage, res.usage);
         if (res.toolCalls && res.toolCalls.length && toolsOn){
           var rd = { text: res.text || '', anthRaw: res.anthRaw,
             calls: res.toolCalls.map(function(c){ return {id:c.id, name:c.name, args:c.args, result:null, state:'run'}; }) };
@@ -7893,9 +8374,15 @@ function updateModelBtn(){
   var c = activeConvo();
   var p = c ? c.provider : S.settings.provider;
   var m = c ? c.model : S.settings.model;
-  $('model-name').textContent = modelInfo(p, m).label || m;
-  $('model-prov').textContent = PROVIDERS[p] ? PROVIDERS[p].name : p;
-  $('model-dot').style.background = providerReady(p) ? 'var(--ok)' : 'var(--warn)';
+  if (S.settings.autoRoute){
+    $('model-name').textContent = 'Auto · best value';
+    $('model-dot').style.background = 'var(--ok)';
+    updateBudgetDisplays();
+  } else {
+    $('model-name').textContent = modelInfo(p, m).label || m;
+    $('model-prov').textContent = PROVIDERS[p] ? PROVIDERS[p].name : p;
+    $('model-dot').style.background = providerReady(p) ? 'var(--ok)' : 'var(--warn)';
+  }
   updateToolsBtn();
 }
 function updateToolsBtn(){
@@ -7913,6 +8400,7 @@ function selectModel(p, id){
   var c = ensureConvo();
   c.provider = p; c.model = id;
   S.settings.provider = p; S.settings.model = id;
+  S.settings.autoRoute = false;
   saveSettings(); persistConvo(c);
   updateModelBtn(); updateHints();
   closePops();
@@ -7925,6 +8413,21 @@ function renderModelMenu(){
   var c = activeConvo();
   var curP = c ? c.provider : S.settings.provider;
   var curM = c ? c.model : S.settings.model;
+  var info = cloudSpendInfo();
+  var auto = document.createElement('button');
+  auto.className = 'mm-item' + (S.settings.autoRoute ? ' sel' : '');
+  auto.innerHTML = '<span class="mi-name">✨ Auto · best value for each request</span><span class="caps"><span class="cap">🏠</span><span class="cap">☁️</span></span>';
+  auto.title = 'Uses local AI for simple work and the least expensive suitable cloud model for harder work.';
+  auto.addEventListener('click', function(){
+    S.settings.autoRoute = true; saveSettings(); updateModelBtn(); closePops();
+    toast('Automatic cost-effective routing enabled', 'ok');
+  });
+  list.appendChild(auto);
+  var budgetNote = document.createElement('div');
+  budgetNote.className = 'mm-note';
+  budgetNote.innerHTML = '<span data-cloud-budget-text>$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(2) + ' · trailing ' + info.windowDays + ' days</span>' +
+    '<div style="height:4px;background:var(--line);border-radius:99px;margin-top:7px;overflow:hidden"><div data-cloud-budget-bar style="height:100%;width:' + Math.min(100, info.spent / info.limit * 100) + '%;background:var(--accent);border-radius:99px"></div></div>';
+  list.appendChild(budgetNote);
   var ordered = PROVIDER_ORDER.slice().sort(function(a, b){
     return (providerReady(b) ? 1 : 0) - (providerReady(a) ? 1 : 0);
   });
@@ -8180,8 +8683,10 @@ async function testProvider(p, btn){
       resp = await withTimeout(function(sig){ return fetch(url, {headers:h, signal:sig}); }, 10000);
     }
     if (!resp.ok) throw await httpError(resp);
+    S.settings.providerHealth[p] = {ok:true, ts:Date.now()}; saveSettings();
     toast(PROVIDERS[p].name + ' connected ✅', 'ok');
   } catch(err){
+    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings();
     var m = err.message || String(err);
     if (err.name === 'AbortError') m = 'timed out';
     if (PROVIDERS[p].local && /fetch|network|abort/i.test(m)) m += ' — is the server running? (see setup note below)';
@@ -8212,13 +8717,24 @@ async function fetchProviderModels(p, btn){
       if (!r3.ok) throw await httpError(r3);
       var j3 = await r3.json();
       ids = (j3.data || []).map(function(m){ return m.id; }).sort();
+      if (p === 'openrouter'){
+        S.settings.modelPricing[p] = S.settings.modelPricing[p] || {};
+        (j3.data || []).forEach(function(m){
+          var prc = m.pricing || {}, inp = +prc.prompt, outp = +prc.completion;
+          if (isFinite(inp) && isFinite(outp) && inp >= 0 && outp >= 0){
+            S.settings.modelPricing[p][m.id] = [inp * 1000000, outp * 1000000];
+          }
+        });
+      }
     }
     ids = ids.slice(0, 400);
     S.settings.modelCache[p] = ids;
+    S.settings.providerHealth[p] = {ok:true, ts:Date.now()};
     saveSettings();
     toast(ids.length + ' models loaded for ' + pr.name, 'ok');
     if (ids.length && pr.local) selectModel(p, ids[0]);
   } catch(err){
+    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings();
     toast('Fetch failed: ' + (err.name === 'AbortError' ? 'timed out' : err.message), 'err', 5000);
   }
   btn.textContent = 'Fetch model list';
@@ -8227,6 +8743,32 @@ async function fetchProviderModels(p, btn){
 function renderChatPane(){
   var pane = $('pane-chat');
   pane.innerHTML = '';
+  var bi = cloudSpendInfo();
+  var budgetCard = document.createElement('div');
+  budgetCard.className = 'hint-box';
+  budgetCard.style.cssText = 'margin:0 0 14px;padding:15px;border-color:color-mix(in srgb,var(--accent) 35%,var(--line))';
+  budgetCard.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><div><b>Cloud AI budget</b><div data-cloud-budget-text style="margin-top:3px;color:var(--text2)">$' + bi.spent.toFixed(2) + ' / $' + bi.limit.toFixed(2) + ' · trailing ' + bi.windowDays + ' days</div></div><b style="color:' + (bi.remaining < bi.limit * .15 ? 'var(--warn)' : 'var(--ok)') + '">$' + bi.remaining.toFixed(2) + ' left</b></div>' +
+    '<div style="height:8px;background:var(--line);border-radius:99px;margin:12px 0 7px;overflow:hidden"><div data-cloud-budget-bar style="height:100%;width:' + Math.min(100, bi.spent / bi.limit * 100) + '%;background:linear-gradient(90deg,var(--accent),var(--ok));border-radius:99px"></div></div>' +
+    '<div style="font-size:11.5px;color:var(--text3)">Estimated from provider token usage. Entries expire continuously after ' + bi.windowDays + ' days' + (bi.nextExpiry ? '; next reduction ' + new Date(bi.nextExpiry).toLocaleDateString() : '') + '.</div>';
+  pane.appendChild(budgetCard);
+  pane.appendChild(tglRow('Automatic model selection', 'Capability first, then the lowest estimated cost that meets the quality requirement',
+    function(){ return S.settings.autoRoute; }, function(v){ S.settings.autoRoute = v; updateModelBtn(); }));
+  pane.appendChild(tglRow('Prefer local AI', 'Use a recently verified local model for simple, private, low-risk queries',
+    function(){ return S.settings.localFirst; }, function(v){ S.settings.localFirst = v; }));
+  pane.appendChild(tglRow('In-browser local fallback', 'Use WebLLM for simple queries when no local server is ready (first use downloads the model)',
+    function(){ return S.settings.webllmFallback; }, function(v){ S.settings.webllmFallback = v; }));
+  pane.appendChild(tglRow('Hard cloud spending guard', 'Reserve the estimated maximum before every paid API call; unknown-price models are blocked',
+    function(){ return S.settings.cloudBudget.hardStop; }, function(v){ S.settings.cloudBudget.hardStop = v; }));
+  var bRow = row('Rolling cloud limit', 'Combined estimated spend across every configured paid provider', '<span style="display:flex;align-items:center;gap:6px">$<input id="ps-budget" type="number" min="1" max="10000" step="1" style="width:90px"><span style="color:var(--text3)">/ trailing</span><input id="ps-window" type="number" min="1" max="365" step="1" style="width:70px"><span style="color:var(--text3)">days</span></span>');
+  pane.appendChild(bRow);
+  var bli = qs('#ps-budget', pane), bwi = qs('#ps-window', pane);
+  bli.value = cloudBudgetCfg().limitUsd; bwi.value = cloudBudgetCfg().windowDays;
+  bli.addEventListener('change', function(){ S.settings.cloudBudget.limitUsd = clamp(+this.value || 50, 1, 10000); this.value = S.settings.cloudBudget.limitUsd; saveSettings(); renderChatPane(); updateModelBtn(); });
+  bwi.addEventListener('change', function(){ S.settings.cloudBudget.windowDays = clamp(+this.value || 30, 1, 365); this.value = S.settings.cloudBudget.windowDays; saveSettings(); renderChatPane(); updateModelBtn(); });
+  var manage = row('Usage history', 'Stored only in this browser; provider billing remains the source of truth', '<button class="sm-btn" id="ps-clear-usage">Clear local history</button>');
+  pane.appendChild(manage);
+  qs('#ps-clear-usage', pane).addEventListener('click', clearCloudUsage);
+  var divider = document.createElement('div'); divider.style.cssText = 'height:1px;background:var(--line);margin:14px 0'; pane.appendChild(divider);
   var pRow = row('Persona', 'Base personality for every chat', '<select id="ps-persona">' +
     Object.keys(PERSONAS).map(function(k){ return '<option value="' + k + '">' + esc(PERSONAS[k].name) + '</option>'; }).join('') + '</select>');
   pane.appendChild(pRow);
@@ -8711,6 +9253,7 @@ async function boot(){
   updateConnectorsBtn();
   vaultSetStatus('idle', '');
   setChatState('fab');
+  syncHomebaseChangelogDom();
   renderDashboard();
   refreshDashboard({toast:false}).catch(function(){});
   // Quiet live refresh while tab is open (weather + scores; calendar every other tick)
