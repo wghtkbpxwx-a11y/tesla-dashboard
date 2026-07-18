@@ -735,6 +735,40 @@ a:hover{text-decoration:underline}
 .task-card .t-btns{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap}
 
 
+
+/* ============================= Vault / Drive sync ============================= */
+.vault-panel{
+  margin: 14px 0 6px; padding: 14px 14px 12px; border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(145deg, rgba(79,70,229,.08), rgba(14,165,233,.07), rgba(255,255,255,.5));
+  box-shadow: 0 8px 28px rgba(79,90,160,.08);
+}
+[data-theme="dark"] .vault-panel{
+  background: linear-gradient(145deg, rgba(129,140,248,.12), rgba(14,165,233,.08), rgba(0,0,0,.15));
+}
+.vault-panel h3{
+  margin: 0 0 6px; font-size: 14px; font-weight: 700; letter-spacing: -.02em;
+  display: flex; align-items: center; gap: 8px;
+}
+.vault-panel .vp-sub{ font-size: 12.5px; color: var(--text2); line-height: 1.45; margin: 0 0 12px; }
+.vault-panel .vp-row{ display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.vault-panel input[type="password"], .vault-panel input[type="text"]{
+  flex: 1; min-width: 160px; font-size: 13px;
+}
+#vault-status{ font-size: 12px; color: var(--text3); margin-top: 4px; min-height: 16px; }
+#vault-status[data-st="ok"]{ color: var(--ok); }
+#vault-status[data-st="err"]{ color: var(--danger); }
+#vault-status[data-st="syncing"]{ color: var(--acc2); }
+#sync-pill{
+  display: none; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 650;
+  border: 1px solid var(--border); background: var(--surface-glass); color: var(--text2);
+  cursor: pointer; white-space: nowrap;
+}
+#sync-pill.on{ color: var(--ok); border-color: color-mix(in srgb, var(--ok) 35%, var(--border)); }
+#sync-pill.err{ color: var(--danger); }
+#sync-pill:hover{ border-color: var(--border2); color: var(--text); }
+
 /* ============================= Connectors ============================= */
 #connectors-ov .modal{max-width:740px}
 .conn-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
@@ -946,6 +980,7 @@ a:hover{text-decoration:underline}
       <button class="icon-btn" id="voice-btn" title="Voice mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
       <button class="icon-btn" id="tasks-btn" title="Scheduled tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></button>
       <button class="icon-btn" id="memory-btn" title="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a3.5 3.5 0 0 0-3.5 3.5c-1.9.3-3.5 1.8-3.5 3.9 0 1.1.5 2.1 1.2 2.8A3.4 3.4 0 0 0 8 20.5c1.5 0 2.9-.9 3.4-2.2h1.2a3.7 3.7 0 0 0 3.4 2.2 3.4 3.4 0 0 0 1.8-6.3c.7-.7 1.2-1.7 1.2-2.8 0-2.1-1.6-3.6-3.5-3.9A3.5 3.5 0 0 0 12 4z"/><path d="M12 4v14"/></svg></button>
+      <button type="button" id="sync-pill" title="Encrypted Google Drive vault">Drive vault</button>
       <button class="icon-btn" id="connectors-btn" title="Connectors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
       <button class="icon-btn" id="settings-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
     </header>
@@ -1057,6 +1092,29 @@ a:hover{text-decoration:underline}
         <span class="lbl">Auto-extract after replies<span class="sub">After each turn, note stable user facts worth keeping.</span></span>
         <div class="tgl" id="mem-auto-tgl"></div>
       </div>
+      <div class="vault-panel" id="vault-panel">
+        <h3>🔐 Private vault · Google Drive</h3>
+        <p class="vp-sub">Memory is encrypted <b>on this device</b> with your passphrase before it touches Google. Drive only stores ciphertext. Passphrase stays in this browser session — never uploaded.</p>
+        <div class="vp-row">
+          <input id="vault-pass" type="password" placeholder="Vault passphrase (min 6 chars)" autocomplete="new-password">
+        </div>
+        <div class="vp-row">
+          <button type="button" class="sm-btn" id="vault-export">Download encrypted file</button>
+          <button type="button" class="sm-btn" id="vault-import">Import vault file</button>
+          <input type="file" id="vault-file" accept=".json,.vault.json,application/json" style="display:none">
+        </div>
+        <div class="vp-row">
+          <button type="button" class="sm-btn pri" id="vault-drive-connect">Connect Google</button>
+          <button type="button" class="sm-btn pri" id="vault-drive-push">Push to Drive</button>
+          <button type="button" class="sm-btn" id="vault-drive-pull">Pull from Drive</button>
+        </div>
+        <div class="set-row" style="border:none;padding:6px 0 0">
+          <span class="lbl">Auto-sync after memory changes<span class="sub">Requires Connected Google + passphrase this session</span></span>
+          <div class="tgl" id="vault-autosync-tgl"></div>
+        </div>
+        <div id="vault-status"></div>
+        <p class="vp-sub" style="margin:10px 0 0;font-size:11.5px">Setup: Google Cloud → OAuth client (Web) → authorized JS origin <code>https://wghtkbpxwx-a11y.github.io</code> → paste Client ID under Connectors → Google Drive.</p>
+      </div>
       <div style="display:flex; gap:8px; margin:13px 0; flex-wrap:wrap">
         <input id="mem-new" type="text" placeholder="Add a fact… e.g. “I drive a Tesla Model 3”" style="flex:1; min-width:180px">
         <select id="mem-cat" style="width:130px">
@@ -1102,7 +1160,7 @@ a:hover{text-decoration:underline}
   <div class="modal wide">
     <div class="mo-head"><h2>Connectors</h2><button class="icon-btn" data-close="connectors-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="mo-body">
-      <div class="conn-banner"><b>Built for David.</b> Enable services Nova can use while you chat — Tesla Dashboard, GitHub, Gmail, Calendar, Drive, weather, and research. Secrets stay in this browser only.</div>
+      <div class="conn-banner"><b>Built for David.</b> Enable services Nova can use while you chat. <b>Google Drive</b> holds your <em>encrypted</em> memory vault for multi-device continuity — passphrase never leaves this device. Add an OAuth Client ID on the Drive card, then open Memory → Private vault.</div>
       <div id="conn-grid" class="conn-grid"></div>
     </div>
   </div>
@@ -1586,12 +1644,15 @@ var CONNECTOR_DEFS = [
   {
     id: 'drive',
     name: 'Google Drive',
-    desc: 'Jump into Drive search for docs and files.',
+    desc: 'Encrypted memory vault sync + Drive search links. OAuth Client ID required for sync.',
     icon: '📁',
     grad: 'linear-gradient(145deg,#fcd34d,#f59e0b)',
-    fields: [],
-    defaults: { on:true },
-    actions: ['search']
+    fields: [
+      {key:'clientId', label:'OAuth Client ID', placeholder:'xxxx.apps.googleusercontent.com', secret:false},
+      {key:'fileName', label:'Vault file name', placeholder:'nova-memory.vault.json', secret:false}
+    ],
+    defaults: { on:true, clientId:'', fileName:'nova-memory.vault.json', autoSync:true, fileId:'' },
+    actions: ['search','push','pull']
   },
   {
     id: 'weather',
@@ -1832,8 +1893,19 @@ async function runConnector(id, action, args){
   }
 
   if (id === 'drive'){
+    if (action === 'push' || action === 'sync'){
+      try { await vaultPushToDrive(); return 'Encrypted vault pushed to Google Drive.'; }
+      catch(e){ return 'Error: ' + (e.message || e); }
+    }
+    if (action === 'pull' || action === 'restore'){
+      try {
+        var payload = await vaultPullFromDrive();
+        return 'Vault restored from Drive with ' + ((payload && payload.memory) || []).length + ' memories.';
+      } catch(e){ return 'Error: ' + (e.message || e); }
+    }
     var dq = args.query || '';
-    return 'Google Drive' + (dq ? ' search for "' + dq + '"' : '') + ':\nhttps://drive.google.com/drive/search?q=' + encodeURIComponent(dq || '');
+    return 'Google Drive' + (dq ? ' search for "' + dq + '"' : '') + ':\nhttps://drive.google.com/drive/search?q=' + encodeURIComponent(dq || '') +
+      '\n(Vault sync: use_connector drive push|pull with vault passphrase set in Memory.)';
   }
 
   if (id === 'weather'){
@@ -1866,8 +1938,491 @@ function initConnectors(){
       $('connectors-ov').classList.add('open');
     });
   }
+  if ($('sync-pill')){
+    $('sync-pill').addEventListener('click', function(){
+      renderMemory(); initVaultUi(); $('memory-ov').classList.add('open');
+      var p = $('vault-panel'); if (p) p.scrollIntoView({behavior:'smooth', block:'nearest'});
+    });
+  }
   updateConnectorsBtn();
 }
+
+/* ============================ Encrypted vault + Google Drive sync ============================ */
+var LS_DRIVE_AUTH = 'nova_drive_auth_v1';
+var VAULT = {
+  passphrase: '', // session only
+  lastSync: 0,
+  lastPull: 0,
+  status: 'idle', // idle|syncing|ok|err
+  message: ''
+};
+
+function vaultSetStatus(st, msg){
+  VAULT.status = st;
+  VAULT.message = msg || '';
+  var el = $('vault-status');
+  if (el){
+    el.textContent = msg || '';
+    el.dataset.st = st;
+  }
+  var pill = $('sync-pill');
+  if (pill){
+    pill.dataset.st = st;
+    pill.textContent = st === 'syncing' ? 'Syncing…' : st === 'ok' ? 'Vault synced' : st === 'err' ? 'Sync error' : 'Drive vault';
+    pill.classList.toggle('on', st === 'ok');
+    pill.classList.toggle('err', st === 'err');
+    pill.style.display = (connectorOn('drive') && connectorCfg('drive').clientId) ? '' : 'none';
+  }
+}
+
+function b64FromBytes(u8){
+  var s = '', CHUNK = 0x8000;
+  for (var i = 0; i < u8.length; i += CHUNK){
+    s += String.fromCharCode.apply(null, u8.subarray(i, i + CHUNK));
+  }
+  return btoa(s);
+}
+function bytesFromB64(b64){
+  var s = atob(b64);
+  var u8 = new Uint8Array(s.length);
+  for (var i = 0; i < s.length; i++) u8[i] = s.charCodeAt(i);
+  return u8;
+}
+
+async function vaultDeriveKey(passphrase, saltU8){
+  var enc = new TextEncoder();
+  var material = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt: saltU8, iterations: 250000, hash:'SHA-256' },
+    material,
+    { name:'AES-GCM', length: 256 },
+    false,
+    ['encrypt','decrypt']
+  );
+}
+
+function buildVaultPayload(){
+  return {
+    v: 1,
+    app: 'nova-personal-ai',
+    exportedAt: Date.now(),
+    label: 'David personal vault',
+    memory: S.memory || [],
+    tasks: S.tasks || [],
+    connectors: S.connectors || {},
+    keys: S.keys || {},
+    settings: {
+      persona: S.settings.persona,
+      systemPrompt: S.settings.systemPrompt,
+      homeLocation: S.settings.homeLocation,
+      injectMemory: S.settings.injectMemory,
+      memorySmartInject: S.settings.memorySmartInject,
+      memoryMaxInject: S.settings.memoryMaxInject,
+      autoMemory: S.settings.autoMemory,
+      toolsDefault: S.settings.toolsDefault,
+      webSearchTool: S.settings.webSearchTool,
+      agentMaxRounds: S.settings.agentMaxRounds,
+      agentPlanFirst: S.settings.agentPlanFirst,
+      councilOn: S.settings.councilOn,
+      council: S.settings.council,
+      uiMode: S.settings.uiMode,
+      theme: S.settings.theme,
+      accent: S.settings.accent,
+      speech: S.settings.speech
+    }
+  };
+}
+
+async function encryptVault(passphrase, payloadObj){
+  if (!passphrase || passphrase.length < 6) throw new Error('Passphrase must be at least 6 characters');
+  if (!window.crypto || !crypto.subtle) throw new Error('Web Crypto unavailable in this browser');
+  var salt = crypto.getRandomValues(new Uint8Array(16));
+  var iv = crypto.getRandomValues(new Uint8Array(12));
+  var key = await vaultDeriveKey(passphrase, salt);
+  var plain = new TextEncoder().encode(JSON.stringify(payloadObj));
+  var ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv: iv }, key, plain);
+  return {
+    v: 1,
+    kdf: 'PBKDF2-SHA256-250k',
+    cipher: 'AES-GCM-256',
+    salt: b64FromBytes(salt),
+    iv: b64FromBytes(iv),
+    data: b64FromBytes(new Uint8Array(ct)),
+    meta: { exportedAt: payloadObj.exportedAt, memoryCount: (payloadObj.memory || []).length }
+  };
+}
+
+async function decryptVault(passphrase, vaultObj){
+  if (!vaultObj || !vaultObj.data) throw new Error('Invalid vault file');
+  var salt = bytesFromB64(vaultObj.salt);
+  var iv = bytesFromB64(vaultObj.iv);
+  var key = await vaultDeriveKey(passphrase, salt);
+  var ct = bytesFromB64(vaultObj.data);
+  try {
+    var plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv: iv }, key, ct);
+  } catch(e){
+    throw new Error('Wrong passphrase or corrupted vault');
+  }
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+function applyVaultPayload(payload, opts){
+  opts = opts || {};
+  if (!payload || typeof payload !== 'object') throw new Error('Empty vault payload');
+  if (Array.isArray(payload.memory)){
+    S.memory = payload.memory.map(normalizeMemoryItem).filter(Boolean);
+    saveMemoryRaw();
+  }
+  if (Array.isArray(payload.tasks) && (opts.includeTasks !== false)){
+    S.tasks = payload.tasks;
+    saveTasks();
+  }
+  if (payload.connectors && typeof payload.connectors === 'object'){
+    // merge, keep local drive tokens if newer
+    var base = loadConnectorsState();
+    Object.keys(payload.connectors).forEach(function(id){
+      base[id] = Object.assign({}, base[id] || {}, payload.connectors[id]);
+    });
+    S.connectors = base;
+    saveConnectors();
+  }
+  if (payload.keys && typeof payload.keys === 'object' && opts.includeKeys !== false){
+    S.keys = Object.assign({}, S.keys || {}, payload.keys);
+    saveKeys();
+  }
+  if (payload.settings && typeof payload.settings === 'object'){
+    Object.keys(payload.settings).forEach(function(k){
+      if (payload.settings[k] !== undefined) S.settings[k] = payload.settings[k];
+    });
+    saveSettings();
+    applyTheme();
+  }
+  try { renderMemory(); } catch(e){}
+  try { renderConnectors(); } catch(e){}
+  try { renderModeRail(); updateModeChrome(); } catch(e){}
+  try { renderTasksIfOpen && renderTasksIfOpen(); } catch(e){}
+}
+
+function saveMemoryRaw(){ lsSet(LS_MEMORY, S.memory); }
+
+function getVaultPassphrase(){
+  if (VAULT.passphrase) return VAULT.passphrase;
+  try {
+    var s = sessionStorage.getItem('nova_vault_pass');
+    if (s){ VAULT.passphrase = s; return s; }
+  } catch(e){}
+  var inp = $('vault-pass');
+  if (inp && inp.value) return inp.value;
+  return '';
+}
+function setVaultPassphrase(p){
+  VAULT.passphrase = p || '';
+  try {
+    if (p) sessionStorage.setItem('nova_vault_pass', p);
+    else sessionStorage.removeItem('nova_vault_pass');
+  } catch(e){}
+}
+
+async function exportVaultFile(){
+  var pass = getVaultPassphrase();
+  if (!pass) throw new Error('Enter a vault passphrase first');
+  setVaultPassphrase(pass);
+  var vault = await encryptVault(pass, buildVaultPayload());
+  var blob = new Blob([JSON.stringify(vault, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nova-memory-' + new Date().toISOString().slice(0,10) + '.vault.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  vaultSetStatus('ok', 'Encrypted vault downloaded');
+  toast('Encrypted vault saved — store the passphrase safely', 'ok', 4000);
+}
+
+async function importVaultFile(file){
+  var pass = getVaultPassphrase();
+  if (!pass) throw new Error('Enter the vault passphrase to unlock');
+  var text = await file.text();
+  var vault = JSON.parse(text);
+  var payload = await decryptVault(pass, vault);
+  setVaultPassphrase(pass);
+  applyVaultPayload(payload);
+  vaultSetStatus('ok', 'Vault restored · ' + (payload.memory || []).length + ' memories');
+  toast('Vault restored into this browser', 'ok');
+}
+
+/* ---- Google Drive auth + file IO ---- */
+function loadDriveAuth(){
+  return lsGet(LS_DRIVE_AUTH, null);
+}
+function saveDriveAuth(auth){
+  if (auth) lsSet(LS_DRIVE_AUTH, auth);
+  else try { localStorage.removeItem(LS_DRIVE_AUTH); } catch(e){}
+}
+function driveAccessToken(){
+  var auth = loadDriveAuth();
+  if (!auth || !auth.access_token) return null;
+  if (auth.expires_at && Date.now() > auth.expires_at - 60000) return null;
+  return auth.access_token;
+}
+
+function ensureGis(cb){
+  if (window.google && google.accounts && google.accounts.oauth2){ cb(); return; }
+  var existing = document.querySelector('script[data-gis]');
+  if (existing){
+    existing.addEventListener('load', function(){ cb(); });
+    return;
+  }
+  var s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.async = true;
+  s.dataset.gis = '1';
+  s.onload = function(){ cb(); };
+  s.onerror = function(){ toast('Could not load Google Identity services', 'err'); };
+  document.head.appendChild(s);
+}
+
+function driveRequestToken(interactive){
+  return new Promise(function(resolve, reject){
+    var clientId = (connectorCfg('drive').clientId || '').trim();
+    if (!clientId){
+      reject(new Error('Add a Google OAuth Client ID in Connectors → Google Drive'));
+      return;
+    }
+    ensureGis(function(){
+      try {
+        var client = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'https://www.googleapis.com/auth/drive.file',
+          callback: function(resp){
+            if (resp.error){ reject(new Error(resp.error)); return; }
+            var auth = {
+              access_token: resp.access_token,
+              expires_at: Date.now() + ((resp.expires_in || 3600) * 1000)
+            };
+            saveDriveAuth(auth);
+            resolve(auth.access_token);
+          },
+          error_callback: function(err){
+            reject(new Error((err && err.message) || 'Google auth failed'));
+          }
+        });
+        client.requestAccessToken({ prompt: interactive ? 'consent' : '' });
+      } catch(e){ reject(e); }
+    });
+  });
+}
+
+async function driveGetToken(interactive){
+  var t = driveAccessToken();
+  if (t) return t;
+  return driveRequestToken(!!interactive);
+}
+
+async function driveApi(path, opts){
+  opts = opts || {};
+  var token = await driveGetToken(opts.interactive);
+  var headers = Object.assign({}, opts.headers || {}, { Authorization: 'Bearer ' + token });
+  var res = await fetch('https://www.googleapis.com' + path, {
+    method: opts.method || 'GET',
+    headers: headers,
+    body: opts.body || undefined
+  });
+  if (res.status === 401){
+    saveDriveAuth(null);
+    token = await driveRequestToken(true);
+    headers.Authorization = 'Bearer ' + token;
+    res = await fetch('https://www.googleapis.com' + path, {
+      method: opts.method || 'GET',
+      headers: headers,
+      body: opts.body || undefined
+    });
+  }
+  return res;
+}
+
+async function driveFindVaultFile(){
+  var name = (connectorCfg('drive').fileName || 'nova-memory.vault.json').replace(/'/g, '');
+  var q = "name='" + name + "' and trashed=false";
+  var res = await driveApi('/drive/v3/files?pageSize=5&spaces=drive&fields=files(id,name,modifiedTime,size)&q=' + encodeURIComponent(q));
+  if (!res.ok) throw new Error('Drive list failed HTTP ' + res.status);
+  var data = await res.json();
+  var files = data.files || [];
+  return files[0] || null;
+}
+
+async function driveUploadVault(vaultObj){
+  var name = connectorCfg('drive').fileName || 'nova-memory.vault.json';
+  var meta = { name: name, mimeType: 'application/json' };
+  var existing = await driveFindVaultFile();
+  if (existing && existing.id){
+    meta = { mimeType: 'application/json' }; // name optional on update
+  }
+  var boundary = 'nova_' + Date.now().toString(36);
+  var body =
+    '--' + boundary + '\r\n' +
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+    JSON.stringify(existing && existing.id ? meta : { name: name, mimeType: 'application/json' }) + '\r\n' +
+    '--' + boundary + '\r\n' +
+    'Content-Type: application/json\r\n\r\n' +
+    JSON.stringify(vaultObj) + '\r\n' +
+    '--' + boundary + '--';
+  var path = existing && existing.id
+    ? '/upload/drive/v3/files/' + existing.id + '?uploadType=multipart&fields=id,name,modifiedTime'
+    : '/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime';
+  var res = await driveApi(path, {
+    method: existing && existing.id ? 'PATCH' : 'POST',
+    interactive: true,
+    headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
+    body: body
+  });
+  if (!res.ok){
+    var errText = await res.text();
+    throw new Error('Drive upload HTTP ' + res.status + ' ' + errText.slice(0, 180));
+  }
+  var file = await res.json();
+  if (file && file.id){
+    S.connectors.drive = S.connectors.drive || {};
+    S.connectors.drive.fileId = file.id;
+    S.connectors.drive.on = true;
+    saveConnectors();
+  }
+  return file;
+}
+
+async function driveDownloadVault(){
+  var file = null;
+  var cfg = connectorCfg('drive');
+  if (cfg.fileId){
+    file = { id: cfg.fileId };
+  } else {
+    file = await driveFindVaultFile();
+  }
+  if (!file || !file.id) throw new Error('No vault file on Drive yet — push once first');
+  var res = await driveApi('/drive/v3/files/' + file.id + '?alt=media', { interactive: true });
+  if (!res.ok) throw new Error('Drive download HTTP ' + res.status);
+  return res.json();
+}
+
+async function vaultPushToDrive(){
+  var pass = getVaultPassphrase();
+  if (!pass) throw new Error('Enter vault passphrase before syncing');
+  setVaultPassphrase(pass);
+  vaultSetStatus('syncing', 'Encrypting & uploading…');
+  var vault = await encryptVault(pass, buildVaultPayload());
+  var file = await driveUploadVault(vault);
+  VAULT.lastSync = Date.now();
+  vaultSetStatus('ok', 'Synced to Drive · ' + (file.name || 'vault') + ' · ' + fmtDateTime(VAULT.lastSync));
+  toast('Memory vault encrypted & saved to Google Drive', 'ok', 3200);
+  return file;
+}
+
+async function vaultPullFromDrive(){
+  var pass = getVaultPassphrase();
+  if (!pass) throw new Error('Enter vault passphrase to decrypt Drive backup');
+  setVaultPassphrase(pass);
+  vaultSetStatus('syncing', 'Downloading vault…');
+  var vault = await driveDownloadVault();
+  var payload = await decryptVault(pass, vault);
+  applyVaultPayload(payload);
+  VAULT.lastPull = Date.now();
+  vaultSetStatus('ok', 'Restored from Drive · ' + (payload.memory || []).length + ' memories · ' + fmtDateTime(VAULT.lastPull));
+  toast('Vault pulled from Google Drive', 'ok');
+  return payload;
+}
+
+var scheduleDriveSync = debounce(function(){
+  try {
+    if (!connectorOn('drive')) return;
+    if (!connectorCfg('drive').autoSync) return;
+    if (!connectorCfg('drive').clientId) return;
+    if (!getVaultPassphrase()) return;
+    if (!driveAccessToken() && !loadDriveAuth()) return;
+    vaultPushToDrive().catch(function(e){
+      vaultSetStatus('err', e.message || String(e));
+    });
+  } catch(e){}
+}, 8000);
+
+function saveMemory(){
+  lsSet(LS_MEMORY, S.memory);
+  scheduleDriveSync();
+}
+
+var _vaultUiReady = false;
+function initVaultUi(){
+  if (_vaultUiReady) {
+    // refresh autosync toggle + status only
+    if ($('vault-autosync-tgl')) $('vault-autosync-tgl').classList.toggle('on', !!(connectorCfg('drive').autoSync));
+    if ($('vault-pass') && !VAULT.passphrase){
+      try { $('vault-pass').value = sessionStorage.getItem('nova_vault_pass') || ''; } catch(e){}
+    }
+    vaultSetStatus(VAULT.status || 'idle', VAULT.message || '');
+    return;
+  }
+  _vaultUiReady = true;
+  // lock passphrase field to session
+  var pass = $('vault-pass');
+  if (pass){
+    try { pass.value = sessionStorage.getItem('nova_vault_pass') || ''; } catch(e){}
+    pass.addEventListener('change', function(){ setVaultPassphrase(pass.value.trim()); });
+  }
+  if ($('vault-export')) $('vault-export').addEventListener('click', function(){
+    exportVaultFile().catch(function(e){ toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message); });
+  });
+  if ($('vault-import')) $('vault-import').addEventListener('click', function(){
+    var inp = $('vault-file');
+    if (inp) inp.click();
+  });
+  if ($('vault-file')) $('vault-file').addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (!f) return;
+    importVaultFile(f).catch(function(e){ toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message); });
+  });
+  if ($('vault-drive-connect')) $('vault-drive-connect').addEventListener('click', function(){
+    driveRequestToken(true).then(function(){
+      toast('Google Drive connected', 'ok');
+      vaultSetStatus('ok', 'Google account linked for vault sync');
+      if (S.connectors && S.connectors.drive){ S.connectors.drive.on = true; saveConnectors(); }
+      updateConnectorsBtn();
+    }).catch(function(e){ toast(e.message || String(e), 'err'); });
+  });
+  if ($('vault-drive-push')) $('vault-drive-push').addEventListener('click', function(){
+    vaultPushToDrive().catch(function(e){ toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message); });
+  });
+  if ($('vault-drive-pull')) $('vault-drive-pull').addEventListener('click', function(){
+    if (!confirm('Pull vault from Drive and merge into this browser? Local memories will be replaced by the vault snapshot.')) return;
+    vaultPullFromDrive().catch(function(e){ toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message); });
+  });
+  if ($('vault-autosync-tgl')){
+    $('vault-autosync-tgl').classList.toggle('on', !!(connectorCfg('drive').autoSync));
+    $('vault-autosync-tgl').addEventListener('click', function(){
+      if (!S.connectors.drive) S.connectors.drive = Object.assign({}, defaultConnectorsState().drive);
+      S.connectors.drive.autoSync = !S.connectors.drive.autoSync;
+      saveConnectors();
+      this.classList.toggle('on', !!S.connectors.drive.autoSync);
+      toast('Auto-sync ' + (S.connectors.drive.autoSync ? 'ON' : 'OFF'), 'ok');
+    });
+  }
+  vaultSetStatus('idle', connectorCfg('drive').clientId
+    ? 'Encrypted vault ready — connect Google to multi-device sync'
+    : 'Set a passphrase · optional Google Drive Client ID in Connectors');
+}
+
+async function bootVaultSync(){
+  try {
+    if (!connectorOn('drive') || !connectorCfg('drive').clientId) return;
+    if (!connectorCfg('drive').autoSync) return;
+    if (!getVaultPassphrase()) return;
+    if (!driveAccessToken()) return;
+    // soft pull only if local memory empty
+    if (S.memory && S.memory.length) return;
+    await vaultPullFromDrive();
+  } catch(e){
+    console.info('[vault] boot pull skipped', e.message || e);
+  }
+}
+
 
 
 
@@ -1955,7 +2510,6 @@ function loadState(){
 }
 function saveSettings(){ lsSet(LS_SETTINGS, S.settings); }
 function saveKeys(){ lsSet(LS_KEYS, S.keys); }
-function saveMemory(){ lsSet(LS_MEMORY, S.memory); }
 function saveTasks(){ lsSet(LS_TASKS, S.tasks); }
 
 var persistConvo = debounce(function(convo){ if (convo) idb.put(convo); }, 350);
@@ -3304,7 +3858,7 @@ function emptyStateEl(){
   d.innerHTML =
     '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">✦</div></div>' +
     '<h1>' + greet + ', David</h1>' +
-    '<p class="subhead">Your personal AI suite — bright, connected, and built around how you actually work.</p>' +
+    '<p class="subhead">Personal AI for David — agentic modes, connectors, and an encrypted Drive vault so memory survives every device.</p>' +
     '<div class="mode-tiles">' + tilesHtml + '</div>' +
     '<div class="prompt-chips">' + chipsHtml + '</div>';
   qsa('.mode-tile', d).forEach(function(b){
@@ -4532,7 +5086,8 @@ function renderMemory(){
   });
 }
 function initMemory(){
-  $('memory-btn').addEventListener('click', function(){ renderMemory(); $('memory-ov').classList.add('open'); });
+  $('memory-btn').addEventListener('click', function(){ renderMemory(); initVaultUi(); $('memory-ov').classList.add('open'); });
+  initVaultUi();
   $('mem-add').addEventListener('click', function(){
     var v = $('mem-new').value.trim();
     if (!v) return;
@@ -5618,6 +6173,7 @@ async function boot(){
   initVoice();
   initMemory();
   initConnectors();
+  initVaultUi();
   initTasks();
   initScheduler();
   if (!S.activeId) createConvo();
@@ -5628,6 +6184,9 @@ async function boot(){
   updateModeChrome();
   updateHints();
   updateSendBtn();
+  updateConnectorsBtn();
+  vaultSetStatus('idle', '');
+  bootVaultSync();
   if (!maybeAutoVoice()) initWelcome();
   /* delegate code-copy buttons */
   $('chat').addEventListener('click', function(e){

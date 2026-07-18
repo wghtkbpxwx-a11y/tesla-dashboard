@@ -87,3 +87,16 @@ tasks, memory, persistence and the voice deep link — see the PR/session notes.
 
 localStorage keys are namespaced `nova_*`; conversations live in IndexedDB
 (`nova_chat`) so they never compete with the dashboard's localStorage quota.
+
+
+## Encrypted memory vault (Google Drive)
+
+Personal memory is stored locally for speed, then optionally synced as an
+**encrypted vault** to Google Drive (AES-GCM, passphrase never uploaded).
+
+1. Google Cloud Console → create OAuth 2.0 Client ID (Web application).
+2. Authorized JavaScript origin: `https://wghtkbpxwx-a11y.github.io`
+3. Connectors → Google Drive → paste Client ID, enable auto-sync.
+4. Memory → Private vault → set passphrase → Connect Google → Push to Drive.
+
+On a new browser: same Client ID + passphrase → Pull from Drive.
