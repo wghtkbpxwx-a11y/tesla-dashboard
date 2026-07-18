@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 # Personal finance snapshot — never publish
 ai/finance-glance.local.json
+**/finance-webapp.bundle.json
+**/homebase-finance-glance.json
+**/finance-glance.local.json
+**/*.finance-private.json

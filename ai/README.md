@@ -25,10 +25,12 @@ voice mode (this is what the dashboard's **More → 🎙️ Homebase Voice** but
 | In-browser | WebLLM (WebGPU) — Llama 3.2, Qwen 2.5, Gemma 2, Phi 3.5, SmolLM2; fully private, works offline after the one-time download |
 | No setup | Demo mode — simulated model to explore the UI |
 
-Add keys in **Settings → Providers** (stored in `localStorage`, never sent
-anywhere except the provider itself). Each provider has a **Test connection**
-and, where supported, **Fetch model list**; any model id can also be typed
-into the model-picker search and used directly.
+Add a dedicated, low-limit key in **Settings → Providers** (stored in
+`localStorage`, never sent anywhere except the provider itself). Do not use
+this feature on a shared device or commit keys to source control. Each provider
+has a **Get API key** shortcut, **Test connection**, and, where supported,
+**Fetch model list**; any model id can also be typed into the model-picker
+search and used directly.
 
 ### Local model setup notes
 
@@ -52,7 +54,7 @@ Refresh (top-right) pulls **Tesla Dashboard hourly cache** plus **browser live A
 | My teams | ESPN scoreboard API live | No |
 | Traffic | DriveBC cam images + incidents from cache | No |
 | Calendar | Google **secret iCal URL** | **Yes — paste iCal in Connectors** (no Google OAuth for calendar) |
-| Budget | Local finance glance JSON | **Import glance** (balances never on Pages) |
+| Finances | Browser-local finance web app + validated private bundle | **Import in Finance**; Homebase updates automatically on the same device (balances never on Pages) |
 | Rituals / Memory / Pins / Tools | Local browser state | Memory **Drive vault** needs OAuth Client ID + Google sign-in |
 | Banks / Monarch / CPS etc. | Deep-links only | Sign in on those sites when you open them |
 

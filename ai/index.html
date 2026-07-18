@@ -1921,20 +1921,20 @@ var idb = {
 
 /* ============================ state ============================ */
 var DEFAULT_SETTINGS = {
-  theme: 'light',
+  theme: 'system',
   accent: '#4f46e5',
-  fontSize: 15,
+  fontSize: 16,
   provider: 'demo',
   model: 'demo',
   customModels: {},            // provider -> free-text model id
   modelCache: {},              // provider -> [ids] fetched from API
-  temperature: 0.7,
+  temperature: 0.3,
   maxTokens: 4096,
   thinking: false,
-  systemPrompt: '',
-  persona: 'assistant',
+  systemPrompt: 'Be concise, practical, and precise. Use Canadian and British Columbia context, metric units, and America/Vancouver time. Distinguish facts from inference; use current, authoritative sources for medical, financial, legal, and news questions. Protect personal financial data and never place balances or account details on public pages. Lead with the useful result and keep formatting easy to scan.',
+  persona: 'agent',
   injectMemory: true,
-  toolsDefault: false,
+  toolsDefault: true,
   webSearchTool: true,
   homeLocation: 'Surrey, BC',
   showCosts: true,
@@ -1943,11 +1943,11 @@ var DEFAULT_SETTINGS = {
   agentPlanFirst: true,
   memoryMaxInject: 14,
   memorySmartInject: true,
-  autoMemory: false,
-  uiMode: 'chat',
+  autoMemory: true,
+  uiMode: 'agent',
   councilOn: false,
   council: { mode: 'debate', members: [], synthesizer: null },
-  speech: { lang: 'en-US', voiceURI: '', rate: 1.0, engine: 'browser', openaiVoice: 'alloy' },
+  speech: { lang: 'en-CA', voiceURI: '', rate: 1.0, engine: 'browser', openaiVoice: 'nova' },
   baseURL: {},
   webllmModel: 'Llama-3.2-1B-Instruct-q4f16_1-MLC'
 };
@@ -2213,7 +2213,7 @@ var HUB_DEFAULTS = [
   { id:'agent', title:'Agent', desc:'Plans, tools, multi-step work', kind:'mode', mode:'agent', icon:'agent', color:'#d97706', enabled:true },
   { id:'research', title:'Research', desc:'Search, read, cite', kind:'mode', mode:'research', icon:'research', color:'#059669', enabled:true },
   { id:'dashboard', title:'Tesla Dashboard', desc:'Car HQ — weather, traffic, sports', kind:'link', url:'../', icon:'car', color:'#6366f1', enabled:true },
-  { id:'budget', title:'Budget Project', desc:'iCloud finances · cash & debt glance', kind:'action', action:'budget', icon:'bank', color:'#0f766e', enabled:true },
+  { id:'budget', title:'Finances', desc:'Private finance web app · synced on this device', kind:'link', url:'../finance/', icon:'bank', color:'#0f766e', enabled:true },
   { id:'finance', title:'Markets', desc:'XEQT & watchlist on Tesla Dashboard', kind:'link', url:'../', icon:'chart', color:'#2563eb', enabled:true },
   { id:'memory', title:'Memory vault', desc:'Personal context + Drive backup', kind:'action', action:'memory', icon:'memory', color:'#7c3aed', enabled:true },
   { id:'connect', title:'Connectors', desc:'Gmail, Calendar, GitHub, Drive…', kind:'action', action:'connectors', icon:'connect', color:'#0284c7', enabled:true },
@@ -2222,7 +2222,7 @@ var HUB_DEFAULTS = [
   { id:'calendar', title:'Calendar', desc:'Open Google Calendar', kind:'link', url:'https://calendar.google.com/', icon:'calendar', color:'#2563eb', enabled:true },
   { id:'mail', title:'Gmail', desc:'Inbox & compose', kind:'link', url:'https://mail.google.com/', icon:'mail', color:'#dc2626', enabled:true },
   { id:'pharmacy', title:'Clinical desk', desc:'Pharmacist persona + careful answers', kind:'action', action:'clinical', icon:'pharmacy', color:'#0d9488', enabled:true },
-  { id:'family', title:'Life & family', desc:'Notes for home logistics (uses memory)', kind:'action', action:'family', icon:'family', color:'#c026d3', enabled:false }
+  { id:'family', title:'Life & family', desc:'Notes for home logistics (uses memory)', kind:'action', action:'family', icon:'family', color:'#c026d3', enabled:true }
 ];
 
 function loadHubConfig(){
@@ -2239,6 +2239,12 @@ function loadHubConfig(){
           icon: byId[s.id].icon,
           kind: s.kind || byId[s.id].kind
         });
+        if (s.id === 'budget'){
+          byId[s.id] = Object.assign({}, byId[s.id], {
+            title:'Finances', desc:'Private finance web app · synced on this device',
+            kind:'link', url:'../finance/', action:null
+          });
+        }
         // allow custom overrides for custom modules
         if (String(s.id).indexOf('custom-') === 0){
           byId[s.id] = Object.assign({ icon:'link', color:'#64748b', kind:'link', enabled:true }, s);
@@ -2533,12 +2539,39 @@ async function fetchTextCors(url, timeoutMs, allowProxy){
   }
 }
 
+function pickOpenMeteoLocation(results, location){
+  results = results || [];
+  var raw = String(location || '');
+  var wantsBC = /\bBC\b|British Columbia/i.test(raw);
+  var wantsCanada = wantsBC || /\bCanada\b/i.test(raw);
+  var match;
+  if (wantsBC){
+    match = results.find(function(r){
+      return r.country_code === 'CA' && /British Columbia/i.test(r.admin1 || '');
+    });
+  }
+  if (!match && wantsCanada){
+    match = results.find(function(r){ return r.country_code === 'CA'; });
+  }
+  return match || results[0] || null;
+}
+
+async function fetchOpenMeteoLocation(location, timeoutMs){
+  var raw = String(location || '').trim() || 'Surrey, BC';
+  var city = raw.split(',')[0].replace(/\s+(?:BC|British Columbia|Canada)$/i, '').trim() || raw;
+  var geo = await fetchJsonCors(
+    'https://geocoding-api.open-meteo.com/v1/search?count=10&language=en&name=' + encodeURIComponent(city),
+    timeoutMs || 9000
+  );
+  var match = pickOpenMeteoLocation(geo.results, raw);
+  if (!match) throw new Error('location not found');
+  return match;
+}
+
 async function fetchLiveWeather(){
   var loc = ((connectorCfg('weather').location) || (S.settings && S.settings.homeLocation) || 'Surrey, BC').trim();
   try {
-    var geo = await fetchJsonCors('https://geocoding-api.open-meteo.com/v1/search?count=1&name=' + encodeURIComponent(loc), 9000);
-    if (!geo.results || !geo.results.length) throw new Error('location not found');
-    var g = geo.results[0];
+    var g = await fetchOpenMeteoLocation(loc, 9000);
     var wx = await fetchJsonCors(
       'https://api.open-meteo.com/v1/forecast?latitude=' + g.latitude + '&longitude=' + g.longitude +
       '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day' +
@@ -2831,6 +2864,37 @@ function loadFinanceGlance(){
 function saveFinanceGlance(g){
   FINANCE.glance = g;
   lsSet(LS_FINANCE, g);
+  try {
+    if (!window.__homebaseFinanceChannel) window.__homebaseFinanceChannel = new BroadcastChannel('homebase-sync-v1');
+    window.__homebaseFinanceChannel.postMessage({ type:'finance-glance-updated', glance:g, at:Date.now() });
+  } catch(e){}
+}
+
+function applySyncedFinanceGlance(g, quiet){
+  if (!g || g.schema !== 'homebase.finance_glance.v1') return false;
+  FINANCE.glance = g;
+  try { renderDashboard(); } catch(e){}
+  if (!quiet) try { toast('Finance card updated', 'ok', 1800); } catch(e){}
+  return true;
+}
+
+function initFinanceSync(){
+  window.addEventListener('storage', function(e){
+    if (e.key !== LS_FINANCE || !e.newValue) return;
+    try { applySyncedFinanceGlance(JSON.parse(e.newValue), false); } catch(err){}
+  });
+  window.addEventListener('message', function(e){
+    if (e.origin !== location.origin || !e.data || e.data.type !== 'homebase:finance-glance') return;
+    if (applySyncedFinanceGlance(e.data.glance, false)) lsSet(LS_FINANCE, e.data.glance);
+  });
+  try {
+    window.__homebaseFinanceChannel = new BroadcastChannel('homebase-sync-v1');
+    window.__homebaseFinanceChannel.onmessage = function(e){
+      if (!e.data) return;
+      if (e.data.type === 'finance-glance-updated') applySyncedFinanceGlance(e.data.glance || loadFinanceGlance(), false);
+      if (e.data.type === 'finance-glance-cleared') { FINANCE.glance = null; try { renderDashboard(); } catch(err){} }
+    };
+  } catch(e){}
 }
 async function tryLoadLocalFinanceFile(){
   // Optional same-origin local file (dev only; gitignored on Pages)
@@ -2881,7 +2945,9 @@ function flattenNews(newsObj, limit){
   var items = [];
   if (!newsObj) return items;
   Object.keys(newsObj).forEach(function(feed){
-    (newsObj[feed] || []).forEach(function(it){
+    var entry = newsObj[feed];
+    var feedItems = Array.isArray(entry) ? entry : (entry && Array.isArray(entry.items) ? entry.items : []);
+    feedItems.forEach(function(it){
       items.push({
         title: it.title || it,
         link: it.link || it.url || '',
@@ -2974,7 +3040,7 @@ function renderWeatherWidget(c, span){
 
 function renderBudgetWidget(span){
   var g = FINANCE.glance || loadFinanceGlance();
-  var extra = '<button type="button" class="linkish" data-act="budget-open">Open project</button>' +
+  var extra = '<button type="button" class="linkish" data-act="budget-open">Open finance app</button>' +
     '<button type="button" class="linkish" data-act="budget-import">Import</button>';
   if (!g || g.status === 'not_loaded' || (!g.kpis && !(g.accounts||[]).length)){
     var bodyEmpty = '<div class="d-empty">Private Budget Project glance (never published to GitHub Pages).</div>' +
@@ -3315,9 +3381,7 @@ function renderDashboard(){
       else if (a === 'connectors'){ renderConnectors(); $('connectors-ov').classList.add('open'); }
       else if (a === 'budget-open'){
         var g = FINANCE.glance || loadFinanceGlance() || {};
-        var hint = g.path_hint || connectorCfg('budget').pathHint || 'iCloud Drive / 03 - Finance / Budget Project / dashboard.html';
-        toast('Budget Project: ' + hint, null, 5200);
-        try { navigator.clipboard.writeText(hint); } catch(e){}
+        window.location.href = g.open_url || '../finance/';
       }
       else if (a === 'budget-import'){
         var inp = $('finance-file');
@@ -3414,6 +3478,7 @@ function goHomeDashboard(){
 }
 
 function initDashboardShell(){
+  initFinanceSync();
   applyDeviceClass();
   if ($('finance-file')) $('finance-file').addEventListener('change', function(){
     var f = this.files && this.files[0]; this.value = '';
@@ -4776,7 +4841,11 @@ var PROFILE_SEEDS = [
   { id:'seed-tech', text:'Comfortable with local LLMs (Ollama / LM Studio), GitHub, and browser-based tooling; prefers practical, high-quality UX for car and phone.', category:'preference', importance:3, pinned:false, tags:['tech'] },
   { id:'seed-units', text:'In Canada — prefer metric units (°C, km) unless asked otherwise.', category:'preference', importance:3, pinned:false, tags:['locale'] },
   { id:'seed-budget', text:'Household finances live in iCloud Drive under 03 - Finance / Budget Project (dashboard.html) and Documents/Money v2. Homebase Budget widget imports a private finance glance JSON — balances are not published to GitHub Pages.', category:'project', importance:4, pinned:true, tags:['finance','budget'] },
-  { id:'seed-tone', text:'Appreciates advanced, high-tech, professional product design — glanceable in the car, polished on desktop/phone.', category:'preference', importance:3, pinned:false, tags:['ux'] }
+  { id:'seed-tone', text:'Appreciates advanced, high-tech, professional product design — glanceable in the car, polished on desktop/phone.', category:'preference', importance:3, pinned:false, tags:['ux'] },
+  { id:'seed-communication', text:'Prefers clear, outcome-first, non-technical explanations with minimal jargon; important results should be easy to scan.', category:'preference', importance:4, pinned:false, tags:['communication','ux'] },
+  { id:'seed-finance-privacy', text:'Treat personal financial data as private: keep balances and detailed account data local or in private storage, never on public GitHub Pages.', category:'preference', importance:5, pinned:false, tags:['finance','privacy'] },
+  { id:'seed-timezone', text:'Default timezone is America/Vancouver (Pacific Time); use local Pacific dates and times unless another timezone is specified.', category:'location', importance:5, pinned:false, tags:['timezone','locale'] },
+  { id:'seed-workstation', text:'Uses a Mac and the Codex desktop app for local project work.', category:'fact', importance:3, pinned:false, tags:['mac','codex'] }
 ];
 function seedProfileMemories(){
   var applied = lsGet(LS_SEED, []) || [];
@@ -4978,7 +5047,7 @@ function stripForSpeech(md){
 /* ============================ providers ============================ */
 var PROVIDERS = {
   anthropic: { name:'Anthropic', kind:'anthropic', base:'https://api.anthropic.com/v1', needsKey:true, color:'#d97757',
-    keyHint:'sk-ant-…  (console.anthropic.com)',
+    keyHint:'sk-ant-…  (platform.claude.com)', keyUrl:'https://platform.claude.com/settings/keys',
     models:[
       {id:'claude-opus-4-8', label:'Claude Opus 4.8', vision:1, tools:1, think:'adaptive', cost:[5,25]},
       {id:'claude-sonnet-5', label:'Claude Sonnet 5', vision:1, tools:1, think:'adaptive', cost:[3,15]},
@@ -4989,7 +5058,7 @@ var PROVIDERS = {
       {id:'claude-sonnet-4-5', label:'Claude Sonnet 4.5', vision:1, tools:1, think:'budget', cost:[3,15]}
     ]},
   openai: { name:'OpenAI', kind:'openai', base:'https://api.openai.com/v1', needsKey:true, usage:true, fetchModels:true, color:'#10a37f',
-    keyHint:'sk-…  (platform.openai.com)',
+    keyHint:'sk-…  (platform.openai.com)', keyUrl:'https://platform.openai.com/settings/organization/api-keys',
     models:[
       {id:'gpt-5', label:'GPT-5', vision:1, tools:1, cost:[1.25,10]},
       {id:'gpt-5-mini', label:'GPT-5 mini', vision:1, tools:1, cost:[0.25,2]},
@@ -5000,7 +5069,7 @@ var PROVIDERS = {
       {id:'o3', label:'o3', vision:1, tools:1, cost:[2,8]}
     ]},
   google: { name:'Google Gemini', kind:'gemini', base:'https://generativelanguage.googleapis.com/v1beta', needsKey:true, fetchModels:true, color:'#4285f4',
-    keyHint:'AIza…  (aistudio.google.com)',
+    keyHint:'AIza…  (aistudio.google.com)', keyUrl:'https://aistudio.google.com/app/apikey',
     models:[
       {id:'gemini-2.5-pro', label:'Gemini 2.5 Pro', vision:1, tools:1, cost:[1.25,10]},
       {id:'gemini-2.5-flash', label:'Gemini 2.5 Flash', vision:1, tools:1, cost:[0.3,2.5]},
@@ -5008,7 +5077,7 @@ var PROVIDERS = {
       {id:'gemini-2.0-flash', label:'Gemini 2.0 Flash', vision:1, tools:1, cost:[0.1,0.4]}
     ]},
   groq: { name:'Groq', kind:'openai', base:'https://api.groq.com/openai/v1', needsKey:true, usage:true, fetchModels:true, color:'#f55036',
-    keyHint:'gsk_…  (console.groq.com — free tier)',
+    keyHint:'gsk_…  (console.groq.com — free tier)', keyUrl:'https://console.groq.com/keys',
     models:[
       {id:'llama-3.3-70b-versatile', label:'Llama 3.3 70B', tools:1, cost:[0.59,0.79]},
       {id:'llama-3.1-8b-instant', label:'Llama 3.1 8B', tools:1, cost:[0.05,0.08]},
@@ -5016,7 +5085,7 @@ var PROVIDERS = {
       {id:'qwen/qwen3-32b', label:'Qwen3 32B', tools:1, cost:[0.29,0.59]}
     ]},
   openrouter: { name:'OpenRouter', kind:'openai', base:'https://openrouter.ai/api/v1', needsKey:true, usage:true, fetchModels:true, color:'#8b5cf6',
-    keyHint:'sk-or-…  (openrouter.ai — hundreds of models)',
+    keyHint:'sk-or-…  (openrouter.ai — hundreds of models)', keyUrl:'https://openrouter.ai/settings/keys',
     models:[
       {id:'openrouter/auto', label:'Auto (best available)', tools:1},
       {id:'meta-llama/llama-3.3-70b-instruct', label:'Llama 3.3 70B', tools:1},
@@ -5024,20 +5093,20 @@ var PROVIDERS = {
       {id:'google/gemini-2.5-flash', label:'Gemini 2.5 Flash', vision:1, tools:1}
     ]},
   mistral: { name:'Mistral', kind:'openai', base:'https://api.mistral.ai/v1', needsKey:true, usage:true, fetchModels:true, color:'#fa5511',
-    keyHint:'(console.mistral.ai)',
+    keyHint:'(console.mistral.ai)', keyUrl:'https://console.mistral.ai/api-keys/',
     models:[
       {id:'mistral-large-latest', label:'Mistral Large', tools:1, cost:[2,6]},
       {id:'mistral-small-latest', label:'Mistral Small', tools:1, cost:[0.1,0.3]},
       {id:'pixtral-large-latest', label:'Pixtral Large', vision:1, tools:1, cost:[2,6]}
     ]},
-  deepseek: { name:'DeepSeek', kind:'openai', base:'https://api.deepseek.com/v1', needsKey:true, usage:true, color:'#4d6bfe',
-    keyHint:'(platform.deepseek.com)',
+  deepseek: { name:'DeepSeek', kind:'openai', base:'https://api.deepseek.com', needsKey:true, usage:true, fetchModels:true, color:'#4d6bfe',
+    keyHint:'(platform.deepseek.com)', keyUrl:'https://platform.deepseek.com/api_keys',
     models:[
-      {id:'deepseek-chat', label:'DeepSeek V3 Chat', tools:1, cost:[0.27,1.1]},
-      {id:'deepseek-reasoner', label:'DeepSeek R1 Reasoner', think:'native', cost:[0.55,2.19]}
+      {id:'deepseek-v4-flash', label:'DeepSeek V4 Flash', tools:1},
+      {id:'deepseek-v4-pro', label:'DeepSeek V4 Pro', tools:1, think:'native'}
     ]},
   xai: { name:'xAI Grok', kind:'openai', base:'https://api.x.ai/v1', needsKey:true, usage:true, fetchModels:true, color:'#1c1c1c',
-    keyHint:'xai-…  (console.x.ai)',
+    keyHint:'xai-…  (console.x.ai)', keyUrl:'https://console.x.ai/',
     models:[
       {id:'grok-4', label:'Grok 4', vision:1, tools:1, cost:[3,15]},
       {id:'grok-3', label:'Grok 3', tools:1, cost:[3,15]},
@@ -5578,11 +5647,9 @@ var TOOLS = [
     params:{ location:{type:'string', description:'City name, e.g. "Surrey, BC". Omit for the user\'s home location.'} }, required:[],
     run: async function(a){
       var loc = (a.location || S.settings.homeLocation || 'Vancouver').trim();
-      var geo = await withTimeout(function(sig){
-        return fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&name=' + encodeURIComponent(loc), {signal:sig}).then(function(r){ return r.json(); });
-      }, 9000);
-      if (!geo.results || !geo.results.length) return 'Error: location "' + loc + '" not found.';
-      var g = geo.results[0];
+      var g;
+      try { g = await fetchOpenMeteoLocation(loc, 9000); }
+      catch(e){ return 'Error: location "' + loc + '" not found.'; }
       var wx = await withTimeout(function(sig){
         return fetch('https://api.open-meteo.com/v1/forecast?latitude=' + g.latitude + '&longitude=' + g.longitude +
           '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m' +
@@ -7963,7 +8030,7 @@ function renderSettings(expandProvider){
 
 function renderProvidersPane(expand){
   var pane = $('pane-providers');
-  pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">🔒 Keys are stored only in this browser (localStorage) and sent only to the provider you pick. On shared computers, clear data when done.</div>';
+  pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">🔒 Use a dedicated, low-limit key in this personal browser. Keys are stored in localStorage and sent only to the provider you pick. Never use this on a shared device or commit keys to source control.</div>';
   PROVIDER_ORDER.forEach(function(p){
     var pr = PROVIDERS[p];
     if (pr.kind === 'demo') return;
@@ -8006,6 +8073,16 @@ function renderProvidersPane(expand){
     }
     var btns = document.createElement('div');
     btns.className = 'f-row';
+    if (pr.keyUrl){
+      var keyLink = document.createElement('a');
+      keyLink.className = 'sm-btn';
+      keyLink.href = pr.keyUrl;
+      keyLink.target = '_blank';
+      keyLink.rel = 'noopener';
+      keyLink.textContent = 'Get API key';
+      keyLink.style.textDecoration = 'none';
+      btns.appendChild(keyLink);
+    }
     var testB = document.createElement('button');
     testB.className = 'sm-btn'; testB.textContent = 'Test connection';
     testB.addEventListener('click', function(){ testProvider(p, testB); });
