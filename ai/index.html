@@ -962,6 +962,46 @@ a:hover{text-decoration:underline}
 .d-list a{color:var(--text); text-decoration:none; font-weight:550}
 .d-list a:hover{color:var(--acc)}
 .d-list .meta{font-size:11px; color:var(--text3)}
+.d-badge{
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:10px; font-weight:750; letter-spacing:.02em; text-transform:uppercase;
+  padding:2px 7px; border-radius:999px;
+  background:color-mix(in srgb, var(--ok,#16a34a) 16%, transparent);
+  color:var(--ok,#15803d); border:1px solid color-mix(in srgb, var(--ok,#16a34a) 22%, transparent);
+}
+.d-badge.cache{
+  background:color-mix(in srgb, var(--acc) 14%, transparent);
+  color:var(--acc); border-color:color-mix(in srgb, var(--acc) 22%, transparent);
+}
+.d-badge.warn{
+  background:color-mix(in srgb, #f59e0b 18%, transparent);
+  color:#b45309; border-color:color-mix(in srgb, #f59e0b 28%, transparent);
+}
+.d-badge.live::before{
+  content:""; width:6px; height:6px; border-radius:50%; background:currentColor;
+  box-shadow:0 0 0 3px color-mix(in srgb, currentColor 25%, transparent);
+}
+.d-fc{display:flex; gap:6px; margin-top:8px}
+.d-fc-day{
+  flex:1; text-align:center; padding:6px 4px; border-radius:10px;
+  background:var(--bg3); border:1px solid var(--border); font-size:11px; color:var(--text3);
+}
+.d-fc-day b{display:block; font-size:13px; margin-top:2px; color:var(--text); font-weight:700}
+.d-cams{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:2px}
+.d-cam{
+  border-radius:10px; overflow:hidden; border:1px solid var(--border);
+  background:var(--bg3); text-decoration:none; color:inherit; display:block;
+}
+.d-cam img{width:100%; height:76px; object-fit:cover; display:block; background:#0f172a}
+.d-cam .cap{
+  font-size:10.5px; padding:5px 7px; color:var(--text2); font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.d-cam .evt{
+  font-size:10px; padding:0 7px 5px; color:#b45309; font-weight:650;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.d-cond{font-size:13px; font-weight:650; color:var(--text); margin:2px 0 6px}
 
 .home-btn{
   display:inline-flex; align-items:center; gap:7px;
@@ -1144,11 +1184,37 @@ body.is-mobile .chat-float[data-state="expanded"]{
   max-width: none;
 }
 body.is-mobile .cf-head{
-  padding: 10px 8px calc(8px + env(safe-area-inset-top));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "brand actions"
+    "modes modes";
+  align-items: center;
+  gap: 8px 6px;
+  padding: 10px 8px 8px;
   padding-top: max(10px, env(safe-area-inset-top));
+  flex-wrap: nowrap;
+}
+body.is-mobile .cf-brand{ grid-area: brand; min-width: 0; }
+body.is-mobile .cf-actions{
+  grid-area: actions;
+  flex-wrap: nowrap;
+  max-width: 58vw;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+body.is-mobile .cf-modes{
+  grid-area: modes;
+  display: flex !important;
+  flex: none !important;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+  flex-wrap: nowrap;
   gap: 6px;
 }
-body.is-mobile .cf-modes{display:flex; width:100%; order:5; overflow-x:auto; padding-bottom:2px}
+body.is-mobile .cf-modes .mode-pill{ flex: none; white-space: nowrap; }
 body.is-mobile .cf-actions .m-prov, body.is-mobile .cf-actions #council-btn{display:none}
 body.is-mobile .chat-float #composer-wrap{
   padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
@@ -2114,6 +2180,8 @@ var ICON_SVG = {
   bolt: '<path d="M13 2.5 5.2 13.5h6.1L9.8 21.5 19 10.2h-5.8L14.5 2.5z" fill="currentColor" opacity=".18"/><path d="M13 2.5 5.2 13.5h6.1L9.8 21.5 19 10.2h-5.8L14.5 2.5z"/>',
   shield: '<path d="M12 3.2 4.8 6.2v5.1c0 4.6 3.1 8 7.2 9.2 4.1-1.2 7.2-4.6 7.2-9.2V6.2L12 3.2z" fill="currentColor" opacity=".15"/><path d="M12 3.2 4.8 6.2v5.1c0 4.6 3.1 8 7.2 9.2 4.1-1.2 7.2-4.6 7.2-9.2V6.2L12 3.2z"/><path d="M9.2 12.1 11.1 14l3.8-4"/>',
   camera: '<path d="M4 8.2h2.8l1.4-2h7.6l1.4 2H20a1.2 1.2 0 0 1 1.2 1.2v8.4A1.2 1.2 0 0 1 20 19H4a1.2 1.2 0 0 1-1.2-1.2V9.4A1.2 1.2 0 0 1 4 8.2z" fill="currentColor" opacity=".12"/><path d="M4 8.2h2.8l1.4-2h7.6l1.4 2H20a1.2 1.2 0 0 1 1.2 1.2v8.4A1.2 1.2 0 0 1 20 19H4a1.2 1.2 0 0 1-1.2-1.2V9.4A1.2 1.2 0 0 1 4 8.2z"/><circle cx="12" cy="13" r="3.1"/>',
+  weather: '<circle cx="12" cy="12" r="4" fill="currentColor" opacity=".15"/><circle cx="12" cy="12" r="4"/><path d="M12 3.2v1.8M12 19v1.8M3.2 12h1.8M19 12h1.8M5.6 5.6l1.3 1.3M17.1 17.1l1.3 1.3M5.6 18.4l1.3-1.3M17.1 6.9l1.3-1.3"/><path d="M16.5 15.2a3.6 3.6 0 1 0-1.1-7 4.4 4.4 0 0 0-8.2 1.4 3 3 0 0 0 .4 5.95"/>',
+  sports: '<circle cx="12" cy="12" r="8.2" fill="currentColor" opacity=".12"/><circle cx="12" cy="12" r="8.2"/><path d="M12 3.8c2.2 1.9 3.5 4.8 3.5 8.2S14.2 18.3 12 20.2c-2.2-1.9-3.5-4.8-3.5-8.2S9.8 5.7 12 3.8z"/><path d="M4.3 9.2h15.4M4.3 14.8h15.4"/>',
   bank_alt: '<path d="M4 10h16M6 10v8M10 10v8M14 10v8M18 10v8M3 18h18M12 4l8 5H4l8-5z"/>'
 };
 function iconSvg(name, size, opts){
@@ -2411,6 +2479,294 @@ var LS_FINANCE = 'homebase_finance_glance_v1';
 var LS_DASH_NOTES = 'homebase_dash_notes_v1';
 var DASH = { cache: null, loading: false, updated: 0 };
 var FINANCE = { glance: null };
+/** Live browser-side feeds (Open-Meteo, ESPN, iCal) — complements hourly Tesla Dashboard cache */
+var LIVE = {
+  weather: null,
+  scores: null,
+  calendar: null,
+  markets: null,
+  air: null,
+  updated: 0,
+  loading: false,
+  errors: {}
+};
+
+function liveBadge(kind){
+  if (kind === 'live') return '<span class="d-badge live">Live</span>';
+  if (kind === 'cache') return '<span class="d-badge cache">Cache</span>';
+  if (kind === 'local') return '<span class="d-badge cache">Local</span>';
+  if (kind === 'setup') return '<span class="d-badge warn">Setup</span>';
+  return '';
+}
+
+function proxyFetchUrl(url){
+  return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+}
+
+async function fetchJsonCors(url, timeoutMs){
+  timeoutMs = timeoutMs || 12000;
+  return withTimeout(function(sig){
+    return fetch(url, { signal: sig, mode: 'cors', cache: 'no-store' }).then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }, timeoutMs);
+}
+
+async function fetchTextCors(url, timeoutMs, allowProxy){
+  timeoutMs = timeoutMs || 14000;
+  try {
+    return await withTimeout(function(sig){
+      return fetch(url, { signal: sig, mode: 'cors', cache: 'no-store' }).then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      });
+    }, timeoutMs);
+  } catch(e){
+    if (!allowProxy) throw e;
+    return withTimeout(function(sig){
+      return fetch(proxyFetchUrl(url), { signal: sig, mode: 'cors', cache: 'no-store' }).then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      });
+    }, timeoutMs);
+  }
+}
+
+async function fetchLiveWeather(){
+  var loc = ((connectorCfg('weather').location) || (S.settings && S.settings.homeLocation) || 'Surrey, BC').trim();
+  try {
+    var geo = await fetchJsonCors('https://geocoding-api.open-meteo.com/v1/search?count=1&name=' + encodeURIComponent(loc), 9000);
+    if (!geo.results || !geo.results.length) throw new Error('location not found');
+    var g = geo.results[0];
+    var wx = await fetchJsonCors(
+      'https://api.open-meteo.com/v1/forecast?latitude=' + g.latitude + '&longitude=' + g.longitude +
+      '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day' +
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=4',
+      10000
+    );
+    var air = null;
+    try {
+      air = await fetchJsonCors(
+        'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + g.latitude + '&longitude=' + g.longitude +
+        '&current=us_aqi,pm2_5&timezone=auto',
+        8000
+      );
+    } catch(eAir){}
+    LIVE.weather = {
+      location: g.name + (g.admin1 ? ', ' + g.admin1 : ''),
+      current: wx.current || {},
+      daily: wx.daily || {},
+      air: air && air.current ? air.current : null,
+      source: 'open-meteo',
+      ts: Date.now()
+    };
+    LIVE.air = LIVE.weather.air;
+    delete LIVE.errors.weather;
+    return LIVE.weather;
+  } catch(e){
+    LIVE.errors.weather = e.message || String(e);
+    return null;
+  }
+}
+
+function parseEspnScoreboard(data, teamLabel, league, abbrs, nameHints){
+  var out = [];
+  abbrs = abbrs || [];
+  nameHints = nameHints || [];
+  (data.events || []).forEach(function(ev){
+    var c = (ev.competitions || [])[0];
+    if (!c) return;
+    var comps = c.competitors || [];
+    var home = null, away = null;
+    comps.forEach(function(x){
+      if (x.homeAway === 'home') home = x;
+      else if (x.homeAway === 'away') away = x;
+    });
+    if (!home) home = comps[0];
+    if (!away) away = comps[1] || comps[0];
+    if (!home || !away) return;
+    var hTeam = home.team || {};
+    var aTeam = away.team || {};
+    var pool = [
+      hTeam.abbreviation, aTeam.abbreviation,
+      hTeam.shortDisplayName, aTeam.shortDisplayName,
+      hTeam.displayName, aTeam.displayName,
+      hTeam.name, aTeam.name
+    ].map(function(s){ return String(s || '').toLowerCase(); });
+    var hit = abbrs.some(function(a){ return pool.indexOf(String(a).toLowerCase()) >= 0; }) ||
+      nameHints.some(function(n){
+        var nl = String(n).toLowerCase();
+        return pool.some(function(p){ return p.indexOf(nl) >= 0; });
+      });
+    if (!hit) return;
+    var st = (c.status && c.status.type) || {};
+    out.push({
+      team: teamLabel,
+      league: league,
+      home: {
+        abbr: hTeam.abbreviation || '?',
+        name: hTeam.shortDisplayName || hTeam.name || '?',
+        score: home.score != null ? String(home.score) : '-',
+        winner: !!home.winner
+      },
+      away: {
+        abbr: aTeam.abbreviation || '?',
+        name: aTeam.shortDisplayName || aTeam.name || '?',
+        score: away.score != null ? String(away.score) : '-',
+        winner: !!away.winner
+      },
+      state: st.state || '',
+      status: st.shortDetail || st.description || '',
+      live: true
+    });
+  });
+  return out;
+}
+
+async function fetchLiveScores(){
+  var specs = [
+    { team:'Blue Jays', league:'MLB', path:'baseball/mlb', abbrs:['TOR'], hints:['blue jays','jays'] },
+    { team:'Canucks', league:'NHL', path:'hockey/nhl', abbrs:['VAN'], hints:['canucks'] },
+    { team:'Raptors', league:'NBA', path:'basketball/nba', abbrs:['TOR'], hints:['raptors'] },
+    { team:'Whitecaps', league:'MLS', path:'soccer/usa.1', abbrs:['VAN'], hints:['whitecaps'] },
+    { team:'BC Lions', league:'CFL', path:'football/cfl', abbrs:['BC','BC L'], hints:['bc lions','lions'] }
+  ];
+  var results = [];
+  await Promise.all(specs.map(async function(spec){
+    try {
+      var data = await fetchJsonCors('https://site.api.espn.com/apis/site/v2/sports/' + spec.path + '/scoreboard', 10000);
+      var games = parseEspnScoreboard(data, spec.team, spec.league, spec.abbrs, spec.hints);
+      games.forEach(function(g){ results.push(g); });
+    } catch(e){}
+  }));
+  // Prefer in-progress, then today finals, keep one card per team when possible
+  results.sort(function(a, b){
+    var rank = function(g){
+      var s = (g.state || '').toLowerCase();
+      if (s === 'in') return 0;
+      if (s === 'pre') return 1;
+      return 2;
+    };
+    return rank(a) - rank(b);
+  });
+  if (results.length){
+    LIVE.scores = results;
+    delete LIVE.errors.scores;
+  } else {
+    LIVE.errors.scores = 'No team games on ESPN boards right now';
+  }
+  return results;
+}
+
+async function fetchLiveMarkets(){
+  // Yahoo often blocks browsers; try a few symbols, fall back to dashboard cache in render.
+  var symbols = ['XEQT.TO','VFV.TO','TSLA','AAPL','MSFT','NVDA','CADUSD=X','^GSPTSE'];
+  var out = {};
+  var ok = 0;
+  await Promise.all(symbols.map(async function(sym){
+    try {
+      var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?interval=1d&range=5d';
+      var data = null;
+      try {
+        data = await fetchJsonCors(url, 8000);
+      } catch(e1){
+        // proxy fallback
+        var txt = await fetchTextCors(url, 10000, true);
+        data = JSON.parse(txt);
+      }
+      var p = stockPrice(data);
+      if (p && p.price != null){ out[sym] = data; ok++; }
+    } catch(e){}
+  }));
+  if (ok){
+    LIVE.markets = out;
+    delete LIVE.errors.markets;
+  } else {
+    LIVE.errors.markets = 'Yahoo CORS/rate-limit — using Tesla Dashboard cache';
+  }
+  return out;
+}
+
+function parseIcalDate(raw){
+  if (!raw) return null;
+  raw = String(raw).trim();
+  // VALUE=DATE:20260718 or 20260718T180000Z / 20260718T180000
+  var m = raw.match(/(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?/);
+  if (!m) return null;
+  var y = +m[1], mo = +m[2] - 1, d = +m[3];
+  if (m[4] != null){
+    var hh = +m[4], mm = +m[5], ss = +m[6];
+    if (m[7] === 'Z') return new Date(Date.UTC(y, mo, d, hh, mm, ss));
+    return new Date(y, mo, d, hh, mm, ss);
+  }
+  return new Date(y, mo, d, 0, 0, 0);
+}
+
+function parseIcalEvents(text, limit){
+  limit = limit || 8;
+  if (!text) return [];
+  // unfold RFC 5545 folded lines
+  text = String(text).replace(/\r\n/g, '\n').replace(/\n[ \t]/g, '');
+  var blocks = text.split('BEGIN:VEVENT');
+  var events = [];
+  var now = Date.now() - 2 * 3600 * 1000; // include events started recently
+  for (var i = 1; i < blocks.length; i++){
+    var b = blocks[i].split('END:VEVENT')[0] || '';
+    var sum = (b.match(/(?:^|\n)SUMMARY[^:]*:(.+)/) || [])[1];
+    var dtRaw = (b.match(/(?:^|\n)DTSTART[^:]*:([^\n]+)/) || [])[1];
+    var loc = (b.match(/(?:^|\n)LOCATION[^:]*:(.+)/) || [])[1];
+    if (!sum) continue;
+    sum = sum.replace(/\\,/g, ',').replace(/\\n/g, ' ').replace(/\\;/g, ';').trim();
+    var start = parseIcalDate(dtRaw);
+    if (start && start.getTime() < now - 24 * 3600 * 1000) continue; // drop old
+    events.push({
+      title: sum,
+      start: start,
+      startMs: start ? start.getTime() : 0,
+      location: loc ? loc.replace(/\\,/g, ',').trim() : '',
+      raw: dtRaw || ''
+    });
+  }
+  events.sort(function(a, b){ return (a.startMs || 0) - (b.startMs || 0); });
+  return events.filter(function(e){ return !e.startMs || e.startMs >= now - 6 * 3600 * 1000; }).slice(0, limit);
+}
+
+async function fetchLiveCalendar(){
+  var cfg = connectorCfg('calendar') || {};
+  var ical = (cfg.ical || '').trim();
+  if (!ical){
+    LIVE.calendar = { events: [], needConfig: true, ts: Date.now() };
+    return LIVE.calendar;
+  }
+  try {
+    var text = await fetchTextCors(ical, 14000, true);
+    var events = parseIcalEvents(text, 8);
+    LIVE.calendar = { events: events, needConfig: false, ts: Date.now(), source: 'ical' };
+    delete LIVE.errors.calendar;
+    return LIVE.calendar;
+  } catch(e){
+    LIVE.errors.calendar = e.message || String(e);
+    LIVE.calendar = { events: [], needConfig: false, error: LIVE.errors.calendar, ts: Date.now() };
+    return LIVE.calendar;
+  }
+}
+
+async function refreshLiveModules(){
+  LIVE.loading = true;
+  try {
+    await Promise.all([
+      fetchLiveWeather(),
+      fetchLiveScores(),
+      fetchLiveCalendar(),
+      fetchLiveMarkets()
+    ]);
+    LIVE.updated = Date.now();
+  } finally {
+    LIVE.loading = false;
+  }
+  return LIVE;
+}
 
 function loadDashNotes(){
   var n = lsGet(LS_DASH_NOTES, []);
@@ -2574,22 +2930,46 @@ function widgetShell(title, icon, color, span, bodyHtml, extraHead){
 }
 
 function renderWeatherWidget(c, span){
-  var w = (c && c.weather && c.weather.current) || {};
+  var live = LIVE.weather;
+  var w = (live && live.current) || (c && c.weather && c.weather.current) || {};
+  var src = live && live.current && live.current.temperature_2m != null ? 'live' : (w.temperature_2m != null ? 'cache' : null);
   var temp = w.temperature_2m;
   var feels = w.apparent_temperature;
   var hum = w.relative_humidity_2m;
   var wind = w.wind_speed_10m;
-  var body = (temp == null)
-    ? '<div class="d-empty">Weather unavailable — open Tesla Dashboard</div>'
-    : '<div class="d-metric">'+esc(String(temp))+'°C<small>feels '+esc(String(feels))+'°</small></div>' +
+  var code = w.weather_code;
+  var loc = (live && live.location) || ((S.settings && S.settings.homeLocation) || 'Surrey, BC');
+  var cond = (typeof WMO_CODES !== 'undefined' && WMO_CODES[code]) ? WMO_CODES[code] : '';
+  var air = (live && live.air) || (c && c.air && c.air.current) || null;
+  var body;
+  if (temp == null){
+    body = '<div class="d-empty">Weather unavailable — check network or open Tesla Dashboard</div>';
+  } else {
+    body = '<div class="d-metric">'+esc(String(temp))+'°C<small>feels '+esc(String(feels))+'°</small></div>' +
+      (cond ? '<div class="d-cond">'+esc(cond)+'</div>' : '') +
       '<div class="d-chips">' +
-        '<span class="d-chip">Humidity '+esc(String(hum))+'%</span>' +
-        '<span class="d-chip">Wind '+esc(String(wind))+' km/h</span>' +
-        '<span class="d-chip">Surrey / Metro</span>' +
+        '<span class="d-chip">'+esc(loc)+'</span>' +
+        (hum != null ? '<span class="d-chip">Humidity '+esc(String(hum))+'%</span>' : '') +
+        (wind != null ? '<span class="d-chip">Wind '+esc(String(wind))+' km/h</span>' : '') +
+        (air && air.us_aqi != null ? '<span class="d-chip">AQI '+esc(String(air.us_aqi))+'</span>' : '') +
       '</div>';
-  return widgetShell('Weather', 'spark', '#0284c7', span,
+    var daily = (live && live.daily) || (c && c.forecast && c.forecast.daily) || null;
+    if (daily && daily.time && daily.time.length){
+      body += '<div class="d-fc">';
+      for (var i = 0; i < Math.min(3, daily.time.length); i++){
+        var dayLabel = String(daily.time[i]).slice(5); // MM-DD
+        var hi = daily.temperature_2m_max ? daily.temperature_2m_max[i] : '–';
+        var lo = daily.temperature_2m_min ? daily.temperature_2m_min[i] : '–';
+        var pr = daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : null;
+        body += '<div class="d-fc-day">'+esc(dayLabel)+'<b>'+esc(String(lo))+'–'+esc(String(hi))+'°</b>'+
+          (pr != null ? esc(String(pr))+'% rain' : '')+'</div>';
+      }
+      body += '</div>';
+    }
+  }
+  return widgetShell('Weather', 'weather', '#0284c7', span,
     body,
-    '<a href="../" target="_blank" rel="noopener">Dashboard</a>');
+    liveBadge(src || 'setup') + ' <button type="button" class="linkish" data-act="weather-refresh">Refresh</button>');
 }
 
 function renderBudgetWidget(span){
@@ -2597,48 +2977,58 @@ function renderBudgetWidget(span){
   var extra = '<button type="button" class="linkish" data-act="budget-open">Open project</button>' +
     '<button type="button" class="linkish" data-act="budget-import">Import</button>';
   if (!g || g.status === 'not_loaded' || (!g.kpis && !(g.accounts||[]).length)){
-    var body = '<div class="d-empty">Pederson Budget Project (iCloud → 03 - Finance → Budget Project)</div>' +
+    var bodyEmpty = '<div class="d-empty">Private Budget Project glance (never published to GitHub Pages).</div>' +
       '<div class="d-chips" style="margin-top:8px">' +
       '<button type="button" class="d-chip" data-act="budget-import">Import glance JSON</button>' +
-      '<button type="button" class="d-chip" data-act="budget-open">Show path</button>' +
-      '</div>';
-    return widgetShell('Budget & cash', 'bank', '#0f766e', span, body, extra);
+      '<button type="button" class="d-chip" data-act="budget-open">Show iCloud path</button>' +
+      '<a class="d-chip" href="./finance-glance.template.json" target="_blank" rel="noopener">Template</a>' +
+      '</div>' +
+      '<div class="d-empty" style="margin-top:6px">Banks (RBC/BMO/Monarch) open via Connectors — no public bank API in-browser.</div>';
+    return widgetShell('Budget & cash', 'bank', '#0f766e', span, bodyEmpty, liveBadge('setup') + extra);
   }
   var k = g.kpis || {};
   var lines = [];
-  if (k.projected_income) lines.push('<div class="d-row"><span>July income</span><span class="up">'+esc(String(k.projected_income))+'</span></div>');
-  if (k.projected_expenses) lines.push('<div class="d-row"><span>July expenses</span><span class="down">'+esc(String(k.projected_expenses))+'</span></div>');
-  if (k.projected_cash_net) lines.push('<div class="d-row"><span>Cash net</span><span>'+esc(String(k.projected_cash_net))+'</span></div>');
+  if (k.projected_income != null && k.projected_income !== '') lines.push('<div class="d-row"><span>Projected income</span><span class="up">'+esc(String(k.projected_income))+'</span></div>');
+  if (k.projected_expenses != null && k.projected_expenses !== '') lines.push('<div class="d-row"><span>Projected expenses</span><span class="down">'+esc(String(k.projected_expenses))+'</span></div>');
+  if (k.projected_cash_net != null && k.projected_cash_net !== '') lines.push('<div class="d-row"><span>Cash net</span><span>'+esc(String(k.projected_cash_net))+'</span></div>');
   if (k.safe_to_spend_cad != null) lines.push('<div class="d-row"><span>Safe to spend</span><span class="up">$'+esc(String(k.safe_to_spend_cad))+'</span></div>');
-  (g.accounts || []).slice(0,4).forEach(function(a){
+  (g.accounts || []).slice(0,5).forEach(function(a){
     var amt = a.amount_cad != null ? ('$'+Number(a.amount_cad).toLocaleString('en-CA',{minimumFractionDigits:2, maximumFractionDigits:2})) : '—';
     lines.push('<div class="d-row"><span>'+esc(a.account||'Account')+'</span><span class="num">'+esc(amt)+'</span></div>');
   });
   if (g.status) lines.push('<div class="d-row"><span>System</span><span class="meta">'+esc(String(g.status))+'</span></div>');
   if ((g.alerts||[]).length) lines.push('<div class="d-empty" style="margin-top:6px">⚠ '+esc(String(g.alerts[0]).slice(0,120))+'</div>');
   var body = lines.length ? lines.join('') : '<div class="d-empty">Glance loaded but empty</div>';
-  var head = '<span class="meta" style="font-size:10px">'+esc((g.as_of||'').slice(0,10))+'</span>';
+  var head = liveBadge('local') + ' <span class="meta" style="font-size:10px">'+esc((g.as_of||'').slice(0,10))+'</span> ';
   return widgetShell('Budget & cash', 'bank', '#0f766e', span, body, head + extra);
 }
 
 function renderFinanceWidget(c, span){
-  var stocks = (c && c.stocks) || {};
-  var prefer = ['XEQT.TO','XGRO.TO','VGRO.TO','VFV.TO','TSLA','AAPL','MSFT','NVDA'];
+  var liveStocks = LIVE.markets || {};
+  var cacheStocks = (c && c.stocks) || {};
+  var stocks = {};
+  Object.keys(cacheStocks).forEach(function(k){ stocks[k] = cacheStocks[k]; });
+  Object.keys(liveStocks).forEach(function(k){ stocks[k] = liveStocks[k]; }); // live wins
+  var usedLive = Object.keys(liveStocks).length > 0;
+  var prefer = ['XEQT.TO','XGRO.TO','VGRO.TO','VFV.TO','TSLA','AAPL','MSFT','NVDA','CADUSD=X','^GSPTSE'];
   var rows = [];
+  var seen = {};
   prefer.forEach(function(sym){
     if (!stocks[sym]) return;
     var p = stockPrice(stocks[sym]);
     if (!p || p.price == null) return;
+    seen[sym] = 1;
     var chg = (p.prev != null && p.prev !== 0) ? ((p.price - p.prev) / p.prev * 100) : null;
     var cls = chg == null ? '' : (chg >= 0 ? 'up' : 'down');
     var chgS = chg == null ? '' : ((chg>=0?'+':'') + chg.toFixed(2) + '%');
-    rows.push('<div class="d-row"><span>'+esc(p.symbol)+'</span><span><b>'+esc(String(p.price))+'</b> <span class="'+cls+'">'+esc(chgS)+'</span></span></div>');
+    var label = p.symbol === 'CADUSD=X' ? 'USD/CAD≈' : (p.symbol === '^GSPTSE' ? 'TSX' : p.symbol);
+    var priceStr = (typeof p.price === 'number') ? p.price.toFixed(p.price < 5 ? 4 : 2) : String(p.price);
+    rows.push('<div class="d-row"><span>'+esc(label)+'</span><span><b>'+esc(priceStr)+'</b> <span class="'+cls+'">'+esc(chgS)+'</span></span></div>');
   });
-  // fill from remaining
-  if (rows.length < 4){
+  if (rows.length < 5){
     Object.keys(stocks).forEach(function(sym){
-      if (prefer.indexOf(sym) >= 0) return;
-      if (rows.length >= 6) return;
+      if (seen[sym]) return;
+      if (rows.length >= 7) return;
       var p = stockPrice(stocks[sym]);
       if (!p || p.price == null) return;
       var chg = (p.prev != null && p.prev !== 0) ? ((p.price - p.prev) / p.prev * 100) : null;
@@ -2647,9 +3037,10 @@ function renderFinanceWidget(c, span){
       rows.push('<div class="d-row"><span>'+esc(p.symbol)+'</span><span><b>'+esc(String(p.price))+'</b> <span class="'+cls+'">'+esc(chgS)+'</span></span></div>');
     });
   }
-  var body = rows.length ? rows.join('') : '<div class="d-empty">No market data yet</div>';
+  var body = rows.length ? rows.join('') : '<div class="d-empty">No market data yet — refresh or open Tesla Dashboard</div>';
   return widgetShell('Markets', 'chart', '#2563eb', span, body,
-    '<a href="../" target="_blank" rel="noopener">Dashboard</a>');
+    liveBadge(usedLive ? 'live' : (rows.length ? 'cache' : 'setup')) +
+    ' <a href="../" target="_blank" rel="noopener">Dashboard</a>');
 }
 
 function renderNewsWidget(c, span){
@@ -2660,23 +3051,33 @@ function renderNewsWidget(c, span){
         var link = it.link ? '<a href="'+esc(it.link)+'" target="_blank" rel="noopener">'+t+'</a>' : t;
         return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px">'+link+'<span class="meta">'+esc(it.source)+'</span></div>';
       }).join('')+'</div>'
-    : '<div class="d-empty">No headlines cached</div>';
+    : '<div class="d-empty">No headlines — refresh dashboard cache</div>';
   return widgetShell('News', 'research', '#4f46e5', span, body,
-    '<a href="../" target="_blank" rel="noopener">More</a>');
+    liveBadge(items.length ? 'cache' : 'setup') +
+    ' <a href="../" target="_blank" rel="noopener">More</a>');
 }
 
 function renderScoresWidget(c, span){
-  var scores = (c && c.scores) || [];
+  var scores = (LIVE.scores && LIVE.scores.length) ? LIVE.scores : ((c && c.scores) || []);
+  var src = (LIVE.scores && LIVE.scores.length) ? 'live' : (scores.length ? 'cache' : null);
   var body = scores.length
-    ? scores.slice(0,5).map(function(g){
+    ? scores.slice(0,6).map(function(g){
         var home = g.home || {}; var away = g.away || {};
         var line = (away.abbr || away.name || '?') + ' ' + (away.score != null ? away.score : '-') +
           ' @ ' + (home.abbr || home.name || '?') + ' ' + (home.score != null ? home.score : '-');
-        return '<div class="d-row"><span>'+esc(g.team || g.league || 'Game')+'</span><span>'+esc(line)+'</span></div>';
+        var st = g.status || g.state || '';
+        return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
+          '<span style="width:100%;display:flex;justify-content:space-between;gap:8px"><b>'+esc(g.team || g.league || 'Game')+'</b><span>'+esc(line)+'</span></span>' +
+          (st ? '<span class="meta">'+esc(String(st))+(g.league ? ' · '+esc(g.league) : '')+'</span>' : '') +
+          '</div>';
       }).join('')
-    : '<div class="d-empty">No live scores</div>';
-  return widgetShell('My teams', 'spark', '#ea580c', span, body,
-    '<a href="../" target="_blank" rel="noopener">Sports</a>');
+    : '<div class="d-empty">No games for Jays / Canucks / Raptors / Whitecaps / Lions right now</div>' +
+      '<div class="d-chips" style="margin-top:8px">' +
+      '<a class="d-chip" href="https://www.espn.com/" target="_blank" rel="noopener">ESPN</a>' +
+      '<a class="d-chip" href="https://www.sportsnet.ca/" target="_blank" rel="noopener">Sportsnet</a></div>';
+  return widgetShell('My teams', 'sports', '#ea580c', span, body,
+    liveBadge(src || 'setup') +
+    ' <button type="button" class="linkish" data-act="scores-refresh">Refresh</button>');
 }
 
 function renderPharmacyWidget(c, span){
@@ -2685,76 +3086,172 @@ function renderPharmacyWidget(c, span){
     ? items.map(function(it){
         var t = esc(it.title);
         return '<div class="d-row" style="flex-direction:column;align-items:flex-start">'+
-          (it.link ? '<a href="'+esc(it.link)+'" target="_blank" rel="noopener">'+t+'</a>' : t)+'</div>';
+          (it.link ? '<a href="'+esc(it.link)+'" target="_blank" rel="noopener">'+t+'</a>' : t)+
+          (it.source ? '<span class="meta">'+esc(it.source)+'</span>' : '')+'</div>';
       }).join('')
-    : '<div class="d-empty">No pharmacy feeds</div>';
+    : '<div class="d-empty">No clinical RSS in cache yet</div>';
+  body += '<div class="d-chips" style="margin-top:8px">' +
+    '<button type="button" class="d-chip" data-act="clinical">Clinical desk</button>' +
+    '<a class="d-chip" href="https://health-products.canada.ca/dpd-bdpp/" target="_blank" rel="noopener">Health Canada DPD</a>' +
+    '<a class="d-chip" href="https://www.rxfiles.ca/" target="_blank" rel="noopener">RxFiles</a></div>';
   return widgetShell('Clinical updates', 'pharmacy', '#0d9488', span, body,
-    '<button type="button" class="linkish" data-act="clinical">Open desk</button>');
+    liveBadge(items.length ? 'cache' : 'setup'));
 }
 
 function renderTasksWidget(span){
-  var tasks = (S.tasks || []).filter(function(t){ return t.enabled !== false; }).slice(0,5);
+  var tasks = (S.tasks || []).filter(function(t){ return t.enabled !== false; }).slice(0,6);
   var body = tasks.length
     ? tasks.map(function(t){
-        return '<div class="d-row"><span>'+esc(t.name)+'</span><span class="meta">'+esc(describeSchedule(t))+'</span></div>';
+        var next = t.nextRun ? fmtDateTime(t.nextRun) : '—';
+        return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
+          '<span style="width:100%;display:flex;justify-content:space-between;gap:8px"><span>'+esc(t.name)+'</span><span class="meta">'+esc(describeSchedule(t))+'</span></span>' +
+          '<span class="meta">Next: '+esc(next)+'</span></div>';
       }).join('')
-    : '<div class="d-empty">No active scheduled tasks</div>';
+    : '<div class="d-empty">No active rituals — add daily briefs or reminders</div>' +
+      '<div class="d-chips" style="margin-top:8px"><button type="button" class="d-chip" data-act="tasks">Add task</button></div>';
   return widgetShell('Rituals & tasks', 'tasks', '#d97706', span, body,
-    '<button type="button" class="linkish" data-act="tasks">Manage</button>');
+    liveBadge('local') + ' <button type="button" class="linkish" data-act="tasks">Manage</button>');
 }
 
 function renderMemoryWidget(span){
   var mems = (S.memory || []).slice().sort(function(a,b){
     return (b.pinned?1:0)-(a.pinned?1:0) || (b.importance||0)-(a.importance||0);
   }).slice(0,4);
+  var vaultOn = !!(connectorCfg('drive').clientId);
   var body = mems.length
     ? mems.map(function(m){
         return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px"><span>'+esc(m.text)+'</span><span class="meta">'+esc(m.category||'fact')+(m.pinned?' · pinned':'')+'</span></div>';
       }).join('')
     : '<div class="d-empty">Memory is empty — teach Homebase about you</div>';
+  body += '<div class="d-chips" style="margin-top:8px"><button type="button" class="d-chip" data-act="memory">Open vault</button>' +
+    (vaultOn ? '<span class="d-chip">Drive OAuth configured</span>' : '<span class="d-chip">Drive sync needs Client ID</span>') + '</div>';
   return widgetShell('Memory', 'memory', '#7c3aed', span, body,
-    '<button type="button" class="linkish" data-act="memory">Vault</button>');
+    liveBadge('local') + ' <button type="button" class="linkish" data-act="memory">Vault</button>');
 }
 
 function renderCalendarWidget(span){
-  var body = '<div class="d-empty">Connect Google Calendar (iCal) in Connectors for live events, or open Calendar.</div>' +
-    '<div class="d-chips" style="margin-top:8px"><button type="button" class="d-chip" data-act="calendar">Open Calendar</button></div>';
-  // async fill later if ical configured - keep sync for first paint
-  return widgetShell('Calendar', 'calendar', '#2563eb', span, body, '');
+  var cal = LIVE.calendar;
+  var body, badge;
+  if (!cal || cal.needConfig){
+    badge = 'setup';
+    body = '<div class="d-empty">Paste a Google Calendar <b>secret iCal URL</b> in Connectors → Google Calendar for live events on this board.</div>' +
+      '<div class="d-chips" style="margin-top:8px">' +
+      '<button type="button" class="d-chip" data-act="calendar">Open Calendar</button>' +
+      '<button type="button" class="d-chip" data-act="connectors">Connectors</button>' +
+      '<button type="button" class="d-chip" data-act="cal-refresh">Retry</button></div>';
+  } else if (cal.error && !(cal.events || []).length){
+    badge = 'setup';
+    body = '<div class="d-empty">Could not load iCal: '+esc(cal.error)+'</div>' +
+      '<div class="d-chips" style="margin-top:8px"><button type="button" class="d-chip" data-act="cal-refresh">Retry</button>' +
+      '<button type="button" class="d-chip" data-act="calendar">Open Calendar</button></div>';
+  } else if (!(cal.events || []).length){
+    badge = 'live';
+    body = '<div class="d-empty">No upcoming events in the next window.</div>' +
+      '<div class="d-chips" style="margin-top:8px"><button type="button" class="d-chip" data-act="calendar">Open Calendar</button></div>';
+  } else {
+    badge = 'live';
+    body = cal.events.slice(0, 6).map(function(ev){
+      var when = ev.start ? fmtDateTime(ev.start) : (ev.raw || '');
+      return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px">' +
+        '<span><b>'+esc(ev.title)+'</b></span>' +
+        '<span class="meta">'+esc(when)+(ev.location ? ' · '+esc(ev.location) : '')+'</span></div>';
+    }).join('');
+  }
+  return widgetShell('Calendar', 'calendar', '#2563eb', span, body,
+    liveBadge(badge) + ' <button type="button" class="linkish" data-act="cal-refresh">Refresh</button>');
 }
 
 function renderLinksWidget(span){
-  var mods = hubModulesEnabled().filter(function(m){ return m.kind === 'link' || String(m.id).indexOf('custom-')===0; }).slice(0, 8);
-  var body = mods.length
-    ? '<div class="d-chips">'+mods.map(function(m){
-        return '<button type="button" class="d-chip" data-hub="'+esc(m.id)+'">'+esc(m.title)+'</button>';
-      }).join('')+'</div>'
-    : '<div class="d-empty">Add custom links in Settings → Hub</div>';
+  var mods = hubModulesEnabled().filter(function(m){ return m.kind === 'link' || String(m.id).indexOf('custom-')===0; }).slice(0, 10);
+  var quick = [
+    { t:'Gmail', u:'https://mail.google.com/' },
+    { t:'Calendar', u:'https://calendar.google.com/' },
+    { t:'Drive', u:'https://drive.google.com/' },
+    { t:'Maps', u:'https://www.google.com/maps/search/' + encodeURIComponent((S.settings && S.settings.homeLocation) || 'Surrey, BC') },
+    { t:'DriveBC', u:'https://www.drivebc.ca/' },
+    { t:'WhatsApp', u:'https://web.whatsapp.com/' }
+  ];
+  var body = '';
+  if (mods.length){
+    body += '<div class="d-chips">'+mods.map(function(m){
+      return '<button type="button" class="d-chip" data-hub="'+esc(m.id)+'">'+esc(m.title)+'</button>';
+    }).join('')+'</div>';
+  }
+  body += '<div class="d-chips" style="margin-top:8px">'+quick.map(function(q){
+    return '<a class="d-chip" href="'+esc(q.u)+'" target="_blank" rel="noopener">'+esc(q.t)+'</a>';
+  }).join('')+'</div>';
+  if (!mods.length) body = '<div class="d-empty">Hub links + everyday tools</div>' + body;
   return widgetShell('Your tools', 'link', '#4f46e5', span, body,
-    '<button type="button" class="linkish" data-act="hub">Edit</button>');
+    liveBadge('local') + ' <button type="button" class="linkish" data-act="hub">Edit</button>');
 }
 
 function renderTrafficWidget(c, span){
   var cams = (c && c.cameras) || [];
-  var fav = cams.slice(0, 4);
-  var body = fav.length
-    ? fav.map(function(cam){
-        return '<div class="d-row"><span>'+esc(cam.name || ('Cam '+cam.id))+'</span><span class="meta">DriveBC</span></div>';
-      }).join('') + '<div class="d-chips" style="margin-top:8px"><a class="d-chip" href="../" target="_blank" rel="noopener">Open traffic board</a></div>'
-    : '<div class="d-empty">Traffic cams load from Tesla Dashboard cache</div>';
-  return widgetShell('Traffic', 'car', '#6366f1', span, body, '');
+  // Prefer cams with active events, then first few
+  var ranked = cams.slice().sort(function(a, b){
+    return ((b.events && b.events.length) || 0) - ((a.events && a.events.length) || 0);
+  });
+  var fav = ranked.slice(0, 4);
+  var incidents = [];
+  cams.forEach(function(cam){
+    (cam.events || []).slice(0, 2).forEach(function(ev){
+      if (incidents.length >= 3) return;
+      incidents.push({
+        road: ev.road || cam.name,
+        desc: ev.desc || ev.type || 'Event',
+        sev: ev.severity || ''
+      });
+    });
+  });
+  var body = '';
+  if (fav.length){
+    body += '<div class="d-cams">'+fav.map(function(cam){
+      var url = cam.url || ('https://www.drivebc.ca/images/' + cam.id + '.jpg');
+      var bust = (DASH.updated ? ('?t=' + DASH.updated) : ('?t=' + Date.now()));
+      var ev0 = (cam.events && cam.events[0]) ? cam.events[0] : null;
+      return '<a class="d-cam" href="https://www.drivebc.ca/" target="_blank" rel="noopener" title="'+esc(cam.caption || cam.name || '')+'">' +
+        '<img src="'+esc(url + bust)+'" alt="'+esc(cam.name || 'Camera')+'" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.opacity=.3">' +
+        '<div class="cap">'+esc(cam.name || ('Cam '+cam.id))+'</div>' +
+        (ev0 ? '<div class="evt">'+esc((ev0.severity ? ev0.severity + ' · ' : '') + (ev0.type || '') + (ev0.desc ? ': ' + String(ev0.desc).slice(0,48) : ''))+'</div>' : '') +
+        '</a>';
+    }).join('')+'</div>';
+  } else {
+    body += '<div class="d-empty">Traffic cams load from Tesla Dashboard cache (DriveBC)</div>';
+  }
+  if (incidents.length){
+    body += incidents.map(function(inc){
+      return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px;margin-top:6px">' +
+        '<span><b>'+esc(inc.road)+'</b>'+(inc.sev ? ' <span class="d-badge warn">'+esc(inc.sev)+'</span>' : '')+'</span>' +
+        '<span class="meta">'+esc(String(inc.desc).slice(0,110))+'</span></div>';
+    }).join('');
+  }
+  body += '<div class="d-chips" style="margin-top:8px">' +
+    '<a class="d-chip" href="../" target="_blank" rel="noopener">Traffic board</a>' +
+    '<a class="d-chip" href="https://www.drivebc.ca/" target="_blank" rel="noopener">DriveBC</a></div>';
+  return widgetShell('Traffic', 'car', '#6366f1', span, body,
+    liveBadge(fav.length ? 'cache' : 'setup'));
 }
 
 function renderUpdatesWidget(c, span){
   var lines = [];
   if (c && c.updated) lines.push('Dashboard cache: ' + c.updated);
-  if (DASH.updated) lines.push('Homebase refreshed: ' + fmtDateTime(DASH.updated));
+  if (DASH.updated) lines.push('Cache pulled: ' + fmtDateTime(DASH.updated));
+  if (LIVE.updated) lines.push('Live APIs: ' + fmtDateTime(LIVE.updated));
+  var liveBits = [];
+  if (LIVE.weather) liveBits.push('weather');
+  if (LIVE.scores && LIVE.scores.length) liveBits.push('scores');
+  if (LIVE.calendar && !LIVE.calendar.needConfig) liveBits.push('calendar');
+  if (LIVE.markets && Object.keys(LIVE.markets).length) liveBits.push('markets');
+  if (liveBits.length) lines.push('Live modules: ' + liveBits.join(', '));
+  var errs = Object.keys(LIVE.errors || {});
+  if (errs.length) lines.push('Notes: ' + errs.map(function(k){ return k + ' (' + LIVE.errors[k] + ')'; }).join('; ').slice(0, 160));
   var nConn = CONNECTOR_DEFS.filter(function(d){ return connectorOn(d.id); }).length;
   lines.push(nConn + ' connectors enabled');
-  lines.push((S.memory || []).length + ' memories · ' + (S.tasks || []).length + ' tasks');
+  lines.push((S.memory || []).length + ' memories · ' + (S.tasks || []).length + ' tasks · ' + loadDashNotes().length + ' pins');
   var body = lines.map(function(l){ return '<div class="d-row"><span>'+esc(l)+'</span></div>'; }).join('');
   return widgetShell('System', 'settings', '#64748b', span, body,
-    '<button type="button" class="linkish" data-act="connectors">Connectors</button>');
+    liveBadge(LIVE.updated ? 'live' : 'cache') +
+    ' <button type="button" class="linkish" data-act="connectors">Connectors</button>');
 }
 
 function renderPinsWidget(span){
@@ -2818,13 +3315,30 @@ function renderDashboard(){
       else if (a === 'connectors'){ renderConnectors(); $('connectors-ov').classList.add('open'); }
       else if (a === 'budget-open'){
         var g = FINANCE.glance || loadFinanceGlance() || {};
-        var hint = g.path_hint || 'iCloud Drive / 03 - Finance / Budget Project / dashboard.html';
+        var hint = g.path_hint || connectorCfg('budget').pathHint || 'iCloud Drive / 03 - Finance / Budget Project / dashboard.html';
         toast('Budget Project: ' + hint, null, 5200);
         try { navigator.clipboard.writeText(hint); } catch(e){}
       }
       else if (a === 'budget-import'){
         var inp = $('finance-file');
         if (inp) inp.click();
+      }
+      else if (a === 'weather-refresh'){
+        toast('Refreshing weather…', null, 1400);
+        fetchLiveWeather().then(function(){ renderDashboard(); toast('Weather updated', 'ok', 1600); })
+          .catch(function(e){ toast(e.message || 'Weather failed', 'err'); });
+      }
+      else if (a === 'scores-refresh'){
+        toast('Refreshing scores…', null, 1400);
+        fetchLiveScores().then(function(){ renderDashboard(); toast((LIVE.scores && LIVE.scores.length ? LIVE.scores.length + ' games' : 'No team games'), 'ok', 1800); })
+          .catch(function(e){ toast(e.message || 'Scores failed', 'err'); });
+      }
+      else if (a === 'cal-refresh'){
+        toast('Refreshing calendar…', null, 1400);
+        fetchLiveCalendar().then(function(){ renderDashboard();
+          var n = (LIVE.calendar && LIVE.calendar.events && LIVE.calendar.events.length) || 0;
+          toast(LIVE.calendar && LIVE.calendar.needConfig ? 'Add iCal URL in Connectors' : (n + ' events'), n || (LIVE.calendar && LIVE.calendar.needConfig) ? 'warn' : 'ok', 2200);
+        }).catch(function(e){ toast(e.message || 'Calendar failed', 'err'); });
       }
     });
   });
@@ -2840,17 +3354,30 @@ function renderDashboard(){
 async function refreshDashboard(opts){
   opts = opts || {};
   try {
-    if ($('dash-stamp')) $('dash-stamp').textContent = 'Refreshing…';
-    await fetchDashboardCache();
+    if ($('dash-stamp')) $('dash-stamp').textContent = 'Refreshing live + cache…';
+    var cachePromise = fetchDashboardCache().catch(function(e){ return { __err: e }; });
+    var livePromise = refreshLiveModules().catch(function(e){ return { __err: e }; });
+    var results = await Promise.all([cachePromise, livePromise]);
     if (!FINANCE.glance) await tryLoadLocalFinanceFile();
     loadFinanceGlance();
     renderDashboard();
-    if (opts.toast) toast('Dashboard updated', 'ok', 1800);
+    var cacheErr = results[0] && results[0].__err;
+    var bits = [];
+    if (LIVE.weather) bits.push('weather');
+    if (LIVE.scores && LIVE.scores.length) bits.push('scores');
+    if (LIVE.calendar && LIVE.calendar.events && LIVE.calendar.events.length) bits.push('cal');
+    if (LIVE.markets && Object.keys(LIVE.markets).length) bits.push('mkts');
+    if (DASH.cache) bits.push('cache');
+    if (opts.toast){
+      if (cacheErr && !DASH.cache) toast('Refresh issues — ' + (cacheErr.message || cacheErr), 'warn', 3200);
+      else toast('Live: ' + (bits.length ? bits.join(' · ') : 'partial') , 'ok', 2200);
+    }
   } catch(e){
     try { if (!FINANCE.glance) await tryLoadLocalFinanceFile(); } catch(e2){}
     loadFinanceGlance();
+    try { await refreshLiveModules(); } catch(e3){}
     renderDashboard();
-    if (opts.toast) toast('Using cached data — ' + (e.message || e), 'warn', 3200);
+    if (opts.toast) toast('Using available data — ' + (e.message || e), 'warn', 3200);
   }
 }
 
@@ -3105,8 +3632,8 @@ var CONNECTOR_DEFS = [
   },
   {
     id: 'weather', name: 'Weather', category: 'Auto & BC',
-    desc: 'Open-meteo live conditions.',
-    icon: 'spark', grad: 'linear-gradient(145deg,#38bdf8,#0369a1)',
+    desc: 'Open-Meteo live conditions (dashboard + agent).',
+    icon: 'weather', grad: 'linear-gradient(145deg,#38bdf8,#0369a1)',
     fields: [{key:'location', label:'Location', placeholder:'Surrey, BC', secret:false}],
     defaults: { on:true, location:'Surrey, BC' }, actions: ['now']
   },
@@ -3115,43 +3642,43 @@ var CONNECTOR_DEFS = [
   {
     id: 'canucks', name: 'Canucks', category: 'Sports',
     desc: 'Vancouver Canucks.',
-    icon: 'spark', grad: 'linear-gradient(145deg,#00205b,#041e42)',
+    icon: 'sports', grad: 'linear-gradient(145deg,#00205b,#041e42)',
     fields: [], defaults: { on:true }, actions: ['open']
   },
   {
     id: 'bluejays', name: 'Blue Jays', category: 'Sports',
     desc: 'Toronto Blue Jays.',
-    icon: 'spark', grad: 'linear-gradient(145deg,#134a8e,#1d2d5c)',
+    icon: 'sports', grad: 'linear-gradient(145deg,#134a8e,#1d2d5c)',
     fields: [], defaults: { on:true }, actions: ['open']
   },
   {
     id: 'raptors', name: 'Raptors', category: 'Sports',
     desc: 'Toronto Raptors.',
-    icon: 'spark', grad: 'linear-gradient(145deg,#ce1141,#000000)',
+    icon: 'sports', grad: 'linear-gradient(145deg,#ce1141,#000000)',
     fields: [], defaults: { on:true }, actions: ['open']
   },
   {
     id: 'whitecaps', name: 'Whitecaps', category: 'Sports',
     desc: 'Vancouver Whitecaps FC.',
-    icon: 'spark', grad: 'linear-gradient(145deg,#92c1e9,#00245d)',
+    icon: 'sports', grad: 'linear-gradient(145deg,#92c1e9,#00245d)',
     fields: [], defaults: { on:true }, actions: ['open']
   },
   {
     id: 'bclions', name: 'BC Lions', category: 'Sports',
     desc: 'CFL — BC Lions.',
-    icon: 'spark', grad: 'linear-gradient(145deg,#f15524,#1a1a1a)',
+    icon: 'sports', grad: 'linear-gradient(145deg,#f15524,#1a1a1a)',
     fields: [], defaults: { on:true }, actions: ['open']
   },
   {
     id: 'sportsnet', name: 'Sportsnet', category: 'Sports',
     desc: 'Canadian sports news & scores.',
-    icon: 'spark', grad: 'linear-gradient(145deg,#e11d48,#7f1d1d)',
+    icon: 'sports', grad: 'linear-gradient(145deg,#e11d48,#7f1d1d)',
     fields: [], defaults: { on:true }, actions: ['open']
   },
   {
     id: 'espn', name: 'ESPN', category: 'Sports',
-    desc: 'Scores hub.',
-    icon: 'spark', grad: 'linear-gradient(145deg,#d20a11,#6b0000)',
+    desc: 'Scores hub + live scoreboard API.',
+    icon: 'sports', grad: 'linear-gradient(145deg,#d20a11,#6b0000)',
     fields: [], defaults: { on:true }, actions: ['open']
   },
 
@@ -3165,9 +3692,9 @@ var CONNECTOR_DEFS = [
   },
   {
     id: 'calendar', name: 'Google Calendar', category: 'Google',
-    desc: 'Open or read iCal feed.',
+    desc: 'Live dashboard events need a secret iCal URL (Calendar → Settings → Integrate calendar).',
     icon: 'calendar', grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
-    fields: [{key:'ical', label:'iCal URL', placeholder:'https://calendar.google.com/…', secret:false}],
+    fields: [{key:'ical', label:'Secret iCal URL', placeholder:'https://calendar.google.com/calendar/ical/…/basic.ics', secret:false}],
     defaults: { on:true, ical:'' }, actions: ['open','upcoming']
   },
   {
@@ -8109,6 +8636,21 @@ async function boot(){
   setChatState('fab');
   renderDashboard();
   refreshDashboard({toast:false}).catch(function(){});
+  // Quiet live refresh while tab is open (weather + scores; calendar every other tick)
+  var liveTick = 0;
+  setInterval(function(){
+    if (document.visibilityState !== 'visible') return;
+    liveTick++;
+    var jobs = [fetchLiveWeather(), fetchLiveScores()];
+    if (liveTick % 2 === 0) jobs.push(fetchLiveCalendar());
+    Promise.all(jobs).then(function(){
+      LIVE.updated = Date.now();
+      if ($('dashboard') && (!document.body.classList.contains('chat-open') || document.body.classList.contains('is-mobile') === false)){
+        /* always safe to re-render dashboard grid */
+      }
+      try { renderDashboard(); } catch(e){}
+    }).catch(function(){});
+  }, 180000);
   bootVaultSync();
   // deep link ?chat=1 or ?voice=1 opens float
   try {

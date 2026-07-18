@@ -40,6 +40,24 @@ into the model-picker search and used directly.
 - **WebLLM** — needs WebGPU (Chrome/Edge 113+); pick a model in Settings →
   Providers → WebLLM and hit *Load model now*.
 
+## Live dashboard modules
+
+Refresh (top-right) pulls **Tesla Dashboard hourly cache** plus **browser live APIs**:
+
+| Widget | Source | Sign-in / setup? |
+|---|---|---|
+| Weather | Open-Meteo (+ AQI) live | No — set location in Connectors → Weather if not Surrey |
+| Markets | Yahoo if browser allows, else cache | No |
+| News / Clinical | Dashboard cache (RSS) | No |
+| My teams | ESPN scoreboard API live | No |
+| Traffic | DriveBC cam images + incidents from cache | No |
+| Calendar | Google **secret iCal URL** | **Yes — paste iCal in Connectors** (no Google OAuth for calendar) |
+| Budget | Local finance glance JSON | **Import glance** (balances never on Pages) |
+| Rituals / Memory / Pins / Tools | Local browser state | Memory **Drive vault** needs OAuth Client ID + Google sign-in |
+| Banks / Monarch / CPS etc. | Deep-links only | Sign in on those sites when you open them |
+
+Agent can pin notes and toggle widgets via `update_dashboard` / speech.
+
 ## Features
 
 - **Model Council (optional)** — fan a prompt to 2–5 models in parallel, then synthesize a consensus answer. Toggle ⚖️ in the top bar or `/council`. Configure members in Settings → Council.
