@@ -1,0 +1,94 @@
+# Nova — multimodal AI chat (`/ai/`)
+
+A self-contained, dependency-free AI chat app served from this repo's GitHub
+Pages site at **`…/tesla-dashboard/ai/`**. One HTML file, no build step, no
+backend — everything (keys, chats, memory, tasks) lives in your browser and is
+sent only to the AI provider you pick.
+
+**Quick links:** `ai/` opens the chat · `ai/?voice=1` opens straight into
+voice mode (this is what the dashboard's **More → 🎙️ Nova Voice** button uses).
+
+## Providers
+
+| Type | Providers |
+|---|---|
+| Cloud (bring your own key) | Anthropic Claude, OpenAI, Google Gemini, Groq, OpenRouter, Mistral, DeepSeek, xAI Grok |
+| Local server | Ollama, LM Studio, llama.cpp — plus any custom OpenAI-compatible endpoint (vLLM, LiteLLM, Together…) |
+| In-browser | WebLLM (WebGPU) — Llama 3.2, Qwen 2.5, Gemma 2, Phi 3.5, SmolLM2; fully private, works offline after the one-time download |
+| No setup | Demo mode — simulated model to explore the UI |
+
+Add keys in **Settings → Providers** (stored in `localStorage`, never sent
+anywhere except the provider itself). Each provider has a **Test connection**
+and, where supported, **Fetch model list**; any model id can also be typed
+into the model-picker search and used directly.
+
+### Local model setup notes
+
+- **Ollama** — allow the page's origin once, then restart Ollama:
+  macOS `launchctl setenv OLLAMA_ORIGINS "*"` · Windows `setx OLLAMA_ORIGINS "*"` ·
+  Linux: add `Environment="OLLAMA_ORIGINS=*"` to the systemd unit.
+- **LM Studio** — Developer → Start server, enable CORS (port 1234).
+- **llama.cpp** — `llama-server -m model.gguf --port 8080` (CORS is on by default).
+- **WebLLM** — needs WebGPU (Chrome/Edge 113+); pick a model in Settings →
+  Providers → WebLLM and hit *Load model now*.
+
+## Features
+
+- **Chat** — streaming responses, markdown + syntax-highlighted code with copy
+  buttons, tables, stop/regenerate/edit-and-resend, branch a chat from any
+  message, pin/search/rename chats, per-chat model + `/sys` prompt, token and
+  ~cost estimates, export a chat as Markdown, full JSON backup/import.
+- **Multimodal** — images (upload, paste, drag-drop, camera) to vision models;
+  PDFs natively to Claude / Gemini / OpenAI; text/code files inlined; voice in
+  and out.
+- **Voice mode** — hands-free loop: listen → think → speak (sentences stream
+  into speech as they're generated), tap the orb to interrupt. Uses the free
+  browser speech APIs; optionally OpenAI Whisper + `gpt-4o-mini-tts` voices
+  when an OpenAI key is set (Settings → Voice). Dictation into the composer
+  via the mic button.
+- **Agent tools** (wrench button or `/tools`) — the model can call, in a loop:
+  live weather (open-meteo), web search + page reader, Wikipedia, calculator,
+  clock, `remember` (write to memory), `schedule_task` / list tasks. Every
+  call and result is shown inline.
+- **Memory** — persistent facts injected into every chat's system prompt;
+  added by you (🧠 panel) or by the model via the `remember` tool.
+- **Scheduled tasks** — daily / weekly / every-N-minutes / one-off prompts
+  that run automatically, post results to a dedicated ⏰ chat and fire a
+  browser notification. The model can create these itself ("remind me every
+  morning at 8 to…"). Runs while a Nova tab is open; missed runs are caught
+  up on the next visit (toggleable per task).
+- **Personalization** — dark/light/system theme, accent colors, font size,
+  personas (incl. a pharmacist clinical mode), default system prompt,
+  temperature / max tokens / extended-thinking toggle.
+
+## iOS / phone
+
+Open the URL in Safari → Share → **Add to Home Screen**: Nova installs as a
+full-screen app (custom icon, safe-area aware, no zoom-on-focus). Long-press
+the icon (Android/desktop PWA) for a direct **Voice mode** shortcut. Voice
+mode works with Safari's speech APIs; the OpenAI voice engine is a drop-in
+upgrade if a key is present.
+
+## In the car
+
+The dashboard's **More → Apps** menu has **✦ Nova AI** and **🎙️ Nova Voice**
+buttons. Heads-up: Tesla's browser blocks most cross-origin requests and has
+no microphone access, so in-car use is best-effort — chat may work with some
+providers, voice generally won't. The buttons shine when the dashboard is
+open on a phone.
+
+## Development
+
+Everything is in `ai/index.html`. Before committing:
+
+```bash
+# JS parses
+python3 -c "import re;open('/tmp/ai.js','w').write('\n;\n'.join(re.findall(r'<script>([\s\S]*?)</script>', open('ai/index.html').read())))" && node --check /tmp/ai.js
+```
+
+An end-to-end harness (mock OpenAI/Anthropic/Gemini SSE server + headless
+Chromium) exercises streaming, the tool loop for all three wire formats,
+tasks, memory, persistence and the voice deep link — see the PR/session notes.
+
+localStorage keys are namespaced `nova_*`; conversations live in IndexedDB
+(`nova_chat`) so they never compete with the dashboard's localStorage quota.

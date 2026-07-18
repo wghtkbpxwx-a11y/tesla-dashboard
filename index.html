@@ -1192,6 +1192,8 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
     <button class="dock-submenu-item" data-p="apple">Apple</button>
     <button class="dock-submenu-item" data-p="stream">Streaming</button>
     <button class="dock-submenu-item" data-p="learn">Learning</button>
+    <button class="dock-submenu-item" data-href="ai/">✦ Nova AI</button>
+    <button class="dock-submenu-item" data-href="ai/?voice=1">🎙️ Nova Voice</button>
   </div>
 </div>
 
@@ -1823,7 +1825,9 @@ document.getElementById('dock-more-btn').addEventListener('click', function(e) {
 });
 document.querySelectorAll('.dock-submenu-item').forEach(function(item) {
   item.addEventListener('click', function() {
-    if (item.dataset.p === 'stocks') {
+    if (item.dataset.href) {
+      window.location.href = item.dataset.href;
+    } else if (item.dataset.p === 'stocks') {
       toggleStocksDropdown();
     } else {
       goPanel(item.dataset.p);
@@ -2141,13 +2145,15 @@ function initDragAndDrop() {
   document.querySelectorAll('.dock-btn').forEach(attachDockDrag);
   // Skip the one-time submenu/drop-zone wiring if already done
   if (dockDragListenersInitialized) {
-    document.querySelectorAll('.dock-submenu-item').forEach(function(el) { el.draggable = true; });
+    document.querySelectorAll('.dock-submenu-item').forEach(function(el) { el.draggable = !!el.getAttribute('data-p'); });
     return;
   }
   dockDragListenersInitialized = true;
 
-  // Submenu item drag handlers (drag to dock)
+  // Submenu item drag handlers (drag to dock). Link items (data-href, no
+  // data-p) navigate instead of opening a panel and are not promotable.
   document.querySelectorAll('.dock-submenu-item').forEach(function(item) {
+    if (!item.getAttribute('data-p')) return;
     item.draggable = true;
     item.addEventListener('dragstart', function(e) {
       draggedBtn = item;

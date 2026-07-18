@@ -177,6 +177,20 @@ Natural extensions, in rough order of value:
 5. Evolutions at level thresholds (new emoji + name per stage).
 6. Sound via the existing WebAudio beep pattern (timerBeep is the template).
 
+## Nova AI chat (`ai/`)
+
+Separate single-file app at `ai/index.html` (own README in `ai/`), served by
+the same Pages site. Multi-provider BYOK chat (Anthropic/OpenAI/Gemini/Groq/
+OpenRouter/Mistral/DeepSeek/xAI + Ollama/LM Studio/llama.cpp/WebLLM + demo),
+voice mode (`ai/?voice=1` deep link), agent tools, memory, scheduled tasks.
+Dashboard More→Apps has "✦ Nova AI" / "🎙️ Nova Voice" `data-href` submenu
+buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
+Nova uses `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
+It is NOT cache-driven; it does live API calls, so in-car it's best-effort
+(phone/desktop is the target). Verify with the same extract-scripts +
+`node --check` recipe (its README has the one-liner). PWA bits: `ai/manifest.webmanifest`,
+`ai/icon-*.png`, apple-touch meta in `ai/index.html`.
+
 ## Open items / ideas not yet done
 
 - Sports feeds are flaky run-to-run (ESPN sometimes parses 0 items); only
