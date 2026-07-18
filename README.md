@@ -13,8 +13,11 @@ shares a minimized local glance with Homebase. Financial bundles, balances,
 transactions, statements, receipts, and credentials must never be committed.
 
 Homebase AI automatically routes simple work to local models where available
-and selects the lowest-cost configured cloud model that meets each harder
-task's capability/quality requirements. Paid API estimates share a hard $50
+and selects the lowest-cost configured direct cloud model that meets each
+harder task's capability/quality requirements. Direct Anthropic, OpenAI,
+Gemini, Groq, Perplexity, Kimi, DeepInfra, Mistral, DeepSeek, and xAI access
+ranks ahead of OpenRouter; OpenRouter remains a manual/free/long-tail/failover
+option. Paid API estimates share a hard $50
 trailing-30-day application budget. Homebase can merge that ledger, provider
 credentials, memory, tasks, and AI preferences between phone and desktop using
 a passphrase-encrypted Google Drive vault; plaintext secrets, the passphrase,
@@ -25,3 +28,10 @@ integrates the result. Explicit dashboard source requests can be turned into
 confirm-guarded GitHub branches and draft pull requests through repository
 read/search/edit tools configured in Homebase Settings → Development. The agent
 never writes directly to `main` and never stores API keys in the repository.
+Browser speech stays free by default; optional OpenAI and ElevenLabs speech
+usage flows through the same rolling budget.
+The preferred local runtime is LM Studio with the tested `homebase-local`
+Qwen 3.5 9B 4-bit model. Its structured function calls can use Homebase tools;
+an optional scoped LM Studio token can also expose the installed Brave-search
+MCP, whose estimated per-search charge is included in the rolling ledger.
+LM Studio is bound to localhost with CORS and just-in-time model loading enabled.

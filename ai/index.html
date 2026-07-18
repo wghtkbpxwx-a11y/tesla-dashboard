@@ -1971,6 +1971,8 @@ var DEFAULT_SETTINGS = {
   customModels: {},            // provider -> free-text model id
   modelCache: {},              // provider -> [ids] fetched from API
   modelPricing: {},            // provider -> model -> [input, output] USD / 1M tokens
+  modelCapabilities: {},       // provider -> model -> discovered capability metadata
+  localPreferredModel: { lmstudio: 'qwen/qwen3.5-9b' },
   providerHealth: {},          // provider -> {ok, ts}; local routing only trusts recent checks
   temperature: 0.3,
   maxTokens: 4096,
@@ -1980,6 +1982,7 @@ var DEFAULT_SETTINGS = {
   injectMemory: true,
   toolsDefault: true,
   webSearchTool: true,
+  lmstudioMcpSearch: false,    // requires a scoped LM Studio API token with mcp.json access
   homeLocation: 'Surrey, BC',
   showCosts: true,
   autoRoute: true,
@@ -2002,7 +2005,8 @@ var DEFAULT_SETTINGS = {
   uiMode: 'agent',
   councilOn: false,
   council: { mode: 'debate', members: [], synthesizer: null },
-  speech: { lang: 'en-CA', voiceURI: '', rate: 1.0, engine: 'browser', openaiVoice: 'nova' },
+  speech: { lang: 'en-CA', voiceURI: '', rate: 1.0, engine: 'browser', openaiVoice: 'nova',
+    elevenVoiceId: '', elevenTtsModel: 'eleven_flash_v2_5', elevenSttModel: 'scribe_v2' },
   baseURL: {},
   webllmModel: 'Llama-3.2-1B-Instruct-q4f16_1-MLC'
 };
@@ -2563,9 +2567,10 @@ var HOMEBASE_CHANGELOG = {
   ],
   current_handoff: {
     to: 'Fable',
-    objective: 'Perform a massive scoping review of Homebase after the cost-aware router, specialist-team orchestrator, guarded self-development tools, private finance sync, and encrypted phone/desktop vault sync work',
-    state: 'Implementation is committed at 17c5642 on codex/homebase-ai-orchestrator and open as draft PR #58; it is not merged or live',
+    objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
+    state: 'PR #58 was merged and encrypted sync is live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are implemented on codex/homebase-sync-live-status but are not yet committed, merged, or live. Qwen 3.5 9B 4-bit is loaded locally as homebase-local; the optional LM Studio MCP path still needs a user-created scoped API token.',
     start_here: [
+      'HOMEBASE_CHANGELOG entry 2026-07-18-direct-provider-router-v2 plus the updated 2026-07-18-cross-device-vault-deployment entry',
       'HOMEBASE_CHANGELOG entries 2026-07-18-cross-device-vault-v2, 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
       'ai/index.html: selectAIRoute, buildAutoAgentTeam, runSubagentMember, runTeamLeadSynthesis, repository tools, Settings → Chat, Settings → Development',
       'ai/README.md, CLAUDE.md, README.md, ROADMAP.md, and finance/README.md for cross-surface constraints'
@@ -2577,6 +2582,8 @@ var HOMEBASE_CHANGELOG = {
       'Connector least privilege, read-only sub-agent boundaries, GitHub token handling, exact-replacement PR workflow, and prompt-injection resistance',
       'Dashboard/finance same-origin synchronization, local-only privacy guarantees, mobile/Tesla-browser degradation, accessibility, and user comprehension',
       'Encrypted Google Drive vault merge semantics, per-section timestamps, usage-ledger deduplication/tombstones, passphrase/token lifecycle, and phone/desktop conflict recovery',
+      'Direct-first versus OpenRouter fallback ranking, freshness/action separation, Perplexity citations and request fees, Kimi frontier gating, DeepInfra scoped JWT guidance, and ElevenLabs speech fallback/cost estimates',
+      'LM Studio capability discovery, local action/search routing, Qwen 3.5 9B performance on 16 GB unified memory, scoped MCP-token permissions, and Brave fixed-cost accounting',
       'Testing gaps: deterministic router tests, mocked provider concurrency, repository-write failure recovery, end-to-end PR creation, and deploy verification'
     ],
     preserve: [
@@ -2607,9 +2614,103 @@ var HOMEBASE_CHANGELOG = {
     'Prefer professional SVG icons (ICON_SVG); avoid emoji for chrome',
     'Dashboard-first UI + floating chat (FAB/dock/expand); avoid redundant left+bottom menus',
     'Mobile shares same URL (body.is-mobile); do not break desktop layout',
-    'Preserve the central runChat cloud reservation path, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
+    'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-direct-provider-router-v2',
+      date: '2026-07-18',
+      commit: 'pending',
+      branch: 'codex/homebase-sync-live-status',
+      pull_request: 'pending',
+      title: 'Direct-first routing, optimized LM Studio tools, current-web research, scoped open models, and ElevenLabs voice',
+      type: 'feat+cost+privacy+docs',
+      depends_on: ['2026-07-18-ai-credit-router','2026-07-18-agent-orchestrator','2026-07-18-cross-device-vault-v2'],
+      files_changed: ['ai/index.html','ai/README.md','README.md','CLAUDE.md','ROADMAP.md'],
+      settings_added: ['speech.elevenVoiceId','speech.elevenTtsModel','speech.elevenSttModel','modelCapabilities','localPreferredModel.lmstudio','lmstudioMcpSearch','keys.lmstudio (optional scoped local token)'],
+      interfaces_changed: ['PROVIDERS','PROVIDER_ORDER','providerModels','modelCaps','modelRequestCost','classifyAIRequest','localRouteCandidate','cloudRouteCandidates','selectAIRoute','cheapestRoleModel','chatOpenAI','lmStudioMcpWebSearch','enabledTools','toolsForRequest','fetchProviderModels','buildSystem','sendMessage','ttsPump','voiceListenWhisper','renderProvidersPane','renderVoicePane','renderToolsPane'],
+      changes: [
+        'Added direct Perplexity Sonar, Kimi K3/K2.7 Code/K2.6, and DeepInfra provider cards with current model metadata and conservative prices; added ElevenLabs Flash TTS and Scribe v2 STT under Voice',
+        'OpenRouter is now fallbackOnly in automatic routing and is sorted after suitable direct provider models for both lead and specialist-role selection; manual OpenRouter selection remains available',
+        'Separated fresh-web requirements from Homebase mutation/action tools so Perplexity native search can answer current cited questions without receiving dashboard or repository function tools',
+        'Removed fetched model-list membership as proof of function-tool support; only annotated/static, local/custom, or demo models are automatically tool-eligible',
+        'Added fixed per-request costs to reservations, including low-context Perplexity Sonar fees, and parses nested provider-reported usage cost plus citation/search-result URLs',
+        'Kimi K3 is quality tier 5 and sends reasoning_effort=max; lower-cost Kimi and DeepInfra models satisfy balanced/advanced roles before frontier models when capabilities permit',
+        'Browser speech remains the default; ElevenLabs TTS/STT reserves against the same trailing budget and falls back to OpenAI/browser speech where available',
+        'Pinned every official key-bearing cloud provider to its official API origin and disabled Base URL editing for those cards; Custom and local endpoints remain configurable',
+        'Made LM Studio the first local runtime considered and preferred the tested homebase-local alias; balanced local requests may now use Homebase function tools when LM Studio reports native tool training instead of escalating solely because a dashboard or web tool is needed',
+        'Added LM Studio native model discovery so loaded-instance IDs carry reported vision, reasoning, and trained-for-tool-use metadata rather than inheriting local capabilities by assumption',
+        'Added an opt-in LM Studio MCP web-search tool using the installed mcp/web-search connector; every Brave query reserves an estimated $0.005 in the same trailing ledger and requires a dedicated scoped LM Studio API token',
+        'Configured and tested Qwen 3.5 9B 4-bit as homebase-local on the 16 GB M1 Pro at 16K context, full GPU offload, and one parallel prediction; updated the LM Studio MLX runtime while comparing local variants',
+        'Enabled LM Studio just-in-time model loading on localhost, kept CORS enabled for the GitHub Pages browser app, and made qwen/qwen3.5-9b the stable preferred key so an idle-evicted model can reload without forcing cloud fallback',
+        'Stopped sending tool schemas and agent-tool instructions for simple auto-routed chats; local action/current requests receive a query-shaped tool shortlist, preserving dashboard, memory, task, connector, repository, and research capabilities with lower prompt-processing latency',
+        'Synchronized README, AI operator guide, maintainer contract, roadmap, deployment handoff, and hidden changelog with the new direct-first policy'
+      ],
+      safety_guards: [
+        'The hard estimated $50 trailing-30-day budget and central runChat reservation path remain intact; simultaneous calls count outstanding reservations',
+        'Provider credentials are never committed, echoed, or used in validation; official provider requests set no-referrer and cannot be redirected to another origin through stored settings',
+        'DeepInfra documentation recommends model/expiry/USD-scoped JWTs; all browser-stored provider keys should be dedicated and provider-limited',
+        'LM Studio MCP access is disabled by default, requires a scoped local token, and never exposes the saved Brave key to Homebase; the generic free web-search tool remains available',
+        'Sub-agents remain read-only and lead-only confirmed mutation/repository draft-PR boundaries are unchanged'
+      ],
+      verification: [
+        'Qwen 3.5 9B produced a valid structured function-tool call through LM Studio /v1/chat/completions',
+        'Local browser smoke tests selected Qwen 3.5 9B for simple and balanced requests, displayed $0 cloud, returned exact text, executed get_current_time, and synthesized the correct America/Vancouver result',
+        'Just-in-time recovery was verified by unloading the model and requesting qwen/qwen3.5-9b; LM Studio reloaded it and returned HTTP 200, after which the conservative homebase-local instance was restored',
+        'LM Studio server verification confirms localhost-only binding, CORS enabled, just-in-time loading enabled, 16K context, one parallel prediction, and a loaded homebase-local alias',
+        'LM Studio native MCP access correctly returned HTTP 403 while no scoped API token was configured; no Brave request or paid model call was consumed',
+        'All inline scripts parse with Node Function construction and git diff --check passes',
+        'Repository validator, deterministic router checks, inline-script parsing, diff hygiene, provider-settings UI, and local browser smoke tests pass; deployed GitHub Pages verification remains pending until merge'
+      ],
+      setup_required: [
+        'After deployment, add and test provider keys one at a time; the user must enter every secret and any payment information directly',
+        'For ElevenLabs, select or copy a voice ID in Settings → Voice; browser speech remains usable without a paid key',
+        'To enable LM Studio Brave MCP search, the user must enable LM Studio API authentication, create a dedicated token allowed to call servers from mcp.json, paste it into Settings → Providers → LM Studio, and enable the Tools toggle',
+        'Keep provider-side hard limits/alerts because Homebase is an estimate and cannot see calls made outside the app'
+      ],
+      known_limits: [
+        'Perplexity Sonar is supported but in maintenance mode; a future Agent API adapter can replace it after its Responses-style stream format is covered by tests',
+        'Static GitHub Pages still exposes any entered browser key to that device; a user-owned Cloudflare Worker relay is the roadmap path for server-side secrets and Workers AI',
+        'LM Studio /v1/chat/completions supports Homebase custom function tools but not installed MCPs; installed MCP search therefore uses /api/v1/chat and stays disabled until scoped authentication is completed',
+        'Provider pricing and model catalogs change; static prices must be reviewed and unknown fetched models stay manual/non-tool-eligible until annotated'
+      ],
+      next_model: 'Review router determinism, LM Studio local-tool/MCP behaviour, provider API compatibility/CORS, citation rendering, voice fallback, and price drift; preserve direct-first ranking, capability metadata, official-host pinning, and the shared rolling budget.'
+    },
+    {
+      id: '2026-07-18-cross-device-vault-deployment',
+      date: '2026-07-18',
+      commit: 'pending (deployment-state follow-up)',
+      branch: 'codex/homebase-sync-live-status',
+      pull_request: 'pending',
+      title: 'Cross-device vault merged/deployed and Google OAuth client configured',
+      type: 'deploy+handoff',
+      depends_on: ['2026-07-18-cross-device-vault-v2'],
+      files_changed: ['ai/index.html'],
+      changes: [
+        'PR #58 was promoted from draft and squash-merged to main as commit 4622a60c44e835984f7506dd4ea151f12cc5fbd5',
+        'The post-merge Validate workflow and GitHub Pages deployment both completed successfully',
+        'The public Homebase URL now renders Private cross-device sync, Keep this device in sync, and Sync API keys and private connectors',
+        'The user accepted the initial Google Cloud Platform terms; project Homebase Sync (resolute-fold-502820-t5) was created and Google Drive API was enabled',
+        'OAuth branding was configured as Homebase with an external testing audience and the account-owner support/contact email',
+        'Correction to the earlier pending handoff: the user accepted the Google API Services User Data Policy, drive.file was the only added scope, the account was added as a test user, and a Web OAuth Client authorized for https://wghtkbpxwx-a11y.github.io was created',
+        'The non-secret OAuth Client ID was entered in the live desktop Homebase connector; account consent, vault passphrase, Push to Drive, and mobile Pull remain user steps'
+      ],
+      safety_guards: [
+        'Google legal terms and consent were accepted only by the account owner',
+        'No client secret, provider API key, OAuth access token, vault passphrase, or paid-model request was exposed or consumed during setup',
+        'Financial data remains outside the repository and was not used for sync setup'
+      ],
+      verification: [
+        'GitHub PR #58 reports MERGED with merge commit 4622a60',
+        'GitHub Actions runs 29660036112 (Validate) and 29660035816 (Pages) completed successfully',
+        'Live browser inspection confirmed the deployed cross-device vault controls, configured Client ID, and Connect Google handoff state'
+      ],
+      setup_required: [
+        'User must choose Connect Google in Homebase and approve the drive.file consent prompt',
+        'Privately enter a strong vault passphrase, push from the desktop source device, then use the same Client ID/account/passphrase and pull once on mobile'
+      ],
+      next_model: 'Do not handle or request the vault passphrase; resume only after the user finishes consent/push/pull or reports the exact UI error.'
+    },
     {
       id: '2026-07-18-cross-device-vault-v2',
       date: '2026-07-18',
@@ -5747,6 +5848,8 @@ function loadState(){
   S.settings.council = Object.assign({}, DEFAULT_SETTINGS.council, S.settings.council || {});
   S.settings.cloudBudget = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, S.settings.cloudBudget || {});
   S.settings.modelPricing = S.settings.modelPricing || {};
+  S.settings.modelCapabilities = S.settings.modelCapabilities || {};
+  S.settings.localPreferredModel = Object.assign({}, DEFAULT_SETTINGS.localPreferredModel, S.settings.localPreferredModel || {});
   S.settings.providerHealth = S.settings.providerHealth || {};
   if (!Array.isArray(S.settings.council.members)) S.settings.council.members = [];
   S.keys = lsGet(LS_KEYS, {});
@@ -5965,13 +6068,36 @@ var PROVIDERS = {
       {id:'meta-llama/llama-4-scout-17b-16e-instruct', label:'Llama 4 Scout', vision:1, tools:1, cost:[0.11,0.34]},
       {id:'qwen/qwen3-32b', label:'Qwen3 32B', tools:1, cost:[0.29,0.59]}
     ]},
-  openrouter: { name:'OpenRouter', kind:'openai', base:'https://openrouter.ai/api/v1', needsKey:true, usage:true, fetchModels:true, color:'#8b5cf6',
+  openrouter: { name:'OpenRouter', kind:'openai', base:'https://openrouter.ai/api/v1', needsKey:true, usage:true, fetchModels:true, fallbackOnly:true, color:'#8b5cf6',
     keyHint:'sk-or-…  (openrouter.ai — hundreds of models)', keyUrl:'https://openrouter.ai/settings/keys',
     models:[
       {id:'openrouter/auto', label:'Auto (best available)', tools:1, quality:4, cost:[1.5,6]},
       {id:'meta-llama/llama-3.3-70b-instruct', label:'Llama 3.3 70B', tools:1, quality:3, cost:[0.12,0.3]},
       {id:'deepseek/deepseek-chat-v3-0324', label:'DeepSeek V3', tools:1, quality:3, cost:[0.3,0.9]},
       {id:'google/gemini-2.5-flash', label:'Gemini 2.5 Flash', vision:1, tools:1, quality:3, cost:[0.3,2.5]}
+    ]},
+  perplexity: { name:'Perplexity', kind:'openai', base:'https://api.perplexity.ai/v1', chatPath:'/sonar', needsKey:true, usage:true, nativeSearch:true, color:'#20b8cd',
+    keyHint:'pplx-…  (console.perplexity.ai)', keyUrl:'https://console.perplexity.ai/',
+    models:[
+      {id:'sonar', label:'Sonar · current web', nativeSearch:1, quality:3, requestCost:0.005, cost:[1,1]},
+      {id:'sonar-pro', label:'Sonar Pro · cited research', nativeSearch:1, quality:4, requestCost:0.006, cost:[3,15]},
+      {id:'sonar-reasoning-pro', label:'Sonar Reasoning Pro', nativeSearch:1, think:'native', quality:4, requestCost:0.006, cost:[2,8]}
+    ]},
+  kimi: { name:'Kimi', kind:'openai', base:'https://api.moonshot.ai/v1', needsKey:true, usage:true, fetchModels:true, color:'#0f172a',
+    keyHint:'sk-…  (platform.kimi.com)', keyUrl:'https://platform.kimi.com/console/api-keys',
+    models:[
+      {id:'kimi-k3', label:'Kimi K3 · frontier 1M context', vision:1, tools:1, think:'native', quality:5, cost:[3,15]},
+      {id:'kimi-k2.7-code', label:'Kimi K2.7 Code', vision:1, tools:1, think:'native', quality:4, cost:[0.95,4]},
+      {id:'kimi-k2.7-code-highspeed', label:'Kimi K2.7 Code HighSpeed', vision:1, tools:1, think:'native', quality:4, cost:[1.90,8]},
+      {id:'kimi-k2.6', label:'Kimi K2.6 · balanced', vision:1, tools:1, quality:4, cost:[0.95,4]}
+    ]},
+  deepinfra: { name:'DeepInfra', kind:'openai', base:'https://api.deepinfra.com/v1/openai', needsKey:true, usage:true, fetchModels:true, color:'#059669',
+    keyHint:'scoped JWT recommended  (deepinfra.com/dash)', keyUrl:'https://deepinfra.com/dash/api_keys',
+    models:[
+      {id:'deepseek-ai/DeepSeek-V4-Flash', label:'DeepSeek V4 Flash · lowest cost', tools:1, quality:3, cost:[0.09,0.18]},
+      {id:'Qwen/Qwen3.6-35B-A3B', label:'Qwen 3.6 35B A3B', tools:1, quality:3, cost:[0.15,0.95]},
+      {id:'moonshotai/Kimi-K2.7-Code', label:'Kimi K2.7 Code', vision:1, tools:1, think:'native', quality:4, cost:[0.74,3.5]},
+      {id:'deepseek-ai/DeepSeek-V4-Pro', label:'DeepSeek V4 Pro', tools:1, think:'native', quality:4, cost:[1.3,2.6]}
     ]},
   mistral: { name:'Mistral', kind:'openai', base:'https://api.mistral.ai/v1', needsKey:true, usage:true, fetchModels:true, color:'#fa5511',
     keyHint:'(console.mistral.ai)', keyUrl:'https://console.mistral.ai/api-keys/',
@@ -5999,11 +6125,16 @@ var PROVIDERS = {
   ollama: { name:'Ollama (local)', kind:'openai', base:'http://localhost:11434/v1', local:true, usage:true, fetchModels:'ollama', color:'#94a3b8',
     models:[] },
   lmstudio: { name:'LM Studio (local)', kind:'openai', base:'http://localhost:1234/v1', local:true, fetchModels:true, color:'#94a3b8',
-    models:[] },
+    models:[
+      {id:'qwen/qwen3.5-9b', label:'Qwen 3.5 9B · preferred local', vision:1, tools:1, nativeTools:1, quality:3},
+      {id:'homebase-local', label:'Qwen 3.5 9B · loaded Homebase alias', vision:1, tools:1, nativeTools:1, quality:3}
+    ] },
   llamacpp: { name:'llama.cpp (local)', kind:'openai', base:'http://localhost:8080/v1', local:true, fetchModels:true, color:'#94a3b8',
     models:[] },
   custom: { name:'Custom endpoint', kind:'openai', base:'', fetchModels:true, color:'#64748b',
     models:[] },
+  elevenlabs: { name:'ElevenLabs', kind:'voice', base:'https://api.elevenlabs.io/v1', needsKey:true, color:'#111827',
+    keyHint:'xi-…  (elevenlabs.io)', keyUrl:'https://elevenlabs.io/app/settings/api-keys', models:[] },
   webllm: { name:'WebLLM (in-browser)', kind:'webllm', local:true, color:'#22d3ee',
     models:[
       {id:'Llama-3.2-1B-Instruct-q4f16_1-MLC', label:'Llama 3.2 1B · 0.9 GB'},
@@ -6016,13 +6147,22 @@ var PROVIDERS = {
   demo: { name:'Demo', kind:'demo', color:'#f5b83d',
     models:[ {id:'demo', label:'Demo model (no key needed)', vision:1, tools:1} ] }
 };
-var PROVIDER_ORDER = ['anthropic','openai','google','groq','openrouter','mistral','deepseek','xai','ollama','lmstudio','llamacpp','custom','webllm','demo'];
+var PROVIDER_ORDER = ['anthropic','openai','google','groq','perplexity','kimi','deepinfra','mistral','deepseek','xai','openrouter','ollama','lmstudio','llamacpp','custom','webllm','demo'];
 
 function getKey(p){ return (S.keys[p] || '').trim(); }
 function getBase(p){
   var o = ((S.settings.baseURL || {})[p] || '').trim();
   var pr = PROVIDERS[p];
-  return (o || (pr && pr.base) || '').replace(/\/+$/, '');
+  var base = (o || (pr && pr.base) || '').replace(/\/+$/, '');
+  // Never send a cloud-provider credential to a host injected through local
+  // settings. Official key-bearing providers are pinned to their API origin;
+  // local and Custom endpoints intentionally remain configurable.
+  if (pr && pr.needsKey && pr.base && p !== 'custom'){
+    try {
+      if (new URL(base).origin !== new URL(pr.base).origin) base = pr.base;
+    } catch(e){ base = pr.base; }
+  }
+  return base.replace(/\/+$/, '');
 }
 function providerReady(p){
   var pr = PROVIDERS[p];
@@ -6038,7 +6178,10 @@ function providerModels(p){
   var cached = (S.settings.modelCache || {})[p] || [];
   for (var i = 0; i < cached.length; i++){
     var id = cached[i];
-    if (!list.some(function(m){ return m.id === id; })) list.push({id:id, label:id, fetched:1});
+    if (!list.some(function(m){ return m.id === id; })){
+      var caps = S.settings.modelCapabilities && S.settings.modelCapabilities[p] && S.settings.modelCapabilities[p][id];
+      list.push(Object.assign({id:id, label:id, fetched:1}, caps || {}));
+    }
   }
   var custom = (S.settings.customModels || {})[p];
   if (custom && !list.some(function(m){ return m.id === custom; })) list.unshift({id:custom, label:custom + ' (custom)'});
@@ -6053,8 +6196,12 @@ function modelCaps(p, id){
   var mi = modelInfo(p, id);
   var pr = PROVIDERS[p];
   var vision = mi.vision || /gpt-4o|gpt-4\.1|gpt-5|claude|gemini|pixtral|llava|vision|-vl\b|grok-4|llama-4|gemma-3|minicpm|moondream/i.test(id);
-  var tools = !!(pr && pr.kind !== 'webllm' && (mi.tools || mi.fetched || pr.local || p === 'custom' || p === 'demo'));
-  return { vision: !!vision, tools: !!tools, think: mi.think || (/reasoner|-r1|qwq|thinking/i.test(id) ? 'native' : null) };
+  // A model appearing in /models is not proof that it supports Homebase
+  // function calling. Only annotated, local/custom, or demo models qualify.
+  var tools = !!(pr && pr.kind !== 'webllm' && (mi.tools || mi.nativeTools || p === 'custom' || p === 'demo'));
+  return { vision: !!vision, tools: !!tools, nativeSearch:!!(mi.nativeSearch || (pr && pr.nativeSearch)),
+    nativeTools:!!mi.nativeTools,
+    think: mi.think || (/reasoner|-r1|qwq|thinking/i.test(id) ? 'native' : null) };
 }
 function modelCost(p, id){
   var mi = modelInfo(p, id);
@@ -6113,9 +6260,9 @@ function clearCloudUsage(){
   toast('Local usage history cleared', 'ok');
 }
 function modelRequestCost(p, id, inTok, outTok){
-  var price = modelCost(p, id);
+  var price = modelCost(p, id), mi = modelInfo(p, id);
   if (!price) return null;
-  return ((Math.max(0, +inTok || 0) * price[0]) + (Math.max(0, +outTok || 0) * price[1])) / 1000000;
+  return (+mi.requestCost || 0) + ((Math.max(0, +inTok || 0) * price[0]) + (Math.max(0, +outTok || 0) * price[1])) / 1000000;
 }
 function estimateRequestInput(o){
   var n = estTokens(o.system || '') + 24;
@@ -6208,13 +6355,14 @@ function classifyAIRequest(query, latestUser, convo){
   var q = String(query || ''), hasVision = !!((latestUser.images || []).length || (latestUser.files || []).some(function(f){ return f.kind === 'pdf'; }));
   var named = explicitModelRequest(q);
   var maxQuality = /\b(most advanced|best (?:available )?model|maximum quality|highest quality|strongest model|frontier model|no matter the cost)\b/i.test(q);
-  var needsTools = /\b(today|current|currently|latest|live|right now|news|weather|price|stock|score|schedule|search|browse|look up|verify|source|citation|dashboard|calendar|task|remind|update|change|modify|create|delete)\b/i.test(q);
+  var fresh = /\b(today|current|currently|latest|live|right now|news|weather|price|stock|score|schedule|search|browse|look up|verify|source|citation)\b/i.test(q);
+  var actions = /\b(dashboard|calendar|task|remind|remember|forget|pin|note|email|gmail|drive|update|change|modify|create|delete|edit|send|connect|sync|deploy|commit|push|pull request)\b/i.test(q);
   var highStakes = /\b(diagnos|dose|dosage|interaction|contraindication|patient|clinical|legal|lawsuit|tax|portfolio|investment|retirement|mortgage|financial plan)\b/i.test(q);
   var advanced = hasVision || highStakes || /\b(architecture|debug|refactor|security audit|research|analy[sz]e|strategy|multi-step|proof|theorem|complex|compare.*trade-?off|production|migration|forecast|model this|write (?:an )?(?:app|program|contract))\b/i.test(q) ||
     /\b(build|develop|implement|redesign|refactor)\b[\s\S]{0,120}\b(app|dashboard|feature|integration|workflow|system|source|repository|repo)\b/i.test(q) || q.length > 1400;
-  var simple = q.length < 550 && !hasVision && !highStakes && !advanced && !needsTools;
+  var simple = q.length < 550 && !hasVision && !highStakes && !advanced && !fresh && !actions;
   var tier = maxQuality || named ? 4 : (advanced ? 3 : (simple ? 1 : 2));
-  return {tier:tier, named:named, explicitMax:maxQuality, vision:hasVision, tools:needsTools,
+  return {tier:tier, named:named, explicitMax:maxQuality, vision:hasVision, fresh:fresh, actions:actions, tools:actions,
     label:tier === 4 ? 'frontier requested' : (tier === 3 ? 'advanced task' : (tier === 2 ? 'balanced task' : 'simple task'))};
 }
 function recentLocalProvider(p){
@@ -6223,13 +6371,21 @@ function recentLocalProvider(p){
   return !!(cached.length && h && h.ok && Date.now() - h.ts < 360000);
 }
 function localRouteCandidate(cls){
-  if (!S.settings.localFirst || cls.tier > 2 || cls.vision || cls.tools) return null;
-  var locals = ['ollama','lmstudio','llamacpp','custom'];
+  if (!S.settings.localFirst || cls.tier > 2 || cls.vision) return null;
+  var needsTools = !!(cls.fresh || cls.actions || cls.tools);
+  if (needsTools && !cls.homebaseToolsEnabled) return null;
+  var locals = ['lmstudio','ollama','llamacpp','custom'];
   for (var i = 0; i < locals.length; i++){
     var p = locals[i];
     if (!localEndpoint(p) || !recentLocalProvider(p)) continue;
-    var ids = (S.settings.modelCache[p] || []);
-    if (ids.length) return {provider:p, model:ids[0], local:true};
+    var ids = (S.settings.modelCache[p] || []).slice();
+    var preferred = S.settings.localPreferredModel && S.settings.localPreferredModel[p];
+    if (preferred && ids.indexOf(preferred) >= 0){ ids.splice(ids.indexOf(preferred), 1); ids.unshift(preferred); }
+    for (var j = 0; j < ids.length; j++){
+      var caps = modelCaps(p, ids[j]);
+      if (needsTools && !caps.tools) continue;
+      return {provider:p, model:ids[j], local:true, caps:caps};
+    }
   }
   if (S.settings.webllmFallback && navigator.gpu){
     return {provider:'webllm', model:S.settings.webllmModel || PROVIDERS.webllm.models[0].id, local:true};
@@ -6240,38 +6396,42 @@ function cloudRouteCandidates(cls, query, msgs, maxOut){
   var minQ = cls.tier >= 4 ? 5 : (cls.tier === 3 ? 4 : (cls.tier === 2 ? 3 : 2));
   var hard = cloudBudgetCfg().hardStop;
   var remaining = cloudSpendInfo().remaining;
-  var out = [], sample = {system:'', msgs:msgs, tools:cls.tools ? TOOLS : null};
+  var needActions = !!(cls.actions || cls.tools);
+  var out = [], sample = {system:'', msgs:msgs, tools:needActions ? TOOLS : null};
   PROVIDER_ORDER.forEach(function(p){
     if (!cloudProvider(p) || !providerReady(p)) return;
     providerModels(p).forEach(function(m){
       var price = modelCost(p, m.id), caps = modelCaps(p, m.id), quality = modelQuality(p, m.id);
-      if (!price || quality < minQ || (cls.vision && !caps.vision) || (cls.tools && !caps.tools)) return;
+      if (!price || quality < minQ || (cls.vision && !caps.vision) || (needActions && !caps.tools) ||
+          (cls.fresh && !caps.nativeSearch && !caps.tools)) return;
       sample.provider = p; sample.model = m.id; sample.maxTokens = maxOut;
       var est = modelRequestCost(p, m.id, estimateRequestInput(sample), maxOut);
       if (est == null) return;
       // Only enforce rolling budget in routing when hard stop is on
       if (hard && est > remaining + 1e-9) return;
-      out.push({provider:p, model:m.id, quality:quality, estimatedCost:est, caps:caps});
+      out.push({provider:p, model:m.id, quality:quality, estimatedCost:est, caps:caps,
+        searchRank:(cls.fresh && !caps.nativeSearch ? 1 : 0),
+        fallbackRank:(PROVIDERS[p].fallbackOnly ? 1 : 0)});
     });
   });
   return out;
 }
 function selectAIRoute(query, latestUser, convo, msgs){
   var cls = classifyAIRequest(query, latestUser || {}, convo);
-  // Tools/agent modes must not auto-route to tool-incapable models (e.g. WebLLM)
-  if (convo && convo.toolsOn) cls.tools = true;
-  if (S.settings && (S.settings.uiMode === 'agent' || S.settings.uiMode === 'research')) cls.tools = true;
-  if (S.settings && S.settings.toolsDefault && !convo) cls.tools = true;
-  // Raise tier slightly when tools are required so cheap nano models aren't forced for agent work
-  if (cls.tools && cls.tier < 2) cls.tier = 2;
+  cls.homebaseToolsEnabled = !convo || convo.toolsOn !== false;
+  // The wrench enables tools but does not force a paid/tool-capable route for
+  // every simple message. Classification decides whether this request needs
+  // a mutation tool or fresh web data.
+  if ((cls.actions || cls.fresh) && cls.tier < 2) cls.tier = 2;
   var local = localRouteCandidate(cls);
   var maxOut = Math.min(+S.settings.maxTokens || 4096, cls.tier >= 4 ? 4096 : (cls.tier === 3 ? 3072 : (cls.tier === 2 ? 1800 : 900)));
   if (local) return Object.assign(local, {maxTokens:maxOut, tier:cls.tier, classification:cls,
     reason:'Auto · local model for a ' + cls.label + ' · $0 cloud'});
   if (cls.named && providerReady(cls.named.provider)){
     var namedCost = modelCost(cls.named.provider, cls.named.model), namedCaps = modelCaps(cls.named.provider, cls.named.model);
-    if (namedCost && (!cls.vision || namedCaps.vision) && (!cls.tools || namedCaps.tools)){
-      var check = {provider:cls.named.provider, model:cls.named.model, system:'', msgs:msgs, tools:cls.tools ? TOOLS : null, maxTokens:maxOut};
+    if (namedCost && (!cls.vision || namedCaps.vision) && (!cls.actions || namedCaps.tools) &&
+        (!cls.fresh || namedCaps.nativeSearch || namedCaps.tools)){
+      var check = {provider:cls.named.provider, model:cls.named.model, system:'', msgs:msgs, tools:cls.actions ? TOOLS : null, maxTokens:maxOut};
       var namedEstimate = modelRequestCost(check.provider, check.model, estimateRequestInput(check), maxOut);
       var hardN = cloudBudgetCfg().hardStop;
       // null estimate must NOT coerce to free (JS: null <= n is true)
@@ -6284,7 +6444,7 @@ function selectAIRoute(query, latestUser, convo, msgs){
   var candidates = cloudRouteCandidates(cls, query, msgs, maxOut);
   candidates.sort(function(a,b){
     if (cls.explicitMax && b.quality !== a.quality) return b.quality - a.quality;
-    return a.estimatedCost - b.estimatedCost || b.quality - a.quality;
+    return a.searchRank - b.searchRank || a.fallbackRank - b.fallbackRank || a.estimatedCost - b.estimatedCost || b.quality - a.quality;
   });
   if (candidates.length){
     var best = candidates[0];
@@ -6359,7 +6519,7 @@ function cheapestRoleModel(role, fallback, msgs){
   var cls = {tier:tier, explicitMax:false, vision:false, tools:role.tools.length > 0};
   var maxOut = tier >= 3 ? 1600 : 1000;
   var choices = cloudRouteCandidates(cls, '', msgs || [], maxOut);
-  choices.sort(function(a,b){ return a.estimatedCost - b.estimatedCost || b.quality - a.quality; });
+  choices.sort(function(a,b){ return a.fallbackRank - b.fallbackRank || a.estimatedCost - b.estimatedCost || b.quality - a.quality; });
   if (choices.length) return Object.assign(choices[0], {maxTokens:maxOut});
   if (fallback && PROVIDERS[fallback.provider] && providerReady(fallback.provider)){
     return {provider:fallback.provider, model:fallback.model, estimatedCost:+fallback.estimatedCost || 0,
@@ -6639,24 +6799,29 @@ async function chatOpenAI(o){
     if (o.maxTokens) body.max_tokens = o.maxTokens;
     if (typeof o.temperature === 'number') body.temperature = o.temperature;
   }
+  if (o.provider === 'kimi' && o.model === 'kimi-k3') body.reasoning_effort = 'max';
   if (p.usage) body.stream_options = {include_usage:true};
   var headers = {'content-type':'application/json'};
   var key = getKey(o.provider);
   if (key) headers['Authorization'] = 'Bearer ' + key;
   if (o.provider === 'openrouter'){ headers['HTTP-Referer'] = location.origin; headers['X-Title'] = 'Nova'; }
-  var resp = await fetch(getBase(o.provider) + '/chat/completions', {
-    method:'POST', headers:headers, body: JSON.stringify(body), signal:o.signal });
+  var resp = await fetch(getBase(o.provider) + (p.chatPath || '/chat/completions'), {
+    method:'POST', headers:headers, body: JSON.stringify(body), signal:o.signal, referrerPolicy:'no-referrer' });
   if (!resp.ok) throw await httpError(resp);
   var text = '', thinking = '', usage = {}, stopReason = null;
-  var calls = {};
+  var calls = {}, citations = [];
   await readSSE(resp, function(ev){
     if (ev.data === '[DONE]') return;
     var j; try { j = JSON.parse(ev.data); } catch(e){ return; }
     if (j.error) throw new Error(j.error.message || 'stream error');
     if (j.usage){
-      usage.inTok = j.usage.prompt_tokens; usage.outTok = j.usage.completion_tokens;
-      if (isFinite(+j.usage.cost)){ usage.providerCostUsd = +j.usage.cost; usage.costUsd = +j.usage.cost; }
+      usage.inTok = j.usage.prompt_tokens != null ? j.usage.prompt_tokens : j.usage.input_tokens;
+      usage.outTok = j.usage.completion_tokens != null ? j.usage.completion_tokens : j.usage.output_tokens;
+      var exactCost = (j.usage.cost && typeof j.usage.cost === 'object') ? j.usage.cost.total_cost : j.usage.cost;
+      if (isFinite(+exactCost)){ usage.providerCostUsd = +exactCost; usage.costUsd = +exactCost; }
     }
+    if (Array.isArray(j.citations)) citations = citations.concat(j.citations);
+    if (Array.isArray(j.search_results)) j.search_results.forEach(function(sr){ if (sr && sr.url) citations.push(sr.url); });
     var ch = j.choices && j.choices[0];
     if (!ch) return;
     if (ch.finish_reason) stopReason = ch.finish_reason;
@@ -6682,6 +6847,18 @@ async function chatOpenAI(o){
     try { args = c.args ? JSON.parse(c.args) : {}; } catch(e){ args = {_raw: c.args}; }
     return {id:c.id, name:c.name, args:args};
   });
+  if (o.provider === 'perplexity' && citations.length){
+    var seen = {}, urls = citations.filter(function(u){
+      u = String(u || '').trim();
+      if (!/^https?:\/\//i.test(u) || seen[u]) return false;
+      seen[u] = 1; return true;
+    }).slice(0, 10);
+    if (urls.length){
+      var sourceBlock = '\n\nSources:\n' + urls.map(function(u, i){ return (i + 1) + '. ' + u; }).join('\n');
+      text += sourceBlock;
+      o.onText && o.onText(sourceBlock);
+    }
+  }
   return {text:text, thinking:thinking, toolCalls:toolCalls, usage:usage, stopReason:stopReason};
 }
 
@@ -6709,7 +6886,7 @@ async function chatAnthropic(o){
       'anthropic-version':'2023-06-01',
       'anthropic-dangerous-direct-browser-access':'true'
     },
-    body: JSON.stringify(body), signal:o.signal });
+    body: JSON.stringify(body), signal:o.signal, referrerPolicy:'no-referrer' });
   if (!resp.ok) throw await httpError(resp);
   var text = '', thinking = '', usage = {}, stopReason = null;
   var rawBlocks = [], cur = null;
@@ -6776,7 +6953,7 @@ async function chatGemini(o){
   var resp = await fetch(url, {
     method:'POST',
     headers:{'content-type':'application/json', 'x-goog-api-key': getKey('google')},
-    body: JSON.stringify(body), signal:o.signal });
+    body: JSON.stringify(body), signal:o.signal, referrerPolicy:'no-referrer' });
   if (!resp.ok) throw await httpError(resp);
   var text = '', thinking = '', usage = {}, toolCalls = [], stopReason = null, fcN = 0;
   await readSSE(resp, function(ev){
@@ -7023,6 +7200,56 @@ async function proposeRepositoryChanges(a){
   return 'Draft pull request created: ' + pr.html_url + '\nBranch: ' + branch + '\nFiles: ' + prepared.map(function(x){ return x.path; }).join(', ');
 }
 
+function lmStudioNativeText(payload){
+  var out = [];
+  function take(v, key){
+    if (v == null) return;
+    if (typeof v === 'string'){
+      if (!key || /^(text|content|output|result|message)$/i.test(key)) out.push(v);
+      return;
+    }
+    if (Array.isArray(v)){ v.forEach(function(x){ take(x, key); }); return; }
+    if (typeof v === 'object'){
+      ['text','content','output','result','message'].forEach(function(k){ if (Object.prototype.hasOwnProperty.call(v, k)) take(v[k], k); });
+    }
+  }
+  take(payload && payload.output, 'output');
+  if (!out.length) take(payload && payload.response, 'response');
+  return out.filter(function(x, i, a){ return x && a.indexOf(x) === i; }).join('\n').trim().slice(0, 8000);
+}
+async function lmStudioMcpWebSearch(query){
+  var q = String(query || '').trim();
+  if (!q) return 'Error: empty query.';
+  if (!S.settings.lmstudioMcpSearch) return 'Error: LM Studio MCP web search is disabled in Settings → Tools.';
+  if (!getKey('lmstudio')) return 'Error: add a scoped LM Studio API token in Settings → Providers first.';
+  if (!recentLocalProvider('lmstudio')) return 'Error: LM Studio is not currently verified and loaded.';
+  var reservation = reserveFixedCloud('brave-search', 'mcp/web-search', 'search', 0.005);
+  try {
+    var headers = {'content-type':'application/json', 'Authorization':'Bearer ' + getKey('lmstudio')};
+    var preferred = (S.settings.localPreferredModel && S.settings.localPreferredModel.lmstudio) || 'qwen/qwen3.5-9b';
+    var available = (S.settings.modelCache && S.settings.modelCache.lmstudio) || [];
+    var model = available.indexOf(preferred) >= 0 ? preferred : 'qwen/qwen3.5-9b';
+    var resp = await withTimeout(function(sig){
+      return fetch(getBase('lmstudio').replace(/\/v1$/, '') + '/api/v1/chat', {
+        method:'POST', headers:headers, signal:sig, referrerPolicy:'no-referrer', body:JSON.stringify({
+          model:model,
+          input:'Use the configured web-search connector for this request. Give a concise evidence-based answer and include the source URLs. Query: ' + q,
+          integrations:[{type:'plugin', id:'mcp/web-search'}],
+          context_length:8192, temperature:0, reasoning:'off', max_output_tokens:700
+        })
+      });
+    }, 45000);
+    if (!resp.ok) throw await httpError(resp);
+    var data = await resp.json(), answer = lmStudioNativeText(data);
+    if (!answer) throw new Error('LM Studio returned no readable search answer');
+    finishFixedCloud(reservation, {queryChars:q.length, source:'LM Studio MCP + Brave Search'});
+    return answer;
+  } catch(err){
+    releaseCloudReservation(reservation);
+    throw err;
+  }
+}
+
 var TOOLS = [
   { name:'get_current_time',
     description:'Get the current local date and time of the user, including timezone.',
@@ -7105,6 +7332,10 @@ var TOOLS = [
         return 'Web search unavailable (' + err.message + '); Wikipedia fallback:\n' + wiki;
       }
     }},
+  { name:'lmstudio_web_search',
+    description:'Search the live web through the local LM Studio MCP connector and return cited results. Prefer this over generic web_search when enabled. Each Brave query is estimated at $0.005 and is enforced by the trailing cloud budget.',
+    params:{ query:{type:'string'} }, required:['query'],
+    run: async function(a){ return lmStudioMcpWebSearch(a.query); }},
   { name:'read_url',
     description:'Fetch a web page and return its readable text content (truncated). Use after web_search to read a specific page.',
     params:{ url:{type:'string'} }, required:['url'],
@@ -7585,8 +7816,28 @@ function enabledTools(){
   return TOOLS.filter(function(t){
     if ((t.name === 'web_search' || t.name === 'read_url' || t.name === 'research' || t.name === 'get_news') && !S.settings.webSearchTool) return false;
     if (/repository/.test(t.name) && !S.settings.developerMode) return false;
+    if (t.name === 'lmstudio_web_search' && (!S.settings.lmstudioMcpSearch || !getKey('lmstudio') || !recentLocalProvider('lmstudio'))) return false;
     return true;
   });
+}
+function toolsForRequest(query, route, provider){
+  var all = enabledTools();
+  if (!localEndpoint(provider) || !route || !route.classification) return all;
+  var cls = route.classification, q = String(query || '').toLowerCase(), allow = {get_current_time:1, calculate:1};
+  function add(names){ names.forEach(function(n){ allow[n] = 1; }); }
+  if (cls.fresh) add(['web_search','lmstudio_web_search','read_url','research','get_news','get_weather','search_wikipedia']);
+  if (/\b(memory|remember|forget|about me|preference)\b/.test(q)) add(['search_memory','remember','update_memory','forget_memory']);
+  if (/\b(task|remind|ritual|schedule)\b/.test(q)) add(['list_scheduled_tasks','schedule_task']);
+  if (/\b(dashboard|homebase|widget|pin|hub|home screen)\b/.test(q)) add(['list_dashboard','update_dashboard']);
+  if (/\b(calendar|email|gmail|drive|connector|connect|sync)\b/.test(q)) add(['list_connectors','read_connector','use_connector']);
+  if (/\b(source|code|repository|repo|commit|deploy|pull request|build|implement|refactor|debug)\b/.test(q)){
+    add(['list_repository_files','read_repository_file','search_repository','propose_repository_changes','list_dashboard']);
+  }
+  if (cls.actions) add(['create_plan','update_plan_step','clear_plan']);
+  // Ambiguous action wording still gets the core dashboard/connector surfaces;
+  // the local prompt stays much smaller than the complete tool catalog.
+  if (cls.actions && Object.keys(allow).length <= 5) add(['list_dashboard','update_dashboard','list_connectors','read_connector','use_connector']);
+  return all.filter(function(t){ return allow[t.name]; });
 }
 function maxAgentRounds(){ return Math.max(4, Math.min(20, +S.settings.agentMaxRounds || 12)); }
 async function execTool(name, args){
@@ -7757,7 +8008,7 @@ function buildSystem(convo, opts){
   if (memBlock) parts.push(memBlock);
   var now = new Date();
   parts.push('Current date/time: ' + now.toString() + '. User home location: ' + (S.settings.homeLocation || 'unknown') + '.');
-  if (convo && convo.toolsOn){
+  if (convo && convo.toolsOn && opts.toolsEnabled !== false){
     var agentBits = [
       'You have agent tools — use them when they improve accuracy (live data, math, research, memory, planning, scheduling).',
       'For multi-step work: call create_plan first, execute tools, mark steps with update_plan_step, then answer clearly.',
@@ -8115,8 +8366,9 @@ async function sendMessage(rawText, opts){
   S.abort = new AbortController();
   updateSendBtn();
   var totalUsage = {inTok:0, outTok:0, costUsd:0};
-  var toolsOn = convo.toolsOn && caps.tools;
-  var tools = toolsOn ? enabledTools() : null;
+  var toolsNeeded = !route || !route.classification || !!(route.classification.actions || route.classification.fresh || route.classification.tools);
+  var toolsOn = convo.toolsOn && caps.tools && toolsNeeded;
+  var tools = toolsOn ? toolsForRequest(latestUser.text || '', route, provider) : null;
   var manualCouncil = configuredCouncilReady;
   var councilMembers = manualCouncil ? (S.settings.council.members || []).slice(0, 5) : autoTeam;
   var useCouncil = councilMembers.length >= 2;
@@ -8202,7 +8454,7 @@ async function sendMessage(rawText, opts){
         if (S.agentPlan) am.agentPlan = JSON.parse(JSON.stringify(S.agentPlan));
         var res = await runChat({
           provider: provider, model: model,
-          system: buildSystem(convo, {query: userQuery}), msgs: msgs,
+          system: buildSystem(convo, {query: userQuery, toolsEnabled:toolsOn}), msgs: msgs,
           temperature: S.settings.temperature, maxTokens: route ? route.maxTokens : S.settings.maxTokens,
           think: S.settings.thinking, tools: roundTools, signal: S.abort.signal,
           conversationId:convo.id, messageId:am.id,
@@ -8599,7 +8851,13 @@ function ttsPump(){
   var text = TTSQ.queue.shift();
   TTSQ.speaking = true;
   var eng = S.settings.speech.engine;
-  if (eng === 'openai' && getKey('openai')){
+  if (eng === 'elevenlabs' && getKey('elevenlabs') && S.settings.speech.elevenVoiceId){
+    ttsElevenLabs(text).catch(function(e){
+      console.warn('elevenlabs tts', e);
+      if (getKey('openai')) ttsOpenAI(text).catch(function(e2){ console.warn('openai tts fallback', e2); ttsBrowser(text); });
+      else ttsBrowser(text);
+    });
+  } else if (eng === 'openai' && getKey('openai')){
     ttsOpenAI(text).catch(function(e){ console.warn('openai tts', e); ttsBrowser(text); });
   } else {
     ttsBrowser(text);
@@ -8635,7 +8893,8 @@ async function ttsOpenAI(text){
     var resp = await fetch(getBase('openai') + '/audio/speech', {
       method:'POST',
       headers:{'content-type':'application/json', 'Authorization':'Bearer ' + getKey('openai')},
-      body: JSON.stringify({model:'gpt-4o-mini-tts', voice: S.settings.speech.openaiVoice || 'alloy', input: input, response_format:'mp3'})
+      body: JSON.stringify({model:'gpt-4o-mini-tts', voice: S.settings.speech.openaiVoice || 'alloy', input: input, response_format:'mp3'}),
+      referrerPolicy:'no-referrer'
     });
     if (!resp.ok) throw await httpError(resp);
     blob = await resp.blob();
@@ -8649,6 +8908,32 @@ async function ttsOpenAI(text){
   audio.onended = function(){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); };
   audio.onerror = function(){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); };
   try { await audio.play(); } catch(e){ TTSQ.audio = null; ttsDoneOne(); }
+}
+async function ttsElevenLabs(text){
+  var input = text.slice(0, 4800);
+  var model = S.settings.speech.elevenTtsModel || 'eleven_flash_v2_5';
+  var voiceId = (S.settings.speech.elevenVoiceId || '').trim();
+  if (!voiceId) throw new Error('Add an ElevenLabs voice ID in Settings → Voice');
+  // Flash/Turbo is estimated conservatively at $0.05 per 1K characters.
+  var reservation = reserveFixedCloud('elevenlabs', model, 'speech', input.length * 0.05 / 1000);
+  var blob;
+  try {
+    var resp = await fetch(getBase('elevenlabs') + '/text-to-speech/' + encodeURIComponent(voiceId) + '?output_format=mp3_44100_128', {
+      method:'POST',
+      headers:{'content-type':'application/json', 'xi-api-key':getKey('elevenlabs')},
+      body:JSON.stringify({text:input, model_id:model, voice_settings:{speed:clamp(+S.settings.speech.rate || 1, 0.7, 1.2)}}),
+      referrerPolicy:'no-referrer'
+    });
+    if (!resp.ok) throw await httpError(resp);
+    blob = await resp.blob();
+    finishFixedCloud(reservation, {chars:input.length}); reservation = null;
+  } catch(e){ if (reservation) releaseCloudReservation(reservation); throw e; }
+  var url = URL.createObjectURL(blob);
+  var audio = TTSQ.sharedAudio || new Audio();
+  audio.src = url; TTSQ.audio = audio;
+  audio.onended = function(){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); };
+  audio.onerror = function(){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); };
+  try { await audio.play(); } catch(e){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); }
 }
 function speakText(text){
   stopSpeaking();
@@ -8794,13 +9079,13 @@ function voiceVizKick(state){
   }
 }
 function voiceSupported(){
-  return !!getSR() || !!getKey('openai');
+  return !!getSR() || !!getKey('openai') || !!getKey('elevenlabs');
 }
 function startVoiceMode(opts){
   opts = opts || {};
   if (VOICE.active){ endVoiceMode(); return; }
   if (!voiceSupported()){
-    toast('Voice mode needs the Web Speech API (Chrome/Edge/Safari) or an OpenAI key for Whisper', 'warn', 4500);
+    toast('Voice mode needs browser speech recognition, OpenAI, or ElevenLabs', 'warn', 4500);
     return;
   }
   ensureConvo();
@@ -8936,17 +9221,27 @@ async function voiceListenWhisper(){
       var durationMin = Math.max(0.01, (Date.now() - t0) / 60000);
       var voiceReservation;
       try {
-        voiceReservation = reserveFixedCloud('openai', 'whisper-1', 'transcription', durationMin * 0.006);
         var mt = mr.mimeType || 'audio/webm';
         var blob = new Blob(chunks, {type: mt});
         /* Safari records audio/mp4 — Whisper detects the format from the
            filename extension, so it must match the actual container. */
         var ext = /mp4|m4a|aac/.test(mt) ? 'mp4' : (/ogg/.test(mt) ? 'ogg' : (/wav/.test(mt) ? 'wav' : 'webm'));
+        var useEleven = S.settings.speech.engine === 'elevenlabs' && !!getKey('elevenlabs');
+        var sttProvider = useEleven ? 'elevenlabs' : 'openai';
+        if (sttProvider === 'openai' && !getKey('openai') && getKey('elevenlabs')) sttProvider = 'elevenlabs';
+        if (sttProvider === 'elevenlabs'){
+          voiceReservation = reserveFixedCloud('elevenlabs', S.settings.speech.elevenSttModel || 'scribe_v2', 'transcription', durationMin * 0.22 / 60);
+        } else {
+          voiceReservation = reserveFixedCloud('openai', 'whisper-1', 'transcription', durationMin * 0.006);
+        }
         var fd = new FormData();
         fd.append('file', blob, 'voice.' + ext);
-        fd.append('model', 'whisper-1');
-        var resp = await fetch(getBase('openai') + '/audio/transcriptions', {
-          method:'POST', headers:{'Authorization':'Bearer ' + getKey('openai')}, body: fd });
+        if (sttProvider === 'elevenlabs') fd.append('model_id', S.settings.speech.elevenSttModel || 'scribe_v2');
+        else fd.append('model', 'whisper-1');
+        var resp = await fetch(getBase(sttProvider) + (sttProvider === 'elevenlabs' ? '/speech-to-text' : '/audio/transcriptions'), {
+          method:'POST',
+          headers:sttProvider === 'elevenlabs' ? {'xi-api-key':getKey('elevenlabs')} : {'Authorization':'Bearer ' + getKey('openai')},
+          body:fd, referrerPolicy:'no-referrer' });
         if (!resp.ok) throw await httpError(resp);
         var j = await resp.json();
         finishFixedCloud(voiceReservation, {minutes:durationMin}); voiceReservation = null;
@@ -9583,7 +9878,7 @@ function renderSettings(expandProvider){
 
 function renderProvidersPane(expand){
   var pane = $('pane-providers');
-  pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">🔒 Use a dedicated, low-limit key. Keys stay in this browser unless encrypted cross-device sync is enabled in Memory → Private sync; then only ciphertext is stored in your Google Drive. Keys are sent in readable form only to the provider you pick. Never use this on a shared device or commit keys to source control.</div>';
+  pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">🔒 Use a dedicated, low-limit or scoped key. Keys stay in this browser unless encrypted cross-device sync is enabled in Memory → Private sync; then only ciphertext is stored in your Google Drive. Official cloud keys are pinned to their provider API host. Never use this on a shared device or commit keys to source control.</div>';
   PROVIDER_ORDER.forEach(function(p){
     var pr = PROVIDERS[p];
     if (pr.kind === 'demo') return;
@@ -9612,16 +9907,30 @@ function renderProvidersPane(expand){
       qs('.show-k', kr).addEventListener('click', function(){ ki.type = ki.type === 'password' ? 'text' : 'password'; });
       body.appendChild(kr);
     }
+    if (p === 'lmstudio'){
+      var lkr = document.createElement('div');
+      lkr.className = 'f-row';
+      lkr.innerHTML = '<label>Scoped API token</label><input type="password" autocomplete="off" spellcheck="false" placeholder="optional · needed for installed MCPs"><button class="sm-btn show-k" type="button">👁</button>';
+      var lki = qs('input', lkr);
+      lki.value = getKey('lmstudio');
+      lki.addEventListener('change', function(){ S.keys.lmstudio = lki.value.trim(); saveKeys(); });
+      qs('.show-k', lkr).addEventListener('click', function(){ lki.type = lki.type === 'password' ? 'text' : 'password'; });
+      body.appendChild(lkr);
+    }
     if (pr.kind !== 'webllm'){
       var br = document.createElement('div');
       br.className = 'f-row';
       br.innerHTML = '<label>Base URL</label><input type="text" spellcheck="false" placeholder="' + esc(pr.base || 'https://…/v1') + '">';
       var bi = qs('input', br);
-      bi.value = S.settings.baseURL[p] || '';
-      bi.addEventListener('change', function(){
-        S.settings.baseURL[p] = bi.value.trim(); saveSettings();
-        qs('.p-dot', card).classList.toggle('ok', providerReady(p));
-      });
+      if (pr.needsKey && pr.base && p !== 'custom'){
+        bi.value = pr.base; bi.disabled = true; bi.title = 'Locked to the official API host to protect this key';
+      } else {
+        bi.value = S.settings.baseURL[p] || '';
+        bi.addEventListener('change', function(){
+          S.settings.baseURL[p] = bi.value.trim(); saveSettings();
+          qs('.p-dot', card).classList.toggle('ok', providerReady(p));
+        });
+      }
       body.appendChild(br);
     }
     var btns = document.createElement('div');
@@ -9656,7 +9965,7 @@ function renderProvidersPane(expand){
         'Then “Fetch model list”. Models: <code>ollama pull llama3.2</code> etc.</div>');
     }
     if (p === 'lmstudio'){
-      body.insertAdjacentHTML('beforeend', '<div class="hint-box">In LM Studio: <b>Developer → Start server</b> and enable <b>CORS</b>. Default port 1234.</div>');
+      body.insertAdjacentHTML('beforeend', '<div class="hint-box">Recommended on this Mac: <b>Qwen 3.5 9B 4-bit</b> as <code>homebase-local</code>, 16K context, one parallel request, full GPU offload. Developer server + CORS must be on. Installed MCP web search additionally requires LM Studio authentication, a scoped token allowed to call <code>mcp.json</code>, and the Tools toggle below.</div>');
     }
     if (p === 'llamacpp'){
       body.insertAdjacentHTML('beforeend', '<div class="hint-box">Run <code>llama-server -m model.gguf --port 8080</code> — CORS is on by default.</div>');
@@ -9670,6 +9979,18 @@ function renderProvidersPane(expand){
       cki.value = getKey('custom');
       cki.addEventListener('change', function(){ S.keys.custom = cki.value.trim(); saveKeys(); });
       body.insertBefore(ck, btns);
+    }
+    if (p === 'openrouter'){
+      body.insertAdjacentHTML('beforeend', '<div class="hint-box">Fallback only in Auto mode: used for free/long-tail models or failover after direct providers. Manual selection still works. OpenRouter charges a credit-purchase fee, so direct provider APIs rank first.</div>');
+    }
+    if (p === 'perplexity'){
+      body.insertAdjacentHTML('beforeend', '<div class="hint-box">Specialist for current web questions with citations. Sonar includes a per-request search fee in addition to token usage; the rolling-budget guard reserves both.</div>');
+    }
+    if (p === 'kimi'){
+      body.insertAdjacentHTML('beforeend', '<div class="hint-box">K2.6 is the cost-aware default. K2.7 Code is preferred for advanced coding; K3 is reserved for explicit “most advanced” requests or tasks that meet the frontier quality floor.</div>');
+    }
+    if (p === 'deepinfra'){
+      body.insertAdjacentHTML('beforeend', '<div class="hint-box">Recommended: create a scoped JWT restricted by model, expiry, and maximum USD spend instead of pasting a full-access account key.</div>');
     }
     if (p === 'webllm'){
       var gpuOk = !!navigator.gpu;
@@ -9718,11 +10039,11 @@ async function testProvider(p, btn){
       resp = await withTimeout(function(sig){
         return fetch(getBase(p) + '/models?limit=1', {headers:{
           'x-api-key': getKey(p), 'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true'}, signal:sig});
+          'anthropic-dangerous-direct-browser-access':'true'}, signal:sig, referrerPolicy:'no-referrer'});
       }, 10000);
     } else if (pr.kind === 'gemini'){
       resp = await withTimeout(function(sig){
-        return fetch(getBase(p) + '/models?pageSize=1', {headers:{'x-goog-api-key': getKey(p)}, signal:sig});
+        return fetch(getBase(p) + '/models?pageSize=1', {headers:{'x-goog-api-key': getKey(p)}, signal:sig, referrerPolicy:'no-referrer'});
       }, 10000);
     } else if (pr.kind === 'webllm'){
       if (!navigator.gpu) throw new Error('WebGPU not available');
@@ -9731,7 +10052,7 @@ async function testProvider(p, btn){
       var h = {};
       if (getKey(p)) h['Authorization'] = 'Bearer ' + getKey(p);
       var url = (p === 'ollama') ? getBase(p).replace(/\/v1$/, '') + '/api/tags' : getBase(p) + '/models';
-      resp = await withTimeout(function(sig){ return fetch(url, {headers:h, signal:sig}); }, 10000);
+      resp = await withTimeout(function(sig){ return fetch(url, {headers:h, signal:sig, referrerPolicy:'no-referrer'}); }, 10000);
     }
     if (!resp.ok) throw await httpError(resp);
     S.settings.providerHealth[p] = {ok:true, ts:Date.now()}; saveSettings({sync:false});
@@ -9749,13 +10070,32 @@ async function fetchProviderModels(p, btn){
   btn.textContent = 'Fetching…';
   try {
     var pr = PROVIDERS[p], ids = [];
-    if (pr.fetchModels === 'ollama'){
+    if (p === 'lmstudio'){
+      var lh = {};
+      if (getKey('lmstudio')) lh.Authorization = 'Bearer ' + getKey('lmstudio');
+      var lr = await withTimeout(function(sig){ return fetch(getBase(p).replace(/\/v1$/, '') + '/api/v1/models', {headers:lh, signal:sig, referrerPolicy:'no-referrer'}); }, 9000);
+      if (!lr.ok) throw await httpError(lr);
+      var lj = await lr.json(), lc = {};
+      (lj.models || []).filter(function(m){ return m.type === 'llm'; }).forEach(function(m){
+        var c = m.capabilities || {}, loaded = m.loaded_instances || [];
+        var mc = {vision:!!c.vision, tools:!!c.trained_for_tool_use, nativeTools:!!c.trained_for_tool_use,
+          think:c.reasoning ? 'native' : null, quality:/\b(?:9|12|14)b\b/i.test(m.key || '') ? 3 : 2,
+          label:(m.key || 'local model') + (loaded.length ? ' · available' : ' · JIT')};
+        ids.push(m.key); lc[m.key] = mc;
+        loaded.forEach(function(inst){
+          var id = inst.id;
+          ids.push(id);
+          lc[id] = Object.assign({}, mc, {label:(m.key || id) + ' · loaded'});
+        });
+      });
+      S.settings.modelCapabilities.lmstudio = lc;
+    } else if (pr.fetchModels === 'ollama'){
       var r = await withTimeout(function(sig){ return fetch(getBase(p).replace(/\/v1$/, '') + '/api/tags', {signal:sig}); }, 9000);
       if (!r.ok) throw await httpError(r);
       var j = await r.json();
       ids = (j.models || []).map(function(m){ return m.name; });
     } else if (pr.kind === 'gemini'){
-      var r2 = await withTimeout(function(sig){ return fetch(getBase(p) + '/models?pageSize=100', {headers:{'x-goog-api-key': getKey(p)}, signal:sig}); }, 9000);
+      var r2 = await withTimeout(function(sig){ return fetch(getBase(p) + '/models?pageSize=100', {headers:{'x-goog-api-key': getKey(p)}, signal:sig, referrerPolicy:'no-referrer'}); }, 9000);
       if (!r2.ok) throw await httpError(r2);
       var j2 = await r2.json();
       ids = (j2.models || []).filter(function(m){
@@ -9764,7 +10104,7 @@ async function fetchProviderModels(p, btn){
     } else {
       var h = {};
       if (getKey(p)) h['Authorization'] = 'Bearer ' + getKey(p);
-      var r3 = await withTimeout(function(sig){ return fetch(getBase(p) + '/models', {headers:h, signal:sig}); }, 12000);
+      var r3 = await withTimeout(function(sig){ return fetch(getBase(p) + '/models', {headers:h, signal:sig, referrerPolicy:'no-referrer'}); }, 12000);
       if (!r3.ok) throw await httpError(r3);
       var j3 = await r3.json();
       ids = (j3.data || []).map(function(m){ return m.id; }).sort();
@@ -9778,7 +10118,7 @@ async function fetchProviderModels(p, btn){
         });
       }
     }
-    ids = ids.slice(0, 400);
+    ids = ids.filter(function(id, i, a){ return id && a.indexOf(id) === i; }).slice(0, 400);
     S.settings.modelCache[p] = ids;
     S.settings.providerHealth[p] = {ok:true, ts:Date.now()};
     saveSettings();
@@ -9795,11 +10135,28 @@ async function autoDiscoverLocalModels(){
   var changed = false;
   await Promise.all(['ollama','lmstudio','llamacpp'].map(async function(p){
     try {
-      var url = p === 'ollama' ? getBase(p).replace(/\/v1$/, '') + '/api/tags' : getBase(p) + '/models';
-      var r = await withTimeout(function(sig){ return fetch(url, {signal:sig}); }, 2200);
+      var h = {};
+      if (p === 'lmstudio' && getKey('lmstudio')) h.Authorization = 'Bearer ' + getKey('lmstudio');
+      var url = p === 'ollama' ? getBase(p).replace(/\/v1$/, '') + '/api/tags' :
+        (p === 'lmstudio' ? getBase(p).replace(/\/v1$/, '') + '/api/v1/models' : getBase(p) + '/models');
+      var r = await withTimeout(function(sig){ return fetch(url, {headers:h, signal:sig, referrerPolicy:'no-referrer'}); }, 2200);
       if (!r.ok) throw new Error('HTTP ' + r.status);
       var j = await r.json();
-      var ids = p === 'ollama' ? (j.models || []).map(function(m){ return m.name; }) : (j.data || []).map(function(m){ return m.id; });
+      var ids;
+      if (p === 'ollama') ids = (j.models || []).map(function(m){ return m.name; });
+      else if (p === 'lmstudio'){
+        var cc = {};
+        ids = [];
+        (j.models || []).filter(function(m){ return m.type === 'llm'; }).forEach(function(m){
+          var c = m.capabilities || {}, mc = {vision:!!c.vision, tools:!!c.trained_for_tool_use,
+            nativeTools:!!c.trained_for_tool_use, think:c.reasoning ? 'native' : null,
+            quality:/\b(?:9|12|14)b\b/i.test(m.key || '') ? 3 : 2, label:(m.key || 'local model') + ' · JIT'};
+          ids.push(m.key); cc[m.key] = mc;
+          (m.loaded_instances || []).forEach(function(inst){ ids.push(inst.id); cc[inst.id] = Object.assign({}, mc, {label:(m.key || inst.id) + ' · loaded'}); });
+        });
+        S.settings.modelCapabilities.lmstudio = cc;
+      } else ids = (j.data || []).map(function(m){ return m.id; });
+      ids = ids.filter(function(id, i, a){ return id && a.indexOf(id) === i; });
       S.settings.modelCache[p] = ids.slice(0, 100);
       S.settings.providerHealth[p] = {ok:ids.length > 0, ts:Date.now()};
       changed = true;
@@ -9890,7 +10247,7 @@ function renderChatPane(){
 function renderVoicePane(){
   var pane = $('pane-voice');
   pane.innerHTML = '';
-  var eng = row('Voice engine', 'Browser is free; OpenAI uses your key for premium TTS + Whisper', '<select id="vs-eng"><option value="browser">Browser (free)</option><option value="openai">OpenAI (premium)</option></select>');
+  var eng = row('Voice engine', 'Browser is free; cloud speech is included in the same trailing 30-day budget', '<select id="vs-eng"><option value="browser">Browser (free)</option><option value="openai">OpenAI (premium)</option><option value="elevenlabs">ElevenLabs (premium)</option></select>');
   pane.appendChild(eng);
   var engSel = qs('#vs-eng', pane);
   engSel.value = S.settings.speech.engine;
@@ -9908,6 +10265,28 @@ function renderVoicePane(){
   var ov = qs('#vs-ov', pane);
   ov.value = S.settings.speech.openaiVoice;
   ov.addEventListener('change', function(){ S.settings.speech.openaiVoice = this.value; saveSettings(); });
+  var ekRow = row('ElevenLabs API key', 'Use a restricted, low-limit key; encrypted sync is optional', '<input id="vs-ek" type="password" autocomplete="off" spellcheck="false" placeholder="xi-…" style="min-width:180px"><button id="vs-etest" class="sm-btn" type="button">Test</button><a class="sm-btn" href="https://elevenlabs.io/app/settings/api-keys" target="_blank" rel="noopener" style="text-decoration:none">Get key</a>');
+  pane.appendChild(ekRow);
+  var eki = qs('#vs-ek', pane);
+  eki.value = getKey('elevenlabs');
+  eki.addEventListener('change', function(){ S.keys.elevenlabs = this.value.trim(); saveKeys(); });
+  qs('#vs-etest', pane).addEventListener('click', async function(){
+    var b = this; b.textContent = 'Testing…';
+    try {
+      var resp = await withTimeout(function(sig){ return fetch(getBase('elevenlabs') + '/user', {
+        headers:{'xi-api-key':getKey('elevenlabs')}, signal:sig, referrerPolicy:'no-referrer' }); }, 10000);
+      if (!resp.ok) throw await httpError(resp);
+      toast('ElevenLabs connected ✅', 'ok');
+    } catch(e){ toast('ElevenLabs: ' + (e.name === 'AbortError' ? 'timed out' : e.message), 'err', 5000); }
+    b.textContent = 'Test';
+  });
+  var evRow = row('ElevenLabs voice ID', 'Choose a voice in your ElevenLabs library', '<input id="vs-evoice" type="text" spellcheck="false" placeholder="voice ID" style="min-width:180px">');
+  pane.appendChild(evRow);
+  var evi = qs('#vs-evoice', pane);
+  evi.value = S.settings.speech.elevenVoiceId || '';
+  evi.addEventListener('change', function(){ S.settings.speech.elevenVoiceId = this.value.trim(); saveSettings(); });
+  var emRow = row('ElevenLabs models', 'Flash is the low-latency, lower-cost TTS default; Scribe v2 handles fallback transcription', '<span style="font-family:var(--mono);font-size:11.5px">eleven_flash_v2_5 · scribe_v2</span>');
+  pane.appendChild(emRow);
   var rRow = row('Speech rate', '', '<input id="vs-rate" type="range" min="0.6" max="1.6" step="0.05" style="width:150px"><span id="vs-rate-v" style="width:36px; text-align:right; font-family:var(--mono); font-size:12px"></span>');
   pane.appendChild(rRow);
   var ri = qs('#vs-rate', pane), rv = qs('#vs-rate-v', pane);
@@ -9922,7 +10301,7 @@ function renderVoicePane(){
     function(){ return S.settings.autoSpeak; }, function(v){ S.settings.autoSpeak = v; }));
   var sup = document.createElement('div');
   sup.className = 'hint-box';
-  sup.innerHTML = 'Speech recognition: ' + (getSR() ? '✅ available' : '⚠️ not in this browser (voice mode can fall back to OpenAI Whisper if a key is set)') +
+  sup.innerHTML = 'Speech recognition: ' + (getSR() ? '✅ browser capture available (free)' : '⚠️ browser capture unavailable; voice mode will use the selected configured cloud engine') +
     ' · Speech synthesis: ' + (window.speechSynthesis ? '✅ available' : '⚠️ unavailable');
   pane.appendChild(sup);
 }
@@ -9932,6 +10311,11 @@ function renderToolsPane(){
   pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">With 🔧 agent tools on, the model runs a multi-step tool loop (default ' + maxAgentRounds() + ' rounds): plan → research → memory → answer. Toggle per chat with the wrench or <code>/tools</code>. Use persona <b>Agent</b> or <code>/agent</code> for proactive behaviour.</div>';
   pane.appendChild(tglRow('Web access tools', 'web_search, read_url, research, get_news — public proxies, can be flaky',
     function(){ return S.settings.webSearchTool; }, function(v){ S.settings.webSearchTool = v; }));
+  pane.appendChild(tglRow('LM Studio MCP web search', 'Use the installed Brave connector through LM Studio when a scoped local API token is configured · estimated $0.005 per search',
+    function(){ return S.settings.lmstudioMcpSearch; }, function(v){
+      S.settings.lmstudioMcpSearch = v;
+      if (v && !getKey('lmstudio')) toast('Add a scoped LM Studio API token in Providers before MCP search can run.', 'warn', 5000);
+    }));
   pane.appendChild(tglRow('Plan-first agent style', 'System prompt nudges create_plan before long tool chains',
     function(){ return S.settings.agentPlanFirst; }, function(v){ S.settings.agentPlanFirst = v; }));
   var rRow = row('Max agent rounds', 'Safety cap on tool-call loops', '<input id="ag-rounds" type="number" min="4" max="20" step="1" style="width:80px">');
@@ -9986,7 +10370,7 @@ function renderCouncilPane(){
     qs('.co-label', r).value = m.label || '';
     var sel = qs('.co-prov', r);
     Object.keys(PROVIDERS).forEach(function(pk){
-      if (pk === 'demo') return;
+      if (pk === 'demo' || PROVIDERS[pk].kind === 'voice') return;
       var o = document.createElement('option'); o.value = pk; o.textContent = PROVIDERS[pk].name;
       if (pk === m.provider) o.selected = true;
       sel.appendChild(o);
@@ -10058,7 +10442,7 @@ function renderCouncilPane(){
   var ss = S.settings.council.synthesizer;
   var sprov = qs('#co-sprov', pane);
   Object.keys(PROVIDERS).forEach(function(pk){
-    if (pk === 'demo') return;
+    if (pk === 'demo' || PROVIDERS[pk].kind === 'voice') return;
     var o = document.createElement('option'); o.value = pk; o.textContent = PROVIDERS[pk].name;
     if (ss && ss.provider === pk) o.selected = true;
     sprov.appendChild(o);
@@ -10160,6 +10544,8 @@ function renderDataPane(){
         S.settings.speech = Object.assign({}, DEFAULT_SETTINGS.speech, (d.settings || {}).speech || {});
         S.settings.council = Object.assign({}, DEFAULT_SETTINGS.council, (d.settings || {}).council || {});
         S.settings.cloudBudget = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, (d.settings || {}).cloudBudget || {});
+        S.settings.modelCapabilities = S.settings.modelCapabilities || {};
+        S.settings.localPreferredModel = Object.assign({}, DEFAULT_SETTINGS.localPreferredModel, (d.settings || {}).localPreferredModel || {});
         S.memory = d.memory || []; S.tasks = d.tasks || [];
         if (d.keys) S.keys = d.keys;
         if (Array.isArray(d.cloudUsage)) lsSet(LS_USAGE, d.cloudUsage);
