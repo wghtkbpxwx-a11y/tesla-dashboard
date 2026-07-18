@@ -195,7 +195,15 @@ LM Studio is the preferred local runtime on the 16 GB M1 Pro. The tested
 prediction; the stable routing key is `qwen/qwen3.5-9b`, with LM Studio
 just-in-time loading as the post-eviction fallback. Trust discovered model capability metadata; do not assume every
 fetched model supports tools. The optional LM Studio Brave MCP requires a
-scoped local API token and counts an estimated $0.005/search in the ledger.
+scoped local API token and counts an estimated $0.005/search in the ledger. The
+verified baseline requires authentication, keeps only the restricted Homebase
+token, denies arbitrary remote MCPs, permits installed `mcp.json` connectors,
+and remains localhost-only. The live one-search test used local Qwen, invoked
+Brave exactly once, and did not use a paid cloud language model.
+Treat Qwen 3.5 4B as the fast local model for short no-tool prompts and Qwen 3.5
+9B as the capable local/tool model. Balanced and tool-heavy tasks consider the
+lowest-cost adequate cloud route before the local fallback unless the user asks
+for local/offline execution; preserve that latency-aware ordering.
 A hard estimated $50 trailing-30-day combined cloud
 budget is stored in `nova_cloud_usage_v1`, reserves concurrent calls, and also
 tracks OpenAI and ElevenLabs premium speech/transcription plus fixed provider

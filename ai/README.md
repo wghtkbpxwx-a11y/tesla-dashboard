@@ -122,7 +122,15 @@ read/write. The token stays in this browser and must never be committed.
   authentication in LM Studio, create a dedicated scoped token that may call
   servers from `mcp.json`, enter it under Settings → Providers → LM Studio, then
   enable Settings → Tools → LM Studio MCP web search. Each Brave search reserves
-  an estimated $0.005 against the same trailing budget.
+  an estimated $0.005 against the same trailing budget. The verified Mac setup
+  requires authentication, retains only the restricted Homebase token, denies
+  arbitrary remote MCPs, permits installed `mcp.json` connectors, and remains
+  localhost-only. A one-search live test succeeded through local Qwen without a
+  paid cloud-model call. Because a full 9B tool loop can take minutes on this
+  machine, Qwen 3.5 4B is the fast path for short no-tool prompts; 9B remains the
+  capable local/tool path. Balanced and tool-heavy requests consider an adequate
+  cloud route first, then fall back locally when cloud is unavailable or the user
+  explicitly requests local/offline execution.
 - **llama.cpp** — `llama-server -m model.gguf --port 8080` (CORS is on by default).
 - **WebLLM** — needs WebGPU (Chrome/Edge 113+); pick a model in Settings →
   Providers → WebLLM and hit *Load model now*.

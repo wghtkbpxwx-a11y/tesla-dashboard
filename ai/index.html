@@ -1973,6 +1973,7 @@ var DEFAULT_SETTINGS = {
   modelPricing: {},            // provider -> model -> [input, output] USD / 1M tokens
   modelCapabilities: {},       // provider -> model -> discovered capability metadata
   localPreferredModel: { lmstudio: 'qwen/qwen3.5-9b' },
+  localFastModel: { lmstudio: 'qwen/qwen3.5-4b' },
   providerHealth: {},          // provider -> {ok, ts}; local routing only trusts recent checks
   temperature: 0.3,
   maxTokens: 4096,
@@ -2568,8 +2569,9 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
-    state: 'PR #58 encrypted sync and PR #59 direct-provider/LM Studio routing are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support deployed from merge commit 398fc8a. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery. LM Studio authentication is enabled and a least-privilege Homebase token was created; the token-input persistence fix and installed-mcp.json server toggle still require live verification.',
+    state: 'PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, and PR #61 LM Studio token persistence are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery. LM Studio now requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call.',
     start_here: [
+      'HOMEBASE_CHANGELOG entry 2026-07-18-lmstudio-secure-mcp-live-verification',
       'HOMEBASE_CHANGELOG entry 2026-07-18-direct-provider-router-v2 plus the updated 2026-07-18-cross-device-vault-deployment entry',
       'HOMEBASE_CHANGELOG entries 2026-07-18-cross-device-vault-v2, 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
       'ai/index.html: selectAIRoute, buildAutoAgentTeam, runSubagentMember, runTeamLeadSynthesis, repository tools, Settings → Chat, Settings → Development',
@@ -2617,6 +2619,50 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-lmstudio-secure-mcp-live-verification',
+      date: '2026-07-18',
+      commit: 'pending (configuration-verification follow-up)',
+      branch: 'codex/record-lmstudio-secure-live',
+      pull_request: 'pending',
+      title: 'Lock down LM Studio and verify one budgeted installed-MCP search end to end',
+      type: 'ops+security+verification+docs',
+      depends_on: ['2026-07-18-lmstudio-token-auth-fix','2026-07-18-direct-provider-router-v2'],
+      files_changed: ['ai/index.html','ai/README.md','README.md','CLAUDE.md','ROADMAP.md'],
+      settings_verified: ['LM Studio tokenMode=required','dynamicRemoteMcpServer=deny','pluginUse=allowAll','Homebase keys.lmstudio','Homebase lmstudioMcpSearch=true','localFastModel.lmstudio=qwen/qwen3.5-4b','localPreferredModel.lmstudio=qwen/qwen3.5-9b'],
+      interfaces_verified: ['LM Studio /api/v1/models','LM Studio /api/v1/chat','mcp/web-search:brave_web_search','classifyAIRequest','localRouteCandidate','selectAIRoute','lmStudioMcpWebSearch','rolling cloud-usage ledger'],
+      changes: [
+        'Confirmed PR #61 is merged and deployed, and that Homebase immediately uses the restricted LM Studio token for authenticated provider requests',
+        'Revoked the obsolete broad Homebase token so LM Studio retains only the dedicated least-privilege dashboard token',
+        'Set LM Studio to require authentication, deny arbitrary per-request remote MCP servers, allow only installed mcp.json connectors, and keep the server bound to 127.0.0.1 with CORS and just-in-time loading enabled',
+        'Enabled Settings → Tools → LM Studio MCP web search in the live Homebase browser state',
+        'Ran one beta search through local Qwen 3.5 9B; LM Studio invoked brave_web_search exactly once and received a tool result, while Homebase reserved and committed the fixed $0.005 estimate to the trailing-30-day ledger',
+        'Used no paid cloud language model for the beta search; local Qwen handled routing, connector use, and response composition',
+        'Added latency-aware two-tier local routing: installed Qwen 3.5 4B handles short no-tool prompts, while Qwen 3.5 9B remains the capable local/tool model',
+        'Balanced and tool-heavy requests now consider the cheapest adequate cloud route before a local fallback, avoiding multi-minute local tool chains unless local/offline use is requested or cloud is unavailable'
+      ],
+      safety_guards: [
+        'No token value, API key, search result payload, or private user data is recorded in source or this changelog',
+        'The remaining LM Studio token cannot add arbitrary remote MCP servers and can call only connectors already installed and approved in mcp.json',
+        'Unauthenticated local model-list requests return HTTP 401; the server is not exposed to the local network or internet',
+        'The beta test was limited to one Brave request with an estimated $0.005 application-ledger cost'
+      ],
+      verification: [
+        'PR #61 merge commit 32d9542a54432ee1c65a7bc6b6bf1470eb76f487 is on main; its validation and Pages deployment runs completed successfully',
+        'Authenticated Homebase model discovery returned HTTP 200, while an unauthenticated /api/v1/models request returned HTTP 401',
+        'LM Studio logs show the installed mcp/web-search connector registered, brave_web_search requested exactly once, and a tool result received',
+        'Homebase fixed-cost accounting commits $0.005 only after /api/v1/chat returns a readable answer and releases the reservation on errors'
+      ],
+      setup_required: [
+        'None for this Mac and browser profile; add cloud-provider credits and keys one provider at a time as the user chooses',
+        'A phone cannot reach this localhost-only LM Studio instance; mobile should continue using eligible cloud providers unless a separately secured private relay is deliberately added'
+      ],
+      known_limits: [
+        'Homebase records an estimated Brave cost, not authoritative provider billing; reconcile against provider exports when a safe read-only API is available',
+        'LM Studio connector permissions are machine-local and must be re-verified after LM Studio resets, migrations, or token recreation'
+      ],
+      next_model: 'Treat the verified restricted token, localhost binding, installed-only MCP permission, one-search cost record, and $50 trailing-30-day guard as the operational baseline; do not weaken them when adding provider keys.'
+    },
     {
       id: '2026-07-18-lmstudio-token-auth-fix',
       date: '2026-07-18',
@@ -5888,6 +5934,7 @@ function loadState(){
   S.settings.modelPricing = S.settings.modelPricing || {};
   S.settings.modelCapabilities = S.settings.modelCapabilities || {};
   S.settings.localPreferredModel = Object.assign({}, DEFAULT_SETTINGS.localPreferredModel, S.settings.localPreferredModel || {});
+  S.settings.localFastModel = Object.assign({}, DEFAULT_SETTINGS.localFastModel, S.settings.localFastModel || {});
   S.settings.providerHealth = S.settings.providerHealth || {};
   if (!Array.isArray(S.settings.council.members)) S.settings.council.members = [];
   S.keys = lsGet(LS_KEYS, {});
@@ -6393,6 +6440,7 @@ function classifyAIRequest(query, latestUser, convo){
   var q = String(query || ''), hasVision = !!((latestUser.images || []).length || (latestUser.files || []).some(function(f){ return f.kind === 'pdf'; }));
   var named = explicitModelRequest(q);
   var maxQuality = /\b(most advanced|best (?:available )?model|maximum quality|highest quality|strongest model|frontier model|no matter the cost)\b/i.test(q);
+  var explicitLocal = /\b(?:use|prefer|force|stay|run)\b[\s\S]{0,30}\b(?:local|offline|lm studio|qwen)\b|\b(?:local|offline|lm studio)\b[\s\S]{0,30}\b(?:only|model|mcp)\b/i.test(q);
   var fresh = /\b(today|current|currently|latest|live|right now|news|weather|price|stock|score|schedule|search|browse|look up|verify|source|citation)\b/i.test(q);
   var actions = /\b(dashboard|calendar|task|remind|remember|forget|pin|note|email|gmail|drive|update|change|modify|create|delete|edit|send|connect|sync|deploy|commit|push|pull request)\b/i.test(q);
   var highStakes = /\b(diagnos|dose|dosage|interaction|contraindication|patient|clinical|legal|lawsuit|tax|portfolio|investment|retirement|mortgage|financial plan)\b/i.test(q);
@@ -6400,7 +6448,7 @@ function classifyAIRequest(query, latestUser, convo){
     /\b(build|develop|implement|redesign|refactor)\b[\s\S]{0,120}\b(app|dashboard|feature|integration|workflow|system|source|repository|repo)\b/i.test(q) || q.length > 1400;
   var simple = q.length < 550 && !hasVision && !highStakes && !advanced && !fresh && !actions;
   var tier = maxQuality || named ? 4 : (advanced ? 3 : (simple ? 1 : 2));
-  return {tier:tier, named:named, explicitMax:maxQuality, vision:hasVision, fresh:fresh, actions:actions, tools:actions,
+  return {tier:tier, named:named, explicitMax:maxQuality, explicitLocal:explicitLocal, vision:hasVision, fresh:fresh, actions:actions, tools:actions,
     label:tier === 4 ? 'frontier requested' : (tier === 3 ? 'advanced task' : (tier === 2 ? 'balanced task' : 'simple task'))};
 }
 function recentLocalProvider(p){
@@ -6417,7 +6465,8 @@ function localRouteCandidate(cls){
     var p = locals[i];
     if (!localEndpoint(p) || !recentLocalProvider(p)) continue;
     var ids = (S.settings.modelCache[p] || []).slice();
-    var preferred = S.settings.localPreferredModel && S.settings.localPreferredModel[p];
+    var fast = cls.tier === 1 && !needsTools && S.settings.localFastModel && S.settings.localFastModel[p];
+    var preferred = fast || (S.settings.localPreferredModel && S.settings.localPreferredModel[p]);
     if (preferred && ids.indexOf(preferred) >= 0){ ids.splice(ids.indexOf(preferred), 1); ids.unshift(preferred); }
     for (var j = 0; j < ids.length; j++){
       var caps = modelCaps(p, ids[j]);
@@ -6461,7 +6510,11 @@ function selectAIRoute(query, latestUser, convo, msgs){
   // every simple message. Classification decides whether this request needs
   // a mutation tool or fresh web data.
   if ((cls.actions || cls.fresh) && cls.tier < 2) cls.tier = 2;
-  var local = localRouteCandidate(cls);
+  // Keep instant, simple work local. Balanced/tool-heavy work first considers
+  // an eligible cloud model because multi-pass local tool chains can take
+  // minutes on 16 GB hardware; explicit local/offline requests still stay local.
+  var localClass = cls.explicitLocal ? Object.assign({}, cls, {tier:Math.min(cls.tier, 2)}) : cls;
+  var local = (cls.tier === 1 || cls.explicitLocal) ? localRouteCandidate(localClass) : null;
   var maxOut = Math.min(+S.settings.maxTokens || 4096, cls.tier >= 4 ? 4096 : (cls.tier === 3 ? 3072 : (cls.tier === 2 ? 1800 : 900)));
   if (local) return Object.assign(local, {maxTokens:maxOut, tier:cls.tier, classification:cls,
     reason:'Auto · local model for a ' + cls.label + ' · $0 cloud'});
@@ -6489,6 +6542,9 @@ function selectAIRoute(query, latestUser, convo, msgs){
     return Object.assign(best, {maxTokens:maxOut, tier:cls.tier, classification:cls,
       reason:'Auto · ' + cls.label + ' · lowest estimated cost meeting quality floor (~$' + best.estimatedCost.toFixed(3) + ' max)'});
   }
+  var capableLocal = localRouteCandidate(Object.assign({}, cls, {tier:Math.min(cls.tier, 2)}));
+  if (capableLocal) return Object.assign(capableLocal, {maxTokens:maxOut, tier:cls.tier, classification:cls,
+    reason:'Auto · capable local fallback; no suitable configured cloud route'});
   var emergency = localRouteCandidate(Object.assign({}, cls, {tier:1, vision:false, tools:false}));
   if (emergency) return Object.assign(emergency, {maxTokens:Math.min(maxOut, 1200), tier:cls.tier, classification:cls,
     reason:'Auto · local fallback; no suitable cloud model is configured and budget-eligible'});
@@ -10585,6 +10641,7 @@ function renderDataPane(){
         S.settings.cloudBudget = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, (d.settings || {}).cloudBudget || {});
         S.settings.modelCapabilities = S.settings.modelCapabilities || {};
         S.settings.localPreferredModel = Object.assign({}, DEFAULT_SETTINGS.localPreferredModel, (d.settings || {}).localPreferredModel || {});
+        S.settings.localFastModel = Object.assign({}, DEFAULT_SETTINGS.localFastModel, (d.settings || {}).localFastModel || {});
         S.memory = d.memory || []; S.tasks = d.tasks || [];
         if (d.keys) S.keys = d.keys;
         if (Array.isArray(d.cloudUsage)) lsSet(LS_USAGE, d.cloudUsage);
