@@ -21,15 +21,19 @@ voice mode (this is what the dashboard's **More → 🎙️ Homebase Voice** but
 
 | Type | Providers |
 |---|---|
-| Cloud (bring your own key) | Anthropic Claude, OpenAI, Google Gemini, Groq, OpenRouter, Mistral, DeepSeek, xAI Grok |
+| Direct cloud (bring your own key) | Anthropic Claude, OpenAI, Google Gemini, Groq, Perplexity Sonar, Kimi, DeepInfra, Mistral, DeepSeek, xAI Grok |
+| Aggregator / fallback | OpenRouter — manual, free/long-tail, or Auto failover after direct providers |
+| Voice cloud (optional) | OpenAI speech/Whisper and ElevenLabs Flash/Scribe; browser speech remains free/default |
 | Local server | Ollama, LM Studio, llama.cpp — plus any custom OpenAI-compatible endpoint (vLLM, LiteLLM, Together…) |
 | In-browser | WebLLM (WebGPU) — Llama 3.2, Qwen 2.5, Gemma 2, Phi 3.5, SmolLM2; fully private, works offline after the one-time download |
 | No setup | Demo mode — simulated model to explore the UI |
 
-Add a dedicated, low-limit key in **Settings → Providers** (stored in
+Add a dedicated, low-limit or scoped key in **Settings → Providers** (stored in
 `localStorage`, and optionally included in the client-side encrypted Google
 Drive vault for phone/desktop sync). A readable key is sent only to its AI
-provider. Do not use this feature on a shared device or commit keys to source control. Each provider
+provider, and official cloud credentials are pinned to the provider's API
+origin so a modified Base URL cannot redirect them. Do not use this feature on
+a shared device or commit keys to source control. Each provider
 has a **Get API key** shortcut, **Test connection**, and, where supported,
 **Fetch model list**; any model id can also be typed into the model-picker
 search and used directly.
@@ -38,11 +42,13 @@ search and used directly.
 
 Homebase defaults to **Auto · best value**. For every new message it:
 
-1. detects required capabilities (live tools, vision/PDF, complexity, and
+1. detects required capabilities (fresh web data, dashboard actions,
+   vision/PDF, complexity, and
    high-stakes clinical/financial/legal context);
 2. uses a recently verified local server or in-browser WebLLM for simple work;
 3. when cloud quality is required, filters out models below the task's quality
-   floor and selects the lowest estimated-cost suitable model;
+   floor, prefers direct provider APIs, and selects the lowest estimated-cost
+   suitable direct model; OpenRouter is considered only as fallback;
 4. raises the quality floor when the prompt names a model or says things such
    as “use your most advanced model” or “maximum quality.”
 
@@ -50,9 +56,10 @@ The default paid-cloud guard is **$50 across the trailing 30 days**, combined
 across all configured providers. It reserves a conservative maximum before
 each call (including concurrent Council calls), records the provider's token
 usage afterward, and continuously releases entries as they become 30 days old.
-OpenAI Whisper and premium text-to-speech are included; local models and browser
-speech cost $0. Unknown-price cloud models are blocked while the hard guard is
-enabled. The tracker and controls are in **Settings → Chat**, and every reply
+OpenAI Whisper/TTS and ElevenLabs Flash/Scribe are included; Perplexity Sonar
+reserves its per-request search fee as well as token cost. Local models and
+browser speech cost $0. Unknown-price cloud models are blocked while the hard
+guard is enabled. The tracker and controls are in **Settings → Chat**, and every reply
 shows the selected model, route reason, tokens, and estimated cost.
 
 When encrypted cross-device sync is enabled, usage events are merged by ID
@@ -103,7 +110,19 @@ read/write. The token stays in this browser and must never be committed.
 - **Ollama** — allow the page's origin once, then restart Ollama:
   macOS `launchctl setenv OLLAMA_ORIGINS "*"` · Windows `setx OLLAMA_ORIGINS "*"` ·
   Linux: add `Environment="OLLAMA_ORIGINS=*"` to the systemd unit.
-- **LM Studio** — Developer → Start server, enable CORS (port 1234).
+- **LM Studio** — Developer → Start server, enable CORS (port 1234). On David's
+  16 GB M1 Pro, the tested default is Qwen 3.5 9B 4-bit loaded as
+  `homebase-local` with 16K context, one parallel prediction, and full GPU
+  offload. Homebase reads LM Studio's reported vision/tool metadata and prefers
+  the underlying `qwen/qwen3.5-9b` key for routine chats and Homebase function
+  tools. Just-in-time loading is enabled, so the model can return after idle
+  eviction; the explicitly loaded instance uses the more conservative settings.
+- **LM Studio installed MCPs** — ordinary Homebase tools use the OpenAI-compatible
+  endpoint. To use LM Studio's installed Brave web-search MCP, enable API
+  authentication in LM Studio, create a dedicated scoped token that may call
+  servers from `mcp.json`, enter it under Settings → Providers → LM Studio, then
+  enable Settings → Tools → LM Studio MCP web search. Each Brave search reserves
+  an estimated $0.005 against the same trailing budget.
 - **llama.cpp** — `llama-server -m model.gguf --port 8080` (CORS is on by default).
 - **WebLLM** — needs WebGPU (Chrome/Edge 113+); pick a model in Settings →
   Providers → WebLLM and hit *Load model now*.
@@ -164,7 +183,7 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
 - **Multimodal** — images (upload, paste, drag-drop, camera) to vision models;
   PDFs natively to Claude / Gemini / OpenAI; text/code files inlined; voice in
   and out.
-- **Voice mode** — cinematic neural voice UI (rings, particle field, waveform bars) with hands-free listen → think → speak. Tap the orb to interrupt. Browser speech APIs; optional OpenAI Whisper + TTS (Settings → Voice).
+- **Voice mode** — cinematic neural voice UI (rings, particle field, waveform bars) with hands-free listen → think → speak. Tap the orb to interrupt. Browser speech APIs by default; optional OpenAI Whisper/TTS or ElevenLabs Flash/Scribe (Settings → Voice).
 - **Agent tools** (wrench or `/tools`) — weather, web search, page reader, Wikipedia, calculator, clock, research (search+read), news, plan tools, memory CRUD, `run_js` sandbox, schedule tasks, dashboard mutation, and guarded repository read/search/draft-PR tools. Inline tool cards + plan board.
 - **Memory** — neural memory store with categories, importance, pins, search, smart injection, and auto-extract. 🧠 panel or agent tools.
 - **Scheduled tasks** — daily / weekly / every-N-minutes / one-off prompts
@@ -181,8 +200,8 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
 Open the URL in Safari → Share → **Add to Home Screen**: Homebase installs as a
 full-screen app (custom icon, safe-area aware, no zoom-on-focus). Long-press
 the icon (Android/desktop PWA) for a direct **Voice mode** shortcut. Voice
-mode works with Safari's speech APIs; the OpenAI voice engine is a drop-in
-upgrade if a key is present.
+mode works with Safari's speech APIs; OpenAI and ElevenLabs are optional cloud
+upgrades if a restricted key is present.
 
 ## In the car
 

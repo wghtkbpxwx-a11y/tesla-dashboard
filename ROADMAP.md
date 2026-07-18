@@ -19,9 +19,19 @@ copy work that pairs well with a Fable model) · **🧪 needs a spike/verify-on-
   AI/router preferences, optional provider credentials, and the shared rolling
   cloud-usage ledger; remote merges are section-aware and abort safely when the
   existing vault cannot be decrypted.
+- ✅ Direct-first provider policy with Perplexity for current cited answers,
+  Kimi for long-context/frontier work, DeepInfra for inexpensive open models,
+  ElevenLabs for optional voice, and OpenRouter restricted to fallback/manual
+  use. Official cloud keys are pinned to their provider origins.
+- ✅ LM Studio is optimized for the 16 GB M1 Pro with Qwen 3.5 9B 4-bit,
+  capability-aware local tool routing, a preferred `homebase-local` alias, and
+  an optional scoped Brave-search MCP path billed into the rolling estimate.
 - Next: reconcile the local estimate with provider billing exports when a safe,
   provider-neutral read-only API path is available; keep provider-side limits as
   the authoritative backstop.
+- Later: a user-owned Cloudflare Worker/Pages Function can become a secure
+  relay for server-side secrets and Workers AI; do not expose a Cloudflare API
+  token directly in the GitHub Pages browser app.
 
 ---
 
