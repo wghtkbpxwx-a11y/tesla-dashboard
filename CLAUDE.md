@@ -227,6 +227,14 @@ every source PR. Do not bypass that requirement.
 Dashboard More→Apps has "✦ Nova AI" / "🎙️ Nova Voice" `data-href` submenu
 buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
 Nova uses `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
+`nova_vault_sync_v2` tracks per-device sync metadata and per-section timestamps.
+The Google Drive vault is schema v2 and may contain memory, tasks, selected AI
+settings, `nova_cloud_usage_v1` events, and (only when `drive.syncSecrets` is
+enabled) API keys/private connector fields. It is PBKDF2/AES-GCM ciphertext;
+the passphrase is session-only and `nova_drive_auth_v1` OAuth tokens stay local.
+Push must merge/decrypt the remote vault first and abort on a decrypt/download
+failure—never weaken this to blind last-write-wins. Background pull/push must
+not intentionally open OAuth UI. Conversations remain device-local IndexedDB.
 It is NOT cache-driven; it does live API calls, so in-car it's best-effort
 (phone/desktop is the target). Verify with the same extract-scripts +
 `node --check` recipe (its README has the one-liner). PWA bits: `ai/manifest.webmanifest`,

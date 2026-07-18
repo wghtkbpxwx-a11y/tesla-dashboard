@@ -1670,8 +1670,8 @@ body.is-desktop .chat-float[data-state="open"]{
         <div class="tgl" id="mem-auto-tgl"></div>
       </div>
       <div class="vault-panel" id="vault-panel">
-        <h3>🔐 Private vault · Google Drive</h3>
-        <p class="vp-sub">Memory is encrypted <b>on this device</b> with your passphrase before it touches Google. Drive only stores ciphertext. Passphrase stays in this browser session — never uploaded.</p>
+        <h3>🔐 Private cross-device sync · Google Drive</h3>
+        <p class="vp-sub">Homebase encrypts your memory, tasks, AI preferences, rolling usage ledger, and—when enabled—provider credentials <b>on this device</b> before they touch Google. Drive only stores ciphertext. Your passphrase stays in this browser session and is never uploaded.</p>
         <div class="vp-row">
           <input id="vault-pass" type="password" placeholder="Vault passphrase (min 6 chars)" autocomplete="new-password">
         </div>
@@ -1686,8 +1686,12 @@ body.is-desktop .chat-float[data-state="open"]{
           <button type="button" class="sm-btn" id="vault-drive-pull">Pull from Drive</button>
         </div>
         <div class="set-row" style="border:none;padding:6px 0 0">
-          <span class="lbl">Auto-sync after memory changes<span class="sub">Requires Connected Google + passphrase this session</span></span>
+          <span class="lbl">Keep this device in sync<span class="sub">Pushes local changes and checks for newer mobile/desktop changes while Homebase is open</span></span>
           <div class="tgl" id="vault-autosync-tgl"></div>
+        </div>
+        <div class="set-row" style="border:none;padding:6px 0 0">
+          <span class="lbl">Sync API keys and private connectors<span class="sub">Encrypted before upload. Turn off to sync only non-secret preferences, memory, tasks, and usage.</span></span>
+          <div class="tgl" id="vault-secrets-tgl"></div>
         </div>
         <div id="vault-status"></div>
         <p class="vp-sub" style="margin:10px 0 0;font-size:11.5px">Setup: Google Cloud → OAuth client (Web) → authorized JS origin <code>https://wghtkbpxwx-a11y.github.io</code> → paste Client ID under Connectors → Google Drive.</p>
@@ -2559,10 +2563,10 @@ var HOMEBASE_CHANGELOG = {
   ],
   current_handoff: {
     to: 'Fable',
-    objective: 'Perform a massive scoping review of Homebase after the cost-aware router, specialist-team orchestrator, guarded self-development tools, and private finance sync work',
-    state: 'Implementation is committed on codex/homebase-ai-orchestrator and open as draft PR #58; GitHub validation passes; it is not merged or live yet',
+    objective: 'Perform a massive scoping review of Homebase after the cost-aware router, specialist-team orchestrator, guarded self-development tools, private finance sync, and encrypted phone/desktop vault sync work',
+    state: 'Implementation is on codex/homebase-ai-orchestrator and open as draft PR #58; the cross-device vault update is implemented but not yet merged or live',
     start_here: [
-      'HOMEBASE_CHANGELOG entries 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
+      'HOMEBASE_CHANGELOG entries 2026-07-18-cross-device-vault-v2, 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
       'ai/index.html: selectAIRoute, buildAutoAgentTeam, runSubagentMember, runTeamLeadSynthesis, repository tools, Settings → Chat, Settings → Development',
       'ai/README.md, CLAUDE.md, README.md, ROADMAP.md, and finance/README.md for cross-surface constraints'
     ],
@@ -2572,6 +2576,7 @@ var HOMEBASE_CHANGELOG = {
       'Parallel local-model performance, cancellation, partial member failure, tool-loop limits, and lead synthesis quality',
       'Connector least privilege, read-only sub-agent boundaries, GitHub token handling, exact-replacement PR workflow, and prompt-injection resistance',
       'Dashboard/finance same-origin synchronization, local-only privacy guarantees, mobile/Tesla-browser degradation, accessibility, and user comprehension',
+      'Encrypted Google Drive vault merge semantics, per-section timestamps, usage-ledger deduplication/tombstones, passphrase/token lifecycle, and phone/desktop conflict recovery',
       'Testing gaps: deterministic router tests, mocked provider concurrency, repository-write failure recovery, end-to-end PR creation, and deploy verification'
     ],
     preserve: [
@@ -2579,6 +2584,7 @@ var HOMEBASE_CHANGELOG = {
       'Local-first privacy and cost behaviour; advanced cloud models only when capability/quality requires them or the user explicitly requests them',
       'Sub-agents remain externally read-only; only the lead may perform confirmed mutations',
       'Repository writes remain explicit-request, confirm-guarded, secret-scanned, new-branch, draft-PR-only, never direct-to-main',
+      'API keys and private connector fields are uploaded only inside the client-side AES-GCM vault and only while encrypted-secret sync is enabled; OAuth access tokens and the passphrase never enter the vault',
       'Financial balances, transactions, statements, credentials, and detailed bundles never enter the public repository'
     ]
   },
@@ -2604,6 +2610,58 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-cross-device-vault-v2',
+      date: '2026-07-18',
+      commit: 'pending (implemented on codex/homebase-ai-orchestrator)',
+      branch: 'codex/homebase-ai-orchestrator',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/58 (draft; not merged/live)',
+      title: 'Encrypted phone/desktop settings, credentials, and usage synchronization',
+      type: 'feat+privacy',
+      depends_on: ['2026-07-18-ai-credit-router','2026-07-18-model-handoff-contract-v2'],
+      files_changed: ['ai/index.html','ai/README.md','README.md','CLAUDE.md','ROADMAP.md'],
+      storage_contracts: ['nova_vault_sync_v2','nova_drive_auth_v1','nova_cloud_usage_v1','homebase-memory.vault.json (AES-GCM ciphertext in user Google Drive)'],
+      settings_added: ['connectors.drive.syncSecrets=true'],
+      functions_added: [
+        'vaultSyncMeta','saveVaultSyncMeta','vaultSecretsEnabled','vaultMarkChanged','vaultConnectorSnapshot','vaultStripConnectorSecrets','vaultSettingsSnapshot',
+        'vaultSectionTime','vaultMergeItems','mergeVaultPayload'
+      ],
+      changes: [
+        'Reframed the existing Drive memory backup as private cross-device sync for Homebase on phone and desktop',
+        'Vault schema v2 now includes memory, tasks, selected AI/router/team settings, connector configuration, the rolling cloud-usage ledger, and—when enabled—provider API keys plus private connector fields',
+        'API-key, settings, task, connector, memory, and cloud-usage changes now mark their section dirty and queue a debounced encrypted Drive push when the passphrase and a valid Google access token are present',
+        'Boot, five-minute background checks, and tab-focus checks pull newer remote state while Homebase is open; background checks never intentionally open an OAuth prompt',
+        'Pushes decrypt and merge the existing remote vault before upload, then resolve sections by per-section update timestamps; keyed memories/tasks and usage events deduplicate by UUID',
+        'The trailing-30-day cloud ledger is shared across devices so the estimated $50 guard sees Homebase calls from both phone and desktop; a synchronized clear timestamp prevents deliberately cleared history from reappearing',
+        'The Memory vault UI now clearly exposes Keep this device in sync and Sync API keys and private connectors controls, plus honest local-only status when the vault is locked',
+        'Provider and Data privacy copy now distinguishes browser-local plaintext, encrypted Drive ciphertext, and provider-bound plaintext requests'
+      ],
+      safety_guards: [
+        'PBKDF2-SHA256 (250,000 iterations) and AES-GCM-256 encryption still happen entirely in the browser before upload',
+        'The passphrase remains session-only; Google OAuth access tokens remain device-local in nova_drive_auth_v1 and are never added to the vault',
+        'Credential sync is user-controllable; when disabled, provider keys and connector fields marked secret are removed from the next merged vault snapshot, remote secret fields are not applied, and a local opt-out is not silently re-enabled by a pull',
+        'A push aborts rather than overwriting an existing Drive vault when the remote vault cannot be downloaded or decrypted',
+        'The app-side usage ledger remains an estimate and cannot enforce calls made outside Homebase; provider-side limits remain authoritative'
+      ],
+      verification: [
+        'All inline JavaScript blocks parse with node --check',
+        'Repository validator passes after the vault schema/UI/documentation changes',
+        'Static merge tests cover cross-device key preservation, usage-event deduplication, and synchronized usage clearing',
+        'Live Google Drive OAuth sync still requires the user OAuth client and account; no credential or paid-model generation is used for source validation'
+      ],
+      setup_required: [
+        'Merge/deploy PR #58 before using this on the public Homebase URL',
+        'On each browser, set the same Google OAuth Web Client ID, enter the same vault passphrase, connect the same Google account, then push once on the source device and pull once on the other',
+        'Leave Sync API keys and private connectors enabled if provider credentials should follow the account; disable it for device-only credentials'
+      ],
+      known_limits: [
+        'Google browser access tokens expire and cannot silently refresh forever; reopen Private sync and reconnect Google when Homebase reports a locked or disconnected vault',
+        'Conversations remain in per-device IndexedDB and are not in the vault; this change synchronizes AI configuration, memory, tasks, and usage rather than chat transcripts',
+        'Two devices making paid calls at exactly the same time can briefly act on stale remote estimates before the next vault merge; provider-side spend limits remain the final hard backstop',
+        'A single encrypted Drive file provides personal synchronization, not real-time multi-user collaboration'
+      ],
+      next_model: 'Review the v2 merge/conflict logic and mobile OAuth behaviour without weakening client-side encryption or the $50 rolling-budget invariant; update current_handoff with findings.'
+    },
     {
       id: '2026-07-18-model-handoff-contract-v2',
       date: '2026-07-18',
@@ -4410,13 +4468,13 @@ var CONNECTOR_DEFS = [
   },
   {
     id: 'drive', name: 'Google Drive vault', category: 'Google',
-    desc: 'Encrypted Homebase memory sync.',
+    desc: 'Encrypted Homebase sync across phone and desktop.',
     icon: 'cloud', grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
     fields: [
       {key:'clientId', label:'OAuth Client ID', placeholder:'….apps.googleusercontent.com', secret:false},
       {key:'fileName', label:'Vault file', placeholder:'homebase-memory.vault.json', secret:false}
     ],
-    defaults: { on:true, clientId:'', fileName:'homebase-memory.vault.json', autoSync:true, fileId:'' },
+    defaults: { on:true, clientId:'', fileName:'homebase-memory.vault.json', autoSync:true, syncSecrets:true, fileId:'' },
     actions: ['search','push','pull']
   },
   {
@@ -4536,7 +4594,10 @@ function loadConnectorsState(){
   });
   return base;
 }
-function saveConnectors(){ lsSet(LS_CONNECTORS, S.connectors || {}); }
+function saveConnectors(opts){
+  lsSet(LS_CONNECTORS, S.connectors || {});
+  if (!opts || opts.sync !== false) vaultMarkChanged('connectors');
+}
 function connectorOn(id){ return !!(S.connectors && S.connectors[id] && S.connectors[id].on); }
 function connectorCfg(id){ return (S.connectors && S.connectors[id]) || {}; }
 
@@ -4917,13 +4978,65 @@ function initConnectors(){
 
 /* ============================ Encrypted vault + Google Drive sync ============================ */
 var LS_DRIVE_AUTH = 'nova_drive_auth_v1';
+var LS_VAULT_SYNC = 'nova_vault_sync_v2';
 var VAULT = {
   passphrase: '', // session only
   lastSync: 0,
   lastPull: 0,
+  applying: false,
   status: 'idle', // idle|syncing|ok|err
   message: ''
 };
+
+function vaultSyncMeta(){
+  var m = lsGet(LS_VAULT_SYNC, {}) || {};
+  if (!m.deviceId) m.deviceId = 'device-' + uuid();
+  if (!m.sections) m.sections = {};
+  return m;
+}
+function saveVaultSyncMeta(m){ lsSet(LS_VAULT_SYNC, m || {}); }
+function vaultSecretsEnabled(){ return connectorCfg('drive').syncSecrets !== false; }
+function vaultMarkChanged(section){
+  if (VAULT.applying) return;
+  var m = vaultSyncMeta();
+  m.sections[section || 'settings'] = Date.now();
+  m.dirtySince = m.dirtySince || Date.now();
+  saveVaultSyncMeta(m);
+  if (!connectorOn('drive') || !connectorCfg('drive').autoSync) return;
+  if (!getVaultPassphrase() || !driveAccessToken()){
+    vaultSetStatus('idle', 'Saved on this device · unlock and connect the vault to sync');
+    return;
+  }
+  scheduleDriveSync();
+}
+
+function vaultConnectorSnapshot(includeSecrets){
+  var snapshot = JSON.parse(JSON.stringify(S.connectors || {}));
+  if (includeSecrets) return snapshot;
+  return vaultStripConnectorSecrets(snapshot);
+}
+function vaultStripConnectorSecrets(snapshot){
+  snapshot = snapshot || {};
+  CONNECTOR_DEFS.forEach(function(def){
+    (def.fields || []).forEach(function(field){
+      if (field.secret && snapshot[def.id]) delete snapshot[def.id][field.key];
+    });
+  });
+  return snapshot;
+}
+
+function vaultSettingsSnapshot(){
+  var fields = [
+    'provider','model','customModels','modelPricing','temperature','maxTokens','thinking','baseURL','webllmModel',
+    'persona','systemPrompt','homeLocation','injectMemory','memorySmartInject','memoryMaxInject','autoMemory',
+    'toolsDefault','webSearchTool','agentMaxRounds','agentPlanFirst','autoRoute','localFirst','webllmFallback',
+    'showCosts','autoDelegate','maxSubagents','teamBudgetUsd','cloudBudget','councilOn','council',
+    'developerMode','devRepo','devBaseBranch','devConfirmWrites','uiMode','theme','accent','fontSize','speech'
+  ];
+  var out = {};
+  fields.forEach(function(k){ if (S.settings[k] !== undefined) out[k] = S.settings[k]; });
+  return out;
+}
 
 function vaultSetStatus(st, msg){
   VAULT.status = st;
@@ -4970,35 +5083,69 @@ async function vaultDeriveKey(passphrase, saltU8){
 }
 
 function buildVaultPayload(){
+  var meta = vaultSyncMeta(), now = Date.now();
+  ['memory','tasks','connectors','keys','settings','cloudUsage'].forEach(function(section){
+    if (!meta.sections[section]) meta.sections[section] = now;
+  });
+  saveVaultSyncMeta(meta);
+  var includeSecrets = vaultSecretsEnabled();
   return {
-    v: 1,
+    v: 2,
     app: 'homebase',
-    exportedAt: Date.now(),
+    exportedAt: now,
+    deviceId: meta.deviceId,
+    sectionUpdatedAt: Object.assign({}, meta.sections),
     label: 'David · Homebase vault',
     memory: S.memory || [],
     tasks: S.tasks || [],
-    connectors: S.connectors || {},
-    keys: S.keys || {},
-    settings: {
-      persona: S.settings.persona,
-      systemPrompt: S.settings.systemPrompt,
-      homeLocation: S.settings.homeLocation,
-      injectMemory: S.settings.injectMemory,
-      memorySmartInject: S.settings.memorySmartInject,
-      memoryMaxInject: S.settings.memoryMaxInject,
-      autoMemory: S.settings.autoMemory,
-      toolsDefault: S.settings.toolsDefault,
-      webSearchTool: S.settings.webSearchTool,
-      agentMaxRounds: S.settings.agentMaxRounds,
-      agentPlanFirst: S.settings.agentPlanFirst,
-      councilOn: S.settings.councilOn,
-      council: S.settings.council,
-      uiMode: S.settings.uiMode,
-      theme: S.settings.theme,
-      accent: S.settings.accent,
-      speech: S.settings.speech
-    }
+    connectors: vaultConnectorSnapshot(includeSecrets),
+    keys: includeSecrets ? (S.keys || {}) : {},
+    settings: vaultSettingsSnapshot(),
+    cloudUsage: usageLedger(),
+    sync: { encryptedSecrets: includeSecrets, usageClearedAt: +(meta.usageClearedAt || 0) }
   };
+}
+
+function vaultSectionTime(payload, section){
+  return +((payload.sectionUpdatedAt || {})[section] || payload.exportedAt || 0);
+}
+function vaultMergeItems(older, newer){
+  var out = {}, order = [];
+  (older || []).concat(newer || []).forEach(function(item){
+    if (!item || !item.id) return;
+    if (!out[item.id]) order.push(item.id);
+    out[item.id] = item;
+  });
+  return order.map(function(id){ return out[id]; });
+}
+function mergeVaultPayload(remote, local){
+  if (!remote || typeof remote !== 'object') return local;
+  var merged = Object.assign({}, remote, local);
+  merged.v = 2;
+  merged.exportedAt = Date.now();
+  merged.deviceId = local.deviceId;
+  merged.sectionUpdatedAt = {};
+  ['memory','tasks','connectors','keys','settings'].forEach(function(section){
+    var remoteNewer = vaultSectionTime(remote, section) > vaultSectionTime(local, section);
+    var older = remoteNewer ? local[section] : remote[section];
+    var newer = remoteNewer ? remote[section] : local[section];
+    if (section === 'memory' || section === 'tasks') merged[section] = vaultMergeItems(older, newer);
+    else if (section === 'connectors'){
+      merged.connectors = Object.assign({}, older || {});
+      Object.keys(newer || {}).forEach(function(id){ merged.connectors[id] = Object.assign({}, merged.connectors[id] || {}, newer[id] || {}); });
+    } else merged[section] = Object.assign({}, older || {}, newer || {});
+    merged.sectionUpdatedAt[section] = Math.max(vaultSectionTime(remote, section), vaultSectionTime(local, section));
+  });
+  var usageClearedAt = Math.max(+((remote.sync || {}).usageClearedAt || 0), +((local.sync || {}).usageClearedAt || 0));
+  merged.cloudUsage = vaultMergeItems(remote.cloudUsage || [], local.cloudUsage || []).filter(function(x){ return (+x.ts || 0) > usageClearedAt; }).sort(function(a,b){ return (+a.ts || 0) - (+b.ts || 0); }).slice(-3000);
+  merged.sectionUpdatedAt.cloudUsage = Math.max(vaultSectionTime(remote, 'cloudUsage'), vaultSectionTime(local, 'cloudUsage'));
+  merged.sync = Object.assign({}, remote.sync || {}, local.sync || {}, {usageClearedAt:usageClearedAt});
+  if ((local.sync || {}).encryptedSecrets === false){
+    merged.keys = {};
+    merged.connectors = vaultStripConnectorSecrets(merged.connectors || {});
+    merged.sync.encryptedSecrets = false;
+  }
+  return merged;
 }
 
 async function encryptVault(passphrase, payloadObj){
@@ -5016,7 +5163,13 @@ async function encryptVault(passphrase, payloadObj){
     salt: b64FromBytes(salt),
     iv: b64FromBytes(iv),
     data: b64FromBytes(new Uint8Array(ct)),
-    meta: { exportedAt: payloadObj.exportedAt, memoryCount: (payloadObj.memory || []).length }
+    meta: {
+      exportedAt: payloadObj.exportedAt,
+      memoryCount: (payloadObj.memory || []).length,
+      usageCount: (payloadObj.cloudUsage || []).length,
+      providerKeyCount: Object.keys(payloadObj.keys || {}).filter(function(k){ return !!payloadObj.keys[k]; }).length,
+      sourceDevice: payloadObj.deviceId || null
+    }
   };
 }
 
@@ -5037,6 +5190,8 @@ async function decryptVault(passphrase, vaultObj){
 function applyVaultPayload(payload, opts){
   opts = opts || {};
   if (!payload || typeof payload !== 'object') throw new Error('Empty vault payload');
+  VAULT.applying = true;
+  try {
   if (Array.isArray(payload.memory)){
     S.memory = payload.memory.map(normalizeMemoryItem).filter(Boolean);
     saveMemoryRaw();
@@ -5049,7 +5204,12 @@ function applyVaultPayload(payload, opts){
     var base = loadConnectorsState();
     Object.keys(payload.connectors).forEach(function(id){
       var incoming = payload.connectors[id] || {};
+      if (!vaultSecretsEnabled()){
+        var def = CONNECTOR_DEFS.find(function(x){ return x.id === id; });
+        (def && def.fields || []).forEach(function(field){ if (field.secret) delete incoming[field.key]; });
+      }
       var local = base[id] || {};
+      if (id === 'drive' && local.syncSecrets === false) incoming.syncSecrets = false;
       var merged = Object.assign({}, local, incoming);
       // Never clobber non-empty local secrets/config with empty remote values
       Object.keys(local).forEach(function(k){
@@ -5058,9 +5218,9 @@ function applyVaultPayload(payload, opts){
       base[id] = merged;
     });
     S.connectors = base;
-    saveConnectors();
+    saveConnectors({sync:false});
   }
-  if (payload.keys && typeof payload.keys === 'object' && opts.includeKeys !== false){
+  if (payload.keys && typeof payload.keys === 'object' && opts.includeKeys !== false && vaultSecretsEnabled()){
     S.keys = Object.assign({}, S.keys || {}, payload.keys);
     saveKeys();
   }
@@ -5071,11 +5231,26 @@ function applyVaultPayload(payload, opts){
     saveSettings();
     applyTheme();
   }
+  if (Array.isArray(payload.cloudUsage)){
+    var usageClearedAt = +((payload.sync || {}).usageClearedAt || 0);
+    var usage = vaultMergeItems(usageLedger(), payload.cloudUsage).filter(function(x){ return (+x.ts || 0) > usageClearedAt; }).sort(function(a,b){ return (+a.ts || 0) - (+b.ts || 0); }).slice(-3000);
+    lsSet(LS_USAGE, usage);
+    try { updateBudgetDisplays(); } catch(e){}
+  }
+  var sm = vaultSyncMeta();
+  Object.keys(payload.sectionUpdatedAt || {}).forEach(function(k){
+    sm.sections[k] = Math.max(+(sm.sections[k] || 0), +(payload.sectionUpdatedAt[k] || 0));
+  });
+  sm.lastRemoteExportedAt = Math.max(+(sm.lastRemoteExportedAt || 0), +(payload.exportedAt || 0));
+  saveVaultSyncMeta(sm);
   try { seedProfileMemories(); } catch(e){}
   try { renderMemory(); } catch(e){}
   try { renderConnectors(); } catch(e){}
   try { renderModeRail(); updateModeChrome(); } catch(e){}
   try { if (typeof renderTasksIfOpen === 'function') renderTasksIfOpen(); } catch(e){}
+  } finally {
+    VAULT.applying = false;
+  }
 }
 
 function saveMemoryRaw(){ lsSet(LS_MEMORY, S.memory); }
@@ -5110,7 +5285,7 @@ async function exportVaultFile(){
   var blob = new Blob([JSON.stringify(vault, null, 2)], { type: 'application/json' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'homebase-memory-' + new Date().toISOString().slice(0,10) + '.vault.json';
+  a.download = 'homebase-sync-' + new Date().toISOString().slice(0,10) + '.vault.json';
   document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   vaultSetStatus('ok', 'Encrypted vault downloaded');
@@ -5129,8 +5304,8 @@ async function importVaultFile(file){
   var payload = await decryptVault(pass, vault);
   setVaultPassphrase(pass);
   applyVaultPayload(payload);
-  vaultSetStatus('ok', 'Vault restored · ' + (payload.memory || []).length + ' memories');
-  toast('Vault restored into this browser', 'ok');
+  vaultSetStatus('ok', 'Vault restored · ' + (payload.memory || []).length + ' memories · ' + (payload.cloudUsage || []).length + ' usage records');
+  toast('Homebase restored and synced into this browser', 'ok');
 }
 
 /* ---- Google Drive auth + file IO ---- */
@@ -5203,7 +5378,11 @@ async function driveGetToken(interactive){
 
 async function driveApi(path, opts){
   opts = opts || {};
-  var token = await driveGetToken(opts.interactive);
+  var token = driveAccessToken();
+  if (!token){
+    if (opts.interactive === false) throw new Error('Google connection expired — reconnect in Private sync');
+    token = await driveGetToken(!!opts.interactive);
+  }
   var headers = Object.assign({}, opts.headers || {}, { Authorization: 'Bearer ' + token });
   var res = await fetch('https://www.googleapis.com' + path, {
     method: opts.method || 'GET',
@@ -5212,6 +5391,7 @@ async function driveApi(path, opts){
   });
   if (res.status === 401){
     saveDriveAuth(null);
+    if (opts.interactive !== true) return res;
     token = await driveRequestToken(true);
     headers.Authorization = 'Bearer ' + token;
     res = await fetch('https://www.googleapis.com' + path, {
@@ -5223,20 +5403,21 @@ async function driveApi(path, opts){
   return res;
 }
 
-async function driveFindVaultFile(){
+async function driveFindVaultFile(opts){
   var name = (connectorCfg('drive').fileName || 'homebase-memory.vault.json').replace(/'/g, '');
   var q = "name='" + name + "' and trashed=false";
-  var res = await driveApi('/drive/v3/files?pageSize=5&spaces=drive&fields=files(id,name,modifiedTime,size)&q=' + encodeURIComponent(q));
+  var res = await driveApi('/drive/v3/files?pageSize=5&spaces=drive&fields=files(id,name,modifiedTime,size)&q=' + encodeURIComponent(q), opts || {});
   if (!res.ok) throw new Error('Drive list failed HTTP ' + res.status);
   var data = await res.json();
   var files = data.files || [];
   return files[0] || null;
 }
 
-async function driveUploadVault(vaultObj){
+async function driveUploadVault(vaultObj, opts){
+  opts = opts || {};
   var name = connectorCfg('drive').fileName || 'homebase-memory.vault.json';
   var meta = { name: name, mimeType: 'application/json' };
-  var existing = await driveFindVaultFile();
+  var existing = await driveFindVaultFile({interactive:opts.interactive});
   if (existing && existing.id){
     meta = { mimeType: 'application/json' }; // name optional on update
   }
@@ -5254,7 +5435,7 @@ async function driveUploadVault(vaultObj){
     : '/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime';
   var res = await driveApi(path, {
     method: existing && existing.id ? 'PATCH' : 'POST',
-    interactive: false,
+    interactive: opts.interactive,
     headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
     body: body
   });
@@ -5267,21 +5448,22 @@ async function driveUploadVault(vaultObj){
     S.connectors.drive = S.connectors.drive || {};
     S.connectors.drive.fileId = file.id;
     S.connectors.drive.on = true;
-    saveConnectors();
+    saveConnectors({sync:false});
   }
   return file;
 }
 
-async function driveDownloadVault(){
+async function driveDownloadVault(opts){
+  opts = opts || {};
   var file = null;
   var cfg = connectorCfg('drive');
   if (cfg.fileId){
     file = { id: cfg.fileId };
   } else {
-    file = await driveFindVaultFile();
+    file = await driveFindVaultFile({interactive:opts.interactive});
   }
   if (!file || !file.id) throw new Error('No vault file on Drive yet — push once first');
-  var res = await driveApi('/drive/v3/files/' + file.id + '?alt=media', { interactive: false });
+  var res = await driveApi('/drive/v3/files/' + file.id + '?alt=media', { interactive: opts.interactive });
   if (!res.ok) throw new Error('Drive download HTTP ' + res.status);
   return res.json();
 }
@@ -5300,15 +5482,32 @@ async function vaultPushToDrive(opts){
   if (opts.interactive !== false){
     try { await driveGetToken(true); } catch(e){ /* upload path retries */ }
   }
-  var vault = await encryptVault(pass, buildVaultPayload());
-  var file = await driveUploadVault(vault);
+  var payload = buildVaultPayload();
+  if (opts.mergeRemote !== false){
+    try {
+      var remoteVault = await driveDownloadVault({interactive:opts.interactive});
+      var remotePayload = await decryptVault(pass, remoteVault);
+      payload = mergeVaultPayload(remotePayload, payload);
+      applyVaultPayload(payload, {includeKeys:vaultSecretsEnabled()});
+    } catch(e){
+      if (!/No vault file/.test(e.message || '')) throw new Error('Sync stopped to protect the existing Drive vault: ' + (e.message || e));
+    }
+  }
+  var vault = await encryptVault(pass, payload);
+  var file = await driveUploadVault(vault, {interactive:opts.interactive});
   VAULT.lastSync = Date.now();
+  var syncMeta = vaultSyncMeta();
+  syncMeta.dirtySince = 0;
+  syncMeta.lastRemoteExportedAt = payload.exportedAt;
+  syncMeta.lastPush = VAULT.lastSync;
+  saveVaultSyncMeta(syncMeta);
   vaultSetStatus('ok', 'Synced to Drive · ' + (file.name || 'vault') + ' · ' + fmtDateTime(VAULT.lastSync));
-  toast('Homebase vault encrypted & saved to Google Drive', 'ok', 3200);
+  if (!opts.quiet) toast('Phone and desktop vault encrypted & synced', 'ok', 3200);
   return file;
 }
 
-async function vaultPullFromDrive(){
+async function vaultPullFromDrive(opts){
+  opts = opts || {};
   var pass = getVaultPassphrase();
   if (!pass){
     var typed = $('vault-pass') && $('vault-pass').value.trim();
@@ -5316,14 +5515,26 @@ async function vaultPullFromDrive(){
   }
   if (!pass) throw new Error('Enter vault passphrase to decrypt Drive backup');
   setVaultPassphrase(pass);
-  try { await driveGetToken(true); } catch(e){}
+  if (opts.interactive !== false){ try { await driveGetToken(true); } catch(e){} }
   vaultSetStatus('syncing', 'Downloading vault…');
-  var vault = await driveDownloadVault();
-  var payload = await decryptVault(pass, vault);
-  applyVaultPayload(payload);
+  var vault = await driveDownloadVault({interactive:opts.interactive});
+  var syncMeta = vaultSyncMeta();
+  var remoteExportedAt = +((vault.meta || {}).exportedAt || 0);
+  if (opts.onlyIfNewer && remoteExportedAt && remoteExportedAt <= +(syncMeta.lastRemoteExportedAt || 0)){
+    vaultSetStatus('ok', 'Phone and desktop are up to date');
+    return null;
+  }
+  var remotePayload = await decryptVault(pass, vault);
+  var payload = mergeVaultPayload(remotePayload, buildVaultPayload());
+  applyVaultPayload(payload, {includeKeys:vaultSecretsEnabled()});
   VAULT.lastPull = Date.now();
-  vaultSetStatus('ok', 'Restored from Drive · ' + (payload.memory || []).length + ' memories · ' + fmtDateTime(VAULT.lastPull));
-  toast('Vault pulled from Google Drive', 'ok');
+  syncMeta = vaultSyncMeta();
+  syncMeta.lastRemoteExportedAt = Math.max(remoteExportedAt, +(remotePayload.exportedAt || 0));
+  syncMeta.lastPull = VAULT.lastPull;
+  syncMeta.dirtySince = 0;
+  saveVaultSyncMeta(syncMeta);
+  vaultSetStatus('ok', 'Synced from Drive · ' + (payload.memory || []).length + ' memories · ' + (payload.cloudUsage || []).length + ' usage records · ' + fmtDateTime(VAULT.lastPull));
+  if (!opts.quiet) toast('Newer Homebase data synced to this device', 'ok');
   return payload;
 }
 
@@ -5335,7 +5546,7 @@ var scheduleDriveSync = debounce(function(){
     if (!getVaultPassphrase()) return;
     // Auto-sync only when a session token already exists (never pop OAuth unexpectedly)
     if (!driveAccessToken()) return;
-    vaultPushToDrive().catch(function(e){
+    vaultPushToDrive({interactive:false, quiet:true}).catch(function(e){
       vaultSetStatus('err', e.message || String(e));
     });
   } catch(e){}
@@ -5343,7 +5554,7 @@ var scheduleDriveSync = debounce(function(){
 
 function saveMemory(){
   lsSet(LS_MEMORY, S.memory);
-  scheduleDriveSync();
+  vaultMarkChanged('memory');
 }
 
 var _vaultUiReady = false;
@@ -5351,6 +5562,7 @@ function initVaultUi(){
   if (_vaultUiReady) {
     // refresh autosync toggle + status only
     if ($('vault-autosync-tgl')) $('vault-autosync-tgl').classList.toggle('on', !!(connectorCfg('drive').autoSync));
+    if ($('vault-secrets-tgl')) $('vault-secrets-tgl').classList.toggle('on', vaultSecretsEnabled());
     if ($('vault-pass') && !VAULT.passphrase){
       try { $('vault-pass').value = sessionStorage.getItem('nova_vault_pass') || ''; } catch(e){}
     }
@@ -5381,7 +5593,7 @@ function initVaultUi(){
     driveRequestToken(true).then(function(){
       toast('Google Drive connected', 'ok');
       vaultSetStatus('ok', 'Google account linked for vault sync');
-      if (S.connectors && S.connectors.drive){ S.connectors.drive.on = true; saveConnectors(); }
+      if (S.connectors && S.connectors.drive){ S.connectors.drive.on = true; saveConnectors({sync:false}); }
       updateConnectorsBtn();
     }).catch(function(e){ toast(e.message || String(e), 'err'); });
   });
@@ -5396,7 +5608,7 @@ function initVaultUi(){
     if (!confirm('Pull vault from Drive and replace local memory/settings snapshot with the Drive vault?')) return;
     var btn = $('vault-drive-pull');
     btn.disabled = true; btn.textContent = 'Pulling…';
-    vaultPullFromDrive().catch(function(e){
+    vaultPullFromDrive({interactive:true}).catch(function(e){
       toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message);
     }).finally(function(){ btn.disabled = false; btn.textContent = 'Pull from Drive'; });
   });
@@ -5405,13 +5617,26 @@ function initVaultUi(){
     $('vault-autosync-tgl').addEventListener('click', function(){
       if (!S.connectors.drive) S.connectors.drive = Object.assign({}, defaultConnectorsState().drive);
       S.connectors.drive.autoSync = !S.connectors.drive.autoSync;
-      saveConnectors();
+      saveConnectors({sync:false});
       this.classList.toggle('on', !!S.connectors.drive.autoSync);
       toast('Auto-sync ' + (S.connectors.drive.autoSync ? 'ON' : 'OFF'), 'ok');
+      if (S.connectors.drive.autoSync) bootVaultSync();
+    });
+  }
+  if ($('vault-secrets-tgl')){
+    $('vault-secrets-tgl').classList.toggle('on', vaultSecretsEnabled());
+    $('vault-secrets-tgl').addEventListener('click', function(){
+      if (!S.connectors.drive) S.connectors.drive = Object.assign({}, defaultConnectorsState().drive);
+      S.connectors.drive.syncSecrets = !vaultSecretsEnabled();
+      saveConnectors({sync:false});
+      this.classList.toggle('on', vaultSecretsEnabled());
+      vaultMarkChanged('connectors');
+      vaultMarkChanged('keys');
+      toast(vaultSecretsEnabled() ? 'Encrypted API-key sync ON' : 'API keys will stay on each device', 'ok', 3600);
     });
   }
   vaultSetStatus('idle', connectorCfg('drive').clientId
-    ? 'Encrypted vault ready — connect Google to multi-device sync'
+    ? 'Encrypted sync ready — connect Google and use the same passphrase on phone and desktop'
     : 'Set a passphrase · optional Google Drive Client ID in Connectors');
 }
 
@@ -5428,8 +5653,9 @@ async function bootVaultSync(){
     if (!connectorCfg('drive').autoSync) return;
     if (!getVaultPassphrase()) return;
     if (!driveAccessToken()) return;
-    if (!memoryLooksUninitialized()) return;
-    await vaultPullFromDrive();
+    var m = vaultSyncMeta();
+    if (m.dirtySince) await vaultPushToDrive({interactive:false, quiet:true});
+    else await vaultPullFromDrive({interactive:false, quiet:true, onlyIfNewer:true});
   } catch(e){
     console.info('[vault] boot pull skipped', e.message || e);
   }
@@ -5531,9 +5757,12 @@ function loadState(){
   var n = seedProfileMemories();
   if (n) try { console.info('[Homebase] Seeded ' + n + ' profile memories'); } catch(e){}
 }
-function saveSettings(){ lsSet(LS_SETTINGS, S.settings); }
-function saveKeys(){ lsSet(LS_KEYS, S.keys); }
-function saveTasks(){ lsSet(LS_TASKS, S.tasks); }
+function saveSettings(opts){
+  lsSet(LS_SETTINGS, S.settings);
+  if (!opts || opts.sync !== false) vaultMarkChanged('settings');
+}
+function saveKeys(){ lsSet(LS_KEYS, S.keys); vaultMarkChanged('keys'); }
+function saveTasks(){ lsSet(LS_TASKS, S.tasks); vaultMarkChanged('tasks'); }
 
 var persistConvo = debounce(function(convo){ if (convo) idb.put(convo); }, 350);
 
@@ -5872,11 +6101,14 @@ function saveCloudUsage(entry){
   var list = usageLedger();
   list.push(Object.assign({id:uuid(), ts:Date.now(), estimated:true}, entry || {}));
   lsSet(LS_USAGE, list.slice(-3000));
+  vaultMarkChanged('cloudUsage');
   updateBudgetDisplays();
 }
 function clearCloudUsage(){
   if (!confirm('Clear the local cloud-usage estimate history? This does not change provider billing.')) return;
-  lsSet(LS_USAGE, []); updateBudgetDisplays(); renderChatPane();
+  lsSet(LS_USAGE, []);
+  var m = vaultSyncMeta(); m.usageClearedAt = Date.now(); saveVaultSyncMeta(m);
+  vaultMarkChanged('cloudUsage'); updateBudgetDisplays(); renderChatPane();
   toast('Local usage history cleared', 'ok');
 }
 function modelRequestCost(p, id, inTok, outTok){
@@ -9350,7 +9582,7 @@ function renderSettings(expandProvider){
 
 function renderProvidersPane(expand){
   var pane = $('pane-providers');
-  pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">🔒 Use a dedicated, low-limit key in this personal browser. Keys are stored in localStorage and sent only to the provider you pick. Never use this on a shared device or commit keys to source control.</div>';
+  pane.innerHTML = '<div class="hint-box" style="margin:0 0 12px">🔒 Use a dedicated, low-limit key. Keys stay in this browser unless encrypted cross-device sync is enabled in Memory → Private sync; then only ciphertext is stored in your Google Drive. Keys are sent in readable form only to the provider you pick. Never use this on a shared device or commit keys to source control.</div>';
   PROVIDER_ORDER.forEach(function(p){
     var pr = PROVIDERS[p];
     if (pr.kind === 'demo') return;
@@ -9501,10 +9733,10 @@ async function testProvider(p, btn){
       resp = await withTimeout(function(sig){ return fetch(url, {headers:h, signal:sig}); }, 10000);
     }
     if (!resp.ok) throw await httpError(resp);
-    S.settings.providerHealth[p] = {ok:true, ts:Date.now()}; saveSettings();
+    S.settings.providerHealth[p] = {ok:true, ts:Date.now()}; saveSettings({sync:false});
     toast(PROVIDERS[p].name + ' connected ✅', 'ok');
   } catch(err){
-    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings();
+    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings({sync:false});
     var m = err.message || String(err);
     if (err.name === 'AbortError') m = 'timed out';
     if (PROVIDERS[p].local && /fetch|network|abort/i.test(m)) m += ' — is the server running? (see setup note below)';
@@ -9552,7 +9784,7 @@ async function fetchProviderModels(p, btn){
     toast(ids.length + ' models loaded for ' + pr.name, 'ok');
     if (ids.length && pr.local && !S.settings.autoRoute) selectModel(p, ids[0]);
   } catch(err){
-    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings();
+    S.settings.providerHealth[p] = {ok:false, ts:Date.now()}; saveSettings({sync:false});
     toast('Fetch failed: ' + (err.name === 'AbortError' ? 'timed out' : err.message), 'err', 5000);
   }
   btn.textContent = 'Fetch model list';
@@ -9575,7 +9807,7 @@ async function autoDiscoverLocalModels(){
     }
   }));
   if (changed){
-    saveSettings(); updateModelBtn();
+    saveSettings({sync:false}); updateModelBtn();
     if ($('model-menu') && $('model-menu').classList.contains('open')) renderModelMenu();
   }
 }
@@ -9904,7 +10136,7 @@ function renderLookPane(){
 
 function renderDataPane(){
   var pane = $('pane-data');
-  pane.innerHTML = '<div class="hint-box" style="margin:0 0 13px">Everything lives in this browser: settings, keys & memory in localStorage; conversations in IndexedDB. Nothing is sent anywhere except to the AI provider you choose.</div>';
+  pane.innerHTML = '<div class="hint-box" style="margin:0 0 13px">Homebase is local-first: settings, keys, memory, tasks, and usage estimates live in this browser; conversations live in IndexedDB. If you enable Private sync, selected data is encrypted here before an unreadable vault is stored in your Google Drive. Plaintext keys are sent only to the AI provider you choose.</div>';
   var exRow = row('Export backup', 'Conversations, memory, tasks, usage estimates & settings as JSON', '<label style="font-size:12px; color:var(--text2); display:flex; gap:5px; align-items:center"><input type="checkbox" id="ex-keys" style="width:auto"> include API keys</label><button class="sm-btn" id="ex-btn">Export</button>');
   pane.appendChild(exRow);
   qs('#ex-btn', pane).addEventListener('click', function(){
@@ -10160,6 +10392,10 @@ async function boot(){
   }, 180000);
   setInterval(autoDiscoverLocalModels, 300000);
   bootVaultSync();
+  setInterval(bootVaultSync, 300000);
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible') bootVaultSync();
+  });
   // deep link ?chat=1 or ?voice=1 opens float
   try {
     var q = new URLSearchParams(location.search);

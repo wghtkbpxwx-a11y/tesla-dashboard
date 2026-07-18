@@ -10,8 +10,9 @@ Personal AI hub (formerly Nova) for David — chat, agents, connectors, and an e
 
 A self-contained, dependency-free AI chat app served from this repo's GitHub
 Pages site at **`…/tesla-dashboard/ai/`**. One HTML file, no build step, no
-backend — everything (keys, chats, memory, tasks) lives in your browser and is
-sent only to the AI provider you pick.
+backend — everything starts in your browser. Optional client-side encrypted
+Google Drive sync can carry selected configuration between your devices;
+readable keys are sent only to the AI provider you pick.
 
 **Quick links:** `ai/` opens the chat · `ai/?voice=1` opens straight into
 voice mode (this is what the dashboard's **More → 🎙️ Homebase Voice** button uses).
@@ -26,8 +27,9 @@ voice mode (this is what the dashboard's **More → 🎙️ Homebase Voice** but
 | No setup | Demo mode — simulated model to explore the UI |
 
 Add a dedicated, low-limit key in **Settings → Providers** (stored in
-`localStorage`, never sent anywhere except the provider itself). Do not use
-this feature on a shared device or commit keys to source control. Each provider
+`localStorage`, and optionally included in the client-side encrypted Google
+Drive vault for phone/desktop sync). A readable key is sent only to its AI
+provider. Do not use this feature on a shared device or commit keys to source control. Each provider
 has a **Get API key** shortcut, **Test connection**, and, where supported,
 **Fetch model list**; any model id can also be typed into the model-picker
 search and used directly.
@@ -52,6 +54,10 @@ OpenAI Whisper and premium text-to-speech are included; local models and browser
 speech cost $0. Unknown-price cloud models are blocked while the hard guard is
 enabled. The tracker and controls are in **Settings → Chat**, and every reply
 shows the selected model, route reason, tokens, and estimated cost.
+
+When encrypted cross-device sync is enabled, usage events are merged by ID
+through the private Drive vault, so phone and desktop contribute to the same
+Homebase estimate. This is still not provider billing truth.
 
 This is an application-side estimate, not a provider billing limit. Keep
 provider-side spend limits/alerts enabled too, because pricing changes, cached
@@ -204,14 +210,26 @@ the rolling cost ledger); conversations live in IndexedDB
 (`nova_chat`) so they never compete with the dashboard's localStorage quota.
 
 
-## Encrypted memory vault (Google Drive)
+## Encrypted phone/desktop sync (Google Drive)
 
-Personal memory is stored locally for speed, then optionally synced as an
-**encrypted vault** to Google Drive (AES-GCM, passphrase never uploaded).
+Homebase remains local-first, then optionally syncs memory, tasks, selected AI
+and router preferences, and the rolling cloud-usage ledger through an
+**encrypted vault** in Google Drive. Provider API keys and connector secret
+fields are included only while **Sync API keys and private connectors** is on.
+PBKDF2 key derivation and AES-GCM encryption happen in the browser; the
+passphrase and Google OAuth access token are never uploaded inside the vault.
+Turning credential sync off removes those secret fields from the next merged
+vault snapshot while leaving each device's local copies intact.
 
 1. Google Cloud Console → create OAuth 2.0 Client ID (Web application).
 2. Authorized JavaScript origin: `https://wghtkbpxwx-a11y.github.io`
-3. Connectors → Google Drive → paste Client ID, enable auto-sync.
-4. Memory → Private vault → set passphrase → Connect Google → Push to Drive.
+3. On the source device, Connectors → Google Drive → paste the Client ID.
+4. Memory → Private cross-device sync → enter a strong passphrase → Connect
+   Google → leave both sync toggles on → Push to Drive.
+5. On the other device, use the same Client ID, Google account, and passphrase,
+   then choose Pull from Drive once.
 
-On a new browser: same Client ID + passphrase → Pull from Drive.
+After setup, Homebase pushes local changes and checks for a newer vault when it
+opens, every five minutes while visible, and when the tab regains focus. Google
+browser access tokens expire, so reconnect Google when sync reports that it is
+locked or disconnected. Conversations remain device-local in IndexedDB.

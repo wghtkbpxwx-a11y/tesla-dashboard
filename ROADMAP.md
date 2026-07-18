@@ -15,6 +15,10 @@ copy work that pairs well with a Fable model) · **🧪 needs a spike/verify-on-
   narrow tool/connector access, per-role model selection, and lead synthesis.
 - ✅ Guarded self-development: repository inspection plus exact multi-file
   changes on a new branch and draft pull request after explicit confirmation.
+- ✅ Passphrase-encrypted Google Drive sync for phone/desktop memory, tasks,
+  AI/router preferences, optional provider credentials, and the shared rolling
+  cloud-usage ledger; remote merges are section-aware and abort safely when the
+  existing vault cannot be decrypted.
 - Next: reconcile the local estimate with provider billing exports when a safe,
   provider-neutral read-only API path is available; keep provider-side limits as
   the authoritative backstop.
