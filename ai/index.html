@@ -2568,7 +2568,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
-    state: 'PR #58 was merged and encrypted sync is live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are implemented on codex/homebase-sync-live-status but are not yet committed, merged, or live. Qwen 3.5 9B 4-bit is loaded locally as homebase-local; the optional LM Studio MCP path still needs a user-created scoped API token.',
+    state: 'PR #58 encrypted sync and PR #59 direct-provider/LM Studio routing are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support deployed from merge commit 398fc8a. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery; the optional LM Studio MCP path still needs a user-created scoped API token.',
     start_here: [
       'HOMEBASE_CHANGELOG entry 2026-07-18-direct-provider-router-v2 plus the updated 2026-07-18-cross-device-vault-deployment entry',
       'HOMEBASE_CHANGELOG entries 2026-07-18-cross-device-vault-v2, 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
@@ -2620,9 +2620,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-direct-provider-router-v2',
       date: '2026-07-18',
-      commit: 'pending',
+      commit: '398fc8a3c2bc29c40df138cff72bb9863d05dc38',
       branch: 'codex/homebase-sync-live-status',
-      pull_request: 'pending',
+      pull_request: '#59 merged',
       title: 'Direct-first routing, optimized LM Studio tools, current-web research, scoped open models, and ElevenLabs voice',
       type: 'feat+cost+privacy+docs',
       depends_on: ['2026-07-18-ai-credit-router','2026-07-18-agent-orchestrator','2026-07-18-cross-device-vault-v2'],
@@ -2660,10 +2660,12 @@ var HOMEBASE_CHANGELOG = {
         'LM Studio server verification confirms localhost-only binding, CORS enabled, just-in-time loading enabled, 16K context, one parallel prediction, and a loaded homebase-local alias',
         'LM Studio native MCP access correctly returned HTTP 403 while no scoped API token was configured; no Brave request or paid model call was consumed',
         'All inline scripts parse with Node Function construction and git diff --check passes',
-        'Repository validator, deterministic router checks, inline-script parsing, diff hygiene, provider-settings UI, and local browser smoke tests pass; deployed GitHub Pages verification remains pending until merge'
+        'Repository validator, deterministic router checks, inline-script parsing, diff hygiene, provider-settings UI, and local browser smoke tests pass',
+        'PR #59 validation run 29662470777 passed; main validation run 29662483825 and Pages deployment run 29662483427 completed successfully for merge commit 398fc8a',
+        'Live browser verification at the Pages URL confirmed Perplexity, Kimi, DeepInfra, LM Studio scoped-token guidance, the opt-in MCP switch, and the $0.005/search tool description'
       ],
       setup_required: [
-        'After deployment, add and test provider keys one at a time; the user must enter every secret and any payment information directly',
+        'In the live app, add and test provider keys one at a time; the user must enter every secret and any payment information directly',
         'For ElevenLabs, select or copy a voice ID in Settings → Voice; browser speech remains usable without a paid key',
         'To enable LM Studio Brave MCP search, the user must enable LM Studio API authentication, create a dedicated token allowed to call servers from mcp.json, paste it into Settings → Providers → LM Studio, and enable the Tools toggle',
         'Keep provider-side hard limits/alerts because Homebase is an estimate and cannot see calls made outside the app'
