@@ -1,3 +1,7 @@
+ # Homebase
+
+Dashboard-first personal OS with floating AI chat, live widgets from the Tesla Dashboard cache, connectors, and encrypted Drive vault.
+
 # Homebase
 
 Personal AI hub (formerly Nova) for David — chat, agents, connectors, and an encrypted Google Drive vault.

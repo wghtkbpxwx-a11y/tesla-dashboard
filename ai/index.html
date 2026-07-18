@@ -826,6 +826,211 @@ a:hover{text-decoration:underline}
 #sidebar{overflow:hidden}
 #convo-list{min-height:80px}
 
+
+/* ============================= Dashboard + floating chat ============================= */
+#main{overflow:hidden;min-height:0;flex:1;display:flex;flex-direction:column}
+#dash-scroll{
+  flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain;
+  padding:0 0 120px; scroll-behavior:smooth;
+}
+.dashboard{
+  max-width:1120px; margin:0 auto; padding:18px 20px 40px;
+  display:flex; flex-direction:column; gap:16px;
+}
+.dash-hero{
+  display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px;
+  padding:8px 4px 4px;
+}
+.dash-hero h1{
+  margin:0; font-size:clamp(26px,3.5vw,34px); font-weight:700; letter-spacing:-.04em;
+  background:linear-gradient(115deg,#312e81 0%,#4f46e5 40%,#0284c7 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+[data-theme="dark"] .dash-hero h1{
+  background:linear-gradient(115deg,#e0e7ff,#a5b4fc,#7dd3fc);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.dash-hero .dh-sub{color:var(--text2); font-size:13.5px; margin-top:4px}
+.dash-hero .dh-stamp{font-size:11.5px; color:var(--text3); font-weight:600}
+
+.dash-grid{
+  display:grid;
+  grid-template-columns:repeat(12, 1fr);
+  gap:14px;
+}
+.d-card{
+  grid-column:span 4;
+  background:var(--surface-glass);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px 15px 13px;
+  box-shadow:0 6px 24px rgba(79,90,160,.07);
+  backdrop-filter:blur(14px);
+  min-height:140px;
+  display:flex; flex-direction:column; gap:10px;
+  transition:border-color .15s, box-shadow .15s, transform .15s;
+}
+.d-card:hover{border-color:var(--border2); box-shadow:0 10px 32px rgba(79,90,160,.1)}
+.d-card.span-6{grid-column:span 6}
+.d-card.span-8{grid-column:span 8}
+.d-card.span-12{grid-column:span 12}
+.d-card.span-3{grid-column:span 3}
+.d-head{display:flex; align-items:center; gap:8px}
+.d-head .d-ico{
+  width:30px;height:30px;border-radius:9px; display:grid; place-items:center;
+  background:color-mix(in srgb, var(--hc,#4f46e5) 14%, transparent);
+  color:var(--hc,#4f46e5); border:1px solid color-mix(in srgb, var(--hc,#4f46e5) 20%, transparent);
+}
+.d-head h3{margin:0; font-size:13.5px; font-weight:700; letter-spacing:-.02em; flex:1}
+.d-head a, .d-head button.linkish{
+  font-size:11.5px; font-weight:650; color:var(--acc); background:none; border:none; cursor:pointer;
+}
+.d-body{flex:1; font-size:13px; color:var(--text2); line-height:1.45}
+.d-metric{font-size:28px; font-weight:700; letter-spacing:-.03em; color:var(--text); line-height:1.1}
+.d-metric small{font-size:13px; font-weight:600; color:var(--text3); margin-left:6px}
+.d-row{display:flex; justify-content:space-between; gap:8px; padding:5px 0; border-bottom:1px solid var(--border)}
+.d-row:last-child{border-bottom:none}
+.d-row .up{color:var(--ok); font-weight:700}
+.d-row .down{color:var(--danger); font-weight:700}
+.d-chips{display:flex; flex-wrap:wrap; gap:6px}
+.d-chip{
+  padding:5px 9px; border-radius:999px; font-size:11.5px; font-weight:600;
+  background:var(--bg3); border:1px solid var(--border); color:var(--text2);
+}
+.d-empty{color:var(--text3); font-size:12.5px; padding:8px 0}
+.d-list a{color:var(--text); text-decoration:none; font-weight:550}
+.d-list a:hover{color:var(--acc)}
+.d-list .meta{font-size:11px; color:var(--text3)}
+
+.home-btn{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:7px 12px; border-radius:999px; font-size:13px; font-weight:650;
+  color:var(--text); background:var(--bg2); border:1px solid var(--border);
+  transition:background .12s, border-color .12s, box-shadow .12s;
+}
+.home-btn:hover{border-color:var(--border2); box-shadow:0 2px 10px rgba(79,90,160,.08)}
+.home-btn.on{background:var(--acc-soft); border-color:color-mix(in srgb,var(--acc) 35%,var(--border)); color:var(--acc)}
+.tb-title{display:flex; flex-direction:column; min-width:0; margin-left:4px}
+.tb-app{font-size:14px; font-weight:750; letter-spacing:-.03em}
+.tb-sub{font-size:11px; color:var(--text3); font-weight:600}
+#topbar{border-bottom:1px solid var(--border); background:color-mix(in srgb,var(--bg) 82%,transparent); backdrop-filter:blur(16px)}
+
+.sb-chats-head{display:flex; align-items:center; padding:0 8px}
+.sb-chats-head .sb-sec{flex:1; padding-top:8px}
+.sb-mini{
+  width:28px;height:28px;border-radius:8px; font-size:16px; font-weight:600;
+  color:var(--text2); display:grid; place-items:center;
+}
+.sb-mini:hover{background:var(--bg3); color:var(--text)}
+
+/* Floating chat */
+.chat-float{
+  position:fixed; z-index:60;
+  display:flex; flex-direction:column;
+  background:var(--surface-glass);
+  border:1px solid var(--border2);
+  box-shadow:0 20px 60px rgba(15,23,42,.22), 0 0 0 1px rgba(255,255,255,.4) inset;
+  backdrop-filter:blur(22px) saturate(1.25);
+  -webkit-backdrop-filter:blur(22px) saturate(1.25);
+  overflow:hidden;
+  transition: width .25s cubic-bezier(.22,1,.36,1), height .25s cubic-bezier(.22,1,.36,1),
+    border-radius .2s, opacity .2s, transform .25s cubic-bezier(.22,1,.36,1);
+}
+[data-theme="dark"] .chat-float{
+  box-shadow:0 24px 70px rgba(0,0,0,.5), 0 0 40px rgba(99,102,241,.08);
+}
+.chat-float[data-state="fab"]{
+  width:0; height:0; opacity:0; pointer-events:none; border:none;
+  right:24px; bottom:24px;
+}
+.chat-float[data-state="open"]{
+  width:min(420px, calc(100vw - 24px));
+  height:min(640px, calc(100dvh - 100px));
+  right:18px; bottom:18px;
+  border-radius:20px;
+  opacity:1;
+}
+.chat-float[data-state="expanded"]{
+  width:min(720px, calc(100vw - 32px));
+  height:min(820px, calc(100dvh - 48px));
+  right:16px; bottom:16px;
+  border-radius:22px;
+  opacity:1;
+}
+.cf-head{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:10px 10px 8px; border-bottom:1px solid var(--border);
+  background:color-mix(in srgb, var(--bg2) 70%, transparent);
+  flex:none;
+}
+.cf-brand{display:flex; align-items:center; gap:9px; min-width:0}
+.cf-orb{
+  width:32px;height:32px;border-radius:11px; display:grid; place-items:center;
+  background:linear-gradient(145deg,#818cf8,#4f46e5 55%,#0ea5e9); color:#fff; font-size:15px;
+  box-shadow:0 4px 14px rgba(79,70,229,.35);
+}
+.cf-title{font-size:13.5px; font-weight:750; letter-spacing:-.02em}
+.cf-meta{font-size:11px; color:var(--text3); font-weight:600}
+.cf-modes{display:flex; gap:4px; flex-wrap:wrap; flex:1; min-width:0}
+.cf-modes .mode-pill{padding:5px 9px 5px 7px; font-size:11.5px}
+.cf-modes .mp-ico{width:18px;height:18px;border-radius:6px;font-size:10px}
+.cf-actions{display:flex; align-items:center; gap:2px; flex-wrap:wrap}
+.cf-actions .icon-btn{width:32px;height:32px;min-width:32px}
+.cf-actions #model-btn{
+  max-width:130px; padding:4px 8px; gap:5px; border-radius:999px;
+  background:var(--bg3); border:1px solid var(--border);
+}
+.cf-actions #model-btn .m-name{font-size:11.5px}
+
+.chat-float #chat-scroll{flex:1; min-height:0; overflow-y:auto}
+.chat-float #chat{max-width:none; padding:12px 12px 16px; gap:16px}
+.chat-float #composer-wrap{
+  max-width:none; padding:8px 10px 10px; margin:0;
+  background:linear-gradient(180deg, transparent, var(--bg2) 30%);
+  flex:none;
+}
+.chat-float #composer{max-width:none; margin:0; box-shadow:0 4px 18px rgba(79,90,160,.1)}
+.chat-float #jump-btn{bottom:88px; left:50%; transform:translateX(-50%)}
+.chat-float #comp-hint{max-width:none; margin:0; padding:6px 4px 0}
+
+#chat-fab{
+  position:fixed; z-index:65; right:20px; bottom:20px;
+  display:flex; align-items:center; gap:8px;
+  padding:12px 16px 12px 12px; border-radius:999px;
+  background:linear-gradient(135deg,#6366f1,#4f46e5 50%,#0ea5e9);
+  color:#fff; font-weight:750; font-size:13.5px; letter-spacing:-.02em;
+  box-shadow:0 12px 36px rgba(79,70,229,.45), 0 0 0 1px rgba(255,255,255,.2) inset;
+  border:none; cursor:pointer;
+  transition:transform .15s, box-shadow .15s, opacity .15s;
+}
+#chat-fab:hover{transform:translateY(-2px) scale(1.02); box-shadow:0 16px 40px rgba(79,70,229,.5)}
+#chat-fab .fab-orb{
+  width:28px;height:28px;border-radius:50%; display:grid; place-items:center;
+  background:rgba(255,255,255,.2); font-size:14px;
+}
+body.chat-open #chat-fab{opacity:0; pointer-events:none; transform:scale(.9)}
+
+/* Chat empty inside float */
+.chat-float #empty-state.hub-home{padding:24px 12px; max-width:none}
+.chat-float #empty-state .hub-grid{display:none}
+.chat-float #empty-state .hub-foot{display:none}
+.chat-float #empty-state .hub-hero h1{font-size:22px}
+.chat-float #empty-state .subhead{font-size:13px; margin-bottom:0}
+
+@media (max-width:900px){
+  .d-card, .d-card.span-3, .d-card.span-6, .d-card.span-8{grid-column:span 12}
+  .chat-float[data-state="open"], .chat-float[data-state="expanded"]{
+    width:calc(100vw - 12px); height:calc(100dvh - 12px);
+    right:6px; bottom:6px; border-radius:16px;
+  }
+  .cf-modes{display:none}
+}
+@media (min-width:901px) and (max-width:1200px){
+  .d-card.span-3{grid-column:span 4}
+  .d-card{grid-column:span 6}
+  .d-card.span-8{grid-column:span 12}
+}
+
 /* ============================= Vault / Drive sync ============================= */
 .vault-panel{
   margin: 14px 0 6px; padding: 14px 14px 12px; border-radius: 18px;
@@ -1037,8 +1242,12 @@ a:hover{text-decoration:underline}
       <div class="brand"><span class="logo">✦</span><span class="nm">Homebase</span></div>
       <button class="icon-btn" id="sb-close" title="Close sidebar" aria-label="Close sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
     </div>
-    <button class="new-chat" id="new-chat-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New chat</button>
-    <div id="hub-nav" class="hub-nav" aria-label="Homebase modules"></div>
+    <button type="button" class="new-chat" id="home-nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/></svg>Home dashboard</button>
+    <div id="hub-nav" class="hub-nav" aria-label="Modules & links"></div>
+    <div class="sb-chats-head">
+      <div class="sb-sec">Chats</div>
+      <button type="button" class="sb-mini" id="new-chat-btn" title="New chat">＋</button>
+    </div>
     <div class="sb-search">
       <svg class="mag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="convo-search" type="text" placeholder="Search chats…" autocomplete="off">
@@ -1057,50 +1266,79 @@ a:hover{text-decoration:underline}
   <div id="main">
     <header id="topbar">
       <button class="icon-btn" id="menu-btn" title="Menu" aria-label="Open sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-      <button id="model-btn" title="Choose model">
-        <span class="m-dot" id="model-dot"></span>
-        <span style="min-width:0">
-          <span class="m-name" id="model-name" style="display:block">Demo</span>
-        </span>
-        <span class="m-prov" id="model-prov">demo</span>
-        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+      <button type="button" class="home-btn" id="home-btn" title="Home dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/></svg>
+        <span>Home</span>
       </button>
+      <div class="tb-title">
+        <span class="tb-app">Homebase</span>
+        <span class="tb-sub" id="tb-sub">Life dashboard</span>
+      </div>
       <span class="tb-spacer"></span>
-      <button class="icon-btn" id="tools-btn" title="Agent tools (function calling)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></button>
-      <button class="icon-btn" id="council-btn" title="Model Council — multi-model debate & synthesis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><circle cx="12" cy="16" r="3"/><path d="M8 12c-2.2 1.5-3.5 3.5-3.5 5.5M16 12c2.2 1.5 3.5 3.5 3.5 5.5M12 13v-1"/></svg></button>
-      <button class="icon-btn" id="voice-btn" title="Voice mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
-      <button class="icon-btn" id="tasks-btn" title="Scheduled tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></button>
-      <button class="icon-btn" id="memory-btn" title="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a3.5 3.5 0 0 0-3.5 3.5c-1.9.3-3.5 1.8-3.5 3.9 0 1.1.5 2.1 1.2 2.8A3.4 3.4 0 0 0 8 20.5c1.5 0 2.9-.9 3.4-2.2h1.2a3.7 3.7 0 0 0 3.4 2.2 3.4 3.4 0 0 0 1.8-6.3c.7-.7 1.2-1.7 1.2-2.8 0-2.1-1.6-3.6-3.5-3.9A3.5 3.5 0 0 0 12 4z"/><path d="M12 4v14"/></svg></button>
+      <button type="button" class="icon-btn" id="dash-refresh" title="Refresh dashboard data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 3v6h-6"/></svg></button>
       <button type="button" id="sync-pill" title="Encrypted Google Drive vault">Drive vault</button>
       <button class="icon-btn" id="connectors-btn" title="Connectors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
       <button class="icon-btn" id="settings-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
     </header>
 
-    <div id="chat-scroll">
-      <div id="chat"></div>
+    <!-- ========== Scrollable life dashboard ========== -->
+    <div id="dash-scroll">
+      <div id="dashboard" class="dashboard"></div>
     </div>
-    <button id="jump-btn" title="Jump to latest"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 10l6 6 6-6"/></svg></button>
 
-    <div id="composer-wrap">
-      <div id="mode-rail" aria-label="Modes"></div>
-      <div id="pending-atts"></div>
-      <div id="composer">
-        <button class="icon-btn" id="attach-btn" title="Attach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-        <textarea id="input" rows="1" placeholder="Message Homebase…"></textarea>
-        <button class="icon-btn" id="mic-btn" title="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
-        <button id="send-btn" title="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+    <!-- ========== Floating AI chat (stays while dashboard scrolls) ========== -->
+    <div id="chat-float" class="chat-float" data-state="fab" aria-label="AI chat">
+      <div class="cf-head">
+        <div class="cf-brand">
+          <span class="cf-orb">✦</span>
+          <div>
+            <div class="cf-title">Homebase AI</div>
+            <div class="cf-meta" id="cf-meta">Assistant</div>
+          </div>
+        </div>
+        <div class="cf-modes" id="cf-modes" aria-label="AI modes"></div>
+        <div class="cf-actions">
+          <button type="button" class="icon-btn" id="model-btn" title="Choose model">
+            <span class="m-dot" id="model-dot"></span>
+            <span class="m-name" id="model-name">Demo</span>
+            <span class="m-prov" id="model-prov" style="display:none">demo</span>
+          </button>
+          <button type="button" class="icon-btn" id="tools-btn" title="Agent tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></button>
+          <button type="button" class="icon-btn" id="council-btn" title="Model Council"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="2.5"/><circle cx="16" cy="9" r="2.5"/><circle cx="12" cy="15.5" r="2.5"/></svg></button>
+          <button type="button" class="icon-btn" id="voice-btn" title="Voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
+          <button type="button" class="icon-btn" id="memory-btn" title="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8zm6 0a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8z"/></svg></button>
+          <button type="button" class="icon-btn" id="tasks-btn" title="Tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/></svg></button>
+          <button type="button" class="icon-btn" id="chat-new" title="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button type="button" class="icon-btn" id="chat-expand" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/></svg></button>
+          <button type="button" class="icon-btn" id="chat-min" title="Minimize"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h12"/></svg></button>
+        </div>
       </div>
-      <div id="comp-hint">
-        <span id="hint-model"></span>
-        <span id="hint-tools" style="display:none">🔧 agent</span>
-        <span id="hint-council" style="display:none">⚖️ council</span>
-        <span class="grow"></span>
-        <span id="hint-tokens" title="Approximate tokens in context"></span>
-        <span class="hide-sm"><span class="kbd">Enter</span> send · <span class="kbd">Shift+Enter</span> line</span>
+      <div id="chat-scroll">
+        <div id="chat"></div>
+      </div>
+      <button id="jump-btn" title="Jump to latest"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 10l6 6 6-6"/></svg></button>
+      <div id="composer-wrap">
+        <div id="pending-atts"></div>
+        <div id="composer">
+          <button class="icon-btn" id="attach-btn" title="Attach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          <textarea id="input" rows="1" placeholder="Ask Homebase…"></textarea>
+          <button class="icon-btn" id="mic-btn" title="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
+          <button id="send-btn" title="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+        </div>
+        <div id="comp-hint">
+          <span id="hint-model"></span>
+          <span id="hint-tools" style="display:none">🔧 agent</span>
+          <span id="hint-council" style="display:none">⚖️ council</span>
+          <span class="grow"></span>
+          <span id="hint-tokens" title="Approximate tokens in context"></span>
+        </div>
       </div>
     </div>
+    <button type="button" id="chat-fab" title="Open Homebase AI" aria-label="Open AI chat">
+      <span class="fab-orb">✦</span>
+      <span class="fab-lab">AI</span>
+    </button>
   </div>
-</div>
 
 <!-- hidden file inputs -->
 <input type="file" id="file-input" multiple accept="image/*,.pdf,.txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.xml,.yaml,.yml,.log,.sh,.c,.cpp,.java,.rs,.go,.rb,.sql,.toml,.ini" style="display:none">
@@ -1632,6 +1870,9 @@ function setUiMode(id, opts){
   S.settings.uiMode = mode.id;
   saveSettings();
   try { mode.apply(); } catch(e){ console.warn(mode.id, e); }
+  if (!opts.skipOpenChat && ['chat','voice','agent','research','council','memory'].indexOf(mode.id) >= 0){
+    try { openChatFloat($('chat-float') && $('chat-float').dataset.state === 'expanded'); } catch(e){}
+  }
   var c = activeConvo();
   if (c) persistConvo(c);
   updateToolsBtn();
@@ -1658,11 +1899,10 @@ function setUiMode(id, opts){
   }
 }
 function renderModeRail(){
-  var rail = $('mode-rail');
+  var rail = $('cf-modes') || $('mode-rail');
   if (!rail) return;
   var cur = S.settings.uiMode || 'chat';
   rail.innerHTML = '';
-  // Keep rail focused on AI work modes; hub/sidebar holds vault, connectors, links
   var railModes = UI_MODES.filter(function(m){ return ['chat','voice','agent','research','council'].indexOf(m.id) >= 0; });
   railModes.forEach(function(m){
     var b = document.createElement('button');
@@ -1675,13 +1915,16 @@ function renderModeRail(){
     qs('.mp-label', b).textContent = m.title;
     b.title = m.desc;
     b.addEventListener('click', function(){
+      openChatFloat($('chat-float') && $('chat-float').dataset.state === 'expanded');
       if (m.id === 'voice') setUiMode('voice');
-      else if (m.id === 'memory' && (S.settings.uiMode === 'memory')){
-        renderMemory(); $('memory-ov').classList.add('open');
-      } else setUiMode(m.id, {silent: m.id === cur});
+      else setUiMode(m.id, {silent: m.id === cur});
     });
     rail.appendChild(b);
   });
+  if ($('cf-meta')){
+    var mode = modeById(cur);
+    $('cf-meta').textContent = (mode && mode.title ? mode.title + ' mode' : 'Assistant');
+  }
 }
 function updateModeChrome(){
   var mode = modeById(S.settings.uiMode || 'chat');
@@ -1819,7 +2062,7 @@ function renderHubNav(){
   nav.innerHTML = '';
   var label = document.createElement('div');
   label.className = 'sb-sec';
-  label.textContent = 'Homebase';
+  label.textContent = 'Modules & links';
   nav.appendChild(label);
   mods.forEach(function(mod){
     var b = document.createElement('button');
@@ -1977,6 +2220,368 @@ function persistHub(){
   renderHubNav();
   if ($('chat') && $('chat').querySelector('#empty-state')) renderChat();
 }
+/* ============================ Life dashboard + floating chat shell ============================ */
+var LS_DASH = 'homebase_dash_v1';
+var DASH = { cache: null, loading: false, updated: 0 };
+
+function defaultDashLayout(){
+  return [
+    { id:'weather', enabled:true, span:3 },
+    { id:'finance', enabled:true, span:5 },
+    { id:'scores', enabled:true, span:4 },
+    { id:'news', enabled:true, span:6 },
+    { id:'calendar', enabled:true, span:3 },
+    { id:'tasks', enabled:true, span:3 },
+    { id:'pharmacy', enabled:true, span:4 },
+    { id:'links', enabled:true, span:4 },
+    { id:'memory', enabled:true, span:4 },
+    { id:'traffic', enabled:true, span:6 },
+    { id:'updates', enabled:true, span:6 }
+  ];
+}
+function loadDashLayout(){
+  var s = lsGet(LS_DASH, null);
+  if (s && Array.isArray(s.widgets)) return s.widgets;
+  return defaultDashLayout();
+}
+function saveDashLayout(widgets){
+  lsSet(LS_DASH, { widgets: widgets });
+}
+
+function stockPrice(entry){
+  try {
+    var m = entry.chart.result[0].meta;
+    return { symbol: m.symbol, price: m.regularMarketPrice, prev: m.chartPreviousClose };
+  } catch(e){ return null; }
+}
+
+function flattenNews(newsObj, limit){
+  limit = limit || 8;
+  var items = [];
+  if (!newsObj) return items;
+  Object.keys(newsObj).forEach(function(feed){
+    (newsObj[feed] || []).forEach(function(it){
+      items.push({
+        title: it.title || it,
+        link: it.link || it.url || '',
+        source: feed.replace(/^https?:\/\//,'').split('/')[0],
+        date: it.published || it.date || ''
+      });
+    });
+  });
+  return items.slice(0, limit);
+}
+
+async function fetchDashboardCache(){
+  DASH.loading = true;
+  var url = (connectorCfg('dashboard').url || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/').replace(/\/?$/, '/');
+  try {
+    var html = await withTimeout(function(sig){
+      return fetch(url, { signal: sig, mode: 'cors', cache: 'no-store' }).then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      });
+    }, 14000);
+    var m = html.match(/var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n/);
+    if (!m) throw new Error('cache missing');
+    DASH.cache = JSON.parse(m[1]);
+    DASH.updated = Date.now();
+    try { lsSet('homebase_dash_cache_v1', { t: DASH.updated, cache: DASH.cache }); } catch(e){}
+  } catch(e){
+    var cached = lsGet('homebase_dash_cache_v1', null);
+    if (cached && cached.cache){ DASH.cache = cached.cache; DASH.updated = cached.t || 0; }
+    else throw e;
+  } finally {
+    DASH.loading = false;
+  }
+  return DASH.cache;
+}
+
+function widgetShell(title, icon, color, span, bodyHtml, extraHead){
+  span = span || 4;
+  return '<section class="d-card span-'+span+'" style="--hc:'+esc(color)+'">' +
+    '<div class="d-head">' +
+      '<span class="d-ico">'+iconSvg(icon, 16)+'</span>' +
+      '<h3>'+esc(title)+'</h3>' +
+      (extraHead || '') +
+    '</div>' +
+    '<div class="d-body">'+bodyHtml+'</div></section>';
+}
+
+function renderWeatherWidget(c, span){
+  var w = (c && c.weather && c.weather.current) || {};
+  var temp = w.temperature_2m;
+  var feels = w.apparent_temperature;
+  var hum = w.relative_humidity_2m;
+  var wind = w.wind_speed_10m;
+  var body = (temp == null)
+    ? '<div class="d-empty">Weather unavailable — open Tesla Dashboard</div>'
+    : '<div class="d-metric">'+esc(String(temp))+'°C<small>feels '+esc(String(feels))+'°</small></div>' +
+      '<div class="d-chips">' +
+        '<span class="d-chip">Humidity '+esc(String(hum))+'%</span>' +
+        '<span class="d-chip">Wind '+esc(String(wind))+' km/h</span>' +
+        '<span class="d-chip">Surrey / Metro</span>' +
+      '</div>';
+  return widgetShell('Weather', 'spark', '#0284c7', span,
+    body,
+    '<a href="../" target="_blank" rel="noopener">Dashboard</a>');
+}
+
+function renderFinanceWidget(c, span){
+  var stocks = (c && c.stocks) || {};
+  var prefer = ['XEQT.TO','XGRO.TO','VGRO.TO','VFV.TO','TSLA','AAPL','MSFT','NVDA'];
+  var rows = [];
+  prefer.forEach(function(sym){
+    if (!stocks[sym]) return;
+    var p = stockPrice(stocks[sym]);
+    if (!p || p.price == null) return;
+    var chg = (p.prev != null && p.prev !== 0) ? ((p.price - p.prev) / p.prev * 100) : null;
+    var cls = chg == null ? '' : (chg >= 0 ? 'up' : 'down');
+    var chgS = chg == null ? '' : ((chg>=0?'+':'') + chg.toFixed(2) + '%');
+    rows.push('<div class="d-row"><span>'+esc(p.symbol)+'</span><span><b>'+esc(String(p.price))+'</b> <span class="'+cls+'">'+esc(chgS)+'</span></span></div>');
+  });
+  // fill from remaining
+  if (rows.length < 4){
+    Object.keys(stocks).forEach(function(sym){
+      if (prefer.indexOf(sym) >= 0) return;
+      if (rows.length >= 6) return;
+      var p = stockPrice(stocks[sym]);
+      if (!p || p.price == null) return;
+      var chg = (p.prev != null && p.prev !== 0) ? ((p.price - p.prev) / p.prev * 100) : null;
+      var cls = chg == null ? '' : (chg >= 0 ? 'up' : 'down');
+      var chgS = chg == null ? '' : ((chg>=0?'+':'') + chg.toFixed(2) + '%');
+      rows.push('<div class="d-row"><span>'+esc(p.symbol)+'</span><span><b>'+esc(String(p.price))+'</b> <span class="'+cls+'">'+esc(chgS)+'</span></span></div>');
+    });
+  }
+  var body = rows.length ? rows.join('') : '<div class="d-empty">No market data yet</div>';
+  return widgetShell('Portfolio pulse', 'chart', '#0f766e', span, body,
+    '<a href="../" target="_blank" rel="noopener">Markets</a>');
+}
+
+function renderNewsWidget(c, span){
+  var items = flattenNews(c && c.news, 7);
+  var body = items.length
+    ? '<div class="d-list">'+items.map(function(it){
+        var t = esc(it.title);
+        var link = it.link ? '<a href="'+esc(it.link)+'" target="_blank" rel="noopener">'+t+'</a>' : t;
+        return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px">'+link+'<span class="meta">'+esc(it.source)+'</span></div>';
+      }).join('')+'</div>'
+    : '<div class="d-empty">No headlines cached</div>';
+  return widgetShell('News', 'research', '#4f46e5', span, body,
+    '<a href="../" target="_blank" rel="noopener">More</a>');
+}
+
+function renderScoresWidget(c, span){
+  var scores = (c && c.scores) || [];
+  var body = scores.length
+    ? scores.slice(0,5).map(function(g){
+        var home = g.home || {}; var away = g.away || {};
+        var line = (away.abbr || away.name || '?') + ' ' + (away.score != null ? away.score : '-') +
+          ' @ ' + (home.abbr || home.name || '?') + ' ' + (home.score != null ? home.score : '-');
+        return '<div class="d-row"><span>'+esc(g.team || g.league || 'Game')+'</span><span>'+esc(line)+'</span></div>';
+      }).join('')
+    : '<div class="d-empty">No live scores</div>';
+  return widgetShell('My teams', 'spark', '#ea580c', span, body,
+    '<a href="../" target="_blank" rel="noopener">Sports</a>');
+}
+
+function renderPharmacyWidget(c, span){
+  var items = flattenNews(c && c.pharmacy, 5);
+  var body = items.length
+    ? items.map(function(it){
+        var t = esc(it.title);
+        return '<div class="d-row" style="flex-direction:column;align-items:flex-start">'+
+          (it.link ? '<a href="'+esc(it.link)+'" target="_blank" rel="noopener">'+t+'</a>' : t)+'</div>';
+      }).join('')
+    : '<div class="d-empty">No pharmacy feeds</div>';
+  return widgetShell('Clinical updates', 'pharmacy', '#0d9488', span, body,
+    '<button type="button" class="linkish" data-act="clinical">Open desk</button>');
+}
+
+function renderTasksWidget(span){
+  var tasks = (S.tasks || []).filter(function(t){ return t.enabled !== false; }).slice(0,5);
+  var body = tasks.length
+    ? tasks.map(function(t){
+        return '<div class="d-row"><span>'+esc(t.name)+'</span><span class="meta">'+esc(describeSchedule(t))+'</span></div>';
+      }).join('')
+    : '<div class="d-empty">No active scheduled tasks</div>';
+  return widgetShell('Rituals & tasks', 'tasks', '#d97706', span, body,
+    '<button type="button" class="linkish" data-act="tasks">Manage</button>');
+}
+
+function renderMemoryWidget(span){
+  var mems = (S.memory || []).slice().sort(function(a,b){
+    return (b.pinned?1:0)-(a.pinned?1:0) || (b.importance||0)-(a.importance||0);
+  }).slice(0,4);
+  var body = mems.length
+    ? mems.map(function(m){
+        return '<div class="d-row" style="flex-direction:column;align-items:flex-start;gap:2px"><span>'+esc(m.text)+'</span><span class="meta">'+esc(m.category||'fact')+(m.pinned?' · pinned':'')+'</span></div>';
+      }).join('')
+    : '<div class="d-empty">Memory is empty — teach Homebase about you</div>';
+  return widgetShell('Memory', 'memory', '#7c3aed', span, body,
+    '<button type="button" class="linkish" data-act="memory">Vault</button>');
+}
+
+function renderCalendarWidget(span){
+  var body = '<div class="d-empty">Connect Google Calendar (iCal) in Connectors for live events, or open Calendar.</div>' +
+    '<div class="d-chips" style="margin-top:8px"><button type="button" class="d-chip" data-act="calendar">Open Calendar</button></div>';
+  // async fill later if ical configured - keep sync for first paint
+  return widgetShell('Calendar', 'calendar', '#2563eb', span, body, '');
+}
+
+function renderLinksWidget(span){
+  var mods = hubModulesEnabled().filter(function(m){ return m.kind === 'link' || String(m.id).indexOf('custom-')===0; }).slice(0, 8);
+  var body = mods.length
+    ? '<div class="d-chips">'+mods.map(function(m){
+        return '<button type="button" class="d-chip" data-hub="'+esc(m.id)+'">'+esc(m.title)+'</button>';
+      }).join('')+'</div>'
+    : '<div class="d-empty">Add custom links in Settings → Hub</div>';
+  return widgetShell('Your tools', 'link', '#4f46e5', span, body,
+    '<button type="button" class="linkish" data-act="hub">Edit</button>');
+}
+
+function renderTrafficWidget(c, span){
+  var cams = (c && c.cameras) || [];
+  var fav = cams.slice(0, 4);
+  var body = fav.length
+    ? fav.map(function(cam){
+        return '<div class="d-row"><span>'+esc(cam.name || ('Cam '+cam.id))+'</span><span class="meta">DriveBC</span></div>';
+      }).join('') + '<div class="d-chips" style="margin-top:8px"><a class="d-chip" href="../" target="_blank" rel="noopener">Open traffic board</a></div>'
+    : '<div class="d-empty">Traffic cams load from Tesla Dashboard cache</div>';
+  return widgetShell('Traffic', 'car', '#6366f1', span, body, '');
+}
+
+function renderUpdatesWidget(c, span){
+  var lines = [];
+  if (c && c.updated) lines.push('Dashboard cache: ' + c.updated);
+  if (DASH.updated) lines.push('Homebase refreshed: ' + fmtDateTime(DASH.updated));
+  var nConn = CONNECTOR_DEFS.filter(function(d){ return connectorOn(d.id); }).length;
+  lines.push(nConn + ' connectors enabled');
+  lines.push((S.memory || []).length + ' memories · ' + (S.tasks || []).length + ' tasks');
+  var body = lines.map(function(l){ return '<div class="d-row"><span>'+esc(l)+'</span></div>'; }).join('');
+  return widgetShell('System', 'settings', '#64748b', span, body,
+    '<button type="button" class="linkish" data-act="connectors">Connectors</button>');
+}
+
+function renderDashboard(){
+  var root = $('dashboard');
+  if (!root) return;
+  if (!S.hubModules) S.hubModules = loadHubConfig();
+  var c = DASH.cache;
+  var hour = new Date().getHours();
+  var greet = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+  var stamp = c && c.updated ? ('Cache ' + c.updated) : (DASH.loading ? 'Loading…' : 'Connect Tesla Dashboard for live data');
+  var layout = loadDashLayout();
+  var html = '<div class="dash-hero">' +
+    '<div><h1>'+greet+', David</h1><div class="dh-sub">Homebase · Surrey · your life OS</div></div>' +
+    '<div class="dh-stamp" id="dash-stamp">'+esc(stamp)+'</div></div><div class="dash-grid">';
+
+  layout.forEach(function(w){
+    if (w.enabled === false) return;
+    var span = w.span || 4;
+    if (w.id === 'weather') html += renderWeatherWidget(c, span);
+    else if (w.id === 'finance') html += renderFinanceWidget(c, 5);
+    else if (w.id === 'scores') html += renderScoresWidget(c, 4);
+    else if (w.id === 'news') html += renderNewsWidget(c, 6);
+    else if (w.id === 'pharmacy') html += renderPharmacyWidget(c, 4);
+    else if (w.id === 'tasks') html += renderTasksWidget(3);
+    else if (w.id === 'memory') html += renderMemoryWidget(4);
+    else if (w.id === 'calendar') html += renderCalendarWidget(3);
+    else if (w.id === 'links') html += renderLinksWidget(4);
+    else if (w.id === 'traffic') html += renderTrafficWidget(c, 6);
+    else if (w.id === 'updates') html += renderUpdatesWidget(c, 6);
+  });
+  html += '</div>';
+  root.innerHTML = html;
+
+  // wire actions
+  qsa('[data-act]', root).forEach(function(b){
+    b.addEventListener('click', function(){
+      var a = b.getAttribute('data-act');
+      if (a === 'clinical') runHubModule({ kind:'action', action:'clinical' });
+      else if (a === 'tasks'){ renderTasks(); $('tasks-ov').classList.add('open'); }
+      else if (a === 'memory'){ renderMemory(); initVaultUi(); $('memory-ov').classList.add('open'); }
+      else if (a === 'calendar') window.open('https://calendar.google.com/', '_blank', 'noopener');
+      else if (a === 'hub'){ openSettings(); switchSetTab('hub'); }
+      else if (a === 'connectors'){ renderConnectors(); $('connectors-ov').classList.add('open'); }
+    });
+  });
+  qsa('[data-hub]', root).forEach(function(b){
+    b.addEventListener('click', function(){
+      var id = b.getAttribute('data-hub');
+      var mod = (S.hubModules || []).find(function(m){ return m.id === id; });
+      if (mod) runHubModule(mod);
+    });
+  });
+}
+
+async function refreshDashboard(opts){
+  opts = opts || {};
+  try {
+    if ($('dash-stamp')) $('dash-stamp').textContent = 'Refreshing…';
+    await fetchDashboardCache();
+    renderDashboard();
+    if (opts.toast) toast('Dashboard updated', 'ok', 1800);
+  } catch(e){
+    renderDashboard();
+    if (opts.toast) toast('Using cached data — ' + (e.message || e), 'warn', 3200);
+  }
+}
+
+/* ----- Floating chat chrome ----- */
+function setChatState(state){
+  // state: fab | open | expanded
+  var fl = $('chat-float');
+  if (!fl) return;
+  fl.dataset.state = state;
+  document.body.classList.toggle('chat-open', state === 'open' || state === 'expanded');
+  if (state !== 'fab'){
+    try { updateModelBtn(); updateToolsBtn(); updateCouncilBtn(); renderModeRail(); updateHints(); } catch(e){}
+    setTimeout(function(){ try { $('input').focus(); } catch(e){} }, 200);
+  }
+  if ($('tb-sub')){
+    $('tb-sub').textContent = state === 'fab' ? 'Life dashboard' : 'AI at your side';
+  }
+  if ($('home-btn')) $('home-btn').classList.toggle('on', state === 'fab');
+}
+function openChatFloat(expanded){
+  setChatState(expanded ? 'expanded' : 'open');
+  ensureConvo();
+  renderChat();
+}
+function closeChatFloat(){
+  setChatState('fab');
+}
+function goHomeDashboard(){
+  closeChatFloat();
+  var sc = $('dash-scroll');
+  if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
+  renderDashboard();
+  closeSidebarMobile();
+}
+
+function initDashboardShell(){
+  if ($('home-btn')) $('home-btn').addEventListener('click', goHomeDashboard);
+  if ($('home-nav-btn')) $('home-nav-btn').addEventListener('click', goHomeDashboard);
+  if ($('dash-refresh')) $('dash-refresh').addEventListener('click', function(){ refreshDashboard({toast:true}); });
+  if ($('chat-fab')) $('chat-fab').addEventListener('click', function(){ openChatFloat(false); });
+  if ($('chat-min')) $('chat-min').addEventListener('click', closeChatFloat);
+  if ($('chat-expand')) $('chat-expand').addEventListener('click', function(){
+    var fl = $('chat-float');
+    if (!fl) return;
+    setChatState(fl.dataset.state === 'expanded' ? 'open' : 'expanded');
+  });
+  if ($('chat-new')) $('chat-new').addEventListener('click', function(){
+    createConvo();
+    openChatFloat($('chat-float').dataset.state === 'expanded');
+  });
+  // brand click -> home
+  var brand = document.querySelector('.brand');
+  if (brand){
+    brand.onclick = function(){ goHomeDashboard(); };
+  }
+}
+
 
 /* ============================ Connectors ============================ */
 var CONNECTOR_DEFS = [
@@ -4038,6 +4643,7 @@ function switchConvo(id){
   S.activeId = id;
   renderSidebar(); renderChat(); updateModelBtn(); updateHints();
   closeSidebarMobile();
+  openChatFloat($('chat-float') && $('chat-float').dataset.state === 'expanded');
 }
 function deleteConvo(id){
   var c = S.convos.find(function(x){ return x.id === id; });
@@ -4235,7 +4841,28 @@ function renderChat(){
   scrollBottom(true);
 }
 function emptyStateEl(){
-  return renderHubHome();
+  // Inside floating chat: minimal prompt, not the full dashboard hub
+  var d = document.createElement('div');
+  d.id = 'empty-state';
+  d.className = 'hub-home chat-empty';
+  d.innerHTML =
+    '<div class="hub-hero" style="margin-bottom:0">' +
+      '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">✦</div></div>' +
+      '<h1>Homebase AI</h1>' +
+      '<p class="subhead">Ask anything — research, plan, remember, or run agent tools. Your dashboard stays behind this window.</p>' +
+      '<div class="hub-foot" style="margin-top:14px">' +
+        '<button type="button" class="prompt-chip" data-q="Summarize what you know about me and suggest three useful next actions.">What do you know?</button>' +
+        '<button type="button" class="prompt-chip" data-q="Run a Surrey morning brief with weather, news, and a clinical pearl." data-tools="1">Morning brief</button>' +
+      '</div>' +
+    '</div>';
+  qsa('.prompt-chip', d).forEach(function(b){
+    b.addEventListener('click', function(){
+      if (b.dataset.tools){ var c = ensureConvo(); c.toolsOn = true; updateToolsBtn(); }
+      $('input').value = b.getAttribute('data-q') || '';
+      autoresize(); updateSendBtn(); $('input').focus();
+    });
+  });
+  return d;
 }
 function msgEl(m, convo){
   var el = document.createElement('div');
@@ -4457,6 +5084,7 @@ var PIPE_HOOKS = { onDelta:null, onDone:null, onUserEcho:null };
 async function sendMessage(rawText, opts){
   opts = opts || {};
   if (S.sending) return;
+  if ($('chat-float') && $('chat-float').dataset.state === 'fab') openChatFloat(false);
   var convo = ensureConvo();
   var text = (rawText != null ? rawText : $('input').value).trim();
   if (!opts.regen){
@@ -6401,7 +7029,7 @@ function applyTheme(){
   document.documentElement.style.setProperty('--acc-soft2', 'color-mix(in srgb, ' + S.settings.accent + ' 30%, transparent)');
   document.documentElement.style.setProperty('--fs', S.settings.fontSize + 'px');
   var meta = qs('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', t === 'light' ? '#f3f4f9' : '#0d0f14');
+  if (meta) meta.setAttribute('content', t === 'light' ? '#eef2ff' : '#12162a');
 }
 
 /* ============================ misc UI wiring ============================ */
@@ -6418,16 +7046,14 @@ function initShell(){
   $('sb-scrim').addEventListener('click', closeSidebarMobile);
   $('new-chat-btn').addEventListener('click', function(){
     var c = activeConvo();
-    if (c && !c.messages.length){ closeSidebarMobile(); $('input').focus(); return; }
-    createConvo(); closeSidebarMobile(); $('input').focus();
+    if (c && !c.messages.length){
+      openChatFloat(false); closeSidebarMobile(); $('input').focus(); return;
+    }
+    createConvo(); openChatFloat(false); closeSidebarMobile(); $('input').focus();
   });
   var brand = document.querySelector('.brand');
   if (brand) brand.style.cursor = 'pointer';
-  if (brand) brand.addEventListener('click', function(){
-    var c = activeConvo();
-    if (c && !c.messages.length){ renderChat(); closeSidebarMobile(); return; }
-    createConvo(); closeSidebarMobile();
-  });
+  if (brand) brand.addEventListener('click', function(){ goHomeDashboard(); });
   $('convo-search').addEventListener('input', renderSidebar);
   $('model-btn').addEventListener('click', function(e){
     e.stopPropagation();
@@ -6500,6 +7126,7 @@ function maybeAutoVoice(){
     wantVoice = /[?&#]voice/.test(location.search + location.hash);
   }
   if (!wantVoice) return false;
+  try { openChatFloat(false); } catch(e){}
   lsSet(LS_BOOT, true); /* skip the welcome tour when deep-linked */
   if (!voiceSupported()){
     toast('Voice mode is not available in this browser — it needs the Web Speech API (Chrome/Edge/Safari) or an OpenAI key for Whisper. You can still type below.', 'warn', 6000);
@@ -6540,6 +7167,7 @@ async function boot(){
   initVaultUi();
   initTasks();
   initScheduler();
+  initDashboardShell();
   if (!S.activeId) createConvo();
   else { renderSidebar(); renderChat(); }
   updateModelBtn();
@@ -6551,8 +7179,17 @@ async function boot(){
   updateSendBtn();
   updateConnectorsBtn();
   vaultSetStatus('idle', '');
+  setChatState('fab');
+  renderDashboard();
+  refreshDashboard({toast:false}).catch(function(){});
   bootVaultSync();
-  if (!maybeAutoVoice()) initWelcome();
+  // deep link ?chat=1 or ?voice=1 opens float
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('voice') === '1'){ openChatFloat(false); maybeAutoVoice(); }
+    else if (q.get('chat') === '1') openChatFloat(false);
+    else if (!maybeAutoVoice()) initWelcome();
+  } catch(e){ if (!maybeAutoVoice()) initWelcome(); }
   /* delegate code-copy buttons */
   $('chat').addEventListener('click', function(e){
     var b = e.target.closest('.cb-copy');
