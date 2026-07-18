@@ -34,4 +34,11 @@ The preferred local runtime is LM Studio with the tested `homebase-local`
 Qwen 3.5 9B 4-bit model. Its structured function calls can use Homebase tools;
 an optional scoped LM Studio token can also expose the installed Brave-search
 MCP, whose estimated per-search charge is included in the rolling ledger.
-LM Studio is bound to localhost with CORS and just-in-time model loading enabled.
+The verified setup requires a dedicated restricted token, denies arbitrary
+remote MCP servers, permits only installed `mcp.json` connectors, and is bound
+to localhost with CORS and just-in-time model loading enabled. One live Brave
+search succeeded through local Qwen and recorded a $0.005 rolling estimate
+without using a paid cloud language model. For responsiveness, installed Qwen
+3.5 4B handles short no-tool prompts; Qwen 3.5 9B remains the capable local/tool
+option, while balanced or tool-heavy work considers the cheapest adequate cloud
+route first unless local/offline use is requested.

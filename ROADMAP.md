@@ -25,7 +25,13 @@ copy work that pairs well with a Fable model) · **🧪 needs a spike/verify-on-
   use. Official cloud keys are pinned to their provider origins.
 - ✅ LM Studio is optimized for the 16 GB M1 Pro with Qwen 3.5 9B 4-bit,
   capability-aware local tool routing, a preferred `homebase-local` alias, and
-  an optional scoped Brave-search MCP path billed into the rolling estimate.
+  a scoped Brave-search MCP path billed into the rolling estimate. The live
+  setup now requires authentication, retains only the restricted Homebase
+  token, denies arbitrary remote MCPs, allows installed `mcp.json` connectors,
+  and has passed a one-search local-Qwen test at an estimated $0.005 with no
+  paid cloud-model call. Qwen 3.5 4B is the fast short-prompt path; 9B remains
+  the capable local/tool path, with balanced or tool-heavy work considering the
+  cheapest adequate cloud route first to avoid multi-minute local tool loops.
 - Next: reconcile the local estimate with provider billing exports when a safe,
   provider-neutral read-only API path is available; keep provider-side limits as
   the authoritative backstop.
