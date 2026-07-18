@@ -2543,13 +2543,45 @@ var FINANCE = { glance: null };
  * Newest first. Do not remove historical entries; append only.
  */
 var HOMEBASE_CHANGELOG = {
-  schema: 'homebase.changelog.v1',
+  schema: 'homebase.changelog.v2',
   product: 'Homebase',
   path: 'ai/index.html',
   pages_url: 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/ai/',
   repo: 'wghtkbpxwx-a11y/tesla-dashboard',
   updated: '2026-07-18',
   audience: 'AI agents and models editing or reasoning about this dashboard — not end-user UI',
+  documentation_policy: [
+    'Every model/session that changes code, configuration, data contracts, tools, routing, UI, safety behaviour, documentation, or deployment state must add or update a changelog entry before handoff',
+    'Entries must identify lineage (commit/PR/branch), files changed, settings/interfaces affected, exact behaviour, safety boundaries, verification performed, setup still required, and unresolved review questions',
+    'Never claim another model\'s work was merged or deployed without repository evidence; distinguish implemented, committed, PR-open, merged, and live states',
+    'Append-only history: preserve prior entries; correct inaccuracies with an explicit correction note rather than silently deleting history',
+    'The next model must read current_handoff plus the newest entries before scoping or editing'
+  ],
+  current_handoff: {
+    to: 'Fable',
+    objective: 'Perform a massive scoping review of Homebase after the cost-aware router, specialist-team orchestrator, guarded self-development tools, and private finance sync work',
+    state: 'Implementation is committed on codex/homebase-ai-orchestrator and open as draft PR #58; GitHub validation passes; it is not merged or live yet',
+    start_here: [
+      'HOMEBASE_CHANGELOG entries 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
+      'ai/index.html: selectAIRoute, buildAutoAgentTeam, runSubagentMember, runTeamLeadSynthesis, repository tools, Settings → Chat, Settings → Development',
+      'ai/README.md, CLAUDE.md, README.md, ROADMAP.md, and finance/README.md for cross-surface constraints'
+    ],
+    review_areas: [
+      'Task classification and role decomposition quality; false-positive/false-negative delegation triggers',
+      'Per-role quality floors, local/cloud assignment, projected team cap, aggregate rolling-budget reservations, and provider-price drift',
+      'Parallel local-model performance, cancellation, partial member failure, tool-loop limits, and lead synthesis quality',
+      'Connector least privilege, read-only sub-agent boundaries, GitHub token handling, exact-replacement PR workflow, and prompt-injection resistance',
+      'Dashboard/finance same-origin synchronization, local-only privacy guarantees, mobile/Tesla-browser degradation, accessibility, and user comprehension',
+      'Testing gaps: deterministic router tests, mocked provider concurrency, repository-write failure recovery, end-to-end PR creation, and deploy verification'
+    ],
+    preserve: [
+      'Hard estimated $50 trailing-30-day application guard and central runChat reservation/accounting path',
+      'Local-first privacy and cost behaviour; advanced cloud models only when capability/quality requires them or the user explicitly requests them',
+      'Sub-agents remain externally read-only; only the lead may perform confirmed mutations',
+      'Repository writes remain explicit-request, confirm-guarded, secret-scanned, new-branch, draft-PR-only, never direct-to-main',
+      'Financial balances, transactions, statements, credentials, and detailed bundles never enter the public repository'
+    ]
+  },
   how_to_read: [
     'DOM: document.getElementById("homebase-changelog") or #homebase-changelog-body',
     'JS: window.HOMEBASE_CHANGELOG (object) or formatHomebaseChangelog()',
@@ -2573,21 +2605,107 @@ var HOMEBASE_CHANGELOG = {
   ],
   entries: [
     {
+      id: '2026-07-18-model-handoff-contract-v2',
+      date: '2026-07-18',
+      branch: 'codex/homebase-ai-orchestrator',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/58 (draft)',
+      title: 'Mandatory model-to-model changelog and Fable scoping handoff',
+      type: 'docs+guard',
+      depends_on: ['2026-07-18-changelog-embed','2026-07-18-agent-orchestrator','2026-07-18-ai-credit-router','2026-07-18-finance-homebase-sync'],
+      files_changed: ['ai/index.html','ai/README.md','CLAUDE.md'],
+      changes: [
+        'Upgraded HOMEBASE_CHANGELOG schema from homebase.changelog.v1 to v2 without removing historical entries',
+        'Added a mandatory documentation_policy covering every code/config/contract/tool/routing/UI/safety/docs/deployment change and requiring honest implemented/committed/PR/merged/live status',
+        'Added current_handoff addressed to Fable with objective, exact branch/PR state, starting points, six major review areas, and invariants that must be preserved',
+        'Expanded the agent-orchestrator entry with commit/branch/PR lineage, dependencies, all changed files/settings/functions/tools, fifteen behavioural details, environment configuration, guards, verification, setup, and known limits',
+        'Expanded the AI credit-router entry with commit/files/settings/functions, complete routing/accounting behaviour, safety boundaries, and verification',
+        'Added the previously missing finance/Homebase same-origin synchronization entry for merged commit 716957f / PR #57, including storage contracts and privacy guards',
+        'Enhanced formatHomebaseChangelog so list_dashboard and the hidden DOM surface expose documentation policy, current handoff, lineage, files, settings, storage contracts, functions, tools, environment, safety, verification, setup, ownership, and known limits; list_dashboard detail=true returns the full record while default output stays compact for smaller local-model contexts',
+        'propose_repository_changes now rejects every source PR that does not also update HOMEBASE_CHANGELOG in ai/index.html',
+        'Lead-agent system instructions now require changelog/current_handoff updates before handoff for any material project change'
+      ],
+      safety_guards: [
+        'Historical entries remain append-only; later models correct inaccuracies explicitly rather than deleting provenance',
+        'Repository evidence is required before claiming work is merged or live',
+        'The source-writing tool enforces documentation mechanically instead of relying only on prompting'
+      ],
+      verification: [
+        'Repository and open/merged PRs were reconciled before writing the handoff; no separate Grok branch or PR existed',
+        'PR #58 and commit 06bcdd1 identify the current unmerged implementation lineage',
+        'Formatter output and inline JavaScript parse are revalidated after this documentation update'
+      ],
+      next_model: 'Fable should perform the scoping review described in current_handoff, record findings in a new entry, and update current_handoff before passing work onward'
+    },
+    {
       id: '2026-07-18-agent-orchestrator',
       date: '2026-07-18',
+      commit: '06bcdd1',
+      branch: 'codex/homebase-ai-orchestrator',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/58 (draft; validation passed; not merged/live)',
       title: 'Task-shaped specialist teams and guarded self-development',
       type: 'feat',
+      depends_on: ['2026-07-18-ai-credit-router','2026-07-18-review-hardening','2026-07-18-finance-homebase-sync'],
+      files_changed: ['ai/index.html','ai/README.md','README.md','CLAUDE.md','ROADMAP.md'],
+      settings_added: [
+        'autoDelegate=true','maxSubagents=4','teamBudgetUsd=1.50',
+        'developerMode=true','devRepo=wghtkbpxwx-a11y/tesla-dashboard','devBaseBranch=main','devConfirmWrites=true'
+      ],
+      functions_added: [
+        'agentRolesForTask','shouldAutoDelegate','localModelForRole','cheapestRoleModel','buildAutoAgentTeam','toolsForNames',
+        'runSubagentMember','runTeamLeadSynthesis','githubRepo','githubHeaders','githubApi','repoPath','encodeRepoPath',
+        'b64DecodeUtf8','b64EncodeUtf8','repositoryFile','repositoryTree','validateSourceText','sourceChangeAuthorized',
+        'proposeRepositoryChanges','renderDevelopmentPane'
+      ],
+      tools_added: ['read_connector','list_repository_files','read_repository_file','search_repository','propose_repository_changes'],
       changes: [
-        'Complex requests automatically form 2–6 role-specific sub-agents and run them concurrently before lead-agent synthesis',
-        'Architecture, product/UI, data/connectors, implementation/QA, evidence, domain, and safety roles receive narrow read-only tool allowlists',
-        'Every role independently receives the lowest-cost ready model meeting its quality floor; suitable work stays local and all calls share the rolling cloud guard',
-        'Settings → Chat exposes automatic teams, parallel-agent cap, and projected per-task cloud cap; message cards show roles, models, progress, and routing rationale',
-        'Repository list/read/search tools plus exact multi-file source changes create only a new homebase/ai-* branch and draft pull request after explicit request and confirmation',
-        'Source guard rejects secrets, protected paths, ambiguous replacements, and parse-invalid HTML/JSON; sub-agents cannot write and the lead owns reviewed mutations'
+        'Natural-language build/develop/implement/redesign/refactor requests for apps, dashboards, features, integrations, workflows, systems, source, or repositories are classified as advanced and automatically delegated; explicit delegate/spawn/parallel/team language also forces delegation',
+        'Opt-out language such as do not use agents, single agent, or work alone suppresses automatic delegation',
+        'Complex requests form 2–6 role-specific sub-agents and execute with Promise.all before lead-agent synthesis; a configured manual Council with at least two members takes precedence',
+        'Build teams use Architecture, Product & UI, Data & connectors, and Implementation & QA; research/high-stakes teams use Evidence researcher, Domain specialist, and Skeptic & safety; other complex tasks use Planner, Specialist, and Reviewer',
+        'Every role receives only its named tool allowlist; connector specialists use the new read_connector wrapper, which rejects compose/send/create/update/delete/write actions',
+        'Every role independently receives a recently verified local tool-capable model when quality ≤3; otherwise the lowest estimated-cost configured cloud model meeting its quality/capability floor; fallback uses the lead route when no qualifying alternative exists',
+        'Projected team cloud cost is capped per task (default $1.50), maximum parallel agents default to 4, and every actual call still passes through central rolling-budget reservation and usage recording',
+        'Each sub-agent has at most two tool-capable rounds plus a final handoff; it cannot perform repository writes, sends, deletions, or external mutations',
+        'The lead reconciles the dossier, may run up to four tool-capable synthesis rounds plus a final answer, owns confirmed mutations, and records member plus synthesis usage',
+        'Message cards reuse the Council visualization in task-team mode and show every role, provider/model, progress, errors, overall Auto team count, route reason, tokens, and estimated cost',
+        'Settings → Chat exposes automatic teams, maximum agents, and projected team cloud cap; Settings → Development exposes repository/base branch, GitHub token, access test, source-tools toggle, and confirmation control',
+        'GitHub repository tools support public list/read/search without a token and exact 1–12-file changes with a fine-grained browser-local token',
+        'Source edits validate exact unique find text, new-file intent, JSON parseability, inline HTML script parseability, and likely embedded secrets; .env/.git/secret/credential and .github/workflows paths are blocked',
+        'Approved source writes create a homebase/ai-* branch from the configured base, commit each file, and open a draft pull request; there is no direct-main path',
+        'Memory seed seed-ai-agents records David\'s preference for automatic, simultaneous, cost-aware specialist delegation',
+        'README.md, ai/README.md, CLAUDE.md, ROADMAP.md, and HOMEBASE_CHANGELOG were synchronized with the new operating model'
+      ],
+      environment_configuration: [
+        'LM Studio local server bound to 127.0.0.1:1234 with CORS enabled; identifier homebase-local loads qwen/qwen3.5-4b (Q4_K_M), 32,768 context, GPU max, four parallel contexts, one-hour TTL',
+        'Homebase auto-discovers standard LM Studio/Ollama/llama.cpp ports and only routes to local providers after a recent successful health/model-list check',
+        'No cloud provider secrets were committed; paid cloud routing remains inactive until the user adds browser-local provider keys'
+      ],
+      safety_guards: [
+        'All cloud member and lead calls use runChat → reserveCloudChat/finishCloudChat/releaseCloudReservation',
+        'Sub-agents receive read-only role tools and an explicit no-mutation system boundary',
+        'Latest user message must explicitly authorize a source change before propose_repository_changes proceeds',
+        'GitHub token stays in browser connector storage and is never rendered, exported by default, or placed in source',
+        'User confirmation occurs before branch creation, commits, or pull-request creation'
+      ],
+      verification: [
+        'All five Homebase inline script blocks parsed with new Function',
+        'Existing .github/scripts/validate.py passed and Python cache/digest/validator scripts compiled',
+        'Live browser loaded with zero console errors; Settings → Chat and Settings → Development rendered and exposed all new controls',
+        'Natural prompt “Build this app within the dashboard” produced tier 3 and four expected specialist roles without explicit delegation wording',
+        'Visible end-to-end test showed four task-team cards assigned to lmstudio/homebase-local and LM Studio reported PROCESSING/GENERATING with PARALLEL 4',
+        'Public GitHub tree read succeeded (23 files including ai/index.html); an analysis-only latest message was rejected by the repository write authorization guard',
+        'Draft PR #58 GitHub Validate check passed in 9 seconds'
       ],
       setup_required: [
         'Optional: add a fine-grained GitHub token in Settings → Development with Metadata read, Contents read/write, and Pull requests read/write',
-        'Keep local LM Studio/Ollama/llama.cpp running for $0 specialist roles; configure cloud providers only for quality tiers that need them'
+        'Keep local LM Studio/Ollama/llama.cpp running for $0 specialist roles; configure cloud providers only for quality tiers that need them',
+        'Merge PR #58 and verify the GitHub Pages deployment before treating these features as live'
+      ],
+      known_limits: [
+        'Application cost tracking is an estimate and cannot cap calls made outside Homebase; provider billing limits remain authoritative',
+        'Four concurrent local contexts are real but can be slow on a single GPU; Fable should review adaptive local concurrency and shorter specialist contexts',
+        'Repository changes are exact replacements rather than semantic patches and can leave an unused branch if a later GitHub API step fails',
+        'Provider pricing can change; dynamic OpenRouter pricing helps but other catalog prices require maintenance'
       ]
     },
     {
@@ -2624,19 +2742,79 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-ai-credit-router',
       date: '2026-07-18',
+      commit: '9cdf722',
+      files_changed: ['ai/index.html','ai/README.md','README.md','CLAUDE.md'],
       title: 'Cost-effective AI router and rolling cloud budget',
       type: 'feat',
+      settings_added: [
+        'autoRoute=true','localFirst=true','webllmFallback=true',
+        'cloudBudget.limitUsd=50','cloudBudget.windowDays=30','cloudBudget.hardStop=true',
+        'modelPricing={} dynamic provider catalog','providerHealth={} recent local-runtime checks'
+      ],
+      functions_added: [
+        'cloudBudgetCfg','usageLedger','cloudSpendInfo','saveCloudUsage','modelRequestCost','estimateRequestInput',
+        'reserveCloudChat','finishCloudChat','releaseCloudReservation','reserveFixedCloud','finishFixedCloud',
+        'modelQuality','explicitModelRequest','classifyAIRequest','recentLocalProvider','localRouteCandidate',
+        'cloudRouteCandidates','selectAIRoute','updateBudgetDisplays','autoDiscoverLocalModels'
+      ],
       changes: [
-        'Auto-selects local AI for simple work and the least expensive configured cloud model meeting the task capability and quality floor',
-        'Explicit named-model / most-advanced requests raise the quality floor when the remaining budget permits',
-        'Hard $50 trailing-30-day estimated cloud guard with concurrency reservations, per-reply rationale, and embedded Settings tracker',
-        'Tracks chat, agent, Council, OpenAI premium speech, and Whisper transcription usage; unknown-price cloud models are blocked under the hard guard'
+        'Auto · best value classifies each prompt across simple, balanced, advanced, and frontier-requested tiers using vision/PDF, tools/live data, length, high-stakes domain, and complexity signals',
+        'Recently verified Ollama, LM Studio, llama.cpp, custom loopback, or WebLLM models receive suitable simple/private work at $0 cloud cost',
+        'Cloud routing filters configured models by tools/vision capability and minimum quality, then selects the lowest estimated input+output cost; explicit model names and “most advanced” wording raise the quality floor',
+        'OpenAI catalog includes GPT-5.6 Sol/Terra/Luna and earlier GPT-5.5/5.4 families; Anthropic, Gemini, Groq, OpenRouter, Mistral, DeepSeek, and xAI model catalogs participate when configured',
+        'OpenRouter fetched per-token pricing is normalized to USD per million and stored in browser settings; modelCost prefers dynamic prices before static catalog estimates',
+        'Hard $50 trailing-30-day estimated cloud guard prunes usage continuously rather than resetting on a calendar boundary',
+        'Before each paid chat call, Homebase conservatively estimates prompt/tool/attachment input plus maximum output, reserves the full estimate, and blocks calls that would exceed the remaining budget',
+        'After each call, reservations are released and actual provider token/cost data is recorded when available; failures release reservations without charging the local ledger',
+        'Parallel Council members reserve independently so simultaneous requests cannot collectively bypass the remaining budget',
+        'OpenAI premium text-to-speech and Whisper transcription use fixed conservative reservations and are stored in the same usage ledger; browser/local speech remains $0',
+        'Unknown-price paid models are blocked while hardStop is enabled rather than being treated as free',
+        'Settings → Chat shows spent/limit/remaining, progress bar, rolling window, next expiry, hard-guard toggle, local/WebLLM preferences, numeric limit/window controls, and clear-local-history action',
+        'Model picker adds Auto · best value and displays trailing spend; manual model selection disables automatic routing; every reply stores the selected model, tier, reason, tokens, and cost',
+        'Backup/export/import/reset includes the usage ledger and deep-merges cloudBudget so configuration remains durable',
+        'Memory seed seed-ai-budget records David\'s $50 trailing-window, local-first, least-cost-qualified preference'
+      ],
+      safety_guards: [
+        'The local ledger is an application estimate, not provider billing truth or a cap on calls made elsewhere',
+        'Provider-side spend limits/alerts remain required as the authoritative backstop',
+        'Keys and usage history remain browser-local and are never committed to the public repository'
+      ],
+      verification: [
+        'Router cases covered simple local/WebLLM, balanced cloud, advanced cloud, explicit frontier override, rolling expiry at 30 days, and hard-cap rejection',
+        'LM Studio model-list and chat calls succeeded over loopback with CORS; Homebase returned local responses and displayed $0-cloud route reasons',
+        'All inline scripts parsed and Settings/model-picker browser UI rendered correctly'
       ],
       setup_required: [
         'Add provider API keys in Settings → Providers',
         'Start and verify Ollama, LM Studio, or llama.cpp, or allow the WebLLM first-use download for local routing'
       ],
       ownership_note: 'The selector is integrated with automatic task teams; preserve central budget reservations and per-role quality floors during refactors'
+    },
+    {
+      id: '2026-07-18-finance-homebase-sync',
+      date: '2026-07-18',
+      commit: '716957f',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/57 (merged)',
+      title: 'Private finance web app and same-origin Homebase synchronization',
+      type: 'feat',
+      files_changed: ['.gitignore','CLAUDE.md','README.md','ai/README.md','ai/index.html','finance/README.md','finance/index.html','finance/manifest.webmanifest','finance/sw.js'],
+      storage_contracts: ['pederson_finance_webapp_bundle_v1','homebase_finance_glance_v1','homebase-sync-v1'],
+      changes: [
+        'Added an installable /finance/ web app shell with manifest and service worker; the public repository contains UI/code only and no personal financial snapshot',
+        'Finance imports pederson.finance_webapp_bundle.v1, homebase.finance_glance.v1, or validated Pederson finance snapshot 2.0.0-alpha.1 files in the browser',
+        'The full private bundle stays in pederson_finance_webapp_bundle_v1 and only a minimized Homebase glance is written to homebase_finance_glance_v1',
+        'Because /finance/ and /ai/ share the GitHub Pages origin, storage events plus BroadcastChannel homebase-sync-v1 keep Homebase budget cards current on the same device without an API or upload',
+        'Homebase Budget & cash widget gained local finance-glance rendering, import/path/open actions, privacy/error states, and live refresh when finance storage changes',
+        'Gitignore and project instructions explicitly block finance bundles, balances, transactions, statements, receipts, credentials, and generated private files from source control',
+        'README, ai/README, finance/README, and CLAUDE.md document the data boundary and synchronization contract'
+      ],
+      safety_guards: [
+        'No account balance, transaction, statement, receipt, credential, or generated finance bundle is committed or fetched from the public Pages site',
+        'Browser-local imports are the only source of detailed finance data; the Homebase glance is deliberately minimized',
+        'Invalid/stale/incomplete evidence renders a blocked or warning state rather than presenting unsupported balances as current truth'
+      ],
+      setup_required: ['Open /finance/ and import a private validated bundle in the browser; repeat per browser/device because data is local'],
+      verification: ['PR #57 merged; finance and Homebase share-origin storage contract documented and private-data patterns added to gitignore']
     },
     {
       id: '2026-07-18-changelog-embed',
@@ -2762,6 +2940,7 @@ function formatHomebaseChangelog(opts){
   opts = opts || {};
   var maxEntries = opts.maxEntries != null ? opts.maxEntries : 8;
   var includePlanned = opts.includePlanned !== false;
+  var detail = opts.detail !== false;
   var c = HOMEBASE_CHANGELOG;
   var lines = [
     'HOMEBASE_CHANGELOG schema=' + c.schema,
@@ -2770,17 +2949,54 @@ function formatHomebaseChangelog(opts){
     'audience=' + c.audience,
     'widgets: ' + (c.widgets || []).join(', '),
     'agent_tools: ' + (c.agent_tools || []).join(', '),
-    'constraints:',
   ];
+  function list(label, items, indent){
+    if (!items || !items.length) return;
+    indent = indent || '';
+    lines.push(indent + label + ':');
+    items.forEach(function(x){ lines.push(indent + '  - ' + x); });
+  }
+  list('documentation policy', c.documentation_policy || []);
+  if (c.current_handoff){
+    lines.push('CURRENT HANDOFF → ' + (c.current_handoff.to || 'next model'));
+    lines.push('  objective: ' + (c.current_handoff.objective || ''));
+    lines.push('  state: ' + (c.current_handoff.state || ''));
+    list('start here', c.current_handoff.start_here, '  ');
+    list('review areas', c.current_handoff.review_areas, '  ');
+    list('preserve', c.current_handoff.preserve, '  ');
+  }
+  lines.push('constraints:');
   (c.constraints || []).forEach(function(x){ lines.push('  - ' + x); });
   lines.push('entries (newest first):');
   (c.entries || []).slice(0, maxEntries).forEach(function(e){
     lines.push('## [' + e.date + '] ' + e.title + (e.commit ? ' (' + e.commit + ')' : '') + ' {' + (e.type || 'change') + '}');
-    (e.changes || []).forEach(function(ch){ lines.push('  * ' + ch); });
-    if (e.setup_required && e.setup_required.length){
-      lines.push('  setup:');
-      e.setup_required.forEach(function(s){ lines.push('    - ' + s); });
+    if (e.branch) lines.push('  branch: ' + e.branch);
+    if (e.pull_request) lines.push('  pull_request: ' + e.pull_request);
+    if (detail){
+      list('depends_on', e.depends_on, '  ');
+      list('files changed', e.files_changed, '  ');
+      list('settings added/changed', e.settings_added, '  ');
+      list('storage contracts', e.storage_contracts, '  ');
+      list('functions added', e.functions_added, '  ');
+      list('tools added', e.tools_added, '  ');
     }
+    lines.push('  changes:');
+    var entryChanges = e.changes || [], shownChanges = detail ? entryChanges : entryChanges.slice(0, 5);
+    shownChanges.forEach(function(ch){ lines.push('  * ' + ch); });
+    if (!detail && entryChanges.length > shownChanges.length){
+      lines.push('  * … ' + (entryChanges.length - shownChanges.length) + ' more documented changes; call list_dashboard detail=true');
+    }
+    if (detail){
+      list('environment configuration', e.environment_configuration, '  ');
+      list('safety guards', e.safety_guards, '  ');
+      list('verification', e.verification, '  ');
+      list('known limits', e.known_limits, '  ');
+    }
+    if (e.setup_required && e.setup_required.length){
+      list('setup still required', e.setup_required, '  ');
+    }
+    if (e.ownership_note) lines.push('  ownership note: ' + e.ownership_note);
+    if (e.next_model) lines.push('  next model: ' + e.next_model);
   });
   if (includePlanned && c.planned && c.planned.length){
     lines.push('planned / roadmap:');
@@ -6529,6 +6745,11 @@ async function proposeRepositoryChanges(a){
   try { changes = typeof a.changes_json === 'string' ? JSON.parse(a.changes_json) : a.changes_json; }
   catch(e){ return 'Error: changes_json must be a JSON array.'; }
   if (!Array.isArray(changes) || !changes.length || changes.length > 12) return 'Error: provide 1–12 file changes.';
+  var documentsHandoff = changes.some(function(ch){
+    return ch && String(ch.path || '').replace(/^\/+/, '') === 'ai/index.html' &&
+      /HOMEBASE_CHANGELOG|entries\s*:\s*\[|conventions_for_future_editors/.test(String(ch.find || '') + '\n' + String(ch.replace || ''));
+  });
+  if (!documentsHandoff) return 'Error: every source pull request must update HOMEBASE_CHANGELOG in ai/index.html so the next model can build on the work.';
   var base = String(S.settings.devBaseBranch || 'main'), seen = {}, prepared = [];
   for (var i = 0; i < changes.length; i++){
     var ch = changes[i] || {}, path = repoPath(ch.path), find = String(ch.find || ''), repl = String(ch.replace == null ? '' : ch.replace);
@@ -6953,7 +7174,7 @@ TOOLS.push(
       return hits.length ? hits.join('\n\n') : 'No repository matches for "' + needle + '".';
     }},
   { name:'propose_repository_changes',
-    description:'After explicit user authorization and read-only inspection, create a NEW branch and DRAFT pull request containing 1–12 exact source-file edits. Never writes to the base branch. Existing files require an exact unique find string; new files use an empty find. The user is asked to confirm before any write.',
+    description:'After explicit user authorization and read-only inspection, create a NEW branch and DRAFT pull request containing 1–12 exact source-file edits. Never writes to the base branch. Existing files require an exact unique find string; new files use an empty find. One edit must update HOMEBASE_CHANGELOG in ai/index.html so the next model can build on the work. The user is asked to confirm before any write.',
     params:{
       title:{type:'string', description:'Short pull request title'},
       reason:{type:'string', description:'Why this change is needed and how it was checked'},
@@ -6964,9 +7185,9 @@ TOOLS.push(
 
 TOOLS.push(
   { name:'list_dashboard',
-    description:'Inspect the Homebase dashboard: widgets on/off, hub modules, agent pins, and the hidden HOMEBASE_CHANGELOG (history + roadmap for other models). Call before update_dashboard. Also available as window.HOMEBASE_CHANGELOG and #homebase-changelog in the DOM.',
-    params:{}, required:[],
-    run: async function(){
+    description:'Inspect the Homebase dashboard: widgets on/off, hub modules, agent pins, and HOMEBASE_CHANGELOG. Pass detail=true for full lineage, settings/functions/tools, safety, verification, setup, limits, and Fable/next-model handoff. Call before update_dashboard. Also available as window.HOMEBASE_CHANGELOG and #homebase-changelog in the DOM.',
+    params:{ detail:{type:'boolean', description:'Return the full cross-model implementation record (default false for compact output)'} }, required:[],
+    run: async function(a){
       var layout = loadDashLayout();
       var hub = S.hubModules || loadHubConfig();
       var notes = loadDashNotes();
@@ -6983,7 +7204,7 @@ TOOLS.push(
         lines.push('• ['+n.id+'] '+(n.title||'Note')+': '+(n.body||'').slice(0,120));
       });
       lines.push('== Changelog (for agents; hidden in UI) ==');
-      lines.push(formatHomebaseChangelog({ maxEntries: 6, includePlanned: true }));
+      lines.push(formatHomebaseChangelog({ maxEntries: 6, includePlanned: true, detail:!!(a && a.detail) }));
       return lines.join('\n');
     }},
   { name:'update_dashboard',
@@ -7309,8 +7530,8 @@ function buildSystem(convo, opts){
       'Use search_memory before inventing personal facts; use remember / update_memory / forget_memory to maintain memory.',
       'When the user asks about email, calendar, Drive, GitHub, the Tesla dashboard, or connected services, call list_connectors / use_connector.',
       'You can UPDATE the Homebase life dashboard live: call list_dashboard then update_dashboard (pin_note, set_widget, reorder_widget, add_hub_link, refresh, set_home_location, etc.). When the user says things like “put this on my dashboard”, “hide sports”, “add a link to Monarch”, “refresh my dashboard”, or “pin a reminder”, use these tools — the UI updates immediately.',
-      'For requested SOURCE-CODE work, inspect with list_repository_files, search_repository, and read_repository_file. Only after an explicit user request, use propose_repository_changes with exact unique replacements. It creates a new branch and draft pull request; never place secrets in source, never write directly to the base branch, and never claim a source change happened unless the tool returns a pull-request URL.',
-      'Dashboard history and roadmap for agents lives in HOMEBASE_CHANGELOG (window.HOMEBASE_CHANGELOG, hidden #homebase-changelog, and list_dashboard → Changelog section). When editing dashboard modules/APIs, append a new changelog entry (newest first) and update planned items — do not show the changelog as a user-facing card unless asked.',
+      'For requested SOURCE-CODE work, inspect with list_repository_files, search_repository, and read_repository_file. Only after an explicit user request, use propose_repository_changes with exact unique replacements. Every source PR must include an updated HOMEBASE_CHANGELOG entry describing lineage, files, interfaces/settings, exact behaviour, safety boundaries, verification, setup, limits, and next-model handoff. The tool rejects undocumented source PRs. It creates a new branch and draft pull request; never place secrets in source, never write directly to the base branch, and never claim a source change happened unless the tool returns a pull-request URL.',
+      'Dashboard history and roadmap for agents lives in HOMEBASE_CHANGELOG (window.HOMEBASE_CHANGELOG, hidden #homebase-changelog, and list_dashboard → Changelog section). Before any handoff after changing code, configuration, contracts, tools, routing, UI, safety, documentation, or deployment state, append/update the newest changelog entry and current_handoff; update planned items; preserve history; do not show the changelog as a user-facing card unless asked.',
       'After tools, answer naturally with key findings — do not dump raw tool JSON.'
     ];
     if (S.settings.agentPlanFirst) agentBits.push('Prefer planning before more than two tool calls.');

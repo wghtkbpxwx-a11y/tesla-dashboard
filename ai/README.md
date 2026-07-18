@@ -111,6 +111,22 @@ cloud model instead of assuming the local server is alive.
 
 Machine-readable history for other models lives in **`HOMEBASE_CHANGELOG`** inside `ai/index.html` (also `#homebase-changelog` in the DOM, hidden from the UI, and returned by the **`list_dashboard`** tool). When you change the dashboard, **append** a new entry (newest first) and refresh `planned[]`.
 
+This is the mandatory model-to-model handoff contract, not a release-note
+summary. Before handing work to another model, document every material code,
+configuration, contract, tool, routing, UI, safety, documentation, and
+deployment change. Each entry must include repository lineage, files and
+interfaces affected, exact behaviour, safety boundaries, verification, setup
+still required, known limits, and the next-model handoff. Keep status precise:
+implemented, committed, PR open, merged, and deployed/live are different states.
+
+`current_handoff` identifies the next reviewer and the invariants/open questions
+they need. Historical entries are append-only. Correct an inaccurate prior note
+with an explicit correction rather than deleting provenance. The guarded
+`propose_repository_changes` tool rejects source pull requests that do not also
+update `HOMEBASE_CHANGELOG` in `ai/index.html`. Agents can call
+`list_dashboard detail=true` for the full implementation record; the default
+response is compact so smaller local models do not waste their context window.
+
 ## Live dashboard modules
 
 Refresh (top-right) pulls **Tesla Dashboard hourly cache** plus **browser live APIs**:

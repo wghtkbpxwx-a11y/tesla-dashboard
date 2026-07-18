@@ -206,6 +206,24 @@ They reject secrets, protected paths (including `.github/workflows`), ambiguous
 replacements, and parse-invalid HTML/JSON. Never weaken these guards or add a
 direct-to-main write path. GitHub setup lives in Settings → Development; tokens
 remain browser-local in connector storage.
+
+## Mandatory Homebase model handoff
+
+`HOMEBASE_CHANGELOG` in `ai/index.html` is the canonical cross-model work log.
+Every model/session must read `current_handoff` and the newest entries before
+scoping or editing. Before handing off any material code, configuration,
+contract, tool, routing, UI, safety, documentation, or deployment change:
+
+1. append or update the newest changelog entry;
+2. record commit/branch/PR and honest implementation/merge/live state;
+3. list files, settings/interfaces, exact behaviour, guards, verification,
+   setup, known limits, and dependencies;
+4. update `current_handoff` for the next model; and
+5. preserve prior entries, correcting inaccuracies explicitly instead of
+   deleting history.
+
+The guarded repository writer enforces an `ai/index.html` changelog edit in
+every source PR. Do not bypass that requirement.
 Dashboard More→Apps has "✦ Nova AI" / "🎙️ Nova Voice" `data-href` submenu
 buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
 Nova uses `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
