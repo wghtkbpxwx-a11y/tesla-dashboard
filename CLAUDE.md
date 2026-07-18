@@ -185,8 +185,9 @@ Perplexity/Kimi/DeepInfra/Mistral/DeepSeek/xAI, OpenRouter fallback,
 Ollama/LM Studio/llama.cpp/WebLLM + demo),
 voice mode (`ai/?voice=1` deep link), agent tools, memory, scheduled tasks.
 All credential fields must update `S.keys` on `input` for immediate tests and
-requests, while retaining the `change` handler for `saveKeys()` persistence;
-do not reintroduce provider-specific stale-key behaviour.
+requests, call the debounced `persistKeys()` so nonstandard input paths survive
+reloads, and retain the `change` handler for an immediate final `saveKeys()`;
+do not reintroduce provider-specific stale-key or change-only persistence.
 Chat defaults to a capability-gated, cost-effective auto router: verified local
 models/WebLLM for simple requests; the cheapest configured direct cloud model
 meeting the task quality floor for harder requests; OpenRouter only after
