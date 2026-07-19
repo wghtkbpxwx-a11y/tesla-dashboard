@@ -44,7 +44,7 @@ requires it. Do not begin with a broad visual redesign.
 
 ## Already verified — do not repeat without contradictory evidence
 
-- PRs #58–#75 are merged; their Pages deployments and validation checks passed.
+- PRs #58–#76 are merged; their Pages deployments and validation checks passed.
 - JavaScript parsing, embedded cache validity, and Python compilation pass through
   `.github/scripts/validate.py`.
 - Mobile Settings was verified at 320×700 and 390×844; desktop at 1280×900. All
