@@ -5724,6 +5724,56 @@ async function vaultDeriveKey(passphrase, saltU8){
   );
 }
 
+/* ---- deletion tombstones (cross-device) ----
+   Without these, an item deleted on one device is resurrected by the id-union
+   vault merge because the other device still carries it. Tombstones record
+   only {id, ts} (never the deleted text), sync inside the encrypted payload,
+   and are garbage-collected after 90 days. Old app versions simply ignore the
+   extra payload key, so mixed-version devices stay safe (their copy of a
+   deleted item is filtered out the next time an updated device merges). */
+var LS_TOMBSTONES = 'nova_vault_tombstones_v1';
+var TOMBSTONE_TTL_MS = 90 * 86400000;
+function loadTombstones(){
+  var t = lsGet(LS_TOMBSTONES, null);
+  if (!t || typeof t !== 'object') t = {};
+  return { memory: Array.isArray(t.memory) ? t.memory : [], tasks: Array.isArray(t.tasks) ? t.tasks : [] };
+}
+function saveTombstones(t){ lsSet(LS_TOMBSTONES, t); }
+function addTombstones(section, ids){
+  ids = (ids || []).filter(Boolean);
+  if (!ids.length) return;
+  var t = loadTombstones(), now = Date.now();
+  ids.forEach(function(id){
+    var hit = t[section].find(function(x){ return x.id === id; });
+    if (hit) hit.ts = now;
+    else t[section].push({id:id, ts:now});
+  });
+  saveTombstones(t);
+}
+function mergeTombstoneLists(a, b){
+  var out = {}, cutoff = Date.now() - TOMBSTONE_TTL_MS;
+  (a || []).concat(b || []).forEach(function(x){
+    if (!x || !x.id || !(+x.ts > cutoff)) return;
+    if (!out[x.id] || +x.ts > +out[x.id].ts) out[x.id] = {id:x.id, ts:+x.ts};
+  });
+  return Object.keys(out).map(function(id){ return out[id]; });
+}
+function vaultItemTime(item){
+  if (!item) return 0;
+  return Math.max(+item.updatedTs || 0, +item.ts || 0, +item.updatedAt || 0, +item.createdAt || 0);
+}
+/* Drop items covered by a tombstone at least as new as the item itself —
+   an item edited AFTER its deletion elsewhere survives (edit beats delete). */
+function applyTombstoneFilter(list, tombs){
+  if (!Array.isArray(list) || !tombs || !tombs.length) return Array.isArray(list) ? list : [];
+  var map = {};
+  tombs.forEach(function(x){ if (x && x.id) map[x.id] = Math.max(+x.ts || 0, +map[x.id] || 0); });
+  return list.filter(function(item){
+    if (!item || !item.id || !map[item.id]) return true;
+    return vaultItemTime(item) > map[item.id];
+  });
+}
+
 function buildVaultPayload(){
   var meta = vaultSyncMeta(), now = Date.now();
   ['memory','tasks','connectors','keys','settings','cloudUsage'].forEach(function(section){
@@ -5740,6 +5790,7 @@ function buildVaultPayload(){
     label: 'David · Homebase vault',
     memory: S.memory || [],
     tasks: S.tasks || [],
+    tombstones: loadTombstones(),
     connectors: vaultConnectorSnapshot(includeSecrets),
     keys: includeSecrets ? (S.keys || {}) : {},
     settings: vaultSettingsSnapshot(),
@@ -5771,13 +5822,22 @@ function mergeVaultPayload(remote, local){
     var remoteNewer = vaultSectionTime(remote, section) > vaultSectionTime(local, section);
     var older = remoteNewer ? local[section] : remote[section];
     var newer = remoteNewer ? remote[section] : local[section];
-    if (section === 'memory' || section === 'tasks') merged[section] = vaultMergeItems(older, newer);
+    if (section === 'memory' || section === 'tasks'){
+      merged[section] = applyTombstoneFilter(
+        vaultMergeItems(older, newer),
+        mergeTombstoneLists((remote.tombstones || {})[section], (local.tombstones || {})[section])
+      );
+    }
     else if (section === 'connectors'){
       merged.connectors = Object.assign({}, older || {});
       Object.keys(newer || {}).forEach(function(id){ merged.connectors[id] = Object.assign({}, merged.connectors[id] || {}, newer[id] || {}); });
     } else merged[section] = Object.assign({}, older || {}, newer || {});
     merged.sectionUpdatedAt[section] = Math.max(vaultSectionTime(remote, section), vaultSectionTime(local, section));
   });
+  merged.tombstones = {
+    memory: mergeTombstoneLists((remote.tombstones || {}).memory, (local.tombstones || {}).memory),
+    tasks: mergeTombstoneLists((remote.tombstones || {}).tasks, (local.tombstones || {}).tasks)
+  };
   var usageClearedAt = Math.max(+((remote.sync || {}).usageClearedAt || 0), +((local.sync || {}).usageClearedAt || 0));
   merged.cloudUsage = vaultMergeItems(remote.cloudUsage || [], local.cloudUsage || []).filter(function(x){ return (+x.ts || 0) > usageClearedAt; }).sort(function(a,b){ return (+a.ts || 0) - (+b.ts || 0); }).slice(-3000);
   merged.sectionUpdatedAt.cloudUsage = Math.max(vaultSectionTime(remote, 'cloudUsage'), vaultSectionTime(local, 'cloudUsage'));
@@ -5834,12 +5894,18 @@ function applyVaultPayload(payload, opts){
   if (!payload || typeof payload !== 'object') throw new Error('Empty vault payload');
   VAULT.applying = true;
   try {
+  var localTombs = loadTombstones(), payloadTombs = payload.tombstones || {};
+  var tombs = {
+    memory: mergeTombstoneLists(localTombs.memory, payloadTombs.memory),
+    tasks: mergeTombstoneLists(localTombs.tasks, payloadTombs.tasks)
+  };
+  saveTombstones(tombs);
   if (Array.isArray(payload.memory)){
-    S.memory = payload.memory.map(normalizeMemoryItem).filter(Boolean);
+    S.memory = applyTombstoneFilter(payload.memory, tombs.memory).map(normalizeMemoryItem).filter(Boolean);
     saveMemoryRaw();
   }
   if (Array.isArray(payload.tasks) && (opts.includeTasks !== false)){
-    S.tasks = payload.tasks;
+    S.tasks = applyTombstoneFilter(payload.tasks, tombs.tasks);
     saveTasks();
   }
   if (payload.connectors && typeof payload.connectors === 'object'){
@@ -6899,7 +6965,8 @@ function reserveCloudChat(o){
   return {maximum:maximum, inTok:inTok, outTok:outTok};
 }
 function finishCloudChat(o, reservation, result){
-  if (!reservation) return result;
+  if (!reservation || reservation.settled) return result;
+  reservation.settled = true;
   CLOUD_RESERVED_USD = Math.max(0, CLOUD_RESERVED_USD - reservation.maximum);
   var u = result.usage || (result.usage = {});
   var inTok = +u.inTok || reservation.inTok;
@@ -6912,7 +6979,8 @@ function finishCloudChat(o, reservation, result){
   return result;
 }
 function releaseCloudReservation(reservation){
-  if (!reservation) return;
+  if (!reservation || reservation.settled) return;
+  reservation.settled = true;
   CLOUD_RESERVED_USD = Math.max(0, CLOUD_RESERVED_USD - reservation.maximum);
   updateBudgetDisplays();
 }
@@ -6925,7 +6993,8 @@ function reserveFixedCloud(provider, model, kind, estimatedCost){
   return {provider:provider, model:model, kind:kind, maximum:cost};
 }
 function finishFixedCloud(r, details){
-  if (!r) return;
+  if (!r || r.settled) return;
+  r.settled = true;
   CLOUD_RESERVED_USD = Math.max(0, CLOUD_RESERVED_USD - (r.maximum || 0));
   saveCloudUsage(Object.assign({provider:r.provider, model:r.model, kind:r.kind, costUsd:r.maximum, estimated:true}, details || {}));
 }
@@ -7177,8 +7246,17 @@ function buildAutoAgentTeam(query, route, msgs){
   team.projectedCost = projected;
   return team;
 }
+/* Sub-agents are externally read-only by invariant. These tools mutate user
+   state, external services, or the repository, so no sub-agent role may ever
+   advertise OR execute them — only the lead agent (with its own guards) can. */
+var SUBAGENT_BLOCKED_TOOLS = ['update_dashboard','propose_repository_changes','use_connector',
+  'schedule_task','remember','update_memory','forget_memory','create_plan','update_plan_step','clear_plan'];
+function subagentAllowedTool(name, allowedNames){
+  if (SUBAGENT_BLOCKED_TOOLS.indexOf(name) >= 0) return false;
+  return (allowedNames || []).indexOf(name) >= 0;
+}
 function toolsForNames(names){
-  names = names || [];
+  names = (names || []).filter(function(n){ return SUBAGENT_BLOCKED_TOOLS.indexOf(n) < 0; });
   return enabledTools().filter(function(t){ return names.indexOf(t.name) >= 0; });
 }
 async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
@@ -7202,9 +7280,18 @@ async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
     addUsage(totalUsage, res.usage);
     finalText = res.text || cm.text;
     if (!(res.toolCalls && res.toolCalls.length && canCall)) break;
+    /* Enforce the role allowlist at EXECUTION time, not just in the advertised
+       schema list — models (local ones especially) can emit tool names they
+       were never given, and prompt-injected page content can encourage that. */
+    var allowedNames = canCall.map(function(t){ return t.name; });
     var results = [];
     for (var i = 0; i < res.toolCalls.length; i++){
       var call = res.toolCalls[i];
+      if (!subagentAllowedTool(call.name, allowedNames)){
+        results.push({id:call.id, name:call.name,
+          text:'Error: tool "' + call.name + '" is outside this sub-agent\'s read-only allowlist. Continue with the tools you were given and report findings to the lead agent.'});
+        continue;
+      }
       results.push({id:call.id, name:call.name, text:await execTool(call.name, call.args)});
     }
     history.push({role:'assistant', text:res.text || '', anthRaw:res.anthRaw, toolCalls:res.toolCalls});
@@ -8193,12 +8280,16 @@ TOOLS.push(
     description:'Delete a memory by id or exact/partial text match.',
     params:{ id:{type:'string'}, query:{type:'string', description:'Text match if no id'} }, required:[],
     run: async function(a){
-      var before = S.memory.length;
-      if (a.id) S.memory = S.memory.filter(function(m){ return m.id !== a.id; });
-      else if (a.query){
+      var before = S.memory.length, removed;
+      if (a.id){
+        removed = S.memory.filter(function(m){ return m.id === a.id; });
+        S.memory = S.memory.filter(function(m){ return m.id !== a.id; });
+      } else if (a.query){
         var q = String(a.query).toLowerCase();
+        removed = S.memory.filter(function(m){ return m.text.toLowerCase().indexOf(q) >= 0; });
         S.memory = S.memory.filter(function(m){ return m.text.toLowerCase().indexOf(q) < 0; });
       } else return 'Error: provide id or query.';
+      addTombstones('memory', removed.map(function(m){ return m.id; }));
       saveMemory();
       return 'Removed ' + (before - S.memory.length) + ' memor' + (before - S.memory.length === 1 ? 'y' : 'ies') + '.';
     }},
@@ -10563,6 +10654,7 @@ function renderMemory(){
       m.pinned = !m.pinned; saveMemory(); renderMemory();
     });
     qs('.del-btn', d).addEventListener('click', function(){
+      addTombstones('memory', [m.id]);
       S.memory = S.memory.filter(function(x){ return x.id !== m.id; });
       saveMemory(); renderMemory();
     });
@@ -10591,7 +10683,10 @@ function initMemory(){
   });
   $('mem-clear').addEventListener('click', function(){
     if (!S.memory.length) return;
-    if (confirm('Delete all ' + S.memory.length + ' memories?')){ S.memory = []; saveMemory(); renderMemory(); }
+    if (confirm('Delete all ' + S.memory.length + ' memories?')){
+      addTombstones('memory', S.memory.map(function(m){ return m.id; }));
+      S.memory = []; saveMemory(); renderMemory();
+    }
   });
   $('mem-inject-tgl').addEventListener('click', function(){
     S.settings.injectMemory = !S.settings.injectMemory; saveSettings(); renderMemory();
@@ -10833,6 +10928,7 @@ function renderTasks(){
     });
     qs('.dl', d).addEventListener('click', function(){
       if (confirm('Delete task "' + t.name + '"?')){
+        addTombstones('tasks', [t.id]);
         S.tasks = S.tasks.filter(function(x){ return x.id !== t.id; });
         saveTasks(); renderTasks();
       }
