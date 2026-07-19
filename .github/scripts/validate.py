@@ -97,6 +97,19 @@ def check_ai_failover():
         fail("AI automatic provider failover tests failed:\n" + (r.stderr.strip() or r.stdout.strip()))
 
 
+def check_query_model_selector():
+    """An exact next-message model choice must remain one-shot and terminal."""
+    target = ".github/scripts/test_query_model_selector.js"
+    if not os.path.exists(target):
+        fail(f"{target} not found")
+        return
+    r = subprocess.run(["node", target], capture_output=True, text=True)
+    if r.returncode == 0:
+        print(r.stdout.rstrip())
+    else:
+        fail("Per-query model selector tests failed:\n" + (r.stderr.strip() or r.stdout.strip()))
+
+
 def main():
     if not os.path.exists("index.html"):
         print("index.html not found — run from the repo root", file=sys.stderr)
@@ -109,6 +122,7 @@ def main():
     check_cache(html)
     check_python()
     check_ai_failover()
+    check_query_model_selector()
     print()
     if FAILS:
         print(f"FAILED: {len(FAILS)} check(s) did not pass — blocking deploy.")

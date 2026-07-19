@@ -24,6 +24,9 @@ new evidence contradicts them.
   unavailable/quota-exhausted providers are skipped for the next least-cost
   eligible model, with reservation release, bounded retries, partial-stream
   duplicate protection, provider cooldowns, and an honest Demo last resort.
+- ✅ A compact **Next** model dropdown in the composer can pin one query to an
+  exact ready model, then returns to Automatic without changing the chat-wide
+  routing preference or silently involving other models.
 - ✅ Automatic task-shaped specialist teams with parallel role execution,
   narrow tool/connector access, per-role model selection, and lead synthesis.
 - ✅ Guarded self-development: repository inspection plus exact multi-file

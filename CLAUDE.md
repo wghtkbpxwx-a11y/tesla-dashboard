@@ -208,6 +208,12 @@ current runtime; editing or successfully testing its key clears that state.
 Manual model choices remain terminal and must never be silently rerouted. Keep
 the bounded real-provider attempt cap and honest Demo last resort so missing keys
 or exhausted credits cannot leave Automatic mode stuck in a repeat-error loop.
+The composer `query-model-select` is intentionally transient: an exact **Next**
+selection applies to one user message, is recorded on that message for
+regeneration, suppresses automatic teams/Council/failover for the turn, and then
+resets without changing `autoRoute` or the persistent conversation model. Only
+ready providers and local/browser runtimes belong in this compact native picker;
+the searchable header model menu remains the complete persistent expert surface.
 LM Studio is the preferred local runtime on the 16 GB M1 Pro. The tested
 `homebase-local` alias is Qwen 3.5 9B 4-bit at 16K context and one parallel
 prediction; the stable routing key is `qwen/qwen3.5-9b`, with LM Studio

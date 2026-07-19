@@ -64,6 +64,11 @@ requires it. Do not begin with a broad visual redesign.
   the six-paid-attempt bound, and the final Demo fallback without paid calls.
   Extend this baseline for concurrency/accounting edge cases rather than
   recreating the same cases in another harness.
+- `.github/scripts/test_query_model_selector.js` verifies the production route
+  encoding/decoding, exact one-message route, regeneration lineage, Automatic
+  reset, and suppression of Council, specialist delegation, and silent failover.
+  The native selector was also checked at 320×700 and 390×844 with no horizontal
+  overflow. Treat this as shipped product behavior, not another P2 redesign task.
 
 ## Priority work packages
 

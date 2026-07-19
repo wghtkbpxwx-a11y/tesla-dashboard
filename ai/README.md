@@ -73,6 +73,14 @@ partial response to avoid duplicate answers, and it never changes an explicitly
 selected manual model. If no real local or cloud model is available, the honest
 Demo response remains reachable so the interface does not strand the user.
 
+The composer’s **Next** dropdown is a one-message override. It lists models on
+configured cloud providers plus available local/browser runtimes. Choosing an
+exact model uses only that model for the submitted query, suppresses automatic
+specialist teams and Model Council for that turn, and never silently fails over
+to another model. The selector resets to Automatic as soon as the query is
+accepted; regenerating the answer preserves the original exact choice. The
+header model picker remains the persistent chat-wide control.
+
 The default paid-cloud guard is **$50 across the trailing 30 days**, combined
 across all configured providers. It reserves a conservative maximum before
 each call (including concurrent Council calls), records the provider's token
