@@ -16,6 +16,30 @@ product comprehension only after those risks. Shipped mobile, credential,
 xAI, and LM Studio smoke checks should not consume another audit session unless
 new evidence contradicts them.
 
+### Audit session results (2026-07-19, Fable)
+
+- ✅ **P0 deterministic tests shipped**: `ai/tests/homebase.test.js` extracts the
+  real production functions and runs 45 checks over the budget hard stop,
+  reservation idempotency, routing floors/ordering (incl. the PR #71 failover
+  cooldowns), mobile WebLLM skip, team caps, sub-agent boundary, vault
+  tombstones, and repository/origin guards. Run `node ai/tests/homebase.test.js`
+  before touching any of those paths; it fails loudly on drift because it pulls
+  the live functions out of `ai/index.html`.
+- ✅ **P0 boundary fixes**: sub-agent tool allowlists enforced at execution time
+  (not just schema), reservation settle/release made idempotent on both the
+  chat and fixed-cost (speech/search) paths.
+- ✅ **P1 vault fix**: cross-device deletion tombstones (id+ts only, 90-day TTL,
+  edit-beats-delete) wired through build/merge/apply and all five delete
+  sites — deleted memories/tasks no longer resurrect on sync.
+- ✅ **Voice UX layer** (per David) on top of the PR #75 reliability engine:
+  audio-reactive orb/waveform, local voice commands (stop / repeat / new chat /
+  pause / end), per-reply route + cost caption, engine badge, repeat button,
+  opt-in echo-guarded barge-in. Every #75 contract (one-tap gate, blocked-answer
+  recovery, free-first plans, tap-to-finish) preserved and re-verified.
+- ⏭ Remaining, in order: P1 failure recovery (stuck-UI under cancel/timeout in
+  team runs), P2 route comprehension outside voice mode, ledger-vs-provider
+  billing reconciliation, real-car barge-in echo test (ask David first).
+
 ## Homebase AI operating model (shipped 2026-07-18)
 
 - ✅ Capability- and cost-aware model routing with local-first execution and a
