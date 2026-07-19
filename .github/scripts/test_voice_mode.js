@@ -113,6 +113,12 @@ function main() {
     'no audio playback/metering function may tap the element via createMediaElementSource (silences mobile audio)');
   assert(!/function\s+vmeterMaybeWireTts/.test(source),
     'the removed element-tap helper (vmeterMaybeWireTts) must not return');
+  // The dynamic "energy orb" renderer: an audio-reactive deformed ring
+  // (frequency data) drawn with additive glow. Guards against a silent revert
+  // to the flat static visualization.
+  const viz = extractFunction('voiceVizKick');
+  assert(/getByteFrequencyData/.test(viz) && /globalCompositeOperation\s*=\s*'lighter'/.test(viz),
+    'the voice orb must remain the audio-reactive additive-glow energy field');
   // Loud playback goes through a decoded AudioBuffer + gain + limiter, which is
   // safe on iOS and lets output exceed the <audio> 100% ceiling.
   const playBuffer = extractFunction('playTTSBuffer');

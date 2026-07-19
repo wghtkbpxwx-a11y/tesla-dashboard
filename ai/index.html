@@ -1403,17 +1403,14 @@ body.is-desktop .chat-float[data-state="open"]{
 }
 #voice-ov.open{display:flex}
 #voice-ov .v-aurora, #voice-ov .v-stars{display:none}
-#v-canvas{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:.5}
+/* the canvas energy field is the full backdrop now */
+#v-canvas{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:1; z-index:0}
 .v-stage{position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:24px; width:min(640px,100%)}
 .v-rings{position:relative; width:240px; height:240px; display:grid; place-items:center}
-.v-ring{
-  position:absolute; border-radius:50%; border:1px solid rgba(150,185,255,.10);
-  animation:vRingPulse 4.4s ease-in-out infinite;
-}
-.v-ring.r1{width:100%;height:100%}
-.v-ring.r2{width:74%;height:74%; border-color:rgba(150,185,255,.06); animation-delay:.7s}
-.v-ring.r3{display:none}
-@keyframes vRingPulse{0%,100%{transform:scale(1); opacity:.5}50%{transform:scale(1.04); opacity:.9}}
+.v-ring{display:none} /* replaced by the canvas energy ring */
+/* the flat bar waveform is retired — the orb's deformed ring carries the audio
+   reactivity now (bars stay in the DOM but hidden) */
+#v-wave{display:none !important}
 #v-glow{
   position:absolute; width:230px; height:230px; border-radius:50%; pointer-events:none; z-index:1;
   background:radial-gradient(circle, rgba(84,150,255,.5), rgba(60,90,230,.15) 55%, transparent 72%);
@@ -2774,6 +2771,40 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-voice-energy-orb',
+      date: '2026-07-20',
+      commit: 'recorded in the PR that ships this change (same branch as the loud/premium voice work)',
+      branch: 'claude/multimodal-ai-chatbot-4r8s23 (restarted from main after #82/#83; loud+premium voice cherry-picked, then this)',
+      pull_request: 'the advanced-voice PR; number recorded in the PR itself',
+      title: 'Truly dynamic, futuristic voice UI: canvas "energy orb"',
+      type: 'feature+voice+ui+canvas',
+      depends_on: ['2026-07-19-voice-loud-premium'],
+      reported_by: 'David: "make it look more aesthetic and cool — truly dynamic and futuristic."',
+      files_changed: ['ai/index.html','.github/scripts/test_voice_mode.js'],
+      interfaces_changed: ['voiceVizKick (rewritten as a canvas energy-field renderer)','vizBars (removed)','VIZ (ring/sparks/arcs state)','#v-canvas CSS (full-backdrop, opacity 1)','.v-ring + #v-wave (hidden)','test_voice_mode.js (energy-orb guard)'],
+      changes: [
+        'Rewrote the voice visualizer from a static CSS sphere + flat bar row into a canvas "living energy orb" rendered around the sphere core: a deformed reactive RING whose outline morphs to the real voice spectrum (mirrored for symmetry, temporally smoothed, twin-stroke additive glow); rotating elliptical HUD ARCS at different radii/tilts/speeds; and orbiting SPARKS with motion trails (canvas persistence fade + globalCompositeOperation lighter)',
+        'The ring/aura/sparks are driven by the live AnalyserNode — the mic capture while listening and the TTS BufferSource while speaking (VMETER.mic/ttsAn) — so it reacts to the actual audio; a smooth synthetic envelope drives it when no analyser is active (idle/thinking, or headless)',
+        'Disciplined futuristic palette that never returns to rainbow: listening = cyan (h~186-202), thinking = violet (h~230-272), speaking = blue (h~210-256); the orb geometry is read from the live #v-orb rect each frame so the field always hugs the sphere/button',
+        'Retired the flat on-screen bar waveform and the CSS decorator rings (kept #v-wave bars in the DOM but hidden) — the orb is now the single hero, like ChatGPT Advanced Voice / Gemini Live but with a richer reactive energy field',
+        'prefers-reduced-motion aware: no orbiting arcs/sparks and no motion trails (full clear) when reduce is set; the ring still reflects audio as essential feedback'
+      ],
+      safety_guards: [
+        'Pure presentation change — no audio, routing, budget, vault, sub-agent, or repository-write behaviour touched. The playback element is still never tapped (voiceVizKick reads analysers only); the loud buffer path and mobile-first routing are unchanged',
+        'New CI guard in test_voice_mode.js requires voiceVizKick to keep the audio-reactive additive-glow energy field (getByteFrequencyData + lighter composite), preventing a silent revert; the no-createMediaElementSource guard already covers voiceVizKick'
+      ],
+      verification: [
+        'python3 .github/scripts/validate.py all green (incl. #82/#83 harnesses + extended voice harness); node ai/tests/homebase.test.js 45/45; node --check clean',
+        'Mobile smoke 20 checks + desktop voice UX smoke 21 checks still pass (all element IDs preserved; bars hidden but present in DOM)',
+        'Screenshots (phone) of the speaking/listening/thinking energy orb confirm distinct blue/cyan/violet states, the reactive ring, orbital arcs, and orbiting sparks; no JS errors'
+      ],
+      known_limits: [
+        'The ring is most expressive with a real analyser (a configured cloud voice for speaking, or the mic while listening); with device speechSynthesis (no analyser during output) the speaking ring uses the smooth synthetic envelope',
+        'Canvas rendering is a modest continuous rAF while the overlay is open (gated to visibility, ~14 sparks + 3 arcs + one ring path); negligible on modern phones and paused when the overlay closes'
+      ],
+      next_model: 'This is a presentation layer over the loud buffer-TTS engine. Keep voiceVizKick reading analysers only (never an element tap). Future: optional metaball/blob core morph, or a subtle particle burst on speech onset.'
+    },
     {
       id: '2026-07-19-p0-security-hardening',
       date: '2026-07-19',
@@ -10524,98 +10555,138 @@ function vmeterActiveAnalyser(){
   if (VOICE.state === 'speaking') return VMETER.ttsAn;
   return null;
 }
-var VIZ = { raf: 0, particles: [], t0: 0, live:false };
-function vizBars(an){
-  var w = $('v-wave'); if (!w) return;
-  var bars = w.childNodes, n = bars.length;
-  if (!an){
-    if (VIZ.live){
-      VIZ.live = false; w.classList.remove('live');
-      for (var i = 0; i < n; i++){ bars[i].style.height = ''; bars[i].style.opacity = ''; }
-    }
-    return;
-  }
-  if (!VIZ.live){ VIZ.live = true; w.classList.add('live'); }
-  if (!VMETER.fbuf || VMETER.fbuf.length !== an.frequencyBinCount) VMETER.fbuf = new Uint8Array(an.frequencyBinCount);
-  try { an.getByteFrequencyData(VMETER.fbuf); } catch(e){ return; }
-  var half = Math.ceil(n / 2);
-  for (var k = 0; k < half; k++){
-    /* speech band, non-linear spread, mirrored center-out */
-    var bin = 2 + Math.floor(Math.pow(k / half, 1.55) * 80);
-    var v = VMETER.fbuf[Math.min(bin, VMETER.fbuf.length - 1)] / 255;
-    var h = Math.max(5, Math.round(5 + v * 34));
-    var l = half - 1 - k, r = half + k;
-    if (bars[l]){ bars[l].style.height = h + 'px'; bars[l].style.opacity = (0.4 + v * 0.6).toFixed(2); }
-    if (bars[r] && r < n){ bars[r].style.height = h + 'px'; bars[r].style.opacity = (0.4 + v * 0.6).toFixed(2); }
-  }
-}
+var VIZ = { raf: 0, t0: 0, ring: null, sparks: null, arcs: null, reduce: false };
+/* ---- futuristic "living energy orb" ----
+   A canvas energy field around the CSS sphere: a deformed spectrum ring that
+   morphs to the real voice (mirrored + smoothed), rotating elliptical HUD
+   arcs, and orbiting sparks with motion trails (persistence fade + additive
+   glow). Disciplined blue/cyan/violet palette, never rainbow. Driven by the
+   live analyser (VMETER.mic/ttsAn) when available, synthetic otherwise. The
+   analyser is a mic capture or a TTS BufferSource — never an element tap. */
 function voiceVizKick(state){
   ensureVoiceWave();
   var cv = $('v-canvas'); if (!cv) return;
   var dpr = Math.min(2, window.devicePixelRatio || 1);
-  var w = cv.clientWidth || window.innerWidth;
-  var h = cv.clientHeight || window.innerHeight;
-  if (cv.width !== w * dpr || cv.height !== h * dpr){
-    cv.width = w * dpr; cv.height = h * dpr;
-    cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  try { VIZ.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){ VIZ.reduce = false; }
+  var N = 100;
+  if (!VIZ.ring || VIZ.ring.length !== N) VIZ.ring = new Float32Array(N);
+  if (!VIZ.sparks){
+    VIZ.sparks = [];
+    for (var i = 0; i < 14; i++) VIZ.sparks.push({
+      a: Math.random() * Math.PI * 2, r: 1.3 + Math.random() * 0.85,
+      s: (0.12 + Math.random() * 0.5) * (Math.random() < 0.5 ? -1 : 1),
+      z: 0.6 + Math.random() * 1.1, ph: Math.random() * Math.PI * 2
+    });
+    VIZ.arcs = [
+      { r: 1.34, span: 1.15, a: 0.0, s: 0.30, tilt: -0.55, w: 2.1 },
+      { r: 1.60, span: 0.75, a: 2.1, s: -0.20, tilt: 0.42, w: 1.6 },
+      { r: 1.92, span: 1.70, a: 4.0, s: 0.13, tilt: -0.20, w: 1.25 }
+    ];
   }
-  if (!VIZ.particles.length){
-    /* few, faint motes — a calm premium field, not confetti */
-    for (var i = 0; i < 20; i++){
-      VIZ.particles.push({
-        x: Math.random(), y: Math.random(),
-        r: 0.5 + Math.random() * 1.6,
-        vx: (Math.random() - 0.5) * 0.0003,
-        vy: (Math.random() - 0.5) * 0.0003,
-        a: 0.06 + Math.random() * 0.20
-      });
+  if (VIZ.raf) return;
+  VIZ.t0 = performance.now();
+  (function loop(now){
+    var ov = $('voice-ov');
+    if (!ov || !ov.classList.contains('open')){ VIZ.raf = 0; return; }
+    var cw = cv.clientWidth || window.innerWidth, ch = cv.clientHeight || window.innerHeight;
+    if (cv.width !== Math.round(cw * dpr) || cv.height !== Math.round(ch * dpr)){
+      cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+      cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
     }
-  }
-  if (!VIZ.raf){
-    VIZ.t0 = performance.now();
-    (function loop(now){
-      if (!$('voice-ov') || !$('voice-ov').classList.contains('open')){ VIZ.raf = 0; return; }
-      var ctx = cv.getContext('2d');
-      var W = cv.width, H = cv.height;
-      ctx.clearRect(0, 0, W, H);
-      var st = VOICE.state || 'idle';
-      var an = vmeterActiveAnalyser();
-      var target;
-      if (an) target = vmeterRms(an);
-      else if (st === 'speaking') /* syllable-like pulse so speaking reads as a voice, not a metronome */
-        target = 0.30 + 0.26 * Math.abs(Math.sin(now / 125)) * (0.55 + 0.45 * Math.sin(now / 43));
-      else if (st === 'thinking') target = 0.16 + 0.12 * Math.sin(now / 170);
-      else if (st === 'listening') target = 0.20 + 0.14 * Math.sin(now / 220);
-      else target = 0;
-      /* fast attack, slow decay — feels like sound, not a metronome */
-      VMETER.level += (target - VMETER.level) * (target > VMETER.level ? 0.55 : 0.12);
-      $('voice-ov').style.setProperty('--vlvl', VMETER.level.toFixed(3));
-      vizBars(an);
-      var pulse = 0.5 + 0.5 * Math.sin((now - VIZ.t0) / (st === 'thinking' ? 180 : 320));
-      var g = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, Math.min(W,H)*0.35);
-      var glow = 0.06 + pulse * 0.05 + VMETER.level * 0.12;
-      var c1 = st === 'listening' ? 'rgba(64,210,240,' + glow + ')' :
-               st === 'speaking' ? 'rgba(84,150,255,' + glow + ')' :
-               st === 'thinking' ? 'rgba(90,150,255,' + (glow * 0.8) + ')' :
-               'rgba(90,150,255,0.05)';
-      g.addColorStop(0, c1); g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-      var speed = (st === 'idle' ? 1 : 2.2) * (1 + VMETER.level * 2.5);
-      VIZ.particles.forEach(function(p){
-        p.x += p.vx * speed;
-        p.y += p.vy * speed;
-        if (p.x < 0 || p.x > 1) p.vx *= -1;
-        if (p.y < 0 || p.y > 1) p.vy *= -1;
-        ctx.beginPath();
-        ctx.arc(p.x * W, p.y * H, p.r * (window.devicePixelRatio||1), 0, Math.PI*2);
-        ctx.fillStyle = st === 'listening'
-          ? 'rgba(120,220,255,' + p.a + ')'
-          : 'rgba(170,200,255,' + p.a + ')';
-        ctx.fill();
-      });
-      VIZ.raf = requestAnimationFrame(loop);
-    })(performance.now());
-  }
+    var ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+    var st = VOICE.state || 'idle';
+    var reduce = VIZ.reduce, T = reduce ? 0 : now;
+    var an = vmeterActiveAnalyser();
+    /* orb geometry from the DOM so the field hugs the real sphere/button */
+    var orb = $('v-orb'), cr = cv.getBoundingClientRect();
+    var cx = W * 0.5, cy = H * 0.4, R = Math.min(W, H) * 0.14;
+    if (orb){
+      var br = orb.getBoundingClientRect();
+      if (br.width){ cx = (br.left + br.width / 2 - cr.left) * dpr; cy = (br.top + br.height / 2 - cr.top) * dpr; R = (br.width / 2) * dpr; }
+    }
+    /* level + spectrum from the live analyser (real voice), else synthetic */
+    var freq = null, lvl;
+    if (an){
+      lvl = vmeterRms(an);
+      if (!VMETER.fbuf || VMETER.fbuf.length !== an.frequencyBinCount) VMETER.fbuf = new Uint8Array(an.frequencyBinCount);
+      try { an.getByteFrequencyData(VMETER.fbuf); freq = VMETER.fbuf; } catch(e){ freq = null; }
+    } else {
+      lvl = st === 'idle' ? 0.05 + 0.04 * Math.sin(T / 900)
+        : st === 'thinking' ? 0.20 + 0.13 * Math.sin(T / 210)
+        : st === 'listening' ? 0.16 + 0.10 * Math.sin(T / 480)
+        : 0.34 + 0.24 * Math.abs(Math.sin(T / 150)) * (0.5 + 0.5 * Math.sin(T / 47));
+    }
+    VMETER.level += (lvl - VMETER.level) * (lvl > VMETER.level ? 0.5 : 0.12);
+    var L = VMETER.level;
+    ov.style.setProperty('--vlvl', L.toFixed(3));
+    /* disciplined futuristic palette (blue / cyan / violet, never rainbow) */
+    var hA, hB;
+    if (st === 'listening'){ hA = 186; hB = 202; }
+    else if (st === 'thinking'){ hA = 230; hB = 272; }
+    else if (st === 'speaking'){ hA = 210; hB = 256; }
+    else { hA = 206; hB = 236; }
+    /* motion-trail persistence + additive glow */
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = reduce ? 'rgba(4,6,14,1)' : 'rgba(4,6,14,0.34)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+    /* aura */
+    var aura = ctx.createRadialGradient(cx, cy, R * 0.15, cx, cy, R * 3.4);
+    aura.addColorStop(0, 'hsla(' + hA + ',95%,62%,' + (0.09 + L * 0.16) + ')');
+    aura.addColorStop(1, 'hsla(' + hA + ',95%,62%,0)');
+    ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(cx, cy, R * 3.4, 0, Math.PI * 2); ctx.fill();
+    /* deformed reactive ring (mirrored spectrum, temporally smoothed, twin-stroke glow) */
+    var baseR = R * 1.14, maxDev = R * 0.62;
+    for (var pass = 0; pass < 2; pass++){
+      ctx.beginPath();
+      for (var i = 0; i <= N; i++){
+        var idx = i % N;
+        var half = idx <= N / 2 ? idx : N - idx;
+        var t = half / (N / 2);
+        var samp;
+        if (freq){ var bin = 2 + Math.floor(Math.pow(t, 1.25) * Math.min(92, freq.length - 3)); samp = freq[bin] / 255; }
+        else { samp = 0.30 + 0.60 * Math.abs(Math.sin(t * Math.PI * 2 + T / 300)); }
+        if (pass === 0) VIZ.ring[idx] = VIZ.ring[idx] * 0.74 + samp * 0.26;
+        var dev = VIZ.ring[idx];
+        var ang = (idx / N) * Math.PI * 2 - Math.PI / 2;
+        var rr = baseR + dev * maxDev * (0.45 + L * 1.0) + Math.sin(idx * 0.6 + T / 520) * R * 0.02;
+        var x = cx + Math.cos(ang) * rr, y = cy + Math.sin(ang) * rr;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      var lg = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+      lg.addColorStop(0, 'hsla(' + hA + ',100%,' + (pass ? 70 : 62) + '%,' + (pass ? 0.18 : 0.55) + ')');
+      lg.addColorStop(1, 'hsla(' + hB + ',100%,' + (pass ? 74 : 66) + '%,' + (pass ? 0.18 : 0.55) + ')');
+      ctx.strokeStyle = lg;
+      ctx.lineWidth = pass ? Math.max(5, R * 0.14) : Math.max(1.5, R * 0.03);
+      ctx.stroke();
+    }
+    /* orbital HUD arcs (elliptical, counter-rotating) */
+    if (!reduce) for (var k = 0; k < VIZ.arcs.length; k++){
+      var A = VIZ.arcs[k];
+      A.a += A.s * 0.016 * (1 + L * 1.6);
+      ctx.save();
+      ctx.translate(cx, cy); ctx.rotate(A.tilt); ctx.scale(1, 0.42);
+      ctx.beginPath(); ctx.arc(0, 0, R * A.r, A.a, A.a + A.span);
+      ctx.strokeStyle = 'hsla(' + (hA + k * 12) + ',100%,74%,' + (0.24 + L * 0.5) + ')';
+      ctx.lineWidth = A.w * dpr; ctx.lineCap = 'round'; ctx.stroke();
+      ctx.restore();
+    }
+    /* orbiting sparks (trails come from the persistence fade) */
+    for (var sp = 0; sp < VIZ.sparks.length; sp++){
+      var p = VIZ.sparks[sp];
+      if (!reduce) p.a += p.s * 0.016 * (1 + L * 2.4);
+      var rr2 = R * (p.r + Math.sin(T / 680 + p.ph) * 0.06 + L * 0.3);
+      var x2 = cx + Math.cos(p.a) * rr2, y2 = cy + Math.sin(p.a) * rr2 * 0.72;
+      var sz = (p.z * (1 + L * 1.6)) * dpr, rad = sz * 3.4;
+      var sg = ctx.createRadialGradient(x2, y2, 0, x2, y2, rad);
+      sg.addColorStop(0, 'hsla(' + hB + ',100%,80%,' + (0.5 + L * 0.4) + ')');
+      sg.addColorStop(1, 'hsla(' + hB + ',100%,80%,0)');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(x2, y2, rad, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    VIZ.raf = requestAnimationFrame(loop);
+  })(performance.now());
 }
 function voiceSTTPlan(engine){
   engine = engine || (S.settings.speech && S.settings.speech.engine) || 'auto';

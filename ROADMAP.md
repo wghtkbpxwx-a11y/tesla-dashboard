@@ -50,6 +50,11 @@ new evidence contradicts them.
   on ChatGPT Advanced Voice / Gemini Live (rainbow orb/aurora/starfield removed,
   orb reacts to the real voice). Loudness slider + "best voice on phone" toggle
   in Settings. CI now forbids re-tapping the playback element.
+- ✨ **Futuristic "energy orb" UI** (David: "make it truly dynamic and
+  futuristic"): the voice visualizer is now a canvas energy field around the
+  sphere — a deformed ring that morphs to the real voice spectrum, rotating
+  HUD arcs, and orbiting sparks with motion trails, in disciplined
+  blue/cyan/violet states. The flat bar waveform is retired.
 - ⏭ Remaining, in order: streaming/chunked cloud TTS for even lower latency;
   P1 failure recovery (stuck-UI under cancel/timeout in team runs); P2 route
   comprehension outside voice mode; ledger-vs-provider billing reconciliation;
