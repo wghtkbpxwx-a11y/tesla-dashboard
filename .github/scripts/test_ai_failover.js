@@ -40,12 +40,21 @@ function assert(condition, message) {
 
 const autoFailurePolicy = eval('(' + extractFunction('autoFailurePolicy') + ')');
 
+let AUTO_PROVIDER_COOLDOWNS = {};
+let AUTO_PROVIDER_PROBES = {};
+const productionProviderInAutoCooldown = eval('(' + extractFunction('providerInAutoCooldown') + ')');
+const productionClaimAutoProviderProbe = eval('(' + extractFunction('claimAutoProviderProbe') + ')');
+const productionMarkAutoProviderFailure = eval('(' + extractFunction('markAutoProviderFailure') + ')');
+const productionClearAutoProviderCooldown = eval('(' + extractFunction('clearAutoProviderCooldown') + ')');
+
 let buildAutoFailoverPlan;
 let providerInAutoCooldown;
 let providerReady;
 let runChatAttempt;
 let autoFailoverPolicyForError;
 let markAutoProviderFailure;
+let clearAutoProviderCooldown;
+let claimAutoProviderProbe;
 const runChat = eval('(' + extractFunction('runChat') + ')');
 
 let modelQuality = () => 3;
@@ -74,6 +83,26 @@ async function testFailurePolicies() {
   assert(!p.eligible, 'unknown errors must not be retried blindly');
 }
 
+async function testBoundedQuotaRecoveryProbe() {
+  const realNow = Date.now;
+  let now = 1000000;
+  Date.now = () => now;
+  try {
+    AUTO_PROVIDER_COOLDOWNS = {};
+    AUTO_PROVIDER_PROBES = {};
+    productionMarkAutoProviderFailure('xai', {scope:'provider', cooldownMs:21600000});
+    assert(productionProviderInAutoCooldown('xai'), 'quota provider must initially remain in cooldown');
+    now += 300001;
+    assert(!productionProviderInAutoCooldown('xai'), 'provider must become eligible for one recovery probe after five minutes');
+    assert(productionClaimAutoProviderProbe('xai'), 'the first caller must claim the half-open probe');
+    assert(productionProviderInAutoCooldown('xai'), 'a claimed probe must keep simultaneous callers in cooldown');
+    productionClearAutoProviderCooldown('xai');
+    assert(!productionProviderInAutoCooldown('xai'), 'successful recovery must clear both cooldown and probe state');
+  } finally {
+    Date.now = realNow;
+  }
+}
+
 async function testBackupPlanRemainsGloballyCostRanked() {
   cloudRouteCandidates = () => [
     {provider:'xai', model:'grok', estimatedCost:0.003, searchRank:0, fallbackRank:0, quality:3},
@@ -87,10 +116,17 @@ async function testBackupPlanRemainsGloballyCostRanked() {
   assert(plan.slice(0, 5).map((x) => x.provider + '/' + x.model).join(',') ===
     'openai/nano,openai/mini,google/flash,xai/grok,demo/demo',
     'backup models must stay globally cost-ranked even when the same provider has multiple eligible models');
+
+  const agentPlan = productionBuildAutoFailoverPlan({
+    provider:'openai', model:'nano', maxTokens:500, qualityFloor:3,
+    msgs:[], tools:null, classification:{tier:2}, allowDemoFallback:false
+  });
+  assert(!agentPlan.some((x) => x.provider === 'demo'), 'real agent runs must be able to forbid simulated Demo fallback after provider failures');
 }
 
 function setupRunChat(plan, behavior, readiness, cooldown) {
   const marked = [];
+  const cleared = [];
   const blocked = new Set();
   buildAutoFailoverPlan = () => plan;
   providerReady = (provider) => provider === 'demo' || (readiness ? readiness(provider) : true);
@@ -100,7 +136,10 @@ function setupRunChat(plan, behavior, readiness, cooldown) {
     marked.push({provider, policy});
     if (policy.scope === 'provider') blocked.add(provider);
   };
+  clearAutoProviderCooldown = (provider) => { cleared.push(provider); blocked.delete(provider); };
+  claimAutoProviderProbe = () => false;
   runChatAttempt = behavior;
+  marked.cleared = cleared;
   return marked;
 }
 
@@ -125,6 +164,7 @@ async function testQuotaFallsThroughToCheapestEligibleProvider() {
   assert(result.usedProvider === 'xai' && result.usedModel === 'grok-3-mini', 'successful fallback route must be returned');
   assert(result.failovers.length === 1 && result.failovers[0].reason === 'credits unavailable', 'fallback reason must remain visible');
   assert(marked.length === 1 && marked[0].provider === 'openai', 'quota-exhausted provider must enter cooldown');
+  assert(marked.cleared.join(',') === 'xai', 'a successful automatic call must clear stale cooldown state for the provider that answered');
 }
 
 async function testMissingKeyIsSkipped() {
@@ -190,6 +230,7 @@ async function testDemoStillRunsAfterAttemptCap() {
 
 async function main() {
   await testFailurePolicies();
+  await testBoundedQuotaRecoveryProbe();
   await testBackupPlanRemainsGloballyCostRanked();
   await testQuotaFallsThroughToCheapestEligibleProvider();
   await testMissingKeyIsSkipped();

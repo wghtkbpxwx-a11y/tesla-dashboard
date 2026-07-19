@@ -23,7 +23,12 @@ new evidence contradicts them.
 - ✅ Request-time automatic provider failover: missing keys and temporarily
   unavailable/quota-exhausted providers are skipped for the next least-cost
   eligible model, with reservation release, bounded retries, partial-stream
-  duplicate protection, provider cooldowns, and an honest Demo last resort.
+  duplicate protection, provider cooldowns, bounded recovery probes after
+  credits are added, and an honest Demo last resort for ordinary chat only.
+- ✅ Scheduled agents use the same Automatic cost/capability router, rolling
+  budget, and provider failover as interactive chat. Their task editor says
+  Automatic, their result records the model that actually answered, and they
+  stop before tools with recovery controls when no real model is available.
 - ✅ A compact **Next** model dropdown in the composer can pin one query to an
   exact ready model, then returns to Automatic without changing the chat-wide
   routing preference or silently involving other models.
