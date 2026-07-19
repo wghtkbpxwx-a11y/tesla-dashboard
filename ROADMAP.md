@@ -39,12 +39,24 @@ new evidence contradicts them.
 - 🔧 **Mobile voice hotfix** (David reported no sound + slowness on the app):
   the audio-reactive meter had tapped the TTS playback element with
   `createMediaElementSource`, which silences `<audio>` on mobile Safari.
-  Removed the tap (speaking visuals are now synthetic; only the mic is metered),
-  fast-flushed the first spoken chunk, tightened endpointing 1800→1200 ms, and
-  cut the silent-device-voice→cloud failover from 3500→1600 ms.
-- ⏭ Remaining, in order: mobile cloud-TTS-first option for reliable iOS sound
-  (recorded audio beats speechSynthesis on iOS) behind the cost guard; P1
-  failure recovery (stuck-UI under cancel/timeout in team runs); P2 route
+  Removed the tap, fast-flushed the first spoken chunk, tightened endpointing
+  1800→1200 ms, and cut silent-device-voice→cloud failover 3500→1600 ms.
+- 🔊 **Advanced voice upgrade** (David: "too quiet; make it like GPT/Gemini;
+  the phone on the charging plate does the voice; it looks like Sesame Street"):
+  loud high-quality cloud TTS via a Web Audio buffer path
+  (decode → gain → limiter → analyser, safe on iOS, boostable to 4×); mobile
+  Automatic now prefers a ready cloud voice (louder/more reliable than iOS
+  speechSynthesis) inside the $50 guard; and a premium single-sphere UI modeled
+  on ChatGPT Advanced Voice / Gemini Live (rainbow orb/aurora/starfield removed,
+  orb reacts to the real voice). Loudness slider + "best voice on phone" toggle
+  in Settings. CI now forbids re-tapping the playback element.
+- ✨ **Futuristic "energy orb" UI** (David: "make it truly dynamic and
+  futuristic"): the voice visualizer is now a canvas energy field around the
+  sphere — a deformed ring that morphs to the real voice spectrum, rotating
+  HUD arcs, and orbiting sparks with motion trails, in disciplined
+  blue/cyan/violet states. The flat bar waveform is retired.
+- ⏭ Remaining, in order: streaming/chunked cloud TTS for even lower latency;
+  P1 failure recovery (stuck-UI under cancel/timeout in team runs); P2 route
   comprehension outside voice mode; ledger-vs-provider billing reconciliation;
   real-car barge-in echo test (ask David first).
 
