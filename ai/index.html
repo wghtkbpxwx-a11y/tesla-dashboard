@@ -2629,7 +2629,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
-    state: 'PR #67 is open in draft with the mobile settings/model-picker simplification, deliberate-only mobile WebLLM downloads, and Locally/LM Link guidance; responsive QA passed at 320, 390, and 1280 px before review. PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, PR #62 secure latency-aware local routing, PR #64 immediate cloud-key activation, and PR #65 debounced credential persistence are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted LM Studio token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call. xAI is now connected with a masked key that survives reload, 10 models are discovered, and one Grok 3 mini beta reply was recorded at approximately $0.0003 before Auto best-value routing and Agent tools were restored.',
+    state: 'PR #67 is merged and live with the mobile settings/model-picker simplification, deliberate-only mobile WebLLM downloads, and Locally/LM Link guidance; responsive QA passed at 320, 390, and 1280 px and the public Pages source was verified after deployment. PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, PR #62 secure latency-aware local routing, PR #64 immediate cloud-key activation, and PR #65 debounced credential persistence are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted LM Studio token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call. xAI is now connected with a masked key that survives reload, 10 models are discovered, and one Grok 3 mini beta reply was recorded at approximately $0.0003 before Auto best-value routing and Agent tools were restored.',
     start_here: [
       'HOMEBASE_CHANGELOG entry 2026-07-18-mobile-settings-navigation',
       'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-debounced-persistence',
@@ -2685,9 +2685,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-mobile-settings-navigation',
       date: '2026-07-18',
-      commit: 'ddc15d8 (implementation; documentation lineage follows in PR #67)',
+      commit: 'de3631a (PR #67 squash merge; implementation originated at ddc15d8)',
       branch: 'codex/fix-mobile-settings-navigation',
-      pull_request: '#67 (draft)',
+      pull_request: '#67 (merged 2026-07-18; live on GitHub Pages)',
       title: 'Make mobile settings and model choice simple without removing power',
       type: 'fix+mobile+ux+accessibility+routing+docs',
       depends_on: ['2026-07-18-cloud-key-debounced-persistence'],
@@ -2714,7 +2714,8 @@ var HOMEBASE_CHANGELOG = {
         'Browser-tested the 390×844 layout: fixed 63 px section picker, independently scrolling 638 px body, synchronized active pane, no horizontal overflow, and collapsed expert groups',
         'Selected all nine mobile sections at 390×844 and confirmed each maps to exactly one visible pane with no page-level horizontal overflow',
         'Browser-tested a 320×700 layout: full-width modal, fixed section picker, independently scrolling content, and no horizontal overflow',
-        'Browser-tested the model picker: Automatic-only first view, all 64 local/demo model choices preserved after explicit reveal, and a 314 px independently scrolling model list'
+        'Browser-tested the model picker: Automatic-only first view, all 64 local/demo model choices preserved after explicit reveal, and a 314 px independently scrolling model list',
+        'Validate and GitHub Pages deployment runs passed on main; the public Pages HTML was then checked for the section picker, simplified model picker, mobile WebLLM guard, LM Studio label, and changelog entry'
       ],
       setup_required: [
         'None after deployment; mobile users may need one refresh to replace the cached stylesheet'
