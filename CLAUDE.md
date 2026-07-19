@@ -188,6 +188,12 @@ All credential fields must update `S.keys` on `input` for immediate tests and
 requests, call the debounced `persistKeys()` so nonstandard input paths survive
 reloads, and retain the `change` handler for an immediate final `saveKeys()`;
 do not reintroduce provider-specific stale-key or change-only persistence.
+On `body.is-mobile`, Settings uses one 44 px plain-language section selector and
+an independently scrolling `.mo-body`. Preserve progressive disclosure: everyday
+choices visible, technical controls expandable, and no capability removed. The
+model picker defaults to Automatic with individual models behind an explicit
+advanced reveal. Never auto-start a large WebLLM download on mobile; keep browser
+models manually selectable.
 Chat defaults to a capability-gated, cost-effective auto router: verified local
 models/WebLLM for simple requests; the cheapest configured direct cloud model
 meeting the task quality floor for harder requests; OpenRouter only after

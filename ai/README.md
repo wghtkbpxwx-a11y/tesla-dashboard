@@ -41,6 +41,12 @@ they are typed so an immediate connection test cannot use stale state; a short
 debounce persists the settled value for paste, password-manager, remote-control,
 and ordinary typing paths, with the change event retained as the immediate final
 save.
+On mobile, Settings uses one plain-language section picker above an independently
+scrolling content pane. Everyday chat choices stay visible while routing, team,
+spending, and response-tuning controls live in expandable groups; all capabilities
+remain available. The model picker opens on Automatic and reveals individual
+providers/models only through “Choose a specific model.” Automatic mobile routing
+never starts a large WebLLM download; browser models remain manually selectable.
 
 ## Automatic model routing and rolling budget
 
