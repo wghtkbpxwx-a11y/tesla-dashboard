@@ -253,6 +253,11 @@ contract, tool, routing, UI, safety, documentation, or deployment change:
 
 The guarded repository writer enforces an `ai/index.html` changelog edit in
 every source PR. Do not bypass that requirement.
+The next full architecture/security audit must start at `FABLE_AUDIT_BRIEF.md`.
+Treat its “already verified” section as a context-saving index: do not repeat
+those checks without contradictory evidence, but verify source before changing a
+boundary. Prioritize deterministic tests and P0/P1 risks over copy, formatting,
+provider expansion, framework migration, or another broad visual pass.
 Dashboard More→Apps has "✦ Nova AI" / "🎙️ Nova Voice" `data-href` submenu
 buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
 Nova uses `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.

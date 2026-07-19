@@ -7,6 +7,15 @@ single-file `index.html`, GitHub Pages, cross-origin blocked, cache refreshed ho
 Tags: **[S/M/L]** effort · **⭐ impact** · **🎨 Fable-session candidate** (creative/design/
 copy work that pairs well with a Fable model) · **🧪 needs a spike/verify-on-car**.
 
+## Next full audit
+
+The canonical audit queue is [`FABLE_AUDIT_BRIEF.md`](FABLE_AUDIT_BRIEF.md).
+The order is intentional: deterministic routing/budget/team tests and mutation
+security first; encrypted-sync/accounting correctness and failure recovery next;
+product comprehension only after those risks. Shipped mobile, credential,
+xAI, and LM Studio smoke checks should not consume another audit session unless
+new evidence contradicts them.
+
 ## Homebase AI operating model (shipped 2026-07-18)
 
 - ✅ Capability- and cost-aware model routing with local-first execution and a
