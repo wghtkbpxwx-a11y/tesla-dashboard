@@ -2681,7 +2681,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
-    state: 'PRs #58–#73 are merged and live; deployment status records are #72 and #74. Commit 2953ebd on agent/voice-mode-reliability implements a substantial Homebase Voice reliability upgrade and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1; its PR/merge/Pages lineage is still pending. The new deterministic voice harness passes without provider calls, and local browser checks cover the deep-link overlay, free output test, settings experience, root dashboard launchers, direct Tesla-to-voice navigation, and zero horizontal overflow at the tested desktop viewport. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and may use the least-expensive ready xAI/ElevenLabs/OpenAI speech backup under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require post-deployment device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    state: 'PRs #58–#75 are merged and live; deployment status records are #72 and #74, with this voice deployment record pending. PR #75 (squash merge 6c54670; implementation originated at 2953ebd) substantially upgrades Homebase Voice and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1. PR Validate, main Validate run 29670230087, and Pages run 29670229691 passed. Public production checks confirmed the one-tap voice overlay, audio-recovery control, xAI TTS implementation, voice test, zero horizontal overflow, three visible root voice links plus the More-menu launcher, no ChatGPT links, and direct Tesla-to-voice navigation. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and uses modality-priced xAI/OpenAI/ElevenLabs speech backup plans under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2732,9 +2732,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-voice-mode-reliability',
       date: '2026-07-18',
-      commit: '2953ebd (branch implementation; PR/merge lineage pending)',
+      commit: '6c54670 (PR #75 squash merge; implementation originated at 2953ebd)',
       branch: 'agent/voice-mode-reliability',
-      pull_request: 'pending; not yet merged or live',
+      pull_request: '#75 (merged 2026-07-18; live on GitHub Pages); deployment record pending',
       title: 'Make Homebase Voice resilient on iPhone and own the Tesla voice entry',
       type: 'feature+fix+voice+mobile+tesla+cost-routing+accessibility+tests+docs',
       depends_on: ['2026-07-18-mobile-settings-navigation','2026-07-18-ai-credit-router','2026-07-18-automatic-provider-failover','2026-07-18-per-query-model-selector'],
@@ -2767,7 +2767,9 @@ var HOMEBASE_CHANGELOG = {
         'python3 .github/scripts/validate.py parses root and AI JavaScript, validates cache/updater, and passes failover, one-query selector, and voice harnesses; git diff --check passes',
         'Local Browser exercised ai/?voice=1, the free device Play voice test and button recovery, the simplified Voice settings, Tesla Dashboard launchers, direct Tesla-to-voice navigation, and zero horizontal overflow at the available desktop viewport',
         'Unauthenticated no-credit CORS preflights to the official https://api.x.ai/v1/stt and /tts endpoints returned HTTP 200 with wildcard origin/method/header allowance for the GitHub Pages origin',
-        'No cloud speech request, provider credit, WebLLM download, or API-key read was used for implementation verification'
+        'No cloud speech request, provider credit, WebLLM download, or API-key read was used for implementation verification',
+        'PR #75 Validate passed; main Validate run 29670230087 and Pages deployment run 29670229691 passed for squash merge 6c54670',
+        'Public Pages checks confirmed ai/?voice=1 opens the one-tap dialog with v-audio-retry, ttsXAI, Play voice test, and zero horizontal overflow; the root has no ChatGPT links, exposes three visible ai/?voice=1 anchors plus the More-menu launcher, and its Voice action navigates directly to the live voice overlay'
       ],
       setup_required: [
         'None for free device speech; the already-configured xAI key makes the cheapest automatic cloud speech backup eligible after the encrypted settings reach that device',
@@ -2779,7 +2781,7 @@ var HOMEBASE_CHANGELOG = {
         'Cloud speech still depends on provider CORS, available credits, the rolling application guard, network reachability, and the device allowing audio playback',
         'Tesla may expose no microphone to webpages even though the Homebase Voice launcher and unsupported-state UI work correctly'
       ],
-      next_model: 'After PR, merge, Pages, and public verification are recorded, treat the deterministic voice work as shipped. Use Fable time on real-device evidence or consequential security/lifecycle races, not another cosmetic voice redesign or paid model comparison.'
+      next_model: 'Treat the deterministic voice implementation as shipped. Use Fable time on real-device evidence or consequential security/lifecycle races, not another cosmetic voice redesign or paid model comparison.'
     },
     {
       id: '2026-07-18-per-query-model-selector',
