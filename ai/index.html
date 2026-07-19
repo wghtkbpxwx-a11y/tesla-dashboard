@@ -2629,7 +2629,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
-    state: 'PRs #58–#68 are merged and live. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, and simplified mobile/model-picker work is deployed. Static validation and Pages checks pass; mobile sections were verified at 320/390 px and desktop at 1280 px. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    state: 'PRs #58–#69 are merged and live. FABLE_AUDIT_BRIEF.md is the canonical next-session entrypoint and the stale merged orchestrator branch has been removed locally and remotely. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, and simplified mobile/model-picker work is deployed. Static validation and Pages checks pass; mobile sections were verified at 320/390 px and desktop at 1280 px. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2678,9 +2678,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-fable-audit-brief',
       date: '2026-07-18',
-      commit: '426092c (implementation; documentation lineage follows in PR #69)',
+      commit: '6460230 (PR #69 squash merge; live-status record originated at 8631d3d)',
       branch: 'codex/prepare-fable-audit-handoff',
-      pull_request: '#69 (draft)',
+      pull_request: '#69 (merged 2026-07-18; live on GitHub Pages); deployment record #70',
       title: 'Give Fable a high-signal audit runway and remove stale orientation work',
       type: 'docs+handoff+audit-planning+cleanup',
       depends_on: ['2026-07-18-mobile-settings-navigation','2026-07-18-direct-provider-router-v2','2026-07-18-agent-orchestrator','2026-07-18-cross-device-vault-v2'],
@@ -2691,7 +2691,7 @@ var HOMEBASE_CHANGELOG = {
         'Compresses current_handoff from a long deployment narrative into the live baseline, five source entrypoints, five risk packages, and preserved non-negotiable boundaries',
         'Routes README, ai/README, CLAUDE.md, and ROADMAP.md to the same audit brief so the next session does not spend context reconciling competing instructions',
         'Marks visual rework, provider expansion, framework migration, repeated smoke tests, and speculative relays as out of scope unless new evidence makes them material',
-        'Schedules removal of the stale codex/homebase-ai-orchestrator branch only after confirming merged PR #58 retains its history'
+        'Removed the stale local and remote codex/homebase-ai-orchestrator branch after confirming merged PR #58 retains its history and commit recovery path'
       ],
       safety_guards: [
         'The brief does not authorize new external writes, public relays, secret handling, cloud spend, or weakened repository/vault/tool boundaries',
@@ -2700,8 +2700,8 @@ var HOMEBASE_CHANGELOG = {
       ],
       verification: [
         'Confirmed PRs #58 and #67–#68 are merged and their implementation/deployment history remains in GitHub and HOMEBASE_CHANGELOG',
-        'Confirmed codex/homebase-ai-orchestrator is the stale source branch for merged PR #58 before cleanup',
-        'Pending: validate JavaScript/cache/docs, review every brief symbol against source, publish through a validated PR, and confirm a clean main worktree'
+        'Confirmed codex/homebase-ai-orchestrator was the stale source branch for merged PR #58, then deleted its local and remote branch references after PR #69 merged',
+        'Validated JavaScript/cache/docs, checked every brief symbol against source, passed Validate and Pages deployment for PR #69, verified the public brief and current_handoff, and confirmed main is the only remaining local/remote work branch'
       ],
       setup_required: [
         'When usage resets, prompt Fable to read FABLE_AUDIT_BRIEF.md and execute its mission; no setup or API spend is needed for the initial deterministic audit'
