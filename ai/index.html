@@ -2682,7 +2682,7 @@ var HOMEBASE_CHANGELOG = {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
     state: 'PRs #58–#76 are merged and live; deployment status records are #72, #74, and #76, with PR #77 finalizing the voice record wording. PR #75 (squash merge 6c54670; implementation originated at 2953ebd) substantially upgrades Homebase Voice and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1. PR Validate, main Validate run 29670230087, and Pages run 29670229691 passed; record PR #76, main Validate run 29670347179, and Pages run 29670346746 also passed. Public production checks confirmed the one-tap voice overlay, audio-recovery control, xAI TTS implementation, voice test, zero horizontal overflow, three visible root voice links plus the More-menu launcher, no ChatGPT links, and direct Tesla-to-voice navigation. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and uses modality-priced xAI/OpenAI/ElevenLabs speech backup plans under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
-    latest_fix: 'Branch codex/fix-scheduled-agent-routing repairs the reproduced scheduled-agent Demo bypass: unpinned tasks now use selectAIRoute plus runChat automatic failover and central cloud accounting, explicit task models remain terminal, result metadata follows the provider that answered, unavailable real models stop before tools with Try models again / AI connections recovery, quota cooldowns permit a bounded five-minute recovery probe after credits are added, and iOS page suspension synchronously flushes key edits. The deterministic scheduled-agent harness is part of validate.py. Merge/deployment evidence must replace this branch-state note before the next audit.',
+    latest_fix: 'PR #78 is merged and live as f3e71e6 (implementation originated at 5613294). It repairs the reproduced scheduled-agent Demo bypass: unpinned tasks use selectAIRoute plus runChat automatic failover and central cloud accounting, explicit task models remain terminal, result metadata follows the provider that answered, unavailable real models stop before tools with Try models again / AI connections recovery, quota cooldowns permit a bounded five-minute recovery probe after credits are added, and iOS page suspension synchronously flushes key edits. PR Validate run 29671132268, main Validate run 29671144920, and Pages run 29671144486 passed. Production at 390×844 confirmed the new contracts, honest paused card, both recovery controls, no tool call, and zero horizontal overflow. The deterministic scheduled-agent harness is part of validate.py.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2733,9 +2733,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-scheduled-agent-real-model-routing',
       date: '2026-07-18',
-      commit: '5613294 (implementation commit; squash-merge commit pending)',
+      commit: 'f3e71e6 (PR #78 squash merge; implementation originated at 5613294)',
       branch: 'codex/fix-scheduled-agent-routing',
-      pull_request: 'pending',
+      pull_request: '#78 (merged 2026-07-18; live on GitHub Pages)',
       title: 'Route scheduled agents through real Automatic models and failover',
       type: 'fix+routing+scheduler+mobile+reliability+tests+docs',
       depends_on: ['2026-07-18-automatic-provider-failover','2026-07-18-ai-credit-router','2026-07-18-cloud-key-debounced-persistence','2026-07-18-mobile-settings-navigation'],
@@ -2764,7 +2764,9 @@ var HOMEBASE_CHANGELOG = {
         '.github/scripts/test_scheduled_agent_routing.js passes Automatic route, exact-model terminality, unavailable-model stop, provider-result metadata, task-picker exclusions, and mobile key-flush contracts without provider calls',
         '.github/scripts/test_ai_failover.js now also verifies successful fallback clears provider cooldown state',
         'python3 .github/scripts/validate.py passes root/AI JavaScript parsing, cache and updater checks, automatic failover, exact query selector, mobile voice, and scheduled-agent routing',
-        'No paid model call, API-key read, private user data, or external mutation was used for implementation verification'
+        'No paid model call, API-key read, private user data, or external mutation was used for implementation verification',
+        'PR #78 Validate run 29671132268, main Validate run 29671144920, and Pages deployment run 29671144486 passed for squash merge f3e71e6',
+        'Public production at 390×844 contains selectScheduledTaskRoute, claimAutoProviderProbe, the new changelog entry, and Automatic paused metadata; the live no-model path showed both recovery controls, performed no tool call, and had zero horizontal overflow'
       ],
       setup_required: [
         'After deployment, reopen Homebase on iPhone and run the affected task again; leave its model on Automatic · best value',
@@ -2774,7 +2776,7 @@ var HOMEBASE_CHANGELOG = {
         'A static GitHub Pages app cannot make a cloud call when the phone truly has no provider key; it now stops honestly and routes the user to recovery instead of simulating completion',
         'Scheduled tasks run only while Homebase is open; reliable background execution would require a user-owned server or platform scheduler'
       ],
-      next_model: 'Treat the new deterministic scheduler-routing harness as the baseline. Audit scheduler lifecycle, notification, concurrent-interactive interruption, and background suspension only when concrete evidence justifies it; replace pending lineage with merge and Pages evidence.'
+      next_model: 'Treat the new deterministic scheduler-routing harness and PR #78 production evidence as the baseline. Audit scheduler lifecycle, notification, concurrent-interactive interruption, and background suspension only when concrete evidence justifies it.'
     },
     {
       id: '2026-07-18-voice-mode-reliability',
