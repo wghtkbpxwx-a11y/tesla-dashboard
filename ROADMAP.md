@@ -97,6 +97,63 @@ new evidence contradicts them.
   relay for server-side secrets and Workers AI; do not expose a Cloudflare API
   token directly in the GitHub Pages browser app.
 
+## Homebase scheduled tasks (Wave 2)
+
+Decision record — 2026-07-19, Agent 2C (P1 scheduler architecture spike, branch
+`homebase/ai-p1-scheduler-spike`).
+
+**Context.** Scheduled tasks (`runTask` / `schedulerTick` in `ai/index.html`)
+run a saved prompt through the same Automatic cost/capability router as chat and
+post the result to a dedicated conversation. They fire **only while a Homebase
+tab is open and executing JS**: the engine is a 20 s `setInterval` plus a
+`visibilitychange` re-check, with an existing "catch up missed runs" toggle. The
+app is a single static file on GitHub Pages — no server, no cron. Target clients
+are the Tesla in-car WebKit browser and iOS Safari, which are the most
+constrained runtimes for any background primitive.
+
+**Options evaluated:**
+
+1. **Service Worker + Periodic Background Sync / notification triggers.** The
+   only genuine background primitive, but `periodicSync` is Chromium-only, gated
+   behind PWA install + engagement heuristics, and **absent from every WebKit**
+   (iOS Safari, Tesla). Notification `showTrigger`/`TimestampTrigger` were
+   pulled from Chromium and never shipped in WebKit. Cannot deliver reliable
+   background runs on the target devices. (A SW is still useful for *shell
+   caching* — Roadmap #5 — but that is a load-speed feature, not scheduling.)
+2. **Web Push via a future Cloudflare Worker relay.** Real (VAPID + Push API),
+   but iOS delivers Web Push only to an *installed* PWA, and a push can wake a
+   *notification* — it cannot run our AI prompt with the user's browser-local
+   API keys. It also requires a hosted relay we deliberately do not run
+   (CLAUDE.md: no public relay tokens in the browser app). Document only; defer.
+3. **Honest product UX: keep-tab-open onboarding + missed-run catch-up.**
+   Already the shipped model and already partly honest. Zero new attack surface,
+   works on every target device today. Improve the copy and make catch-up runs
+   visible.
+4. **PWA install + clearly documented limitations.** The manifest already
+   installs Homebase. Install by itself does **not** grant background execution
+   on WebKit — it only makes "keep it open" nicer. Keep it, but never imply it
+   enables background AI.
+
+**Recommended default: Option 3 (honest keep-open UX), framed with Option 4.**
+It is the only approach that is both truthful and functional on Tesla/iOS today.
+Ship clearer task copy stating Homebase needs an open/pinned tab (or the open
+installed app), never claim background execution, and surface a distinct toast
+when a run is *caught up* after the tab reopens.
+
+**What NOT to build yet:** no Service Worker for scheduling; no
+`periodicSync`/notification-trigger code (unsupported on WebKit → dead and
+misleading code); no Cloudflare Worker or Web Push relay; and never a public
+relay token in the browser. A shell-cache-only SW (Roadmap #5) is a separate
+load-performance task for **Wave 3 Agent 3A** and must be registered carefully
+given how hard the car caches.
+
+**Next implementation step (Wave 3):** if truly reliable reminders become a
+requirement, design a *user-owned* Cloudflare Worker / Pages Function relay (the
+same relay CLAUDE.md already anticipates for server-side secrets) that sends Web
+Push to an installed PWA as a **reminder/notification only** — explicitly not
+remote AI execution with the user's local keys. Separately, evaluate the
+shell-cache SW purely for faster loads.
+
 ---
 
 ## The one number that drives most of this

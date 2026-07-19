@@ -1908,7 +1908,7 @@ body.is-desktop .chat-float[data-state="open"]{
   <div class="modal">
     <div class="mo-head"><h2>⏰ Scheduled tasks</h2><button class="icon-btn" data-close="tasks-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="mo-body">
-      <div class="hint-box" style="margin:0 0 13px">Tasks run their prompt automatically and post the result to a dedicated chat (with an optional notification). They run while Homebase is open in a tab — runs missed while closed are caught up on your next visit.</div>
+      <div class="hint-box" style="margin:0 0 13px">Tasks run their prompt automatically and post the result to a dedicated chat (with an optional notification). <b>They only run while a Homebase tab is open</b> (or the installed app is open in the foreground) — Homebase can't run in the background or wake itself, so keep a tab open or pinned for on-time runs. Runs missed while it was closed are caught up the next time you open Homebase.</div>
       <button class="sm-btn pri" id="task-new" style="margin-bottom:13px">＋ New task</button>
       <div id="task-list"></div>
     </div>
@@ -1938,8 +1938,8 @@ body.is-desktop .chat-float[data-state="open"]{
       <div class="set-row" id="te-row-once" style="display:none"><span class="lbl">Run at</span><input id="te-once" type="datetime-local"></div>
       <div class="set-row"><span class="lbl">Model<span class="sub">Blank = current default model</span></span><select id="te-model"><option value="">(default)</option></select></div>
       <div class="set-row"><span class="lbl">Use agent tools<span class="sub">Weather, web search, time, etc.</span></span><div class="tgl" id="te-tools"></div></div>
-      <div class="set-row"><span class="lbl">Notify<span class="sub">Browser notification when the run finishes</span></span><div class="tgl on" id="te-notify"></div></div>
-      <div class="set-row"><span class="lbl">Catch up missed runs<span class="sub">If the app was closed at the scheduled time, run on next open</span></span><div class="tgl on" id="te-catchup"></div></div>
+      <div class="set-row"><span class="lbl">Notify<span class="sub">Browser notification when the run finishes (only fires while Homebase is open)</span></span><div class="tgl on" id="te-notify"></div></div>
+      <div class="set-row"><span class="lbl">Catch up missed runs<span class="sub">If Homebase was closed at the scheduled time, run it on your next open</span></span><div class="tgl on" id="te-catchup"></div></div>
       <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:14px">
         <button class="sm-btn" data-close="task-ed-ov">Cancel</button>
         <button class="sm-btn pri" id="te-save">Save task</button>
@@ -2727,8 +2727,9 @@ var HOMEBASE_CHANGELOG = {
     'The next model must read current_handoff plus the newest entries before scoping or editing'
   ],
   current_handoff: {
-    to: 'next model / Wave 2 agents',
-    objective: 'Wave 1 P0 is complete on this branch (security hardening + concurrency/vault/team CI). Keep python3 .github/scripts/validate.py green (all harnesses including test_subagent_allowlist.js and ai/tests/homebase.test.js). Next: Wave 2 reliability — error beacon for /ai/, vault conflict UX, scheduler architecture spike.',
+    to: 'next model / Wave 2–3 agents',
+    objective: 'Wave 1 P0 is complete (security hardening + concurrency/vault/team CI). Wave 2 P1 scheduler architecture spike is DONE (this branch): decision recorded in ROADMAP.md and honest keep-open onboarding shipped — NO background-execution code added. Keep python3 .github/scripts/validate.py green. Remaining Wave 2 reliability: error beacon for /ai/, vault conflict UX.',
+    scheduler_spike_2026_07_19: 'Agent 2C (branch homebase/ai-p1-scheduler-spike): recommended default = honest keep-tab-open UX + missed-run catch-up (ROADMAP.md "## Homebase scheduled tasks (Wave 2)"). Rationale: periodicSync + notification triggers are unavailable on WebKit (iOS/Tesla) and Web Push cannot run a prompt with the user\'s browser-local keys. Shipped: clearer task copy that an open/pinned tab (or open installed app) is required, and a distinct catch-up toast (runTask gained a catchUp arg; schedulerTick passes it when a run is >3 min late). DEFERRED: Service Worker shell-cache to Wave 3 Agent 3A; Cloudflare Worker/Web Push relay documented only. Do NOT add periodicSync/notification-trigger scheduling on WebKit or any public relay token.',
     p0_security_hardening_2026_07_19: 'Agent 1B implemented Agent 1C\'s Wave 1 P0 review on branch homebase/ai-p0-security-harden (rebased onto main after PR #82). developerMode defaults false; sourceChangeAuthorized() requires explicit /dev or a pull-request phrase; proposeRepositoryChanges() ALWAYS confirms regardless of devConfirmWrites; run_js removed; vault passphrase minimum 12 chars. test_subagent_allowlist.js (17 checks) wired into validate.py. Do NOT reintroduce run_js, loosen sourceChangeAuthorized, or make the repo-write confirm optional.',
     wave1_p0_concurrency_tests_2026_07_19: 'Agent 1A shipped (merged as PR #82): test_cloud_budget_concurrency.js, test_vault_merge.js, test_specialist_team.js, plus ai/tests/homebase.test.js in validate.py.',
     fable_audit_2026_07_19: 'The Fable session executed FABLE_AUDIT_BRIEF P0/P1 on branch claude/multimodal-ai-chatbot-4r8s23 (PR #80): sub-agent tool boundary enforced at execution time, reservation settle/release idempotency on chat and fixed-cost paths, cross-device deletion tombstones through the encrypted vault, a 45-check deterministic safety suite extracting the real production functions (ai/tests/homebase.test.js — includes the PR #71 failover cooldowns), and a voice UX layer (audio-reactive orb/bars, local voice commands, split captions with per-reply route/cost, engine badge, repeat, opt-in echo-guarded barge-in) ported ON TOP of the PR #75 reliability engine with every #75 contract preserved and re-verified (one-tap gate, blocked-answer recovery, free-first plans, tap-to-finish).',
@@ -2745,7 +2746,7 @@ var HOMEBASE_CHANGELOG = {
     review_areas: [
       'DONE Wave 1: concurrent budget/vault/team CI (#82), security hardening (#83 this branch), sub-agent allowlist locked',
       'P1 next: /ai/ runtime error beacon, vault conflict UI, mobile sync indicator',
-      'P1: scheduler architecture (SW/push vs honest pin-tab onboarding)',
+      'DONE P1: scheduler architecture spike — recommended honest keep-open UX (ROADMAP "## Homebase scheduled tasks (Wave 2)"); SW/push deferred, no background-execution code added',
       'P1: concrete iPhone/Tesla hardware evidence for WebKit voice lifecycle / microphone limits; usage-ledger reconciliation vs provider billing exports',
       'P2: route/cost/degradation comprehension outside voice mode'
     ],
@@ -2782,6 +2783,40 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-19-scheduler-architecture-spike',
+      date: '2026-07-19',
+      commit: 'recorded in the PR that ships this change',
+      branch: 'homebase/ai-p1-scheduler-spike (from origin/main)',
+      pull_request: 'draft PR for Wave 2 P1 scheduler spike',
+      title: 'Wave 2 P1 scheduled-task architecture spike + honest keep-open onboarding',
+      type: 'docs+decision-record+ux+honesty',
+      depends_on: ['2026-07-18-scheduled-agent-real-model-routing','2026-07-19-p0-security-hardening'],
+      files_changed: ['ROADMAP.md','ai/index.html'],
+      interfaces_changed: ['runTask(t, manual, catchUp) — new optional third arg','schedulerTick() catch-up call site','tasks modal hint copy','task editor Notify/Catch-up sub-copy'],
+      reviewed_by: 'Agent 2C (Wave 2 P1 scheduler architecture spike)',
+      changes: [
+        'Architecture decision recorded in ROADMAP.md under "## Homebase scheduled tasks (Wave 2)": evaluated (1) Service Worker + Periodic Sync/notification triggers, (2) Web Push via a future Cloudflare Worker relay, (3) honest keep-tab-open UX + missed-run catch-up, (4) PWA install + documented limits. RECOMMENDED DEFAULT = option 3 framed with option 4, because periodicSync and notification triggers do not exist in WebKit (iOS/Tesla) and Web Push cannot run our prompt with the user\'s browser-local keys',
+        'Honest onboarding only (no fake background execution): tasks modal hint now states tasks run ONLY while a Homebase tab/installed app is open, that Homebase cannot run in the background or wake itself, and that missed runs are caught up on next open',
+        'Task editor sub-copy: Notify clarifies notifications only fire while Homebase is open; Catch-up wording tightened',
+        'runTask gained an optional third arg catchUp; schedulerTick passes catchUp=true only when a run is >3 min late (i.e. missed while closed and the task opted into catch-up). A distinct "Caught up …" toast then makes the late run visible instead of looking like an on-time run',
+        'NO Service Worker, NO periodicSync/notification-trigger code, NO Cloudflare/Web Push relay, and NO relay token were added — those are explicitly deferred (SW shell-cache to Wave 3 Agent 3A; relay documented only)'
+      ],
+      safety_guards: [
+        'Never claims background AI execution works: all copy is explicit that an open tab is required',
+        'selectScheduledTaskRoute / runChat reservation / $50 budget / allowDemoFallback:false paths are untouched; scheduled runs still stop honestly when no real model is available',
+        'test_scheduled_agent_routing.js substring contracts on runTask (selectScheduledTaskRoute resolution, autoFailover, allowDemoFallback:false, provider metadata, unavailable stop) are all preserved'
+      ],
+      verification: [
+        'python3 .github/scripts/validate.py green (index/ai JS parse, cache, python, failover, selector, voice, scheduled-agent routing, sub-agent allowlist, concurrency/vault/team, homebase suite)',
+        'node --check on extracted ai/index.html scripts passes'
+      ],
+      known_limits: [
+        'This does NOT add any real background execution — by design; WebKit offers no mechanism that runs our AI prompt with local keys while closed',
+        'Catch-up toast heuristic uses the existing 3-minute lateness threshold; interval tasks that legitimately run a few minutes late are not labelled catch-ups'
+      ],
+      next_model: 'Wave 3 Agent 3A: if pursuing a Service Worker, scope it to SHELL CACHING (Roadmap #5) for load speed, register carefully (the car caches hard), and do NOT resurrect periodicSync/notification-trigger scheduling on WebKit. Reliable reminders require a user-owned Cloudflare Worker/Pages Function Web Push relay (reminder-only, not remote AI), never a public relay token in the browser.'
+    },
     {
       id: '2026-07-19-p0-security-hardening',
       date: '2026-07-19',
@@ -11221,7 +11256,7 @@ function selectScheduledTaskRoute(t, convo, um, msgs){
   return {provider:provider, model:model, autoFailover:false, reason:'Chat default model',
     classification:classifyAIRequest(t.prompt || '', um || {}, convo)};
 }
-async function runTask(t, manual){
+async function runTask(t, manual, catchUp){
   if (t.running) return;
   // Don't interleave scheduled agent work with interactive chat
   if (S.sending){
@@ -11306,7 +11341,11 @@ async function runTask(t, manual){
   touchConvo(convo);
   if (convo.id === S.activeId) renderChat();
   var summary = (am.text || am.error || 'done').replace(/\s+/g, ' ').slice(0, 140);
-  toast('⏰ ' + t.name + ': ' + summary, am.error ? 'err' : 'ok', 5000);
+  if (catchUp && !am.error){
+    toast('⏰ Caught up “' + t.name + '” (missed while Homebase was closed): ' + summary, 'ok', 6000);
+  } else {
+    toast('⏰ ' + t.name + ': ' + summary, am.error ? 'err' : 'ok', 5000);
+  }
   if (t.notify && window.Notification && Notification.permission === 'granted' && (document.hidden || manual !== true)){
     try {
       var n = new Notification('⏰ ' + t.name, {body: summary, tag: 'nova-task-' + t.id});
@@ -11326,7 +11365,7 @@ function schedulerTick(){
         saveTasks();
         return;
       }
-      runTask(t);
+      runTask(t, false, late > 3 * 60000);
     }
   });
 }
