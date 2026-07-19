@@ -38,11 +38,16 @@ function assert(condition, message) {
 const DEFAULT_SETTINGS = {speech:{
   lang:'en-CA', voiceURI:'', rate:1, engine:'auto', engineVersion:2,
   xaiVoice:'eve', openaiVoice:'nova', elevenVoiceId:'',
-  elevenTtsModel:'eleven_flash_v2_5', elevenSttModel:'scribe_v2'
+  elevenTtsModel:'eleven_flash_v2_5', elevenSttModel:'scribe_v2', preferPremiumVoiceMobile:false
 }};
 const keys = {xai:'xai-test', elevenlabs:'eleven-test', openai:'openai-test'};
 const getKey = (provider) => keys[provider] || '';
-const S = {settings:{speech:{engine:'auto', xaiVoice:'eve', elevenVoiceId:'voice-id'}}};
+const S = {settings:{speech:{engine:'auto', xaiVoice:'eve', elevenVoiceId:'voice-id', preferPremiumVoiceMobile:false}}};
+
+// Mutable device context for the mobile premium opt-in checks below.
+let IS_IOS = false;
+let mobileFlag = false;
+const document = { body: { classList: { contains: (c) => c === 'is-mobile' && mobileFlag } } };
 
 const chooseVoiceTranscript = eval('(' + extractFunction('chooseVoiceTranscript') + ')');
 const normalizeSpeechSettings = eval('(' + extractFunction('normalizeSpeechSettings') + ')');
@@ -50,6 +55,8 @@ const voiceSTTPlan = eval('(' + extractFunction('voiceSTTPlan') + ')');
 const selectVoiceSTTProvider = eval('(' + extractFunction('selectVoiceSTTProvider') + ')');
 const voiceTTSPlan = eval('(' + extractFunction('voiceTTSPlan') + ')');
 const selectVoiceTTSProvider = eval('(' + extractFunction('selectVoiceTTSProvider') + ')');
+const isMobileVoiceDevice = eval('(' + extractFunction('isMobileVoiceDevice') + ')');
+const mobilePremiumVoiceCloudFirst = eval('(' + extractFunction('mobilePremiumVoiceCloudFirst') + ')');
 
 function main() {
   assert(chooseVoiceTranscript(' final answer ', 'unfinished') === 'final answer',
@@ -83,6 +90,59 @@ function main() {
   delete keys.openai;
   assert(selectVoiceTTSProvider('auto') === 'elevenlabs',
     'automatic speech output must retain a final configured backup');
+
+  // ---- Mobile premium voice opt-in (Wave 2 P1) ----
+  // Restore the full key set for the opt-in scenarios.
+  keys.xai = 'xai-test'; keys.openai = 'openai-test'; keys.elevenlabs = 'eleven-test';
+
+  // Default (opt-in OFF): Automatic keeps the documented free-device-first plan.
+  S.settings.speech.engine = 'auto';
+  S.settings.speech.preferPremiumVoiceMobile = false;
+  mobileFlag = true; IS_IOS = true;
+  assert(mobilePremiumVoiceCloudFirst() === false,
+    'without the opt-in, Automatic voice must stay free-device-first even on mobile');
+
+  // Opt-in ON + ready xAI key on mobile: cloud voice first, ordered by cost.
+  S.settings.speech.preferPremiumVoiceMobile = true;
+  assert(mobilePremiumVoiceCloudFirst() === true,
+    'the opt-in with a ready cloud key on mobile must run cloud voice first');
+  assert(selectVoiceTTSProvider('auto') === 'xai',
+    'mobile premium voice must pick the lowest-cost ready cloud provider first');
+  assert(voiceTTSPlan('auto').join(',') === 'xai,openai,elevenlabs',
+    'mobile premium voice plan must stay modality-cost-ordered');
+
+  // Opt-in ON but no cloud keys: falls back to device speech (no spend).
+  const savedKeys = Object.assign({}, keys);
+  delete keys.xai; delete keys.openai; delete keys.elevenlabs;
+  assert(mobilePremiumVoiceCloudFirst() === false,
+    'the opt-in must fall back to free device speech when no cloud key is ready (no spend)');
+  assert(voiceTTSPlan('auto').length === 0,
+    'no cloud keys means no cloud speech plan and no spend');
+  Object.assign(keys, savedKeys);
+
+  // Explicit device-only mode never spends, even with the opt-in and keys ready.
+  S.settings.speech.engine = 'device';
+  assert(mobilePremiumVoiceCloudFirst() === false,
+    'explicit device-only mode must never route to cloud voice');
+  assert(voiceTTSPlan('device').length === 0,
+    'device-only mode must never spend cloud credits');
+
+  // Opt-in ON but a non-mobile device: the free-device-first default is preserved.
+  S.settings.speech.engine = 'auto';
+  mobileFlag = false; IS_IOS = false;
+  assert(mobilePremiumVoiceCloudFirst() === false,
+    'the mobile opt-in must not change desktop behaviour');
+  // Restore mobile+auto context for any later reads.
+  S.settings.speech.preferPremiumVoiceMobile = false;
+
+  const ttsPumpSrc = extractFunction('ttsPump');
+  assert(/mobilePremiumVoiceCloudFirst\(\)/.test(ttsPumpSrc) &&
+    /runAutomaticTTSFallback\(text, playId\)/.test(ttsPumpSrc) &&
+    ttsPumpSrc.indexOf('mobilePremiumVoiceCloudFirst()') < ttsPumpSrc.lastIndexOf('ttsBrowser(text, playId)'),
+    'ttsPump must try mobile premium cloud voice before the device-voice fallback');
+  assert(/normalizeSpeechSettings/.test(source) &&
+    /preferPremiumVoiceMobile\s*=\s*!!/.test(extractFunction('normalizeSpeechSettings')),
+    'the premium opt-in must be normalized to a boolean and persisted in speech settings');
 
   const startVoiceMode = extractFunction('startVoiceMode');
   assert(/Tap once to start voice/.test(startVoiceMode) && !/permissions\.query/.test(startVoiceMode),
