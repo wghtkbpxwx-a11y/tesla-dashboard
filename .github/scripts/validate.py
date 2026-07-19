@@ -136,6 +136,38 @@ def check_scheduled_agent_routing():
         fail("Scheduled agent routing tests failed:\n" + (r.stderr.strip() or r.stdout.strip()))
 
 
+def check_node_harness(target, label):
+    """Run a deterministic Node harness and surface its stdout/stderr on failure."""
+    if not os.path.exists(target):
+        fail(f"{target} not found")
+        return
+    r = subprocess.run(["node", target], capture_output=True, text=True)
+    if r.returncode == 0:
+        print(r.stdout.rstrip())
+    else:
+        fail(f"{label} failed:\n" + (r.stderr.strip() or r.stdout.strip()))
+
+
+def check_cloud_budget_concurrency():
+    """Parallel reservations must honor the $50 hard stop and settle without double-count."""
+    check_node_harness(".github/scripts/test_cloud_budget_concurrency.js", "Cloud budget concurrency tests")
+
+
+def check_vault_merge():
+    """Vault merge must dedupe usage, strip secrets, and abort push on decrypt failure."""
+    check_node_harness(".github/scripts/test_vault_merge.js", "Vault merge tests")
+
+
+def check_specialist_team():
+    """Specialist teams must honor the budget cap and synthesize after partial member failure."""
+    check_node_harness(".github/scripts/test_specialist_team.js", "Specialist team tests")
+
+
+def check_homebase_safety_suite():
+    """Broader Homebase deterministic suite (routing, tombstones, repo guards, budgets)."""
+    check_node_harness("ai/tests/homebase.test.js", "Homebase deterministic safety suite")
+
+
 def main():
     if not os.path.exists("index.html"):
         print("index.html not found — run from the repo root", file=sys.stderr)
@@ -151,6 +183,10 @@ def main():
     check_query_model_selector()
     check_voice_mode()
     check_scheduled_agent_routing()
+    check_cloud_budget_concurrency()
+    check_vault_merge()
+    check_specialist_team()
+    check_homebase_safety_suite()
     print()
     if FAILS:
         print(f"FAILED: {len(FAILS)} check(s) did not pass — blocking deploy.")
