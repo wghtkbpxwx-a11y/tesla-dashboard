@@ -2629,7 +2629,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
-    state: 'PRs #58–#69 are merged and live. FABLE_AUDIT_BRIEF.md is the canonical next-session entrypoint and the stale merged orchestrator branch has been removed locally and remotely. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, and simplified mobile/model-picker work is deployed. Static validation and Pages checks pass; mobile sections were verified at 320/390 px and desktop at 1280 px. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    state: 'PRs #58–#69 are merged and live. Draft PR #71 (implementation commit 4d2c155) adds deterministic, request-time Automatic failover for missing keys and quota/auth/rate-limit/network/provider failures; merge and Pages status must still be recorded before calling it live. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, and simplified mobile/model-picker work is deployed. Static validation passes locally, including the new failover harness. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2638,7 +2638,7 @@ var HOMEBASE_CHANGELOG = {
       'ai/README.md and the Homebase sections of CLAUDE.md only when a boundary contract needs clarification'
     ],
     review_areas: [
-      'P0: deterministic routing, budget reservation/settlement, team-trigger/quality/cap, partial-failure, and mobile WebLLM tests',
+      'P0: extend the shipped single-call automatic failover harness into concurrent reservation/settlement, cancellation, team partial-failure, and mobile WebLLM tests',
       'P0: adversarial repository-mutation, connector least-privilege, prompt-injection, official-host, LM Studio MCP, and secret-boundary review',
       'P1: encrypted vault conflict/tombstone/deduplication/wrong-passphrase/interrupted-sync correctness and usage-ledger reconciliation',
       'P1: cancellation, cloud/local timeout, model unload, tool-loop exhaustion, partial-agent failure, and mobile background recovery',
@@ -2675,6 +2675,49 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-automatic-provider-failover',
+      date: '2026-07-18',
+      commit: '4d2c155 (implementation commit; lineage metadata follows in the same PR)',
+      branch: 'agent/auto-provider-failover',
+      pull_request: '#71 (draft; implementation and deterministic validation complete, checks pending)',
+      title: 'Keep Automatic chat working across missing keys and exhausted providers',
+      type: 'fix+routing+reliability+budget+agents+tests+docs',
+      depends_on: ['2026-07-18-direct-provider-router-v2','2026-07-18-agent-orchestrator','2026-07-18-cloud-key-debounced-persistence','2026-07-18-fable-audit-brief'],
+      files_changed: ['ai/index.html','.github/scripts/test_ai_failover.js','.github/scripts/validate.py','ai/README.md','CLAUDE.md','FABLE_AUDIT_BRIEF.md','ROADMAP.md'],
+      interfaces_changed: ['AUTO_PROVIDER_COOLDOWNS','autoFailurePolicy','autoFailoverPolicyForError','cloudRouteCandidates','httpError','buildAutoFailoverPlan','runChat','runSubagentMember','runTeamLeadSynthesis','sendMessage','.github/scripts/validate.py'],
+      changes: [
+        'Automatic mode now skips providers without usable credentials and ranks an ordered backup plan using the existing task capability, quality floor, direct-first/OpenRouter-fallback, and lowest-estimated-cost rules',
+        'Quota/billing, authentication/access, rate-limit, provider outage, network, and model-level request failures are classified; eligible pre-stream failures release their budget reservation and continue to the next suitable model',
+        'Provider-wide failures enter a bounded in-memory cooldown so simultaneous chats and specialist agents do not repeatedly spend latency on a known-bad route; editing a key or passing Test connection clears its cooldown',
+        'Automatic specialist members and Automatic lead synthesis inherit the same failover path and record the provider/model actually used plus a plain-language fallback reason',
+        'At most six real-provider attempts are made for one response, while the free Demo route remains reachable after the cap when no real provider is usable',
+        'Validation now parses the AI application and runs a deterministic Node harness against extracted production functions without making provider calls or consuming credits'
+      ],
+      safety_guards: [
+        'Manual provider/model selections remain terminal and are never silently rerouted',
+        'Failover is allowed only before visible response or reasoning text is emitted, preventing duplicate or contradictory partial answers',
+        'Every attempted paid call still passes through the central rolling-budget reservation, settlement, and release path; capability, quality, tool, vision, and hard-budget eligibility remain enforced',
+        'No real API key, private data, network call, or paid model usage appears in the failover fixtures or validation output',
+        'The Demo fallback identifies itself and does not pretend to provide real model reasoning'
+      ],
+      verification: [
+        'node .github/scripts/test_ai_failover.js passes missing-key skip, OpenAI quota to xAI continuation, provider cooldown, no-provider Demo, no retry after partial output, and six-attempt-bound cases',
+        'python3 .github/scripts/validate.py parses root and AI JavaScript, validates the embedded cache, compiles the updater, and runs the failover harness',
+        'git diff --check passes; no live or paid provider request was made'
+      ],
+      setup_required: [
+        'Configure and fund at least one cloud provider or make a local runtime reachable for genuine AI answers; otherwise Homebase deliberately falls back to Demo',
+        'Provider-side billing limits and alerts remain recommended because the Homebase rolling ledger is an estimate'
+      ],
+      known_limits: [
+        'Provider cooldowns are runtime/session state and clear on page reload; they are intentionally not synced across devices',
+        'The browser cannot know a provider balance before the provider rejects a request, so the first exhausted-credit call may still incur latency',
+        'Automatic failover does not resume from a partially streamed provider response and does not alter a manually selected route',
+        'The deterministic baseline does not yet cover concurrent cancellation/settlement races or streamed tool-call failover; those remain the highest-value Fable reliability extensions'
+      ],
+      next_model: 'After deployment lineage is recorded, Fable should extend this production-function harness into concurrent budget reservation/settlement, cancellation, streamed tool-call, and specialist-team partial-failure cases without spending cloud credits.'
+    },
     {
       id: '2026-07-18-fable-audit-brief',
       date: '2026-07-18',
@@ -6511,6 +6554,38 @@ function anthropicAllowsTemp(id){ return !/opus-4-[78]|sonnet-5/.test(id); }
 
 /* ================= cloud budget + model router ================= */
 var CLOUD_RESERVED_USD = 0;
+var AUTO_PROVIDER_COOLDOWNS = {};
+function autoFailurePolicy(status, message, retryAfterMs){
+  status = +status || 0;
+  var s = String(message || '').toLowerCase();
+  var quota = /quota|billing|credit|balance|insufficient[_ -]?quota|payment required|spend limit/.test(s) || status === 402;
+  if (quota) return {eligible:true, scope:'provider', reason:'credits unavailable', cooldownMs:21600000};
+  if (status === 401 || status === 403) return {eligible:true, scope:'provider', reason:'key or access unavailable', cooldownMs:600000};
+  if (status === 429) return {eligible:true, scope:'provider', reason:'temporarily rate limited', cooldownMs:Math.max(30000, +retryAfterMs || 60000)};
+  if (status === 408 || status === 425 || status >= 500) return {eligible:true, scope:'provider', reason:'temporarily unavailable', cooldownMs:90000};
+  if ([400,404,409,413,415,422].indexOf(status) >= 0) return {eligible:true, scope:'model', reason:'model rejected this request', cooldownMs:0};
+  if (!status && /cloud budget guard/.test(s)) return {eligible:true, scope:'model', reason:'outside the remaining app budget', cooldownMs:0};
+  if (!status && /failed to fetch|networkerror|network error|load failed|timed out|timeout|connection/.test(s)){
+    return {eligible:true, scope:'provider', reason:'network unavailable', cooldownMs:90000};
+  }
+  return {eligible:false, scope:'none', reason:'request failed', cooldownMs:0};
+}
+function providerInAutoCooldown(provider){
+  var until = +AUTO_PROVIDER_COOLDOWNS[provider] || 0;
+  if (!until) return false;
+  if (until <= Date.now()){ delete AUTO_PROVIDER_COOLDOWNS[provider]; return false; }
+  return true;
+}
+function clearAutoProviderCooldown(provider){ delete AUTO_PROVIDER_COOLDOWNS[provider]; }
+function markAutoProviderFailure(provider, policy){
+  if (!provider || !policy || policy.scope !== 'provider' || !policy.cooldownMs) return;
+  AUTO_PROVIDER_COOLDOWNS[provider] = Math.max(+AUTO_PROVIDER_COOLDOWNS[provider] || 0, Date.now() + policy.cooldownMs);
+}
+function autoFailoverPolicyForError(err){
+  if (!err) return autoFailurePolicy(0, '');
+  if (err.name === 'AbortError' || err.code === 20) return {eligible:false, scope:'none', reason:'cancelled', cooldownMs:0};
+  return err.autoFailurePolicy || autoFailurePolicy(err.status || 0, err.message || String(err), err.retryAfterMs || 0);
+}
 function cloudBudgetCfg(){
   var b = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, S.settings.cloudBudget || {});
   b.limitUsd = clamp(+b.limitUsd || 50, 1, 10000);
@@ -6701,7 +6776,7 @@ function cloudRouteCandidates(cls, query, msgs, maxOut){
   var needActions = !!(cls.actions || cls.tools);
   var out = [], sample = {system:'', msgs:msgs, tools:needActions ? TOOLS : null};
   PROVIDER_ORDER.forEach(function(p){
-    if (!cloudProvider(p) || !providerReady(p)) return;
+    if (!cloudProvider(p) || !providerReady(p) || providerInAutoCooldown(p)) return;
     providerModels(p).forEach(function(m){
       var price = modelCost(p, m.id), caps = modelCaps(p, m.id), quality = modelQuality(p, m.id);
       if (!price || quality < minQ || (cls.vision && !caps.vision) || (needActions && !caps.tools) ||
@@ -6859,7 +6934,7 @@ function toolsForNames(names){
   return enabledTools().filter(function(t){ return names.indexOf(t.name) >= 0; });
 }
 async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
-  if (!PROVIDERS[cm.provider] || !providerReady(cm.provider)) throw new Error('Provider not ready');
+  if (!PROVIDERS[cm.provider]) throw new Error('Unknown provider');
   var history = msgs.slice(), roleTools = toolsForNames(cm.toolNames), finalText = '';
   for (var round = 0; round < 3; round++){
     var canCall = roleTools.length && round < 2 ? roleTools : null;
@@ -6869,8 +6944,13 @@ async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
         '\nUse only the tools supplied to you. Never perform repository writes, sends, deletions, or other external mutations. Return a compact handoff to the lead agent.',
       msgs:history, temperature:Math.min(.5, S.settings.temperature), maxTokens:cm.maxTokens || 1200,
       think:false, tools:canCall, signal:S.abort.signal, conversationId:convo.id, messageId:am.id,
+      autoFailover:true, qualityFloor:cm.quality || 3, userQuery:userQuery,
+      classification:{tier:autoFailoverTierForQuality(cm.quality || 3), tools:!!(canCall && canCall.length), actions:!!(canCall && canCall.length)},
       onText:function(t){ cm.text += t; schedulePaint(am, convo); }, onThink:null, onProgress:null
     });
+    if (res.usedProvider){ cm.provider = res.usedProvider; cm.model = res.usedModel; }
+    var memberFallback = autoFailoverSummary(res);
+    if (memberFallback) cm.failover = memberFallback;
     addUsage(totalUsage, res.usage);
     finalText = res.text || cm.text;
     if (!(res.toolCalls && res.toolCalls.length && canCall)) break;
@@ -6896,10 +6976,17 @@ async function runTeamLeadSynthesis(sp, sm, convo, history, userQuery, am, total
       msgs:history, temperature:Math.min(.7, S.settings.temperature), maxTokens:maxTokens,
       think:S.settings.thinking, tools:roundTools, signal:S.abort.signal,
       conversationId:convo.id, messageId:am.id,
+      autoFailover:!!S.settings.autoRoute, qualityFloor:Math.max(3, modelQuality(sp, sm)), userQuery:userQuery,
+      classification:{tier:autoFailoverTierForQuality(Math.max(3, modelQuality(sp, sm))), tools:!!(roundTools && roundTools.length), actions:!!(roundTools && roundTools.length)},
       onText:function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
       onThink:function(t){ am.thinking += t; schedulePaint(am, convo); },
       onProgress:function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
     });
+    if (res.usedProvider){
+      sp = res.usedProvider; sm = res.usedModel; am.provider = sp; am.model = sm;
+      var leadFallback = autoFailoverSummary(res);
+      if (leadFallback && am.routeReason.indexOf(leadFallback) < 0) am.routeReason += ' · ' + leadFallback;
+    }
     addUsage(totalUsage, res.usage); final = res;
     if (!(res.toolCalls && res.toolCalls.length && roundTools)) break;
     var rd = {text:res.text || '', anthRaw:res.anthRaw,
@@ -6957,9 +7044,22 @@ async function httpError(resp){
       if (typeof j.error === 'string') msg = j.error;
     } catch(e){ if (t) msg = msg + ' — ' + t.slice(0, 200); }
   } catch(e){}
-  if (resp.status === 401 || resp.status === 403) msg += ' · check your API key in Settings';
-  if (resp.status === 429) msg += ' · rate limited, wait a moment';
-  return new Error(msg);
+  var retryAfterMs = 0;
+  try {
+    var retryAfter = resp.headers && resp.headers.get('retry-after');
+    if (retryAfter){
+      retryAfterMs = /^\d+(?:\.\d+)?$/.test(retryAfter) ? (+retryAfter * 1000) : Math.max(0, new Date(retryAfter).getTime() - Date.now());
+    }
+  } catch(e){}
+  var policy = autoFailurePolicy(resp.status, msg, retryAfterMs);
+  if (policy.reason === 'credits unavailable') msg += ' · provider credits or quota unavailable';
+  else if (resp.status === 401 || resp.status === 403) msg += ' · check your API key or provider access';
+  else if (resp.status === 429) msg += ' · provider temporarily rate limited';
+  var err = new Error(msg);
+  err.status = resp.status;
+  err.retryAfterMs = retryAfterMs;
+  err.autoFailurePolicy = policy;
+  return err;
 }
 
 /* ======================= message builders ======================= */
@@ -7376,7 +7476,50 @@ function runChatRaw(o){
   if (kind === 'demo') return chatDemo(o);
   return chatOpenAI(o);
 }
-async function runChat(o){
+function autoFailoverTierForQuality(quality){
+  quality = +quality || 2;
+  return quality >= 5 ? 4 : (quality >= 4 ? 3 : (quality >= 3 ? 2 : 1));
+}
+function buildAutoFailoverPlan(o){
+  var primary = {provider:o.provider, model:o.model, maxTokens:o.maxTokens,
+    quality:modelQuality(o.provider, o.model), local:!cloudProvider(o.provider)};
+  var cls = Object.assign({}, o.classification || {});
+  if (!cls.tier) cls.tier = autoFailoverTierForQuality(o.qualityFloor || primary.quality);
+  cls.vision = cls.vision || (o.msgs || []).some(function(m){ return (m.images || []).length || (m.files || []).some(function(f){ return f.kind === 'pdf'; }); });
+  cls.tools = cls.tools || !!(o.tools && o.tools.length);
+  cls.actions = cls.actions || cls.tools;
+  cls.homebaseToolsEnabled = true;
+  var choices = cloudRouteCandidates(cls, o.userQuery || '', o.msgs || [], o.maxTokens || 2048);
+  choices.sort(function(a,b){
+    if (cls.explicitMax && b.quality !== a.quality) return b.quality - a.quality;
+    return a.searchRank - b.searchRank || a.fallbackRank - b.fallbackRank || a.estimatedCost - b.estimatedCost || b.quality - a.quality;
+  });
+  var plan = [primary], seen = {};
+  seen[primary.provider + '\n' + primary.model] = 1;
+  choices.forEach(function(c){
+    var key = c.provider + '\n' + c.model;
+    if (seen[key]) return;
+    seen[key] = 1;
+    plan.push(Object.assign({}, c, {maxTokens:o.maxTokens || c.maxTokens}));
+  });
+  // Provider-wide errors put that provider into cooldown, so keeping every
+  // remaining candidate globally ranked preserves true next-cheapest behavior.
+  if (!seen['demo\ndemo']) plan.push({provider:'demo', model:'demo', maxTokens:Math.min(900, o.maxTokens || 900), quality:1, local:true});
+  return plan;
+}
+function autoFailoverSummary(result){
+  if (!result || !result.failovers || !result.failovers.length) return '';
+  var seen = {}, failed = [];
+  result.failovers.forEach(function(f){
+    if (seen[f.provider]) return;
+    seen[f.provider] = 1;
+    failed.push(((PROVIDERS[f.provider] && PROVIDERS[f.provider].name) || f.provider) + ' ' + f.reason);
+  });
+  var used = (PROVIDERS[result.usedProvider] && PROVIDERS[result.usedProvider].name) || result.usedProvider;
+  var model = modelInfo(result.usedProvider, result.usedModel).label || result.usedModel;
+  return 'Fallback: ' + failed.join(', ') + ' → ' + used + ' · ' + model;
+}
+async function runChatAttempt(o){
   var reservation = reserveCloudChat(o);
   try {
     var result = await runChatRaw(o);
@@ -7385,6 +7528,36 @@ async function runChat(o){
     releaseCloudReservation(reservation);
     throw e;
   }
+}
+async function runChat(o){
+  if (!o.autoFailover) return runChatAttempt(o);
+  var plan = buildAutoFailoverPlan(o), failures = [], lastError = null, attempts = 0;
+  for (var i = 0; i < plan.length; i++){
+    var pick = plan[i];
+    if (attempts >= 6 && pick.provider !== 'demo') continue;
+    if (pick.provider !== 'demo' && providerInAutoCooldown(pick.provider)) continue;
+    if (pick.provider !== 'demo' && !providerReady(pick.provider)) continue;
+    attempts++;
+    var emitted = false;
+    var attempt = Object.assign({}, o, {provider:pick.provider, model:pick.model, maxTokens:pick.maxTokens || o.maxTokens});
+    attempt.autoFailover = false;
+    attempt.onText = function(t){ if (t) emitted = true; if (o.onText) o.onText(t); };
+    attempt.onThink = function(t){ if (t) emitted = true; if (o.onThink) o.onThink(t); };
+    try {
+      var result = await runChatAttempt(attempt);
+      result.usedProvider = pick.provider;
+      result.usedModel = pick.model;
+      result.failovers = failures;
+      return result;
+    } catch(e){
+      lastError = e;
+      var policy = autoFailoverPolicyForError(e);
+      if (emitted || !policy.eligible) throw e;
+      markAutoProviderFailure(pick.provider, policy);
+      failures.push({provider:pick.provider, model:pick.model, reason:policy.reason});
+    }
+  }
+  throw lastError || new Error('No configured AI provider is currently available. Add an API key, connect private AI, or choose the offline browser model.');
 }
 
 /* ============================ agent tools ============================ */
@@ -8752,7 +8925,8 @@ async function sendMessage(rawText, opts){
       var sres = await runTeamLeadSynthesis(sp, sm, convo, synthMsgs, userQuery, am, totalUsage,
         !manualCouncil && toolsOn, route ? route.maxTokens : S.settings.maxTokens);
       am.text = sres.text || am.liveText;
-      am.provider = sp; am.model = sm;
+      am.provider = sres.usedProvider || am.provider || sp;
+      am.model = sres.usedModel || am.model || sm;
     } else {
       var maxR = maxAgentRounds();
       for (var round = 0; round < maxR; round++){
@@ -8767,10 +8941,18 @@ async function sendMessage(rawText, opts){
           temperature: S.settings.temperature, maxTokens: route ? route.maxTokens : S.settings.maxTokens,
           think: S.settings.thinking, tools: roundTools, signal: S.abort.signal,
           conversationId:convo.id, messageId:am.id,
+          autoFailover:!!S.settings.autoRoute, qualityFloor:modelQuality(provider, model), userQuery:userQuery,
+          classification:route ? route.classification : null,
           onText: function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
           onThink: function(t){ am.thinking += t; schedulePaint(am, convo); },
           onProgress: function(txt, p){ am.statusNote = txt + (p ? ' ' + Math.round(p * 100) + '%' : ''); schedulePaint(am, convo); }
         });
+        if (res.usedProvider){
+          provider = res.usedProvider; model = res.usedModel;
+          am.provider = provider; am.model = model;
+          var fallbackNote = autoFailoverSummary(res);
+          if (fallbackNote && am.routeReason.indexOf(fallbackNote) < 0) am.routeReason += ' · ' + fallbackNote;
+        }
         addUsage(totalUsage, res.usage);
         if (res.toolCalls && res.toolCalls.length && roundTools){
           var rd = { text: res.text || '', anthRaw: res.anthRaw,
@@ -10228,7 +10410,7 @@ function renderProvidersPane(expand){
       kr.innerHTML = '<label>API key</label><input type="password" autocomplete="off" spellcheck="false" placeholder="' + esc(pr.keyHint || '') + '"><button class="sm-btn show-k" type="button">👁</button>';
       var ki = qs('input', kr);
       ki.value = getKey(p);
-      ki.addEventListener('input', function(){ S.keys[p] = ki.value.trim(); persistKeys(); });
+      ki.addEventListener('input', function(){ S.keys[p] = ki.value.trim(); clearAutoProviderCooldown(p); persistKeys(); });
       ki.addEventListener('change', function(){
         S.keys[p] = ki.value.trim(); saveKeys();
         qs('.p-dot', card).classList.toggle('ok', providerReady(p));
@@ -10243,7 +10425,7 @@ function renderProvidersPane(expand){
       lkr.innerHTML = '<label>Scoped API token</label><input type="password" autocomplete="off" spellcheck="false" placeholder="optional · needed for installed MCPs"><button class="sm-btn show-k" type="button">👁</button>';
       var lki = qs('input', lkr);
       lki.value = getKey('lmstudio');
-      lki.addEventListener('input', function(){ S.keys.lmstudio = lki.value.trim(); persistKeys(); });
+      lki.addEventListener('input', function(){ S.keys.lmstudio = lki.value.trim(); clearAutoProviderCooldown('lmstudio'); persistKeys(); });
       lki.addEventListener('change', function(){ S.keys.lmstudio = lki.value.trim(); saveKeys(); });
       qs('.show-k', lkr).addEventListener('click', function(){ lki.type = lki.type === 'password' ? 'text' : 'password'; });
       body.appendChild(lkr);
@@ -10387,6 +10569,7 @@ async function testProvider(p, btn){
       resp = await withTimeout(function(sig){ return fetch(url, {headers:h, signal:sig, referrerPolicy:'no-referrer'}); }, 10000);
     }
     if (!resp.ok) throw await httpError(resp);
+    clearAutoProviderCooldown(p);
     S.settings.providerHealth[p] = {ok:true, ts:Date.now()}; saveSettings({sync:false});
     toast(PROVIDERS[p].name + ' connected ✅', 'ok');
   } catch(err){

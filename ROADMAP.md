@@ -20,6 +20,10 @@ new evidence contradicts them.
 
 - ✅ Capability- and cost-aware model routing with local-first execution and a
   hard estimated $50 trailing-30-day cloud budget.
+- ✅ Request-time automatic provider failover: missing keys and temporarily
+  unavailable/quota-exhausted providers are skipped for the next least-cost
+  eligible model, with reservation release, bounded retries, partial-stream
+  duplicate protection, provider cooldowns, and an honest Demo last resort.
 - ✅ Automatic task-shaped specialist teams with parallel role execution,
   narrow tool/connector access, per-role model selection, and lead synthesis.
 - ✅ Guarded self-development: repository inspection plus exact multi-file

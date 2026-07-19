@@ -200,6 +200,14 @@ meeting the task quality floor for harder requests; OpenRouter only after
 direct providers as free/long-tail/failover; explicit “most advanced”/named-model
 prompts raise the floor. Freshness and mutation/tool requirements are classified
 separately so Perplexity native search does not receive Homebase mutation tools.
+Automatic calls must keep the central `runChat` failover contract: skip
+unconfigured or cooling-down providers, release failed reservations, and try the
+next least-cost eligible provider only when no visible partial response has been
+emitted. Quota/auth/rate-limit/outage failures may cool down a provider for the
+current runtime; editing or successfully testing its key clears that state.
+Manual model choices remain terminal and must never be silently rerouted. Keep
+the bounded real-provider attempt cap and honest Demo last resort so missing keys
+or exhausted credits cannot leave Automatic mode stuck in a repeat-error loop.
 LM Studio is the preferred local runtime on the 16 GB M1 Pro. The tested
 `homebase-local` alias is Qwen 3.5 9B 4-bit at 16K context and one parallel
 prediction; the stable routing key is `qwen/qwen3.5-9b`, with LM Studio
