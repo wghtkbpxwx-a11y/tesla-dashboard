@@ -2682,6 +2682,7 @@ var HOMEBASE_CHANGELOG = {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
     state: 'PRs #58–#76 are merged and live; deployment status records are #72, #74, and #76, with PR #77 finalizing the voice record wording. PR #75 (squash merge 6c54670; implementation originated at 2953ebd) substantially upgrades Homebase Voice and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1. PR Validate, main Validate run 29670230087, and Pages run 29670229691 passed; record PR #76, main Validate run 29670347179, and Pages run 29670346746 also passed. Public production checks confirmed the one-tap voice overlay, audio-recovery control, xAI TTS implementation, voice test, zero horizontal overflow, three visible root voice links plus the More-menu launcher, no ChatGPT links, and direct Tesla-to-voice navigation. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and uses modality-priced xAI/OpenAI/ElevenLabs speech backup plans under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    latest_fix: 'Branch codex/fix-scheduled-agent-routing repairs the reproduced scheduled-agent Demo bypass: unpinned tasks now use selectAIRoute plus runChat automatic failover and central cloud accounting, explicit task models remain terminal, result metadata follows the provider that answered, unavailable real models stop before tools with Try models again / AI connections recovery, quota cooldowns permit a bounded five-minute recovery probe after credits are added, and iOS page suspension synchronously flushes key edits. The deterministic scheduled-agent harness is part of validate.py. Merge/deployment evidence must replace this branch-state note before the next audit.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2729,6 +2730,52 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-scheduled-agent-real-model-routing',
+      date: '2026-07-18',
+      commit: '5613294 (implementation commit; squash-merge commit pending)',
+      branch: 'codex/fix-scheduled-agent-routing',
+      pull_request: 'pending',
+      title: 'Route scheduled agents through real Automatic models and failover',
+      type: 'fix+routing+scheduler+mobile+reliability+tests+docs',
+      depends_on: ['2026-07-18-automatic-provider-failover','2026-07-18-ai-credit-router','2026-07-18-cloud-key-debounced-persistence','2026-07-18-mobile-settings-navigation'],
+      files_changed: ['ai/index.html','.github/scripts/test_ai_failover.js','.github/scripts/test_scheduled_agent_routing.js','.github/scripts/validate.py','README.md','ai/README.md','CLAUDE.md','FABLE_AUDIT_BRIEF.md','ROADMAP.md'],
+      interfaces_changed: ['AUTO_PROVIDER_PROBES','providerInAutoCooldown','clearAutoProviderCooldown','clearAllAutoProviderCooldowns','markAutoProviderFailure','automaticModelUnavailableMessage','selectAIRoute','runChat','paintMsg','sendMessage','selectScheduledTaskRoute','runTask','openTaskEditor','beforeunload/pagehide credential flush'],
+      changes: [
+        'Fixed scheduled tasks with no pinned model bypassing selectAIRoute and inheriting the legacy Demo conversation default even when configured cloud models were available',
+        'Unpinned tasks now use the same capability/quality classifier, least-cost local/cloud route, central rolling-budget reservation, and automatic provider failover as interactive chat',
+        'A task with an explicitly selected model remains terminal to that model and never silently sends its prompt to another provider',
+        'Scheduled result metadata updates to the provider/model that actually answered and includes the same visible fallback summary as chat',
+        'Agent, Research, Council, and scheduled-task flows stop before tool execution when only Demo is available; the message explains the real availability problem and exposes Try models again plus AI connections actions',
+        'Those real-agent flows also set allowDemoFallback=false, so quota/network failure after selecting a real provider cannot degrade into simulated Demo reasoning midway through a run',
+        'The task editor labels the unpinned choice Automatic · best value and excludes Demo and voice-only providers from exact task models',
+        'Provider-wide quota cooldowns allow one half-open recovery probe after five minutes so newly purchased credits can recover without a full-page reset; a successful call clears stale cooldown/probe state',
+        'beforeunload and iOS pagehide synchronously flush in-memory provider keys and settings to close the remaining mobile debounce suspension window'
+      ],
+      safety_guards: [
+        'Every automatic scheduled cloud call still passes through runChat, reserveCloudChat, finishCloudChat/releaseCloudReservation, and the hard $50 trailing-30-day guard',
+        'Exact task-model choices remain terminal; automatic failover is enabled only for an unpinned Automatic task',
+        'No real-model availability error executes tools, sends external mutations, or presents simulated Demo reasoning as agent completion',
+        'Recovery probes remain bounded to one per provider per five-minute interval after provider-wide failures and successful recovery clears the state',
+        'Synchronous mobile persistence writes only the same browser-local key/settings objects already owned by Homebase; no credential enters source, logs, tests, or documentation'
+      ],
+      verification: [
+        'Reproduced the no-key live path in the browser and confirmed why ordinary desktop chat selected WebLLM while mobile/scheduled execution could land on Demo',
+        '.github/scripts/test_scheduled_agent_routing.js passes Automatic route, exact-model terminality, unavailable-model stop, provider-result metadata, task-picker exclusions, and mobile key-flush contracts without provider calls',
+        '.github/scripts/test_ai_failover.js now also verifies successful fallback clears provider cooldown state',
+        'python3 .github/scripts/validate.py passes root/AI JavaScript parsing, cache and updater checks, automatic failover, exact query selector, mobile voice, and scheduled-agent routing',
+        'No paid model call, API-key read, private user data, or external mutation was used for implementation verification'
+      ],
+      setup_required: [
+        'After deployment, reopen Homebase on iPhone and run the affected task again; leave its model on Automatic · best value',
+        'If the recovery card says no real model is connected, open AI connections and test xAI after securely entering or pulling the encrypted key on that phone'
+      ],
+      known_limits: [
+        'A static GitHub Pages app cannot make a cloud call when the phone truly has no provider key; it now stops honestly and routes the user to recovery instead of simulating completion',
+        'Scheduled tasks run only while Homebase is open; reliable background execution would require a user-owned server or platform scheduler'
+      ],
+      next_model: 'Treat the new deterministic scheduler-routing harness as the baseline. Audit scheduler lifecycle, notification, concurrent-interactive interruption, and background suspension only when concrete evidence justifies it; replace pending lineage with merge and Pages evidence.'
+    },
     {
       id: '2026-07-18-voice-mode-reliability',
       date: '2026-07-18',
@@ -6719,6 +6766,7 @@ function anthropicAllowsTemp(id){ return !/opus-4-[78]|sonnet-5/.test(id); }
 /* ================= cloud budget + model router ================= */
 var CLOUD_RESERVED_USD = 0;
 var AUTO_PROVIDER_COOLDOWNS = {};
+var AUTO_PROVIDER_PROBES = {};
 function autoFailurePolicy(status, message, retryAfterMs){
   status = +status || 0;
   var s = String(message || '').toLowerCase();
@@ -6738,12 +6786,30 @@ function providerInAutoCooldown(provider){
   var until = +AUTO_PROVIDER_COOLDOWNS[provider] || 0;
   if (!until) return false;
   if (until <= Date.now()){ delete AUTO_PROVIDER_COOLDOWNS[provider]; return false; }
+  /* A provider can recover early after the user adds credits. When it is the
+     only configured route, allow one inexpensive half-open probe every five
+     minutes instead of silently staying in Demo for the full quota cooldown. */
+  var probeAt = +AUTO_PROVIDER_PROBES[provider] || 0;
+  if (probeAt && probeAt <= Date.now()) return false;
   return true;
 }
-function clearAutoProviderCooldown(provider){ delete AUTO_PROVIDER_COOLDOWNS[provider]; }
+function claimAutoProviderProbe(provider){
+  var until = +AUTO_PROVIDER_COOLDOWNS[provider] || 0;
+  var probeAt = +AUTO_PROVIDER_PROBES[provider] || 0;
+  if (!until || until <= Date.now() || !probeAt || probeAt > Date.now()) return false;
+  AUTO_PROVIDER_PROBES[provider] = until;
+  return true;
+}
+function clearAutoProviderCooldown(provider){ delete AUTO_PROVIDER_COOLDOWNS[provider]; delete AUTO_PROVIDER_PROBES[provider]; }
+function clearAllAutoProviderCooldowns(){
+  AUTO_PROVIDER_COOLDOWNS = {};
+  AUTO_PROVIDER_PROBES = {};
+}
 function markAutoProviderFailure(provider, policy){
   if (!provider || !policy || policy.scope !== 'provider' || !policy.cooldownMs) return;
-  AUTO_PROVIDER_COOLDOWNS[provider] = Math.max(+AUTO_PROVIDER_COOLDOWNS[provider] || 0, Date.now() + policy.cooldownMs);
+  var until = Math.max(+AUTO_PROVIDER_COOLDOWNS[provider] || 0, Date.now() + policy.cooldownMs);
+  AUTO_PROVIDER_COOLDOWNS[provider] = until;
+  AUTO_PROVIDER_PROBES[provider] = Math.min(until, Date.now() + 300000);
 }
 function autoFailoverPolicyForError(err){
   if (!err) return autoFailurePolicy(0, '');
@@ -6957,6 +7023,21 @@ function cloudRouteCandidates(cls, query, msgs, maxOut){
   });
   return out;
 }
+function automaticModelUnavailableMessage(cls){
+  var configured = PROVIDER_ORDER.filter(function(p){ return cloudProvider(p) && providerReady(p); });
+  var cooling = configured.filter(function(p){ return (+AUTO_PROVIDER_COOLDOWNS[p] || 0) > Date.now(); });
+  var info = cloudSpendInfo();
+  if (!configured.length){
+    return 'No real AI model is connected on this device. Open AI connections and add or securely sync an API key, then try again. Homebase did not run this agent in Demo mode.';
+  }
+  if (cooling.length === configured.length){
+    return 'Your connected cloud model is temporarily paused after an API or credit error. Tap Try models again after adding credits, or open AI connections and test it. Homebase did not run this agent in Demo mode.';
+  }
+  if (cloudBudgetCfg().hardStop && info.remaining <= 0.000001){
+    return 'The rolling cloud-AI budget is currently full. Connect a local model, wait for usage to roll off, or adjust the limit before retrying. Homebase did not run this agent in Demo mode.';
+  }
+  return 'No connected real model currently meets this task\'s capability, quality, and budget requirements. Open AI connections or choose a suitable model, then try again. Homebase did not run this agent in Demo mode.';
+}
 function selectAIRoute(query, latestUser, convo, msgs){
   var cls = classifyAIRequest(query, latestUser || {}, convo);
   cls.homebaseToolsEnabled = !convo || convo.toolsOn !== false;
@@ -7003,6 +7084,7 @@ function selectAIRoute(query, latestUser, convo, msgs){
   if (emergency) return Object.assign(emergency, {maxTokens:Math.min(maxOut, 1200), tier:cls.tier, classification:cls,
     reason:'Auto · local fallback; no suitable cloud model is configured and budget-eligible'});
   return {provider:'demo', model:'demo', maxTokens:900, tier:cls.tier, classification:cls,
+    unavailable:automaticModelUnavailableMessage(cls),
     reason:'Auto · demo fallback; no priced cloud model is configured and budget-eligible, and no local runtime is ready'};
 }
 function updateBudgetDisplays(){
@@ -7108,7 +7190,7 @@ async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
         '\nUse only the tools supplied to you. Never perform repository writes, sends, deletions, or other external mutations. Return a compact handoff to the lead agent.',
       msgs:history, temperature:Math.min(.5, S.settings.temperature), maxTokens:cm.maxTokens || 1200,
       think:false, tools:canCall, signal:S.abort.signal, conversationId:convo.id, messageId:am.id,
-      autoFailover:true, qualityFloor:cm.quality || 3, userQuery:userQuery,
+      autoFailover:true, qualityFloor:cm.quality || 3, userQuery:userQuery, allowDemoFallback:false,
       classification:{tier:autoFailoverTierForQuality(cm.quality || 3), tools:!!(canCall && canCall.length), actions:!!(canCall && canCall.length)},
       onText:function(t){ cm.text += t; schedulePaint(am, convo); }, onThink:null, onProgress:null
     });
@@ -7140,7 +7222,7 @@ async function runTeamLeadSynthesis(sp, sm, convo, history, userQuery, am, total
       msgs:history, temperature:Math.min(.7, S.settings.temperature), maxTokens:maxTokens,
       think:S.settings.thinking, tools:roundTools, signal:S.abort.signal,
       conversationId:convo.id, messageId:am.id,
-      autoFailover:!!S.settings.autoRoute, qualityFloor:Math.max(3, modelQuality(sp, sm)), userQuery:userQuery,
+      autoFailover:!!S.settings.autoRoute, qualityFloor:Math.max(3, modelQuality(sp, sm)), userQuery:userQuery, allowDemoFallback:false,
       classification:{tier:autoFailoverTierForQuality(Math.max(3, modelQuality(sp, sm))), tools:!!(roundTools && roundTools.length), actions:!!(roundTools && roundTools.length)},
       onText:function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
       onThink:function(t){ am.thinking += t; schedulePaint(am, convo); },
@@ -7668,7 +7750,9 @@ function buildAutoFailoverPlan(o){
   });
   // Provider-wide errors put that provider into cooldown, so keeping every
   // remaining candidate globally ranked preserves true next-cheapest behavior.
-  if (!seen['demo\ndemo']) plan.push({provider:'demo', model:'demo', maxTokens:Math.min(900, o.maxTokens || 900), quality:1, local:true});
+  if (o.allowDemoFallback !== false && !seen['demo\ndemo']){
+    plan.push({provider:'demo', model:'demo', maxTokens:Math.min(900, o.maxTokens || 900), quality:1, local:true});
+  }
   return plan;
 }
 function autoFailoverSummary(result){
@@ -7701,6 +7785,7 @@ async function runChat(o){
     if (attempts >= 6 && pick.provider !== 'demo') continue;
     if (pick.provider !== 'demo' && providerInAutoCooldown(pick.provider)) continue;
     if (pick.provider !== 'demo' && !providerReady(pick.provider)) continue;
+    if (pick.provider !== 'demo') claimAutoProviderProbe(pick.provider);
     attempts++;
     var emitted = false;
     var attempt = Object.assign({}, o, {provider:pick.provider, model:pick.model, maxTokens:pick.maxTokens || o.maxTokens});
@@ -7709,6 +7794,7 @@ async function runChat(o){
     attempt.onThink = function(t){ if (t) emitted = true; if (o.onThink) o.onThink(t); };
     try {
       var result = await runChatAttempt(attempt);
+      clearAutoProviderCooldown(pick.provider);
       result.usedProvider = pick.provider;
       result.usedModel = pick.model;
       result.failovers = failures;
@@ -8879,7 +8965,15 @@ function paintMsg(m, convo){
     var er = document.createElement('div'); er.className = 'err-row';
     er.innerHTML = '<span>⚠️ </span><span class="e-t" style="flex:1"></span><button>Retry</button>';
     qs('.e-t', er).textContent = m.error;
-    qs('button', er).addEventListener('click', function(){ regenMsg(m.id); });
+    var retry = qs('button', er);
+    if (m.recovery === 'model'){
+      retry.textContent = 'Try models again';
+      retry.addEventListener('click', function(){ clearAllAutoProviderCooldowns(); regenMsg(m.id); });
+      var connections = document.createElement('button');
+      connections.textContent = 'AI connections';
+      connections.addEventListener('click', function(){ openSettings('providers'); });
+      er.appendChild(connections);
+    } else retry.addEventListener('click', function(){ regenMsg(m.id); });
     eb.appendChild(er);
     body.appendChild(eb);
   }
@@ -8889,8 +8983,11 @@ function metaRow(m, convo){
   var meta = document.createElement('div');
   meta.className = 'meta';
   var bits = [];
-  if (m.role === 'assistant' && m.model) bits.push(modelInfo(m.provider || 'demo', m.model).label || m.model);
-  if (m.role === 'assistant' && m.routeReason) bits.push(m.routeReason);
+  if (m.role === 'assistant' && m.recovery === 'model') bits.push('Automatic paused · no real model ran');
+  else {
+    if (m.role === 'assistant' && m.model) bits.push(modelInfo(m.provider || 'demo', m.model).label || m.model);
+    if (m.role === 'assistant' && m.routeReason) bits.push(m.routeReason);
+  }
   bits.push(fmtTime(m.ts));
   if (m.role === 'assistant' && m.usage && (m.usage.inTok || m.usage.outTok)){
     var u = m.usage;
@@ -9023,11 +9120,17 @@ async function sendMessage(rawText, opts){
   var manualCouncil = configuredCouncilReady;
   var councilMembers = manualCouncil ? (S.settings.council.members || []).slice(0, 5) : autoTeam;
   var useCouncil = councilMembers.length >= 2;
+  var requiresRealAI = ['agent','research','council'].indexOf(S.settings.uiMode) >= 0;
   try {
     var msgs = internalHistory(convo, convo.messages.length - 1);
     var userQuery = '';
     for (var ui = msgs.length - 1; ui >= 0; ui--){
       if (msgs[ui].role === 'user' && msgs[ui].text){ userQuery = msgs[ui].text; break; }
+    }
+
+    if (provider === 'demo' && route && route.unavailable && requiresRealAI){
+      am.recovery = 'model';
+      throw new Error(route.unavailable);
     }
 
     if (useCouncil){
@@ -9111,6 +9214,7 @@ async function sendMessage(rawText, opts){
           think: S.settings.thinking, tools: roundTools, signal: S.abort.signal,
           conversationId:convo.id, messageId:am.id,
           autoFailover:!!S.settings.autoRoute && !queryOverride, qualityFloor:modelQuality(provider, model), userQuery:userQuery,
+          allowDemoFallback:!requiresRealAI,
           classification:route ? route.classification : null,
           onText: function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
           onThink: function(t){ am.thinking += t; schedulePaint(am, convo); },
@@ -9154,7 +9258,10 @@ async function sendMessage(rawText, opts){
     if (err && (err.name === 'AbortError' || err.code === 20)){
       am.text = am.liveText; am.stopped = true;
     } else {
-      am.error = (err && err.message) || String(err);
+      if (requiresRealAI && autoFailoverPolicyForError(err).eligible){
+        am.recovery = 'model';
+        am.error = automaticModelUnavailableMessage(route && route.classification) + ' Last provider response: ' + ((err && err.message) || String(err));
+      } else am.error = (err && err.message) || String(err);
       am.text = am.liveText;
       console.error(err);
     }
@@ -10544,6 +10651,30 @@ function taskConvo(t){
   }
   return c;
 }
+function selectScheduledTaskRoute(t, convo, um, msgs){
+  var chosen = String(t.model || '').split('::');
+  if (chosen.length === 2 && PROVIDERS[chosen[0]]){
+    if (!providerReady(chosen[0])){
+      return {provider:chosen[0], model:chosen[1], autoFailover:false,
+        unavailable:'The model selected for this task is not connected on this device. Open AI connections or edit the task model, then run it again.'};
+    }
+    return {provider:chosen[0], model:chosen[1], autoFailover:false,
+      reason:'Task model · ' + PROVIDERS[chosen[0]].name + ' · ' + (modelInfo(chosen[0], chosen[1]).label || chosen[1]),
+      classification:classifyAIRequest(t.prompt || '', um || {}, convo)};
+  }
+  if (S.settings.autoRoute){
+    var automatic = selectAIRoute(t.prompt || '', um || {}, convo, msgs || []);
+    automatic.autoFailover = true;
+    return automatic;
+  }
+  var provider = S.settings.provider, model = S.settings.model;
+  if (!providerReady(provider) || provider === 'demo'){
+    return {provider:provider || 'demo', model:model || 'demo', autoFailover:false,
+      unavailable:automaticModelUnavailableMessage(classifyAIRequest(t.prompt || '', um || {}, convo))};
+  }
+  return {provider:provider, model:model, autoFailover:false, reason:'Chat default model',
+    classification:classifyAIRequest(t.prompt || '', um || {}, convo)};
+}
 async function runTask(t, manual){
   if (t.running) return;
   // Don't interleave scheduled agent work with interactive chat
@@ -10558,15 +10689,15 @@ async function runTask(t, manual){
   if (t.type === 'once') t.enabled = false;
   else t.nextRun = computeNextRun(t, now + 1000);
   saveTasks(); renderTasksIfOpen();
-  var sel = (t.model || '').split('::');
-  var provider = sel.length === 2 ? sel[0] : S.settings.provider;
-  var model = sel.length === 2 ? sel[1] : S.settings.model;
-  if (!PROVIDERS[provider] || !providerReady(provider)){ provider = S.settings.provider; model = S.settings.model; }
   var convo = taskConvo(t);
   convo.toolsOn = !!t.useTools;
   var um = { id:uuid(), role:'user', text:'[Scheduled run · ' + fmtDateTime(now) + ']\n' + t.prompt, ts: now, images:[], files:[] };
   convo.messages.push(um);
-  var am = { id:uuid(), role:'assistant', text:'', thinking:'', toolRounds:[], provider:provider, model:model, ts: Date.now(), usage:{} };
+  var routePreview = internalHistory(convo, convo.messages.length);
+  var taskRoute = selectScheduledTaskRoute(t, convo, um, routePreview);
+  var provider = taskRoute.provider, model = taskRoute.model;
+  var am = { id:uuid(), role:'assistant', text:'', thinking:'', toolRounds:[], provider:provider, model:model, ts: Date.now(), usage:{},
+    routeReason:taskRoute.reason || '', routeTier:taskRoute.tier || null };
   convo.messages.push(am);
   var isActive = convo.id === S.activeId;
   if (isActive) renderChat();
@@ -10575,6 +10706,10 @@ async function runTask(t, manual){
   var prevPlan = S.agentPlan;
   S.agentPlan = null;
   try {
+    if (taskRoute.unavailable){
+      am.recovery = 'model';
+      throw new Error(taskRoute.unavailable);
+    }
     var msgs = internalHistory(convo, convo.messages.length - 1);
     if (msgs.length > 12) msgs = normalizeMsgs(msgs.slice(-12));
     if (!msgs.length) msgs = [{role:'user', text: t.prompt, images:[], files:[]}];
@@ -10586,7 +10721,16 @@ async function runTask(t, manual){
         msgs:msgs, temperature: S.settings.temperature, maxTokens: S.settings.maxTokens,
         think:false, tools:roundTools, signal:null,
         conversationId:convo.id, messageId:am.id,
+        autoFailover:!!taskRoute.autoFailover, qualityFloor:modelQuality(provider, model), userQuery:t.prompt || '',
+        allowDemoFallback:false,
+        classification:taskRoute.classification || null,
         onText:null, onThink:null });
+      if (res.usedProvider){
+        provider = res.usedProvider; model = res.usedModel;
+        am.provider = provider; am.model = model;
+        var taskFallback = autoFailoverSummary(res);
+        if (taskFallback && am.routeReason.indexOf(taskFallback) < 0) am.routeReason += (am.routeReason ? ' · ' : '') + taskFallback;
+      }
       addUsage(totalUsage, res.usage);
       if (res.toolCalls && res.toolCalls.length && roundTools){
         var rd = { text: res.text || '', anthRaw: res.anthRaw,
@@ -10604,7 +10748,10 @@ async function runTask(t, manual){
       break;
     }
   } catch(err){
-    am.error = (err && err.message) || String(err);
+    if (taskRoute.autoFailover && !taskRoute.unavailable){
+      am.recovery = 'model';
+      am.error = automaticModelUnavailableMessage(taskRoute.classification) + ' Last provider response: ' + ((err && err.message) || String(err));
+    } else am.error = (err && err.message) || String(err);
   }
   S.agentPlan = prevPlan;
   am.usage = totalUsage;
@@ -10706,9 +10853,9 @@ function openTaskEditor(t){
   $('te-notify').classList.toggle('on', t ? !!t.notify : true);
   $('te-catchup').classList.toggle('on', t ? !!t.catchUp : true);
   var sel = $('te-model');
-  sel.innerHTML = '<option value="">(default: ' + esc(modelInfo(S.settings.provider, S.settings.model).label || S.settings.model) + ')</option>';
+  sel.innerHTML = '<option value="">' + (S.settings.autoRoute ? 'Automatic · best value' : ('Chat default · ' + esc(modelInfo(S.settings.provider, S.settings.model).label || S.settings.model))) + '</option>';
   PROVIDER_ORDER.forEach(function(p){
-    if (!providerReady(p) || p === 'webllm') return;
+    if (!providerReady(p) || p === 'webllm' || p === 'demo' || PROVIDERS[p].kind === 'voice') return;
     providerModels(p).forEach(function(m){
       var o = document.createElement('option');
       o.value = p + '::' + m.id;
@@ -11938,11 +12085,16 @@ async function boot(){
   window.addEventListener('beforeunload', function(){
     var c = activeConvo();
     if (c) idb.put(c);
+    /* Flush debounced credential edits before mobile Safari suspends the tab. */
+    lsSet(LS_KEYS, S.keys || {});
+    lsSet(LS_SETTINGS, S.settings || {});
   });
   /* iOS Safari fires pagehide, not beforeunload */
   window.addEventListener('pagehide', function(){
     var c = activeConvo();
     if (c) idb.put(c);
+    lsSet(LS_KEYS, S.keys || {});
+    lsSet(LS_SETTINGS, S.settings || {});
   });
 }
 document.addEventListener('DOMContentLoaded', boot);

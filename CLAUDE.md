@@ -216,7 +216,7 @@ next least-cost eligible provider only when no visible partial response has been
 emitted. Quota/auth/rate-limit/outage failures may cool down a provider for the
 current runtime; editing or successfully testing its key clears that state.
 Manual model choices remain terminal and must never be silently rerouted. Keep
-the bounded real-provider attempt cap and honest Demo last resort so missing keys
+the bounded real-provider attempt cap and honest Demo last resort for ordinary chat so missing keys
 or exhausted credits cannot leave Automatic mode stuck in a repeat-error loop.
 The composer `query-model-select` is intentionally transient: an exact **Next**
 selection applies to one user message, is recorded on that message for

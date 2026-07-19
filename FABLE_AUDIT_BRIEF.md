@@ -27,7 +27,7 @@ Run only this orientation pass before substantive work:
 ```sh
 git status --short
 python3 .github/scripts/validate.py
-rg -n "function (selectAIRoute|cloudRouteCandidates|buildAutoFailoverPlan|runChat|buildAutoAgentTeam|runSubagentMember|runTeamLeadSynthesis|reserveCloudChat|finishCloudChat|releaseCloudReservation|mergeVaultPayload|proposeRepositoryChanges|chooseVoiceTranscript|selectVoiceSTTProvider|selectVoiceTTSProvider|ttsPlaybackBlocked)|HOMEBASE_CHANGELOG" ai/index.html
+rg -n "function (selectAIRoute|cloudRouteCandidates|buildAutoFailoverPlan|runChat|selectScheduledTaskRoute|runTask|buildAutoAgentTeam|runSubagentMember|runTeamLeadSynthesis|reserveCloudChat|finishCloudChat|releaseCloudReservation|mergeVaultPayload|proposeRepositoryChanges|chooseVoiceTranscript|selectVoiceSTTProvider|selectVoiceTTSProvider|ttsPlaybackBlocked)|HOMEBASE_CHANGELOG" ai/index.html
 ```
 
 Then read, in order:
@@ -51,8 +51,9 @@ requires it. Do not begin with a broad visual redesign.
   nine sections map to one pane without horizontal overflow.
 - The model picker retains all direct model choices behind an explicit advanced
   reveal. Automatic mobile routing does not silently start WebLLM downloads.
-- Credential fields activate on input, persist after a short debounce, and keep a
-  final change-event save. Do not revisit this unless a reproducible failure exists.
+- Credential fields activate on input, persist after a short debounce, keep a
+  final change-event save, and synchronously flush on mobile page suspension.
+  Do not revisit this unless a reproducible failure exists.
 - xAI discovery and a low-cost Grok 3 mini request were verified. LM Studio's
   authenticated local model, JIT loading, scoped `mcp.json` access, and one Brave
   MCP search were verified.
@@ -77,6 +78,13 @@ requires it. Do not begin with a broad visual redesign.
   no-overflow desktop layout, and Tesla-to-voice navigation. Do not spend a Fable
   session redoing this deterministic baseline; concentrate any voice follow-up on
   real iPhone/Tesla hardware evidence, WebKit lifecycle races, or security findings.
+- `.github/scripts/test_scheduled_agent_routing.js` verifies that an unpinned
+  scheduled task uses the production Automatic route and failover contract, an
+  explicitly pinned task stays terminal, unavailable real models stop before
+  tools instead of simulating Demo completion, the result records the provider
+  that answered, and the task picker excludes Demo/voice-only models. Build any
+  follow-up around scheduler lifecycle/concurrency evidence instead of redoing
+  this routing baseline.
 
 ## Priority work packages
 

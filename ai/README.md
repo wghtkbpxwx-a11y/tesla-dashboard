@@ -67,11 +67,15 @@ without a configured key are skipped. If a provider rejects the request because
 its credits/quota, authentication, rate limit, network, or service is
 unavailable, Homebase releases the unused budget reservation and tries the next
 least-expensive model that still meets the task's capability and quality floor.
-Provider-wide failures enter a short runtime cooldown so parallel agents do not
-keep repeating the same failing call. Automatic failover stops after any visible
-partial response to avoid duplicate answers, and it never changes an explicitly
-selected manual model. If no real local or cloud model is available, the honest
-Demo response remains reachable so the interface does not strand the user.
+Provider-wide failures enter a runtime cooldown so parallel agents do not keep
+repeating the same failing call; a bounded half-open probe can recover after the
+user adds credits without waiting for the entire quota cooldown. Automatic
+failover stops after any visible partial response to avoid duplicate answers,
+and it never changes an explicitly selected manual model. If no real local or
+cloud model is available, Demo remains available for ordinary interface
+exploration, while Agent, Research, Council, and scheduled task runs pause with
+plain-language recovery controls instead of simulating completion—even when a
+real provider becomes unavailable only after an automatic run has started.
 
 The composer’s **Next** dropdown is a one-message override. It lists models on
 configured cloud providers plus available local/browser runtimes. Choosing an
@@ -80,6 +84,18 @@ specialist teams and Model Council for that turn, and never silently fails over
 to another model. The selector resets to Automatic as soon as the query is
 accepted; regenerating the answer preserves the original exact choice. The
 header model picker remains the persistent chat-wide control.
+
+Scheduled tasks whose model is left at **Automatic · best value** use the same
+classifier, local/cloud cost ranking, rolling-budget reservation, and automatic
+provider failover as an interactive message. A task with an explicitly pinned
+model remains terminal to that model. The result card records the provider and
+model that actually answered. If the task cannot reach a real model, it stops
+before calling tools and offers **Try models again** and **AI connections**.
+Its metadata says that Automatic paused and no real model ran, rather than
+labelling the result as a Demo model response.
+Provider-key edits are also flushed synchronously when mobile Safari suspends or
+hides the page, closing the short debounce window that could otherwise lose a
+freshly pasted key.
 
 The default paid-cloud guard is **$50 across the trailing 30 days**, combined
 across all configured providers. It reserves a conservative maximum before

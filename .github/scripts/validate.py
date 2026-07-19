@@ -123,6 +123,19 @@ def check_voice_mode():
         fail("Mobile voice reliability tests failed:\n" + (r.stderr.strip() or r.stdout.strip()))
 
 
+def check_scheduled_agent_routing():
+    """Scheduled agents must use Auto/failover and never simulate completion with Demo."""
+    target = ".github/scripts/test_scheduled_agent_routing.js"
+    if not os.path.exists(target):
+        fail(f"{target} not found")
+        return
+    r = subprocess.run(["node", target], capture_output=True, text=True)
+    if r.returncode == 0:
+        print(r.stdout.rstrip())
+    else:
+        fail("Scheduled agent routing tests failed:\n" + (r.stderr.strip() or r.stdout.strip()))
+
+
 def main():
     if not os.path.exists("index.html"):
         print("index.html not found — run from the repo root", file=sys.stderr)
@@ -137,6 +150,7 @@ def main():
     check_ai_failover()
     check_query_model_selector()
     check_voice_mode()
+    check_scheduled_agent_routing()
     print()
     if FAILS:
         print(f"FAILED: {len(FAILS)} check(s) did not pass — blocking deploy.")

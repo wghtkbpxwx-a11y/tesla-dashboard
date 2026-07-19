@@ -49,3 +49,7 @@ without using a paid cloud language model. For responsiveness, installed Qwen
 3.5 4B handles short no-tool prompts; Qwen 3.5 9B remains the capable local/tool
 option, while balanced or tool-heavy work considers the cheapest adequate cloud
 route first unless local/offline use is requested.
+Scheduled tasks with no pinned model now use that same Automatic router and
+provider-failover path. They show the provider/model that actually answered and
+pause with AI-connection recovery controls when no real model is available;
+Homebase never presents Demo output as a completed scheduled agent run.
