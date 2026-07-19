@@ -1,6 +1,8 @@
 # tesla-dashboard
 
-<!-- Test comment: Verifying GitHub Pages deployment pipeline -->
+> Next-model audit entrypoint: [`FABLE_AUDIT_BRIEF.md`](FABLE_AUDIT_BRIEF.md).
+> It identifies verified work, high-risk audit packages, invariants, and low-value
+> tasks to avoid so a full review can spend its context on consequential changes.
 
 This repository hosts three connected GitHub Pages apps:
 

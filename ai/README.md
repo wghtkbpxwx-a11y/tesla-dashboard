@@ -170,6 +170,11 @@ update `HOMEBASE_CHANGELOG` in `ai/index.html`. Agents can call
 `list_dashboard detail=true` for the full implementation record; the default
 response is compact so smaller local models do not waste their context window.
 
+For the next full audit, start with root `FABLE_AUDIT_BRIEF.md`. It deliberately
+separates already-verified behavior from P0/P1 audit packages and lists low-value
+work not to repeat. The brief is an index, not a substitute for exact source
+evidence or `HOMEBASE_CHANGELOG` lineage.
+
 ## Live dashboard modules
 
 Refresh (top-right) pulls **Tesla Dashboard hourly cache** plus **browser live APIs**:

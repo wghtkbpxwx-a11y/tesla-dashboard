@@ -2628,28 +2628,21 @@ var HOMEBASE_CHANGELOG = {
   ],
   current_handoff: {
     to: 'Fable',
-    objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
-    state: 'PR #67 is merged and live with the mobile settings/model-picker simplification, deliberate-only mobile WebLLM downloads, and Locally/LM Link guidance; responsive QA passed at 320, 390, and 1280 px and the public Pages source was verified after deployment. PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, PR #62 secure latency-aware local routing, PR #64 immediate cloud-key activation, and PR #65 debounced credential persistence are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted LM Studio token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call. xAI is now connected with a masked key that survives reload, 10 models are discovered, and one Grok 3 mini beta reply was recorded at approximately $0.0003 before Auto best-value routing and Agent tools were restored.',
+    objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
+    state: 'PRs #58–#68 are merged and live. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, and simplified mobile/model-picker work is deployed. Static validation and Pages checks pass; mobile sections were verified at 320/390 px and desktop at 1280 px. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
-      'HOMEBASE_CHANGELOG entry 2026-07-18-mobile-settings-navigation',
-      'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-debounced-persistence',
-      'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-live-activation',
-      'HOMEBASE_CHANGELOG entry 2026-07-18-lmstudio-secure-mcp-live-verification',
-      'HOMEBASE_CHANGELOG entry 2026-07-18-direct-provider-router-v2 plus the updated 2026-07-18-cross-device-vault-deployment entry',
-      'HOMEBASE_CHANGELOG entries 2026-07-18-cross-device-vault-v2, 2026-07-18-agent-orchestrator, 2026-07-18-ai-credit-router, and 2026-07-18-finance-homebase-sync',
-      'ai/index.html: selectAIRoute, buildAutoAgentTeam, runSubagentMember, runTeamLeadSynthesis, repository tools, Settings → Chat, Settings → Development',
-      'ai/README.md, CLAUDE.md, README.md, ROADMAP.md, and finance/README.md for cross-surface constraints'
+      'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
+      'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
+      'HOMEBASE_CHANGELOG newest three entries only; follow older dependency entries on demand instead of reading history linearly',
+      'ai/index.html: routing/budget/team/vault/repository-mutation functions named in the brief',
+      'ai/README.md and the Homebase sections of CLAUDE.md only when a boundary contract needs clarification'
     ],
     review_areas: [
-      'Task classification and role decomposition quality; false-positive/false-negative delegation triggers',
-      'Per-role quality floors, local/cloud assignment, projected team cap, aggregate rolling-budget reservations, and provider-price drift',
-      'Parallel local-model performance, cancellation, partial member failure, tool-loop limits, and lead synthesis quality',
-      'Connector least privilege, read-only sub-agent boundaries, GitHub token handling, exact-replacement PR workflow, and prompt-injection resistance',
-      'Dashboard/finance same-origin synchronization, local-only privacy guarantees, mobile/Tesla-browser degradation, accessibility, and user comprehension',
-      'Encrypted Google Drive vault merge semantics, per-section timestamps, usage-ledger deduplication/tombstones, passphrase/token lifecycle, and phone/desktop conflict recovery',
-      'Direct-first versus OpenRouter fallback ranking, freshness/action separation, Perplexity citations and request fees, Kimi frontier gating, DeepInfra scoped JWT guidance, and ElevenLabs speech fallback/cost estimates',
-      'LM Studio capability discovery, local action/search routing, Qwen 3.5 9B performance on 16 GB unified memory, scoped MCP-token permissions, and Brave fixed-cost accounting',
-      'Testing gaps: deterministic router tests, mocked provider concurrency, repository-write failure recovery, end-to-end PR creation, and deploy verification'
+      'P0: deterministic routing, budget reservation/settlement, team-trigger/quality/cap, partial-failure, and mobile WebLLM tests',
+      'P0: adversarial repository-mutation, connector least-privilege, prompt-injection, official-host, LM Studio MCP, and secret-boundary review',
+      'P1: encrypted vault conflict/tombstone/deduplication/wrong-passphrase/interrupted-sync correctness and usage-ledger reconciliation',
+      'P1: cancellation, cloud/local timeout, model unload, tool-loop exhaustion, partial-agent failure, and mobile background recovery',
+      'P2 only after P0/P1: route/cost/degradation/frontier-request comprehension in the simplified UI'
     ],
     preserve: [
       'Hard estimated $50 trailing-30-day application guard and central runChat reservation/accounting path',
@@ -2682,6 +2675,43 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-fable-audit-brief',
+      date: '2026-07-18',
+      commit: '426092c (implementation; documentation lineage follows in PR #69)',
+      branch: 'codex/prepare-fable-audit-handoff',
+      pull_request: '#69 (draft)',
+      title: 'Give Fable a high-signal audit runway and remove stale orientation work',
+      type: 'docs+handoff+audit-planning+cleanup',
+      depends_on: ['2026-07-18-mobile-settings-navigation','2026-07-18-direct-provider-router-v2','2026-07-18-agent-orchestrator','2026-07-18-cross-device-vault-v2'],
+      files_changed: ['FABLE_AUDIT_BRIEF.md','README.md','ROADMAP.md','ai/README.md','CLAUDE.md','ai/index.html'],
+      interfaces_changed: ['HOMEBASE_CHANGELOG.current_handoff','Fable audit entrypoint','ROADMAP next-audit queue'],
+      changes: [
+        'Creates one canonical Fable audit entrypoint with a minimal orientation command, verified facts not to repeat, prioritized P0/P1 work packages, safety invariants, low-value exclusions, and an exact deliverable contract',
+        'Compresses current_handoff from a long deployment narrative into the live baseline, five source entrypoints, five risk packages, and preserved non-negotiable boundaries',
+        'Routes README, ai/README, CLAUDE.md, and ROADMAP.md to the same audit brief so the next session does not spend context reconciling competing instructions',
+        'Marks visual rework, provider expansion, framework migration, repeated smoke tests, and speculative relays as out of scope unless new evidence makes them material',
+        'Schedules removal of the stale codex/homebase-ai-orchestrator branch only after confirming merged PR #58 retains its history'
+      ],
+      safety_guards: [
+        'The brief does not authorize new external writes, public relays, secret handling, cloud spend, or weakened repository/vault/tool boundaries',
+        'Already-verified claims are context-saving pointers, not permission to skip exact source evidence before changing a boundary',
+        'Fable is directed to use deterministic tests before paid model comparisons and to keep private financial data and secrets out of fixtures and logs'
+      ],
+      verification: [
+        'Confirmed PRs #58 and #67–#68 are merged and their implementation/deployment history remains in GitHub and HOMEBASE_CHANGELOG',
+        'Confirmed codex/homebase-ai-orchestrator is the stale source branch for merged PR #58 before cleanup',
+        'Pending: validate JavaScript/cache/docs, review every brief symbol against source, publish through a validated PR, and confirm a clean main worktree'
+      ],
+      setup_required: [
+        'When usage resets, prompt Fable to read FABLE_AUDIT_BRIEF.md and execute its mission; no setup or API spend is needed for the initial deterministic audit'
+      ],
+      known_limits: [
+        'The brief prioritizes the audit but cannot predict new evidence; Fable should reorder only when it records the concrete risk that justifies doing so',
+        'User-device Google consent, passphrase entry, and private vault push/pull cannot be completed from repository documentation alone'
+      ],
+      next_model: 'Fable: start at FABLE_AUDIT_BRIEF.md, complete P0 before P1/P2, implement evidence-backed fixes, and leave one answer-first audit record with tests and exact deployment lineage.'
+    },
     {
       id: '2026-07-18-mobile-settings-navigation',
       date: '2026-07-18',
