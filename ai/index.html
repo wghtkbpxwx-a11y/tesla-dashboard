@@ -635,8 +635,22 @@ a:hover{text-decoration:underline}
   cursor:pointer; font-size:13.5px; color:var(--text2);
 }
 .mm-item:hover{background:var(--bg3); color:var(--text)}
-.mm-item.on{background:var(--acc-soft); color:var(--text)}
+.mm-item.on,.mm-item.sel{background:var(--acc-soft); color:var(--text)}
 .mm-note{font-size:11.5px; color:var(--text3); padding:4px 12px 10px}
+.mm-quick{padding:12px 12px 8px; flex:none}
+.mm-quick-title{font-size:14px; font-weight:700; color:var(--text); margin-bottom:3px}
+.mm-quick-sub{font-size:12px; line-height:1.4; color:var(--text3); margin-bottom:10px}
+.mm-item .mi-name{flex:1; min-width:0; text-align:left}
+.mm-item .mi-name small{display:block; color:var(--text3); font-size:11.5px; font-weight:400; margin-top:2px; line-height:1.35}
+.mm-choice{width:100%; border:1px solid var(--border); background:var(--bg3)}
+.mm-choice.sel{border-color:color-mix(in srgb,var(--acc) 45%,var(--border)); background:var(--acc-soft)}
+.mm-advanced-toggle{display:flex; width:100%; align-items:center; justify-content:space-between; padding:11px 14px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); color:var(--text2); font-size:13px; font-weight:650; flex:none}
+.mm-advanced-toggle:hover{background:var(--bg3); color:var(--text)}
+.mm-advanced-toggle .chev{transition:transform .15s}
+.mm-advanced-toggle[aria-expanded="true"] .chev{transform:rotate(90deg)}
+#mm-advanced:not([hidden]){display:flex; flex:1; min-height:0; flex-direction:column; overflow:hidden}
+#mm-advanced .mm-search{flex:none}
+#mm-advanced #mm-list{flex:1; min-height:0}
 .attach-menu{min-width:200px; padding:6px}
 .menu-item{
   display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:10px;
@@ -661,17 +675,18 @@ a:hover{text-decoration:underline}
 .modal.wide{max-width:680px}
 .mo-head{
   display:flex; align-items:center; gap:10px; padding:16px 18px;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid var(--border); flex:none;
 }
 .mo-head h2{margin:0; font-size:16px; font-weight:650; letter-spacing:-.02em; flex:1}
-.mo-tabs{display:flex; gap:2px; padding:8px 12px 0; overflow-x:auto; border-bottom:1px solid var(--border)}
+.mo-tabs{display:flex; gap:2px; padding:8px 12px 0; overflow-x:auto; border-bottom:1px solid var(--border); flex:none}
 .mo-tab{
   padding:9px 12px; border-radius:10px 10px 0 0; font-size:13px; font-weight:600;
   color:var(--text3); white-space:nowrap; border-bottom:2px solid transparent; margin-bottom:-1px;
 }
 .mo-tab:hover{color:var(--text2)}
 .mo-tab.on{color:var(--text); border-bottom-color:var(--acc)}
-.mo-body{padding:16px 18px 20px; overflow-y:auto; flex:1}
+.mo-mobile-nav{display:none}
+.mo-body{padding:16px 18px 20px; overflow-y:auto; flex:1; min-height:0}
 .set-pane{}
 .set-row{
   display:flex; align-items:center; gap:14px; padding:12px 0;
@@ -682,6 +697,9 @@ a:hover{text-decoration:underline}
 .set-row .sub{display:block; font-size:12.5px; color:var(--text3); font-weight:400; margin-top:3px; line-height:1.4}
 .set-sec{margin-top:8px}
 .set-sec h3{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--text3); margin:16px 0 8px; font-weight:700}
+.settings-disclosure{border:1px solid var(--border); border-radius:14px; margin:10px 0; overflow:hidden; background:var(--bg)}
+.settings-disclosure>summary{display:none}
+.settings-disclosure-body{padding:0 14px}
 .hint-box{
   background:var(--bg3); border:1px solid var(--border); border-radius:12px;
   padding:12px 14px; font-size:13px; color:var(--text2); line-height:1.5;
@@ -1260,6 +1278,30 @@ body.is-mobile .modal{max-width:100%; border-radius:16px 16px 0 0; max-height:92
 body.is-mobile .modal-scrim{align-items:flex-end; padding:0}
 body.is-mobile .mo-tabs{gap:0}
 body.is-mobile .icon-btn{width:40px;height:40px;min-width:40px}
+body.is-mobile #settings-ov .modal{height:min(92dvh, 820px)}
+body.is-mobile #settings-ov .mo-tabs{display:none}
+body.is-mobile #settings-ov .mo-mobile-nav{
+  display:flex; align-items:center; gap:12px; padding:9px 14px; flex:none;
+  border-bottom:1px solid var(--border); background:var(--bg2);
+}
+body.is-mobile #settings-ov .mo-mobile-nav span{font-size:12px; font-weight:700; color:var(--text3); white-space:nowrap}
+body.is-mobile #settings-ov .mo-mobile-nav select{flex:1; min-width:0; min-height:44px; font-size:16px; font-weight:650; background:var(--bg3)}
+body.is-mobile #settings-ov .mo-body{
+  min-height:0; padding:14px 18px max(20px, env(safe-area-inset-bottom));
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+}
+body.is-mobile #settings-ov .settings-disclosure>summary{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  min-height:50px; padding:10px 14px; cursor:pointer; font-size:14px; font-weight:700;
+  list-style:none;
+}
+body.is-mobile #settings-ov .settings-disclosure>summary::-webkit-details-marker{display:none}
+body.is-mobile #settings-ov .settings-disclosure>summary::after{content:'›'; color:var(--text3); font-size:20px; transform:rotate(90deg)}
+body.is-mobile #settings-ov .settings-disclosure[open]>summary::after{transform:rotate(-90deg)}
+body.is-mobile #settings-ov .settings-disclosure-body{border-top:1px solid var(--border); padding:0 14px}
+body.is-mobile #settings-ov .set-row{align-items:flex-start}
+body.is-mobile #settings-ov .set-row>span:not(.lbl){max-width:52%; flex-wrap:wrap; justify-content:flex-end}
+body.is-mobile #model-menu{left:12px!important; right:12px!important; width:auto!important; max-width:none; max-height:72dvh}
 
 /* Desktop-only affordances */
 body.is-desktop .chat-float[data-state="open"]{
@@ -1590,8 +1632,12 @@ body.is-desktop .chat-float[data-state="open"]{
 
 <!-- model picker -->
 <div class="pop" id="model-menu">
-  <div class="mm-search"><input id="mm-filter" type="text" placeholder="Filter models… or paste any model id" autocomplete="off"></div>
-  <div id="mm-list"></div>
+  <div class="mm-quick" id="mm-quick"></div>
+  <button class="mm-advanced-toggle" id="mm-advanced-toggle" type="button" aria-expanded="false"><span>Choose a specific model</span><span class="chev">›</span></button>
+  <div id="mm-advanced" hidden>
+    <div class="mm-search"><input id="mm-filter" type="text" placeholder="Search models or providers" autocomplete="off"></div>
+    <div id="mm-list"></div>
+  </div>
 </div>
 
 <!-- attach menu -->
@@ -1638,6 +1684,20 @@ body.is-desktop .chat-float[data-state="open"]{
       <button class="mo-tab" data-tab="look">Appearance</button>
       <button class="mo-tab" data-tab="data">Data</button>
     </div>
+    <label class="mo-mobile-nav" for="settings-mobile-section">
+      <span>Show</span>
+      <select id="settings-mobile-section" aria-label="Settings section">
+        <option value="providers">AI connections</option>
+        <option value="chat">Chat behaviour</option>
+        <option value="voice">Voice</option>
+        <option value="toolsx">Tools</option>
+        <option value="hub">Dashboard</option>
+        <option value="council">Model council</option>
+        <option value="dev">App development</option>
+        <option value="look">Appearance</option>
+        <option value="data">Data &amp; backup</option>
+      </select>
+    </label>
     <div class="mo-body">
       <div class="set-pane" id="pane-providers"></div>
       <div class="set-pane" id="pane-chat" style="display:none"></div>
@@ -1801,8 +1861,8 @@ body.is-desktop .chat-float[data-state="open"]{
       <p style="color:var(--text2); margin:0; font-size:14px">Homebase is your personal hub — AI agents, memory vault, connectors, and links to the life you run from the car and desk.</p>
       <div class="w-opts">
         <button class="w-opt" id="w-keys"><span class="w-ico">🔑</span><span><span class="w-t">Add an API key</span><span class="w-d" style="display:block">Anthropic Claude, OpenAI, Gemini, Groq, OpenRouter, Mistral, DeepSeek, xAI…</span></span></button>
-        <button class="w-opt" id="w-local"><span class="w-ico">💻</span><span><span class="w-t">Use a local LLM</span><span class="w-d" style="display:block">Connect Ollama / LM Studio / llama.cpp on this machine</span></span></button>
-        <button class="w-opt" id="w-webllm"><span class="w-ico">🌐</span><span><span class="w-t">Run a model in the browser</span><span class="w-d" style="display:block">WebLLM — private, offline-capable, needs WebGPU</span></span></button>
+        <button class="w-opt" id="w-local"><span class="w-ico">💻</span><span><span class="w-t">Use private AI</span><span class="w-d" style="display:block">Connect LM Studio on your Mac or another trusted local service</span></span></button>
+        <button class="w-opt" id="w-webllm"><span class="w-ico">🌐</span><span><span class="w-t">Download offline AI</span><span class="w-d" style="display:block">Runs privately in this browser · first model is about 0.9 GB</span></span></button>
         <button class="w-opt" id="w-demo"><span class="w-ico">✨</span><span><span class="w-t">Just explore (demo mode)</span><span class="w-d" style="display:block">Try the interface with a simulated model, no key needed</span></span></button>
       </div>
     </div>
@@ -2569,8 +2629,9 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Perform a massive scoping review of Homebase after the direct-first cost router, specialist-team orchestrator, guarded self-development tools, private finance sync, encrypted phone/desktop vault sync, and new research/voice providers',
-    state: 'PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, PR #62 secure latency-aware local routing, PR #64 immediate cloud-key activation, and PR #65 debounced credential persistence are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted LM Studio token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call. xAI is now connected with a masked key that survives reload, 10 models are discovered, and one Grok 3 mini beta reply was recorded at approximately $0.0003 before Auto best-value routing and Agent tools were restored.',
+    state: 'PR #67 is open in draft with the mobile settings/model-picker simplification, deliberate-only mobile WebLLM downloads, and Locally/LM Link guidance; responsive QA passed at 320, 390, and 1280 px before review. PR #58 encrypted sync, PR #59 direct-provider/LM Studio routing, PR #61 LM Studio token persistence, PR #62 secure latency-aware local routing, PR #64 immediate cloud-key activation, and PR #65 debounced credential persistence are merged and live. Google Drive API, external test app, drive.file scope, Web OAuth client, authorized Pages origin, test user, and Homebase Client ID are configured; the user still must complete Google consent, privately enter the vault passphrase, push from the source device, and pull on mobile. Direct Perplexity/Kimi/DeepInfra, ElevenLabs, and optimized LM Studio local/MCP support are deployed. Qwen 3.5 9B 4-bit is loaded locally as homebase-local with just-in-time recovery, while installed Qwen 3.5 4B is the fast path for short no-tool prompts. LM Studio requires authentication, retains only the least-privilege Homebase token, denies arbitrary remote MCPs, allows installed mcp.json connectors, and remains localhost-only. Homebase has the restricted LM Studio token active, its MCP-search tool enabled, and one live Brave search was completed through the local model with a $0.005 rolling-ledger estimate and no cloud-model call. xAI is now connected with a masked key that survives reload, 10 models are discovered, and one Grok 3 mini beta reply was recorded at approximately $0.0003 before Auto best-value routing and Agent tools were restored.',
     start_here: [
+      'HOMEBASE_CHANGELOG entry 2026-07-18-mobile-settings-navigation',
       'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-debounced-persistence',
       'HOMEBASE_CHANGELOG entry 2026-07-18-cloud-key-live-activation',
       'HOMEBASE_CHANGELOG entry 2026-07-18-lmstudio-secure-mcp-live-verification',
@@ -2621,6 +2682,49 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-mobile-settings-navigation',
+      date: '2026-07-18',
+      commit: 'ddc15d8 (implementation; documentation lineage follows in PR #67)',
+      branch: 'codex/fix-mobile-settings-navigation',
+      pull_request: '#67 (draft)',
+      title: 'Make mobile settings and model choice simple without removing power',
+      type: 'fix+mobile+ux+accessibility+routing+docs',
+      depends_on: ['2026-07-18-cloud-key-debounced-persistence'],
+      files_changed: ['ai/index.html','ai/README.md','CLAUDE.md'],
+      interfaces_changed: ['#settings-ov','#settings-mobile-section','.settings-disclosure','#model-menu','#mm-quick','#mm-advanced','localRouteCandidate','PROVIDERS.lmstudio'],
+      changes: [
+        'Prevents modal headers and settings navigation from shrinking when a long settings pane is rendered inside the mobile flex column',
+        'Replaces nine crowded mobile tabs with one 44 px plain-language section picker while preserving the complete desktop tab interface',
+        'Keeps cloud budget and Automatic model selection immediately visible, grouping routing, teams, spending limits, and response preferences behind two expandable sections on phones',
+        'Redesigns the model picker around Automatic as the recommended intent-level choice and keeps every provider, model, capability badge, and custom model ID behind Choose a specific model',
+        'Constrains settings and advanced model lists to independent scrolling regions with contained overscroll, safe-area padding, and no horizontal page overflow at 320 px',
+        'Stops Automatic mobile routing from silently downloading WebLLM model weights while keeping all browser models manually selectable and labeling the first download at about 0.9 GB',
+        'Renames the LM Studio surface to Private AI from your Mac and explains the Locally/LM Link relationship without claiming that iOS exposes a browser-callable API'
+      ],
+      safety_guards: [
+        'No credential, budget, sync, provider, model, or expert setting is removed',
+        'Desktop keeps its existing tabs and expanded expert settings; mobile simplification is scoped to body.is-mobile',
+        'WebLLM remains available only through deliberate mobile selection; automatic routing still uses verified Mac-local AI when securely reachable and otherwise selects an eligible cloud route',
+        'LM Link guidance preserves the authenticated, CORS-limited LM Studio server contract and does not expose the Mac or iPhone to the public internet'
+      ],
+      verification: [
+        'Reproduced from the user screenshot: the Chat pane was visible while the settings tab labels were clipped to a blank strip between two borders',
+        'Validated the generated JavaScript and dashboard cache with .github/scripts/validate.py and checked the patch with git diff --check',
+        'Browser-tested the 390×844 layout: fixed 63 px section picker, independently scrolling 638 px body, synchronized active pane, no horizontal overflow, and collapsed expert groups',
+        'Selected all nine mobile sections at 390×844 and confirmed each maps to exactly one visible pane with no page-level horizontal overflow',
+        'Browser-tested a 320×700 layout: full-width modal, fixed section picker, independently scrolling content, and no horizontal overflow',
+        'Browser-tested the model picker: Automatic-only first view, all 64 local/demo model choices preserved after explicit reveal, and a 314 px independently scrolling model list'
+      ],
+      setup_required: [
+        'None after deployment; mobile users may need one refresh to replace the cached stylesheet'
+      ],
+      known_limits: [
+        'The Locally iPhone app can use Mac models through LM Link, but it does not expose a documented API directly to Safari; remote Homebase access still requires the Mac LM Studio API to be securely reachable over HTTPS',
+        'Very large browser text-size overrides may reduce content height, but navigation and both scroll regions remain available'
+      ],
+      next_model: 'Preserve intent-level Automatic UX, progressive disclosure, manually initiated mobile model downloads, full expert capability access, fixed mobile section navigation, and independently scrolling content when adding settings or models.'
+    },
     {
       id: '2026-07-18-cloud-key-debounced-persistence',
       date: '2026-07-18',
@@ -6287,7 +6391,7 @@ var PROVIDERS = {
     ]},
   ollama: { name:'Ollama (local)', kind:'openai', base:'http://localhost:11434/v1', local:true, usage:true, fetchModels:'ollama', color:'#94a3b8',
     models:[] },
-  lmstudio: { name:'LM Studio (local)', kind:'openai', base:'http://localhost:1234/v1', local:true, fetchModels:true, color:'#94a3b8',
+  lmstudio: { name:'Private AI from your Mac · LM Studio', kind:'openai', base:'http://localhost:1234/v1', local:true, fetchModels:true, color:'#94a3b8',
     models:[
       {id:'qwen/qwen3.5-9b', label:'Qwen 3.5 9B · preferred local', vision:1, tools:1, nativeTools:1, quality:3},
       {id:'homebase-local', label:'Qwen 3.5 9B · loaded Homebase alias', vision:1, tools:1, nativeTools:1, quality:3}
@@ -6552,7 +6656,9 @@ function localRouteCandidate(cls){
       return {provider:p, model:ids[j], local:true, caps:caps};
     }
   }
-  if (S.settings.webllmFallback && navigator.gpu){
+  // Avoid silently downloading a large browser model on phones. WebLLM remains
+  // available in the model picker when the user deliberately chooses it.
+  if (S.settings.webllmFallback && navigator.gpu && !document.body.classList.contains('is-mobile')){
     return {provider:'webllm', model:S.settings.webllmModel || PROVIDERS.webllm.models[0].id, local:true};
   }
   return null;
@@ -9926,24 +10032,26 @@ function renderModelMenu(){
   var list = $('mm-list');
   var filter = ($('mm-filter').value || '').toLowerCase().trim();
   list.innerHTML = '';
+  var quick = $('mm-quick');
+  quick.innerHTML = '<div class="mm-quick-title">How should Homebase choose?</div><div class="mm-quick-sub">Automatic quietly picks the least expensive model that can do the job. Ask for “best quality” or a named model anytime.</div>';
   var c = activeConvo();
   var curP = c ? c.provider : S.settings.provider;
   var curM = c ? c.model : S.settings.model;
   var info = cloudSpendInfo();
   var auto = document.createElement('button');
-  auto.className = 'mm-item' + (S.settings.autoRoute ? ' sel' : '');
-  auto.innerHTML = '<span class="mi-name">✨ Auto · best value for each request</span><span class="caps"><span class="cap">🏠</span><span class="cap">☁️</span></span>';
+  auto.className = 'mm-item mm-choice' + (S.settings.autoRoute ? ' sel' : '');
+  auto.innerHTML = '<span class="mi-name">✨ Automatic <small>Recommended · balances quality, speed, privacy, and cost</small></span><span class="caps"><span class="cap">🏠</span><span class="cap">☁️</span></span>';
   auto.title = 'Uses local AI for simple work and the least expensive suitable cloud model for harder work.';
   auto.addEventListener('click', function(){
     S.settings.autoRoute = true; saveSettings(); updateModelBtn(); closePops();
     toast('Automatic cost-effective routing enabled', 'ok');
   });
-  list.appendChild(auto);
+  quick.appendChild(auto);
   var budgetNote = document.createElement('div');
   budgetNote.className = 'mm-note';
   budgetNote.innerHTML = '<span data-cloud-budget-text>$' + info.spent.toFixed(2) + ' / $' + info.limit.toFixed(2) + ' · trailing ' + info.windowDays + ' days</span>' +
     '<div style="height:4px;background:var(--line);border-radius:99px;margin-top:7px;overflow:hidden"><div data-cloud-budget-bar style="height:100%;width:' + Math.min(100, info.spent / info.limit * 100) + '%;background:var(--accent);border-radius:99px"></div></div>';
-  list.appendChild(budgetNote);
+  quick.appendChild(budgetNote);
   var ordered = PROVIDER_ORDER.slice().sort(function(a, b){
     return (providerReady(b) ? 1 : 0) - (providerReady(a) ? 1 : 0);
   });
@@ -10006,9 +10114,12 @@ function renderModelMenu(){
 }
 function openModelMenu(){
   renderModelMenu();
+  var advanced = $('mm-advanced');
+  advanced.hidden = !!S.settings.autoRoute;
+  $('mm-advanced-toggle').setAttribute('aria-expanded', String(!advanced.hidden));
   openPop('model-menu', $('model-btn'));
   $('mm-filter').value = '';
-  setTimeout(function(){ if (window.innerWidth > 900) $('mm-filter').focus(); }, 50);
+  setTimeout(function(){ if (!advanced.hidden && window.innerWidth > 900) $('mm-filter').focus(); }, 50);
 }
 
 /* ============================ settings ============================ */
@@ -10027,6 +10138,18 @@ function tglRow(label, sub, get, set){
   });
   return d;
 }
+function settingsDisclosure(title, children){
+  var d = document.createElement('details');
+  d.className = 'settings-disclosure';
+  d.open = !document.body.classList.contains('is-mobile');
+  var s = document.createElement('summary');
+  s.textContent = title;
+  var body = document.createElement('div');
+  body.className = 'settings-disclosure-body';
+  children.forEach(function(child){ body.appendChild(child); });
+  d.appendChild(s); d.appendChild(body);
+  return d;
+}
 function openSettings(tab, expandProvider){
   renderSettings(expandProvider);
   $('settings-ov').classList.add('open');
@@ -10035,6 +10158,9 @@ function openSettings(tab, expandProvider){
 function switchSetTab(tab){
   qsa('#set-tabs .mo-tab').forEach(function(b){ b.classList.toggle('on', b.dataset.tab === tab); });
   qsa('.set-pane').forEach(function(p){ p.style.display = (p.id === 'pane-' + tab) ? '' : 'none'; });
+  if ($('settings-mobile-section')) $('settings-mobile-section').value = tab;
+  var body = qs('#settings-ov .mo-body');
+  if (body) body.scrollTop = 0;
 }
 function renderSettings(expandProvider){
   renderProvidersPane(expandProvider);
@@ -10139,7 +10265,7 @@ function renderProvidersPane(expand){
         'Then “Fetch model list”. Models: <code>ollama pull llama3.2</code> etc.</div>');
     }
     if (p === 'lmstudio'){
-      body.insertAdjacentHTML('beforeend', '<div class="hint-box">Recommended on this Mac: <b>Qwen 3.5 9B 4-bit</b> as <code>homebase-local</code>, 16K context, one parallel request, full GPU offload. Developer server + CORS must be on. Installed MCP web search additionally requires LM Studio authentication, a scoped token allowed to call <code>mcp.json</code>, and the Tools toggle below.</div>');
+      body.insertAdjacentHTML('beforeend', '<div class="hint-box"><b>Private AI from your Mac.</b> Recommended: Qwen 3.5 9B 4-bit as <code>homebase-local</code>, 16K context, one parallel request, full GPU offload. On iPhone, the Locally app can reach the same models through LM Link. Homebase uses this connection whenever its authenticated API is securely reachable; Safari cannot call the Locally app directly. Developer server + CORS must be on. Installed MCP web search also requires a scoped token allowed to call <code>mcp.json</code>.</div>');
     }
     if (p === 'llamacpp'){
       body.insertAdjacentHTML('beforeend', '<div class="hint-box">Run <code>llama-server -m model.gguf --port 8080</code> — CORS is on by default.</div>');
@@ -10360,7 +10486,7 @@ function renderChatPane(){
     function(){ return S.settings.autoRoute; }, function(v){ S.settings.autoRoute = v; updateModelBtn(); }));
   pane.appendChild(tglRow('Prefer local AI', 'Use a recently verified local model for simple, private, low-risk queries',
     function(){ return S.settings.localFirst; }, function(v){ S.settings.localFirst = v; }));
-  pane.appendChild(tglRow('In-browser local fallback', 'Use WebLLM for simple queries when no local server is ready (first use downloads the model)',
+  pane.appendChild(tglRow('Offline browser model', 'Available when deliberately selected; automatic mobile mode avoids the large first-use download',
     function(){ return S.settings.webllmFallback; }, function(v){ S.settings.webllmFallback = v; }));
   pane.appendChild(tglRow('Automatic specialist teams', 'For complex tasks, delegate independent sub-components in parallel and let a lead agent integrate the result',
     function(){ return S.settings.autoDelegate; }, function(v){ S.settings.autoDelegate = v; }));
@@ -10417,6 +10543,18 @@ function renderChatPane(){
   var loc = qs('#ps-loc', pane);
   loc.value = S.settings.homeLocation;
   loc.addEventListener('change', function(){ S.settings.homeLocation = this.value.trim(); saveSettings(); });
+
+  // Keep everyday choices obvious while preserving every expert control.
+  var chatRows = Array.from(pane.children);
+  var chatBudget = chatRows.shift(), chatAuto = chatRows.shift();
+  var dividerAt = chatRows.indexOf(divider);
+  var routingRows = chatRows.slice(0, dividerAt);
+  var preferenceRows = chatRows.slice(dividerAt + 1);
+  pane.innerHTML = '';
+  pane.appendChild(chatBudget);
+  pane.appendChild(chatAuto);
+  pane.appendChild(settingsDisclosure('Routing, teams & spending limits', routingRows));
+  pane.appendChild(settingsDisclosure('Response preferences', preferenceRows));
 }
 
 function renderVoicePane(){
@@ -10815,6 +10953,12 @@ function initShell(){
     else openModelMenu();
   });
   $('mm-filter').addEventListener('input', renderModelMenu);
+  $('mm-advanced-toggle').addEventListener('click', function(){
+    var advanced = $('mm-advanced');
+    advanced.hidden = !advanced.hidden;
+    this.setAttribute('aria-expanded', String(!advanced.hidden));
+    if (!advanced.hidden && window.innerWidth > 900) setTimeout(function(){ $('mm-filter').focus(); }, 0);
+  });
   $('tools-btn').addEventListener('click', function(){
     var c = ensureConvo();
     c.toolsOn = !c.toolsOn;
@@ -10842,6 +10986,7 @@ function initShell(){
   qsa('.mo-tab').forEach(function(b){
     b.addEventListener('click', function(){ switchSetTab(b.dataset.tab); });
   });
+  $('settings-mobile-section').addEventListener('change', function(){ switchSetTab(this.value); });
   qsa('[data-close]').forEach(function(b){
     b.addEventListener('click', function(){ $(b.dataset.close).classList.remove('open'); });
   });
