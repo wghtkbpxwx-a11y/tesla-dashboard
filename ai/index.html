@@ -613,6 +613,23 @@ a:hover{text-decoration:underline}
   font-size:11.5px; color:var(--text3); max-width:var(--chat-w); margin:0 auto;
 }
 #comp-hint .grow{flex:1}
+#query-model-control{
+  display:inline-flex; align-items:center; gap:5px; min-width:0; max-width:min(290px,58vw);
+  padding:3px 22px 3px 8px; position:relative; border:1px solid var(--border);
+  border-radius:999px; background:var(--bg2); color:var(--text2); cursor:pointer;
+}
+#query-model-control.chosen{
+  color:var(--acc); border-color:color-mix(in srgb, var(--acc) 38%, var(--border));
+  background:var(--acc-soft);
+}
+#query-model-control>span{font-size:10px; font-weight:750; text-transform:uppercase; letter-spacing:.035em; flex:none}
+#query-model-control::after{content:'⌄'; position:absolute; right:8px; top:50%; transform:translateY(-56%); pointer-events:none; font-size:11px}
+#query-model-select{
+  min-width:0; max-width:220px; border:0; padding:0; outline:0; box-shadow:none!important;
+  background:transparent; color:inherit; font-family:inherit; font-size:11.5px; font-weight:650; line-height:1.35; cursor:pointer;
+  appearance:none; -webkit-appearance:none; white-space:nowrap; text-overflow:ellipsis;
+}
+#hint-model{display:none}
 #hint-tools,#hint-council{
   font-size:11px; font-weight:600; padding:2px 8px; border-radius:999px;
   background:var(--acc-soft); color:var(--acc);
@@ -1266,6 +1283,8 @@ body.is-mobile .chat-float #composer-wrap{
 }
 body.is-mobile .chat-float #composer{padding:8px; border-radius:22px}
 body.is-mobile .chat-float #input{font-size:16px} /* prevent iOS zoom */
+body.is-mobile #query-model-control{max-width:min(64vw,270px); min-height:28px}
+body.is-mobile #query-model-select{max-width:min(48vw,205px); font-size:12px}
 body.is-mobile #chat-fab{
   right: max(16px, env(safe-area-inset-right));
   bottom: max(16px, env(safe-area-inset-bottom));
@@ -1611,6 +1630,10 @@ body.is-desktop .chat-float[data-state="open"]{
           <button id="send-btn" title="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
         </div>
         <div id="comp-hint">
+          <label id="query-model-control" title="Choose a model for only the next message">
+            <span>Next</span>
+            <select id="query-model-select" aria-label="Model for the next message"><option value="auto">Automatic · best value</option></select>
+          </label>
           <span id="hint-model"></span>
           <span id="hint-tools" style="display:none">🔧 agent</span>
           <span id="hint-council" style="display:none">⚖️ council</span>
@@ -2629,7 +2652,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
-    state: 'PRs #58–#71 are merged and live. PR #71 (squash merge 35cbe23; implementation originated at 4d2c155) adds deterministic, request-time Automatic failover for missing keys and quota/auth/rate-limit/network/provider failures. Validate and Pages passed on main, and the public app was checked for the production failover functions and changelog entry; deployment status is documented by PR #72. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, simplified mobile/model-picker, and automatic provider failover work is deployed. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    state: 'PRs #58–#71 are merged and live; deployment status is documented by PR #72. The agent/add-query-model-selector branch now adds a compact, exact, one-message model dropdown with deterministic tests and 320/390 px mobile verification; its commit, PR, merge, and Pages status must be recorded before calling it live. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, simplified mobile/model-picker, and automatic provider failover work is deployed. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2675,6 +2698,47 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-per-query-model-selector',
+      date: '2026-07-18',
+      commit: 'pending on agent/add-query-model-selector',
+      branch: 'agent/add-query-model-selector',
+      pull_request: 'not opened yet; implementation and deterministic/mobile validation complete locally',
+      title: 'Choose an exact model for one query without changing Automatic mode',
+      type: 'feature+mobile+ux+routing+safety+tests+docs',
+      depends_on: ['2026-07-18-automatic-provider-failover','2026-07-18-mobile-settings-navigation'],
+      files_changed: ['ai/index.html','.github/scripts/test_query_model_selector.js','.github/scripts/validate.py','ai/README.md','CLAUDE.md','FABLE_AUDIT_BRIEF.md','ROADMAP.md'],
+      interfaces_changed: ['#query-model-control','#query-model-select','S.queryModelOverride','queryModelValue','parseQueryModelValue','queryOverrideRoute','refreshQueryModelSelect','initQueryModelSelect','sendMessage'],
+      changes: [
+        'Adds a compact native Next dropdown beneath the composer with Automatic plus exact models from configured cloud providers and local/browser runtimes',
+        'An exact selection applies only to the next accepted user message, is recorded as requestedRoute for regeneration, and immediately resets the composer to Automatic without changing the chat-wide model preference',
+        'Response metadata names the exact model and explains Chosen for this message, while the misleading composer footer base-model label is hidden',
+        'The dropdown refreshes when focused so newly configured keys and discovered models appear without adding another settings workflow',
+        'The validation workflow now runs a production-function test for value encoding, exact route construction, reset, regeneration, and orchestration boundaries'
+      ],
+      safety_guards: [
+        'A query-specific exact choice suppresses automatic specialist teams, Model Council, and provider failover for that turn so no unrequested model sees the prompt',
+        'The one-shot choice does not mutate or sync autoRoute, persistent provider/model settings, credentials, or conversation defaults',
+        'Only configured/ready providers and explicit local/browser runtimes appear; Demo and voice-only providers are excluded',
+        'Regeneration reuses the exact requested route instead of silently returning to Automatic',
+        'WebLLM selection remains deliberate and warns that the chosen browser model downloads once before being cached'
+      ],
+      verification: [
+        'node .github/scripts/test_query_model_selector.js passes all exact-route, terminal-boundary, reset, and regeneration assertions',
+        'python3 .github/scripts/validate.py parses root and AI JavaScript, validates cache/updater, and runs failover plus per-query selector tests',
+        'Browser-tested at 390×844 and 320×700: native selector is visible/tappable, exact LM Studio selection enters chosen state, composer remains within viewport, and horizontal overflow is zero',
+        'git diff --check passes; no provider request, model download, credential use, or cloud spend occurred'
+      ],
+      setup_required: [
+        'None for the UI; configure a provider key or reachable local runtime for its models to appear as usable choices'
+      ],
+      known_limits: [
+        'The compact picker caps very large discovered provider catalogs; the searchable header picker remains the complete persistent model surface',
+        'Selecting a local runtime does not make an unreachable Mac endpoint available and selecting WebLLM may require its documented first download',
+        'An exact model without a capability needed by the query will not be silently replaced; the user must choose Automatic or another capable model'
+      ],
+      next_model: 'After deployment lineage is recorded, preserve the one-message terminal semantics and native mobile control; focus Fable effort on concurrent accounting/cancellation and security boundaries rather than redesigning this selector.'
+    },
     {
       id: '2026-07-18-automatic-provider-failover',
       date: '2026-07-18',
@@ -6114,6 +6178,7 @@ var S = {
   convos: [],           // [{id,title,pin,updatedAt,provider,model,messages:[...] ,system,toolsOn}]
   activeId: null,
   pendingAtts: [],
+  queryModelOverride: null,
   sending: false,
   abort: null,
   stick: true
@@ -8813,14 +8878,17 @@ async function sendMessage(rawText, opts){
   if ($('chat-float') && $('chat-float').dataset.state === 'fab') openChatFloat(false);
   var convo = ensureConvo();
   var text = (rawText != null ? rawText : $('input').value).trim();
+  var queryOverride = opts.queryModelOverride || (!opts.regen ? S.queryModelOverride : null);
   if (!opts.regen){
     if (!text && !S.pendingAtts.length) return;
     if (text.charAt(0) === '/' && handleSlash(text)) { $('input').value = ''; autoresize(); updateSendBtn(); return; }
     var um = { id: uuid(), role:'user', text: text, ts: Date.now(),
       images: S.pendingAtts.filter(function(a){ return a.kind === 'image'; }).map(function(a){ return a.dataUrl; }),
       files: S.pendingAtts.filter(function(a){ return a.kind !== 'image'; }).map(function(a){ return {name:a.name, kind:a.kind, size:a.size, text:a.text, dataUrl:a.dataUrl}; }) };
+    if (queryOverride) um.requestedRoute = {provider:queryOverride.provider, model:queryOverride.model};
     convo.messages.push(um);
     S.pendingAtts = []; renderPendingAtts();
+    if (queryOverride){ S.queryModelOverride = null; refreshQueryModelSelect(); }
     if (rawText == null){ $('input').value = ''; autoresize(); }
     if (convo.messages.length === 1){ setAutoTitle(convo); renderSidebar(); }
     if ($('chat').querySelector('#empty-state')) renderChat();
@@ -8832,11 +8900,13 @@ async function sendMessage(rawText, opts){
   for (var pi = convo.messages.length - 1; pi >= 0; pi--){
     if (convo.messages[pi].role === 'user'){ latestUser = convo.messages[pi]; break; }
   }
-  var route = S.settings.autoRoute ? selectAIRoute(latestUser.text || '', latestUser, convo, previewMsgs) : null;
+  if (opts.regen && latestUser.requestedRoute) queryOverride = latestUser.requestedRoute;
+  var route = queryOverride ? queryOverrideRoute(queryOverride, latestUser, convo)
+    : (S.settings.autoRoute ? selectAIRoute(latestUser.text || '', latestUser, convo, previewMsgs) : null);
   var provider = route ? route.provider : convo.provider;
   var model = route ? route.model : convo.model;
-  var configuredCouncilReady = !!(S.settings.councilOn && (S.settings.council.members || []).length >= 2);
-  var autoTeam = (S.settings.autoRoute && !configuredCouncilReady) ? buildAutoAgentTeam(latestUser.text || '', route, previewMsgs) : [];
+  var configuredCouncilReady = !!(!queryOverride && S.settings.councilOn && (S.settings.council.members || []).length >= 2);
+  var autoTeam = (S.settings.autoRoute && !queryOverride && !configuredCouncilReady) ? buildAutoAgentTeam(latestUser.text || '', route, previewMsgs) : [];
   var caps = modelCaps(provider, model);
   var am = { id: uuid(), role:'assistant', text:'', liveText:'', thinking:'', toolRounds:[],
     provider: provider, model: model, ts: Date.now(), streaming: true, usage:{},
@@ -8942,7 +9012,7 @@ async function sendMessage(rawText, opts){
           temperature: S.settings.temperature, maxTokens: route ? route.maxTokens : S.settings.maxTokens,
           think: S.settings.thinking, tools: roundTools, signal: S.abort.signal,
           conversationId:convo.id, messageId:am.id,
-          autoFailover:!!S.settings.autoRoute, qualityFloor:modelQuality(provider, model), userQuery:userQuery,
+          autoFailover:!!S.settings.autoRoute && !queryOverride, qualityFloor:modelQuality(provider, model), userQuery:userQuery,
           classification:route ? route.classification : null,
           onText: function(t){ am.liveText += t; if (PIPE_HOOKS.onDelta) PIPE_HOOKS.onDelta(t); schedulePaint(am, convo); },
           onThink: function(t){ am.thinking += t; schedulePaint(am, convo); },
@@ -9181,6 +9251,73 @@ function updateSendBtn(){
     b.disabled = !($('input').value.trim() || S.pendingAtts.length);
   }
 }
+function queryModelValue(provider, model){
+  return encodeURIComponent(String(provider || '')) + '|' + encodeURIComponent(String(model || ''));
+}
+function parseQueryModelValue(value){
+  var parts = String(value || '').split('|');
+  if (parts.length !== 2) return null;
+  try {
+    var pick = {provider:decodeURIComponent(parts[0]), model:decodeURIComponent(parts[1])};
+    return PROVIDERS[pick.provider] && pick.model ? pick : null;
+  } catch(e){ return null; }
+}
+function queryOverrideRoute(pick, latestUser, convo){
+  if (!pick || !PROVIDERS[pick.provider]) return null;
+  var cls = classifyAIRequest((latestUser && latestUser.text) || '', latestUser || {}, convo);
+  cls.homebaseToolsEnabled = !convo || convo.toolsOn !== false;
+  return {
+    provider:pick.provider, model:pick.model, maxTokens:+S.settings.maxTokens || 4096,
+    tier:cls.tier, classification:cls, local:!cloudProvider(pick.provider),
+    reason:'Chosen for this message · ' + ((PROVIDERS[pick.provider] && PROVIDERS[pick.provider].name) || pick.provider) + ' · ' + (modelInfo(pick.provider, pick.model).label || pick.model)
+  };
+}
+function refreshQueryModelSelect(){
+  var select = $('query-model-select');
+  if (!select) return;
+  var wanted = S.queryModelOverride ? queryModelValue(S.queryModelOverride.provider, S.queryModelOverride.model) : 'auto';
+  select.innerHTML = '';
+  var automatic = document.createElement('option');
+  var defaultConvo = activeConvo();
+  var defaultProvider = defaultConvo ? defaultConvo.provider : S.settings.provider;
+  var defaultModel = defaultConvo ? defaultConvo.model : S.settings.model;
+  automatic.value = 'auto';
+  automatic.textContent = S.settings.autoRoute ? 'Automatic · best value'
+    : 'Chat default · ' + (modelInfo(defaultProvider, defaultModel).label || defaultModel);
+  select.appendChild(automatic);
+  PROVIDER_ORDER.forEach(function(provider){
+    var pr = PROVIDERS[provider];
+    if (!pr || pr.kind === 'voice' || pr.kind === 'demo' || !providerReady(provider)) return;
+    var models = providerModels(provider).slice(0, provider === 'openrouter' ? 30 : 40);
+    if (!models.length) return;
+    var group = document.createElement('optgroup');
+    group.label = pr.name + (pr.local ? ' · local' : '');
+    models.forEach(function(model){
+      var option = document.createElement('option');
+      option.value = queryModelValue(provider, model.id);
+      option.textContent = (model.label || model.id) + ' · ' + pr.name;
+      group.appendChild(option);
+    });
+    select.appendChild(group);
+  });
+  var exists = Array.prototype.some.call(select.options, function(option){ return option.value === wanted; });
+  if (!exists){ S.queryModelOverride = null; wanted = 'auto'; }
+  select.value = wanted;
+  $('query-model-control').classList.toggle('chosen', wanted !== 'auto');
+}
+function initQueryModelSelect(){
+  var select = $('query-model-select');
+  if (!select) return;
+  refreshQueryModelSelect();
+  select.addEventListener('focus', refreshQueryModelSelect);
+  select.addEventListener('change', function(){
+    S.queryModelOverride = select.value === 'auto' ? null : parseQueryModelValue(select.value);
+    $('query-model-control').classList.toggle('chosen', !!S.queryModelOverride);
+    if (S.queryModelOverride && S.queryModelOverride.provider === 'webllm'){
+      toast('This browser model downloads once, then stays cached on this device', null, 3800);
+    }
+  });
+}
 function updateHints(){
   var c = activeConvo();
   var p = c ? c.provider : S.settings.provider;
@@ -9199,6 +9336,7 @@ function updateHints(){
 }
 function initComposer(){
   var ta = $('input');
+  initQueryModelSelect();
   ta.addEventListener('input', function(){ autoresize(); updateSendBtn(); updateHints(); });
   ta.addEventListener('keydown', function(e){
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing){
