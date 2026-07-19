@@ -1203,7 +1203,13 @@ body.is-mobile #topbar{
 body.is-mobile .tb-title{display:none}
 body.is-mobile .home-btn span{display:none}
 body.is-mobile .home-btn{padding:10px; border-radius:12px}
-body.is-mobile #sync-pill{display:none !important}
+body.is-mobile #sync-pill{
+  display:inline-flex !important; min-width:44px; min-height:40px; max-width:none;
+  padding:0 10px; justify-content:center; font-size:0; overflow:visible;
+}
+body.is-mobile #sync-pill::before{
+  content:attr(data-short); font-size:10.5px; line-height:1; font-weight:750; letter-spacing:.02em;
+}
 body.is-mobile #connectors-btn, body.is-mobile #dash-refresh{width:40px;height:40px}
 
 body.is-mobile #dash-scroll{
@@ -1351,6 +1357,10 @@ body.is-desktop .chat-float[data-state="open"]{
 #vault-status[data-st="ok"]{ color: var(--ok); }
 #vault-status[data-st="err"]{ color: var(--danger); }
 #vault-status[data-st="syncing"]{ color: var(--acc2); }
+#vault-status[data-st="locked"],
+#vault-status[data-st="disconnected"],
+#vault-status[data-st="pending"],
+#vault-status[data-st="newer"]{ color: var(--warn); }
 #sync-pill{
   display: none; align-items: center; gap: 6px;
   padding: 6px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 650;
@@ -1359,6 +1369,7 @@ body.is-desktop .chat-float[data-state="open"]{
 }
 #sync-pill.on{ color: var(--ok); border-color: color-mix(in srgb, var(--ok) 35%, var(--border)); }
 #sync-pill.err{ color: var(--danger); }
+#sync-pill.warn{ color: var(--warn); border-color: color-mix(in srgb, var(--warn) 35%, var(--border)); }
 #sync-pill:hover{ border-color: var(--border2); color: var(--text); }
 
 /* ============================= Connectors ============================= */
@@ -1642,7 +1653,7 @@ body.is-desktop .chat-float[data-state="open"]{
       </div>
       <span class="tb-spacer"></span>
       <button type="button" class="icon-btn" id="dash-refresh" title="Refresh dashboard data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 3v6h-6"/></svg></button>
-      <button type="button" id="sync-pill" title="Encrypted Google Drive vault">Drive vault</button>
+      <button type="button" id="sync-pill" title="Encrypted Google Drive vault" aria-label="Encrypted Google Drive vault">Drive vault</button>
       <button class="icon-btn" id="connectors-btn" title="Connectors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
       <button class="icon-btn" id="settings-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
     </header>
@@ -1969,6 +1980,44 @@ body.is-desktop .chat-float[data-state="open"]{
 <div id="toasts"></div>
 <script>
 'use strict';
+/* ============================ tier-0 runtime recovery ============================ */
+function showHomebaseErrorBeacon(){
+  if (document.getElementById('err-beacon')) return;
+  var b = document.createElement('button');
+  b.id = 'err-beacon';
+  b.textContent = '⚠ Something glitched — tap to reload';
+  b.setAttribute('style', 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9999;background:#c0392b;color:#fff;border:none;border-radius:100px;padding:12px 22px;font:600 14px system-ui,-apple-system,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.45);cursor:pointer');
+  b.onclick = function(){ location.reload(); };
+  (document.body || document.documentElement).appendChild(b);
+}
+function stashHomebaseRuntimeError(message, filename, line){
+  try {
+    localStorage.setItem('last_error_v1', JSON.stringify({
+      m: String(message || 'Unknown Homebase error').slice(0, 300),
+      src: (filename || '').split('/').pop(),
+      line: line || 0,
+      app: 'homebase',
+      t: Date.now()
+    }));
+  } catch(_) {}
+}
+function reportHomebaseRuntimeError(message, filename, line){
+  if (!message) return;
+  stashHomebaseRuntimeError(message, filename, line);
+  if (document.body) showHomebaseErrorBeacon();
+  else document.addEventListener('DOMContentLoaded', showHomebaseErrorBeacon, { once:true });
+}
+(function(){
+  window.addEventListener('error', function(e){
+    if (!e || !e.message) return; // Ignore benign resource failures such as <img> loads.
+    reportHomebaseRuntimeError(e.message, e.filename || '', e.lineno || 0);
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    var reason = e && e.reason;
+    var msg = reason && reason.message ? reason.message : String(reason || 'Unhandled promise rejection');
+    reportHomebaseRuntimeError(msg, 'promise', 0);
+  });
+})();
 /* =====================================================================
    Homebase — personal AI hub
    Single-file app. No build step, no dependencies.
@@ -2727,25 +2776,25 @@ var HOMEBASE_CHANGELOG = {
     'The next model must read current_handoff plus the newest entries before scoping or editing'
   ],
   current_handoff: {
-    to: 'next model / Wave 2 agents',
-    objective: 'Wave 1 P0 is complete on this branch (security hardening + concurrency/vault/team CI). Keep python3 .github/scripts/validate.py green (all harnesses including test_subagent_allowlist.js and ai/tests/homebase.test.js). Next: Wave 2 reliability — error beacon for /ai/, vault conflict UX, scheduler architecture spike.',
+    to: 'next model / Wave 2–3 agents',
+    objective: 'Wave 2 P1 reliability on homebase/ai-p1-error-vault: Tier-0 Homebase error beacon, vault sync failures visible in UI, restored mobile sync indicator. Keep python3 .github/scripts/validate.py green. Scheduler architecture is in parallel PR #84 (honest keep-open UX).',
     p0_security_hardening_2026_07_19: 'Agent 1B implemented Agent 1C\'s Wave 1 P0 review on branch homebase/ai-p0-security-harden (rebased onto main after PR #82). developerMode defaults false; sourceChangeAuthorized() requires explicit /dev or a pull-request phrase; proposeRepositoryChanges() ALWAYS confirms regardless of devConfirmWrites; run_js removed; vault passphrase minimum 12 chars. test_subagent_allowlist.js (17 checks) wired into validate.py. Do NOT reintroduce run_js, loosen sourceChangeAuthorized, or make the repo-write confirm optional.',
     wave1_p0_concurrency_tests_2026_07_19: 'Agent 1A shipped (merged as PR #82): test_cloud_budget_concurrency.js, test_vault_merge.js, test_specialist_team.js, plus ai/tests/homebase.test.js in validate.py.',
     fable_audit_2026_07_19: 'The Fable session executed FABLE_AUDIT_BRIEF P0/P1 on branch claude/multimodal-ai-chatbot-4r8s23 (PR #80): sub-agent tool boundary enforced at execution time, reservation settle/release idempotency on chat and fixed-cost paths, cross-device deletion tombstones through the encrypted vault, a 45-check deterministic safety suite extracting the real production functions (ai/tests/homebase.test.js — includes the PR #71 failover cooldowns), and a voice UX layer (audio-reactive orb/bars, local voice commands, split captions with per-reply route/cost, engine badge, repeat, opt-in echo-guarded barge-in) ported ON TOP of the PR #75 reliability engine with every #75 contract preserved and re-verified (one-tap gate, blocked-answer recovery, free-first plans, tap-to-finish).',
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely (speaking visuals are now a synthetic envelope; only the mic is ever metered, via a separate capture) so no metering failure can ever mute output. Latency: first spoken chunk fast-flushes on the opening clause, record→transcribe endpointing tightened 1800->1200ms (min 300ms speech), silent device-voice fails over to cloud in 1600ms (was 3500), and the redundant metering getUserMedia is skipped on mobile. New guard tests in scratchpad prove createMediaElementSource is never called on the playback element. See the 2026-07-19-voice-mobile-audio-latency entry.',
-    state: 'PR #82 (concurrency/vault/team CI) is on main. This branch rebases Wave 1 P0 security hardening (#83) onto that tip. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device.',
-    latest_fix: 'Wave 1 P0 security: developerMode off by default, explicit /dev write intent, mandatory write confirm, run_js removed, 12-char vault passphrase, sub-agent allowlist harness. Prior: PR #82 concurrency harnesses; PR #80/#81 Fable audit + voice mobile sound fix.',
+    state: 'PR #82 and #83 are on main. This branch is Wave 2 P1 error beacon + vault UX from origin/main. Parallel draft PR #84 covers the scheduler architecture spike. Google Drive consent/passphrase push-pull still requires the user on each device; this branch adds clearer locked/disconnected/newer status in the UI rather than changing the underlying vault contract.',
+    latest_fix: 'Wave 2 P1: early runtime error beacon for /ai/, clearer vault sync failure/status messaging, restored mobile sync pill visibility, and light newer/locked/disconnected sync feedback. Prior: Wave 1 P0 security hardening and PR #82 concurrency harnesses.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py (all Wave 1 harnesses + ai/tests/homebase.test.js)',
       'HOMEBASE_CHANGELOG newest three entries only; follow older dependency entries on demand instead of reading history linearly',
-      'Wave 2: port error beacon from index.html to ai/index.html; vault conflict UX; scheduler SW spike',
+      'Wave 2: Tier-0 /ai/ error beacon plus vault status/newer/mobile-sync UX on homebase/ai-p1-error-vault; scheduler keep-open UX is PR #84',
       'ai/index.html: routing/budget/team/vault/repository-mutation functions named in the brief'
     ],
     review_areas: [
-      'DONE Wave 1: concurrent budget/vault/team CI (#82), security hardening (#83 this branch), sub-agent allowlist locked',
-      'P1 next: /ai/ runtime error beacon, vault conflict UI, mobile sync indicator',
-      'P1: scheduler architecture (SW/push vs honest pin-tab onboarding)',
+      'DONE Wave 1: concurrent budget/vault/team CI (#82), security hardening (#83), sub-agent allowlist locked',
+      'P1 current: /ai/ runtime error beacon, vault conflict/status UI, mobile sync indicator',
+      'P1 parallel: scheduler architecture spike (PR #84) — honest keep-open UX; SW/push deferred',
       'P1: concrete iPhone/Tesla hardware evidence for WebKit voice lifecycle / microphone limits; usage-ledger reconciliation vs provider billing exports',
       'P2: route/cost/degradation comprehension outside voice mode'
     ],
@@ -2782,6 +2831,39 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-19-wave2-p1-error-beacon-vault-ux',
+      date: '2026-07-19',
+      commit: 'recorded in the commit that ships this branch',
+      branch: 'homebase/ai-p1-error-vault',
+      pull_request: 'draft PR opened from homebase/ai-p1-error-vault after validate passes',
+      title: 'Wave 2 P1: recover from Homebase runtime failures and surface encrypted-vault sync state',
+      type: 'fix+reliability+vault+mobile+ux',
+      depends_on: ['2026-07-19-p0-security-hardening','2026-07-19-p0-concurrency-vault-team-ci'],
+      files_changed: ['ai/index.html'],
+      interfaces_changed: ['Tier-0 window error/unhandledrejection recovery for /ai/','boot() startup wrapper','VAULT status/pill messaging','saveDriveAuth()/driveApi() vault disconnect handling','bootVaultSync()/vaultPushToDrive()/vaultPullFromDrive() status UX','HOMEBASE_CHANGELOG.current_handoff'],
+      changes: [
+        'Ports the Tesla dashboard Tier-0 error-beacon pattern into Homebase early in the first script, stashing the last runtime failure in localStorage and rendering a fixed reload chip instead of leaving the app on a dead white screen',
+        'Extends Homebase vault status beyond idle/ok/err to locked, disconnected, pending, and newer-remote states so background sync failures are visible in the UI instead of only the console',
+        'Keeps the top-bar sync pill visible on mobile as a compact short-label indicator rather than hiding it entirely, with tap-through still opening Memory → Private sync',
+        'Shows light conflict/status UX when newer Drive data is detected during pull or merge-before-push, plus friendlier reconnect messaging when Google auth expires'
+      ],
+      safety_guards: [
+        'No change to developerMode defaults, /dev write intent, mandatory repository-write confirm, run_js removal, 12-character vault passphrase minimum, the $50 budget guard, or the read-only sub-agent execution boundary',
+        'Vault uploads still decrypt and merge the existing Drive file before overwrite and still abort on decrypt/download problems to avoid blind last-write-wins'
+      ],
+      verification: [
+        'python3 .github/scripts/validate.py'
+      ],
+      setup_required: [
+        'After deployment, test Homebase on phone/desktop: the sync pill should stay visible on mobile, tapping it should open Private sync, and a locked/disconnected vault should explain the recovery action'
+      ],
+      known_limits: [
+        'This is intentionally light conflict UX: Homebase now warns when Drive is newer or sync is blocked, but it still relies on the existing timestamp-based vault merge rather than a manual conflict editor',
+        'The browser still cannot silently refresh Google Drive auth forever; when the token expires the UI now says so explicitly and points the user back to Private sync'
+      ],
+      next_model: 'Keep this branch focused on reliability and vault clarity. Do not weaken the Wave 1 security invariants or expand into scheduler/service-worker work on the same PR.'
+    },
     {
       id: '2026-07-19-p0-security-hardening',
       date: '2026-07-19',
@@ -5840,7 +5922,9 @@ var VAULT = {
   lastPull: 0,
   applying: false,
   status: 'idle', // idle|syncing|ok|err
-  message: ''
+  message: '',
+  lastToastKey: '',
+  lastToastAt: 0
 };
 
 function vaultSyncMeta(){
@@ -5857,11 +5941,19 @@ function vaultMarkChanged(section){
   m.sections[section || 'settings'] = Date.now();
   m.dirtySince = m.dirtySince || Date.now();
   saveVaultSyncMeta(m);
-  if (!connectorOn('drive') || !connectorCfg('drive').autoSync) return;
-  if (!getVaultPassphrase() || !driveAccessToken()){
-    vaultSetStatus('idle', 'Saved on this device · unlock and connect the vault to sync');
+  if (!connectorOn('drive')){
+    vaultRefreshStatus();
     return;
   }
+  if (!connectorCfg('drive').autoSync){
+    vaultRefreshStatus({autoSyncOff:true});
+    return;
+  }
+  if (!getVaultPassphrase() || !driveAccessToken()){
+    vaultRefreshStatus();
+    return;
+  }
+  vaultSetStatus('pending', 'Saved on this device · syncing soon');
   scheduleDriveSync();
 }
 
@@ -5903,12 +5995,96 @@ function vaultSetStatus(st, msg){
   }
   var pill = $('sync-pill');
   if (pill){
+    var labels = {
+      idle: { text:'Drive vault', short:'Vault' },
+      syncing: { text:'Syncing…', short:'Sync' },
+      ok: { text:'Vault synced', short:'OK' },
+      err: { text:'Sync error', short:'Err' },
+      locked: { text:'Vault locked', short:'Lock' },
+      disconnected: { text:'Reconnect Drive', short:'Link' },
+      pending: { text:'Needs sync', short:'Soon' },
+      newer: { text:'Newer Drive data', short:'New' }
+    };
+    var label = labels[st] || labels.idle;
     pill.dataset.st = st;
-    pill.textContent = st === 'syncing' ? 'Syncing…' : st === 'ok' ? 'Vault synced' : st === 'err' ? 'Sync error' : 'Drive vault';
+    pill.dataset.short = label.short;
+    pill.textContent = label.text;
+    pill.title = msg || label.text;
+    pill.setAttribute('aria-label', msg || label.text);
     pill.classList.toggle('on', st === 'ok');
     pill.classList.toggle('err', st === 'err');
-    pill.style.display = (connectorOn('drive') && connectorCfg('drive').clientId) ? 'inline-flex' : 'none';
+    pill.classList.toggle('warn', st === 'locked' || st === 'disconnected' || st === 'pending' || st === 'newer');
+    pill.style.display = connectorCfg('drive').clientId ? 'inline-flex' : 'none';
   }
+}
+function vaultToastOnce(key, msg, kind, ms){
+  var now = Date.now();
+  if (VAULT.lastToastKey === key && now - (VAULT.lastToastAt || 0) < 45000) return;
+  VAULT.lastToastKey = key;
+  VAULT.lastToastAt = now;
+  toast(msg, kind, ms);
+}
+function vaultBlockedState(){
+  var cfg = connectorCfg('drive');
+  var syncMeta = vaultSyncMeta();
+  var pending = !!syncMeta.dirtySince;
+  if (!cfg.clientId) return { st:'idle', msg:'Set a passphrase · optional Google Drive Client ID in Connectors' };
+  if (!connectorOn('drive')) return { st:'idle', msg:'Google Drive ready — connect your account to enable encrypted sync' };
+  if (!getVaultPassphrase()) return { st:'locked', msg: pending ? 'Saved on this device · enter the passphrase to sync' : 'Drive vault locked — enter the passphrase to sync phone and desktop' };
+  if (!driveAccessToken()) return { st:'disconnected', msg: pending ? 'Saved on this device · reconnect Google Drive to sync' : 'Google Drive disconnected — reconnect in Private sync' };
+  return null;
+}
+function vaultRefreshStatus(opts){
+  opts = opts || {};
+  var blocked = vaultBlockedState();
+  if (blocked){
+    vaultSetStatus(blocked.st, blocked.msg);
+    if (opts.toast && blocked.st !== 'idle') vaultToastOnce('vault-' + blocked.st, blocked.msg, 'warn', 4200);
+    return blocked.st;
+  }
+  var syncMeta = vaultSyncMeta();
+  if (opts.autoSyncOff){
+    vaultSetStatus(syncMeta.dirtySince ? 'pending' : 'idle', syncMeta.dirtySince ? 'Saved on this device · auto-sync is off' : 'Auto-sync is off · use Push or Pull when ready');
+    return syncMeta.dirtySince ? 'pending' : 'idle';
+  }
+  if (syncMeta.dirtySince){
+    vaultSetStatus('pending', 'Saved on this device · waiting to sync');
+    return 'pending';
+  }
+  if (!syncMeta.lastRemoteExportedAt && !VAULT.lastSync && !VAULT.lastPull){
+    vaultSetStatus('idle', 'Encrypted sync ready — push once to create your Drive vault');
+    return 'idle';
+  }
+  vaultSetStatus('idle', 'Phone and desktop sync ready');
+  return 'idle';
+}
+function vaultHandleSyncError(err, opts){
+  opts = opts || {};
+  var raw = err && err.message ? err.message : String(err || 'Vault sync failed');
+  var st = 'err';
+  var msg = raw;
+  if (/passphrase|decrypt/i.test(raw)){
+    st = 'locked';
+    msg = 'Drive vault locked — enter the same passphrase on this device to sync';
+  } else if (/reconnect|expired|HTTP 401|auth failed|oauth/i.test(raw)){
+    st = 'disconnected';
+    msg = 'Google Drive disconnected — reconnect in Private sync';
+  }
+  vaultSetStatus(st, msg);
+  if (opts.toast !== false) vaultToastOnce('vault-' + st + '-' + msg, msg, st === 'err' ? 'err' : 'warn', 4200);
+}
+function vaultSignalRemoteNewer(remoteExportedAt, mode){
+  var known = +(vaultSyncMeta().lastRemoteExportedAt || 0);
+  if (!remoteExportedAt || remoteExportedAt <= known) return false;
+  var syncingMsg = mode === 'push'
+    ? 'Newer Drive vault found — merging before upload…'
+    : 'Newer Drive vault found — syncing to this device…';
+  var toastMsg = mode === 'push'
+    ? 'Newer Drive changes found — merging before upload'
+    : 'Newer Homebase data found on Drive — syncing now';
+  vaultSetStatus('newer', syncingMsg);
+  vaultToastOnce('vault-newer-' + mode + '-' + remoteExportedAt, toastMsg, 'warn', 3400);
+  return true;
 }
 
 function b64FromBytes(u8){
@@ -6236,6 +6412,7 @@ function loadDriveAuth(){
 function saveDriveAuth(auth){
   if (auth) lsSet(LS_DRIVE_AUTH, auth);
   else try { localStorage.removeItem(LS_DRIVE_AUTH); } catch(e){}
+  vaultRefreshStatus();
 }
 function driveAccessToken(){
   var auth = loadDriveAuth();
@@ -6312,7 +6489,7 @@ async function driveApi(path, opts){
   });
   if (res.status === 401){
     saveDriveAuth(null);
-    if (opts.interactive !== true) return res;
+    if (opts.interactive !== true) throw new Error('Google connection expired — reconnect in Private sync');
     token = await driveRequestToken(true);
     headers.Authorization = 'Bearer ' + token;
     res = await fetch('https://www.googleapis.com' + path, {
@@ -6407,6 +6584,7 @@ async function vaultPushToDrive(opts){
   if (opts.mergeRemote !== false){
     try {
       var remoteVault = await driveDownloadVault({interactive:opts.interactive});
+      vaultSignalRemoteNewer(+((remoteVault.meta || {}).exportedAt || 0), 'push');
       var remotePayload = await decryptVault(pass, remoteVault);
       payload = mergeVaultPayload(remotePayload, payload);
       applyVaultPayload(payload, {includeKeys:vaultSecretsEnabled()});
@@ -6441,6 +6619,7 @@ async function vaultPullFromDrive(opts){
   var vault = await driveDownloadVault({interactive:opts.interactive});
   var syncMeta = vaultSyncMeta();
   var remoteExportedAt = +((vault.meta || {}).exportedAt || 0);
+  vaultSignalRemoteNewer(remoteExportedAt, 'pull');
   if (opts.onlyIfNewer && remoteExportedAt && remoteExportedAt <= +(syncMeta.lastRemoteExportedAt || 0)){
     vaultSetStatus('ok', 'Phone and desktop are up to date');
     return null;
@@ -6468,7 +6647,7 @@ var scheduleDriveSync = debounce(function(){
     // Auto-sync only when a session token already exists (never pop OAuth unexpectedly)
     if (!driveAccessToken()) return;
     vaultPushToDrive({interactive:false, quiet:true}).catch(function(e){
-      vaultSetStatus('err', e.message || String(e));
+      vaultHandleSyncError(e);
     });
   } catch(e){}
 }, 8000);
@@ -6487,7 +6666,8 @@ function initVaultUi(){
     if ($('vault-pass') && !VAULT.passphrase){
       try { $('vault-pass').value = sessionStorage.getItem('nova_vault_pass') || ''; } catch(e){}
     }
-    vaultSetStatus(VAULT.status || 'idle', VAULT.message || '');
+    if (VAULT.message) vaultSetStatus(VAULT.status || 'idle', VAULT.message || '');
+    else vaultRefreshStatus();
     return;
   }
   _vaultUiReady = true;
@@ -6513,16 +6693,17 @@ function initVaultUi(){
   if ($('vault-drive-connect')) $('vault-drive-connect').addEventListener('click', function(){
     driveRequestToken(true).then(function(){
       toast('Google Drive connected', 'ok');
-      vaultSetStatus('ok', 'Google account linked for vault sync');
       if (S.connectors && S.connectors.drive){ S.connectors.drive.on = true; saveConnectors({sync:false}); }
+      vaultRefreshStatus();
+      if (connectorCfg('drive').autoSync) bootVaultSync();
       updateConnectorsBtn();
-    }).catch(function(e){ toast(e.message || String(e), 'err'); });
+    }).catch(function(e){ vaultHandleSyncError(e); });
   });
   if ($('vault-drive-push')) $('vault-drive-push').addEventListener('click', function(){
     var btn = $('vault-drive-push');
     btn.disabled = true; btn.textContent = 'Pushing…';
     vaultPushToDrive({interactive:true}).catch(function(e){
-      toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message);
+      vaultHandleSyncError(e);
     }).finally(function(){ btn.disabled = false; btn.textContent = 'Push to Drive'; });
   });
   if ($('vault-drive-pull')) $('vault-drive-pull').addEventListener('click', function(){
@@ -6530,7 +6711,7 @@ function initVaultUi(){
     var btn = $('vault-drive-pull');
     btn.disabled = true; btn.textContent = 'Pulling…';
     vaultPullFromDrive({interactive:true}).catch(function(e){
-      toast(e.message || String(e), 'err'); vaultSetStatus('err', e.message);
+      vaultHandleSyncError(e);
     }).finally(function(){ btn.disabled = false; btn.textContent = 'Pull from Drive'; });
   });
   if ($('vault-autosync-tgl')){
@@ -6556,9 +6737,7 @@ function initVaultUi(){
       toast(vaultSecretsEnabled() ? 'Encrypted API-key sync ON' : 'API keys will stay on each device', 'ok', 3600);
     });
   }
-  vaultSetStatus('idle', connectorCfg('drive').clientId
-    ? 'Encrypted sync ready — connect Google and use the same passphrase on phone and desktop'
-    : 'Set a passphrase · optional Google Drive Client ID in Connectors');
+  vaultRefreshStatus();
 }
 
 function memoryLooksUninitialized(){
@@ -6570,15 +6749,27 @@ function memoryLooksUninitialized(){
 }
 async function bootVaultSync(){
   try {
-    if (!connectorOn('drive') || !connectorCfg('drive').clientId) return;
-    if (!connectorCfg('drive').autoSync) return;
-    if (!getVaultPassphrase()) return;
-    if (!driveAccessToken()) return;
+    if (!connectorCfg('drive').clientId || !connectorOn('drive')){
+      vaultRefreshStatus();
+      return;
+    }
+    if (!connectorCfg('drive').autoSync){
+      vaultRefreshStatus({autoSyncOff:true});
+      return;
+    }
+    if (vaultBlockedState()){
+      vaultRefreshStatus({toast:true});
+      return;
+    }
     var m = vaultSyncMeta();
     if (m.dirtySince) await vaultPushToDrive({interactive:false, quiet:true});
     else await vaultPullFromDrive({interactive:false, quiet:true, onlyIfNewer:true});
   } catch(e){
-    console.info('[vault] boot pull skipped', e.message || e);
+    if (/No vault file/.test((e && e.message) || '')){
+      vaultSetStatus('idle', 'Encrypted sync ready — push once to create your Drive vault');
+      return;
+    }
+    vaultHandleSyncError(e);
   }
 }
 
@@ -12588,7 +12779,7 @@ async function boot(){
   updateHints();
   updateSendBtn();
   updateConnectorsBtn();
-  vaultSetStatus('idle', '');
+  vaultRefreshStatus();
   setChatState('fab');
   syncHomebaseChangelogDom();
   renderDashboard();
@@ -12647,7 +12838,12 @@ async function boot(){
     lsSet(LS_SETTINGS, S.settings || {});
   });
 }
-document.addEventListener('DOMContentLoaded', boot);
+document.addEventListener('DOMContentLoaded', function(){
+  Promise.resolve(boot()).catch(function(err){
+    reportHomebaseRuntimeError((err && err.message) ? err.message : String(err || 'Homebase boot failed'), 'boot', 0);
+    try { console.error(err); } catch(_) {}
+  });
+});
 </script>
 </body>
 </html>
