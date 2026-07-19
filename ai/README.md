@@ -23,7 +23,7 @@ voice mode (this is what the dashboard's **More → 🎙️ Homebase Voice** but
 |---|---|
 | Direct cloud (bring your own key) | Anthropic Claude, OpenAI, Google Gemini, Groq, Perplexity Sonar, Kimi, DeepInfra, Mistral, DeepSeek, xAI Grok |
 | Aggregator / fallback | OpenRouter — manual, free/long-tail, or Auto failover after direct providers |
-| Voice cloud (optional) | OpenAI speech/Whisper and ElevenLabs Flash/Scribe; browser speech remains free/default |
+| Voice cloud (optional) | xAI STT/TTS, OpenAI speech/Whisper, and ElevenLabs Flash/Scribe; Automatic tries free device speech first |
 | Local server | Ollama, LM Studio, llama.cpp — plus any custom OpenAI-compatible endpoint (vLLM, LiteLLM, Together…) |
 | In-browser | WebLLM (WebGPU) — Llama 3.2, Qwen 2.5, Gemma 2, Phi 3.5, SmolLM2; fully private, works offline after the one-time download |
 | No setup | Demo mode — simulated model to explore the UI |
@@ -85,7 +85,7 @@ The default paid-cloud guard is **$50 across the trailing 30 days**, combined
 across all configured providers. It reserves a conservative maximum before
 each call (including concurrent Council calls), records the provider's token
 usage afterward, and continuously releases entries as they become 30 days old.
-OpenAI Whisper/TTS and ElevenLabs Flash/Scribe are included; Perplexity Sonar
+OpenAI Whisper/TTS, ElevenLabs Flash/Scribe, and xAI STT/TTS are included; Perplexity Sonar
 reserves its per-request search fee as well as token cost. Local models and
 browser speech cost $0. Unknown-price cloud models are blocked while the hard
 guard is enabled. The tracker and controls are in **Settings → Chat**, and every reply
@@ -242,16 +242,28 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
 Open the URL in Safari → Share → **Add to Home Screen**: Homebase installs as a
 full-screen app (custom icon, safe-area aware, no zoom-on-focus). Long-press
 the icon (Android/desktop PWA) for a direct **Voice mode** shortcut. Voice
-mode works with Safari's speech APIs; OpenAI and ElevenLabs are optional cloud
-upgrades if a restricted key is present.
+mode always waits for one deliberate tap after a shortcut/deep link so iOS
+authorizes the microphone and later spoken replies together. Automatic mode
+uses free device speech first. If Safari ends recognition with useful interim
+words, Homebase keeps them; if spoken output is blocked, it preserves the
+answer behind **Enable sound** instead of regenerating it. Settings → Voice has
+one **Play voice test** control, while engine, language, and premium voice
+choices remain under progressive disclosure. A configured xAI key is the
+lowest-cost automatic cloud transcription/output backup at the documented
+prices used by the app estimate; OpenAI and ElevenLabs remain optional choices.
+If an Automatic cloud speech provider is missing, out of credits, or temporarily
+unavailable, Homebase advances through the modality-specific cost-ranked plan;
+transcription reuses the same local recording, while an explicitly selected
+voice provider remains terminal.
 
 ## In the car
 
-The dashboard's **More → Apps** menu has **✦ Homebase AI** and **🎙️ Homebase Voice**
-buttons. Heads-up: Tesla's browser blocks most cross-origin requests and has
-no microphone access, so in-car use is best-effort — chat may work with some
-providers, voice generally won't. The buttons shine when the dashboard is
-open on a phone.
+The Tesla Dashboard's former ChatGPT shortcuts, the AI & Research launcher,
+and **More → Apps → Homebase Voice** now open `ai/?voice=1`. The voice screen
+still opens honestly when a browser exposes no microphone, with a clear device
+limitation instead of a retry loop. Tesla's in-car browser may not expose its
+microphone to webpages, so hardware voice remains best-effort; the same launchers
+work fully when the dashboard is open on a phone or supported desktop browser.
 
 ## Development
 
@@ -262,9 +274,12 @@ Everything is in `ai/index.html`. Before committing:
 python3 -c "import re;open('/tmp/ai.js','w').write('\n;\n'.join(re.findall(r'<script>([\s\S]*?)</script>', open('ai/index.html').read())))" && node --check /tmp/ai.js
 ```
 
-An end-to-end harness (mock OpenAI/Anthropic/Gemini SSE server + headless
-Chromium) exercises streaming, the tool loop for all three wire formats,
-tasks, memory, persistence and the voice deep link — see the PR/session notes.
+The validation script also runs focused production-function harnesses for
+provider failover, the one-query model selector, and mobile voice reliability.
+The voice harness covers Safari interim-transcript recovery, free-only vs
+automatic provider selection, modality-specific cloud cost ordering, one-tap deep
+link gating, preserved blocked audio, and every Tesla-to-Homebase launcher
+without making provider calls.
 
 localStorage keys are namespaced `nova_*` (including `nova_cloud_usage_v1` for
 the rolling cost ledger); conversations live in IndexedDB

@@ -488,8 +488,8 @@ input[type="color"]:hover{border-color:var(--line2)}
 .command-actions{display:flex;align-items:stretch;gap:7px}
 .command-action{display:flex;align-items:center;justify-content:center;min-width:76px;padding:10px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--t2);font-size:12px;font-weight:700;transition:background .2s,color .2s,transform .2s}
 .command-action:hover{background:var(--surface2);color:var(--t1);transform:translateY(-1px)}
-.command-action.chatgpt{background:#10a37f;border-color:#10a37f;color:#fff}
-.command-action.chatgpt:hover{background:#0d8a6b;color:#fff}
+.command-action.voice{background:linear-gradient(135deg,#7c3aed,#0284c7);border-color:#6366f1;color:#fff}
+.command-action.voice:hover{background:linear-gradient(135deg,#6d28d9,#0369a1);color:#fff}
 .charge-session{display:none;grid-template-columns:1fr auto;align-items:center;gap:14px;padding:14px 16px;background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.24);border-radius:12px}
 body[data-mode="charging"] .charge-session{display:grid}
 .charge-time{display:flex;align-items:baseline;gap:10px;min-width:0}
@@ -520,7 +520,7 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
 .app-panel .rl{flex:0;width:100%;min-width:0}
 .app-panel .rl-t{font-size:15px;line-height:1.25;font-weight:700;letter-spacing:0;overflow-wrap:anywhere}
 .app-panel .rl-s,.app-panel .chev{display:none}
-.ic-chatgpt{background:#10a37f}
+.ic-homebase-voice{background:linear-gradient(145deg,#8b5cf6,#4f46e5 55%,#0ea5e9)}
 @media(max-width:760px){.app-panel .split{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 12px}.app-panel .row{min-height:156px}.app-panel .appicon{width:84px;height:84px;border-radius:22px}.app-panel .appicon svg{width:48px;height:48px}}
 @media(max-width:460px){.app-panel .split{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}.app-panel .row{min-height:150px}.app-panel .appicon{width:80px;height:80px;border-radius:21px}.app-panel .appicon svg{width:46px;height:46px}}
 @media(prefers-reduced-motion:reduce){.app-panel .row,.app-panel .appicon{transition:none}}
@@ -578,7 +578,7 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
         </div>
         <div class="command-actions">
           <button class="command-action" type="button" onclick="briefingToggle()" title="Listen to your briefing">Listen</button>
-          <a class="command-action chatgpt" href="https://chatgpt.com/" target="_blank" rel="noopener" title="Open ChatGPT">ChatGPT</a>
+          <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
         </div>
       </div>
       <div class="charge-session" id="charge-session" aria-live="polite">
@@ -591,7 +591,7 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
           <button class="charge-preset" type="button" onclick="startChargeTimer(15)">15 min</button>
           <button class="charge-preset" type="button" onclick="startChargeTimer(30)">30 min</button>
           <button class="charge-preset" type="button" onclick="startChargeTimer(60)">60 min</button>
-          <a class="command-action chatgpt" href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a>
+          <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
         </div>
       </div>
 
@@ -915,9 +915,9 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
     <div class="sec-title">AI & Research Tools</div>
     <div class="split">
       <div class="cardgroup">
-        <a class="row" href="https://chatgpt.com/" target="_blank" rel="noopener">
-          <div class="appicon ic-chatgpt"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l1.55 5.65L19.2 10l-5.65 1.55L12 17.2l-1.55-5.65L4.8 10l5.65-1.55L12 2.8z"/><path d="M18.5 15.5l.72 2.28 2.28.72-2.28.72-.72 2.28-.72-2.28-2.28-.72 2.28-.72.72-2.28z"/></svg></div>
-          <div class="rl"><div class="rl-t">ChatGPT</div><div class="rl-s">Voice and ideas</div></div>
+        <a class="row" href="ai/?voice=1">
+          <div class="appicon ic-homebase-voice"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l1.55 5.65L19.2 10l-5.65 1.55L12 17.2l-1.55-5.65L4.8 10l5.65-1.55L12 2.8z"/><path d="M18.5 15.5l.72 2.28 2.28.72-2.28.72-.72 2.28-.72-2.28-2.28-.72 2.28-.72.72-2.28z"/></svg></div>
+          <div class="rl"><div class="rl-t">Homebase Voice</div><div class="rl-s">Talk hands-free with your AI</div></div>
           <span class="chev">›</span>
         </a>
         <a class="row" href="https://claude.ai" target="_blank" rel="noopener">
@@ -1192,8 +1192,8 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
     <button class="dock-submenu-item" data-p="apple">Apple</button>
     <button class="dock-submenu-item" data-p="stream">Streaming</button>
     <button class="dock-submenu-item" data-p="learn">Learning</button>
-    <button class="dock-submenu-item" data-href="ai/">✦ Nova AI</button>
-    <button class="dock-submenu-item" data-href="ai/?voice=1">🎙️ Nova Voice</button>
+    <button class="dock-submenu-item" data-href="ai/">✦ Homebase AI</button>
+    <button class="dock-submenu-item" data-href="ai/?voice=1">🎙️ Homebase Voice</button>
   </div>
 </div>
 

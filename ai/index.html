@@ -1392,8 +1392,10 @@ body.is-desktop .chat-float[data-state="open"]{
 /* ============================= Voice overlay ============================= */
 #voice-ov{
   position:fixed; inset:0; z-index:100; display:none; flex-direction:column;
-  align-items:center; justify-content:center; gap:0; padding:28px 24px;
+  align-items:center; justify-content:center; gap:0;
+  min-height:100dvh; padding:max(28px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));
   text-align:center; overflow:hidden;
+  overscroll-behavior:none; touch-action:manipulation;
   background:radial-gradient(ellipse at 50% 42%, #16161c 0%, #050506 65%, #000 100%);
 }
 #voice-ov.open{display:flex}
@@ -1422,11 +1424,13 @@ body.is-desktop .chat-float[data-state="open"]{
 @keyframes vRingPulse{0%,100%{transform:scale(1); opacity:.55}50%{transform:scale(1.05); opacity:1}}
 #v-orb{
   width:112px;height:112px; border-radius:50%; position:relative; cursor:pointer; z-index:3;
+  border:0; padding:0; color:#fff; -webkit-appearance:none;
   background:conic-gradient(from 0deg,var(--acc),var(--acc2),#f06bd8,var(--acc));
   animation:orbSpin 8s linear infinite; display:grid; place-items:center;
   transition:transform .35s cubic-bezier(.34,1.4,.64,1), box-shadow .3s;
   box-shadow:0 0 40px rgba(139,124,247,.35);
 }
+#v-orb:focus-visible{outline:3px solid #7dd3fc;outline-offset:8px}
 #v-orb::before{content:""; position:absolute; inset:8px; border-radius:50%; background:radial-gradient(circle at 40% 35%, #1c1c24, #0a0a0c 70%)}
 #v-orb::after{
   content:""; position:absolute; inset:-12px; border-radius:50%;
@@ -1464,6 +1468,12 @@ body.is-desktop .chat-float[data-state="open"]{
   background:none; -webkit-text-fill-color:unset;
 }
 #v-line{color:rgba(255,255,255,.65); font-size:15.5px; max-width:560px; min-height:48px; line-height:1.55; overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; padding:0 8px}
+#v-audio-retry{
+  display:none; min-height:44px; padding:10px 18px; border-radius:999px;
+  border:1px solid rgba(125,211,252,.45); background:rgba(56,189,248,.14);
+  color:#e0f2fe; font-size:14px; font-weight:700;
+}
+#voice-ov.audio-blocked #v-audio-retry{display:inline-flex;align-items:center;justify-content:center}
 #v-ctl{display:flex; gap:16px; margin-top:4px}
 #v-ctl .v-btn{
   width:56px;height:56px; border-radius:50%;
@@ -1473,6 +1483,23 @@ body.is-desktop .chat-float[data-state="open"]{
 #v-ctl .v-btn:hover{border-color:rgba(255,255,255,.25); transform:scale(1.05)}
 #v-ctl .v-btn.end{background:var(--danger); border-color:transparent}
 #v-hint{font-size:12.5px; color:rgba(255,255,255,.4); margin-top:2px}
+@media(max-width:520px){
+  .v-stage{gap:16px}
+  .v-rings{width:min(52vw,190px);height:min(52vw,190px)}
+  #v-orb{width:100px;height:100px}
+  #v-status{font-size:20px}
+  #v-line{font-size:14.5px;min-height:44px;-webkit-line-clamp:3}
+  #v-hint{max-width:300px;line-height:1.4}
+}
+@media(max-height:620px) and (orientation:landscape){
+  #voice-ov{justify-content:flex-start;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top))}
+  .v-stage{gap:10px}
+  .v-rings{width:128px;height:128px}
+  #v-orb{width:76px;height:76px}
+  #v-wave{height:24px}
+  #v-line{min-height:24px;-webkit-line-clamp:2}
+  #v-ctl .v-btn{width:48px;height:48px}
+}
 
 /* ============================= Toasts / lightbox / misc ============================= */
 #toasts{position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none}
@@ -1670,7 +1697,7 @@ body.is-desktop .chat-float[data-state="open"]{
 </div>
 
 <!-- Voice overlay -->
-<div id="voice-ov">
+<div id="voice-ov" role="dialog" aria-modal="true" aria-label="Homebase Voice">
   <div class="v-stars" aria-hidden="true"></div>
   <canvas id="v-canvas" aria-hidden="true"></canvas>
   <div class="v-stage">
@@ -1679,11 +1706,12 @@ body.is-desktop .chat-float[data-state="open"]{
       <div class="v-ring r1"></div>
       <div class="v-ring r2"></div>
       <div class="v-ring r3"></div>
-      <div id="v-orb" title="Tap to interrupt / talk"><span class="v-ico">✦</span></div>
+      <button id="v-orb" type="button" title="Tap to interrupt or talk" aria-label="Talk to Homebase"><span class="v-ico">✦</span></button>
     </div>
     <div id="v-wave" aria-hidden="true"></div>
-    <div id="v-status">Voice mode</div>
-    <div id="v-line"></div>
+    <div id="v-status" role="status" aria-live="polite">Voice mode</div>
+    <div id="v-line" aria-live="polite"></div>
+    <button id="v-audio-retry" type="button">Enable sound</button>
     <div id="v-ctl">
       <button class="v-btn" id="v-mute" title="Pause listening">🎙️</button>
       <button class="v-btn end" id="v-end" title="End voice mode">✕</button>
@@ -2089,8 +2117,9 @@ var DEFAULT_SETTINGS = {
   uiMode: 'agent',
   councilOn: false,
   council: { mode: 'debate', members: [], synthesizer: null },
-  speech: { lang: 'en-CA', voiceURI: '', rate: 1.0, engine: 'browser', openaiVoice: 'nova',
-    elevenVoiceId: '', elevenTtsModel: 'eleven_flash_v2_5', elevenSttModel: 'scribe_v2' },
+  speech: { lang: 'en-CA', voiceURI: '', rate: 1.0, engine: 'auto', engineVersion: 2,
+    xaiVoice: 'eve', openaiVoice: 'nova', elevenVoiceId: '',
+    elevenTtsModel: 'eleven_flash_v2_5', elevenSttModel: 'scribe_v2' },
   baseURL: {},
   webllmModel: 'Llama-3.2-1B-Instruct-q4f16_1-MLC'
 };
@@ -2652,7 +2681,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
-    state: 'PRs #58–#73 are merged and live; deployment status records are #72 and #74. PR #73 (squash merge 164ac71; implementation originated at 9600d64) adds a compact, exact, one-message model dropdown with deterministic tests and 320/390 px mobile verification. Validate and Pages passed on main, and the public app was checked for the selector, exact route, terminal failover guard, and changelog entry. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, simplified mobile/model-picker, automatic provider failover, and per-query exact model choice are deployed. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    state: 'PRs #58–#73 are merged and live; deployment status records are #72 and #74. The agent/voice-mode-reliability branch now implements a substantial Homebase Voice reliability upgrade and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1; its PR/merge/Pages lineage is still pending. The new deterministic voice harness passes without provider calls, and local browser checks cover the deep-link overlay, free output test, settings experience, root dashboard launchers, direct Tesla-to-voice navigation, and zero horizontal overflow at the tested desktop viewport. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and may use the least-expensive ready xAI/ElevenLabs/OpenAI speech backup under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require post-deployment device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2665,6 +2694,7 @@ var HOMEBASE_CHANGELOG = {
       'P0: adversarial repository-mutation, connector least-privilege, prompt-injection, official-host, LM Studio MCP, and secret-boundary review',
       'P1: encrypted vault conflict/tombstone/deduplication/wrong-passphrase/interrupted-sync correctness and usage-ledger reconciliation',
       'P1: cancellation, cloud/local timeout, model unload, tool-loop exhaustion, partial-agent failure, and mobile background recovery',
+      'P1: after deployment, use concrete iPhone/Tesla hardware evidence to audit WebKit voice lifecycle or microphone limitations; preserve the deterministic free-first/no-spend and blocked-answer recovery contracts',
       'P2 only after P0/P1: route/cost/degradation/frontier-request comprehension in the simplified UI'
     ],
     preserve: [
@@ -2673,7 +2703,8 @@ var HOMEBASE_CHANGELOG = {
       'Sub-agents remain externally read-only; only the lead may perform confirmed mutations',
       'Repository writes remain explicit-request, confirm-guarded, secret-scanned, new-branch, draft-PR-only, never direct-to-main',
       'API keys and private connector fields are uploaded only inside the client-side AES-GCM vault and only while encrypted-secret sync is enabled; OAuth access tokens and the passphrase never enter the vault',
-      'Financial balances, transactions, statements, credentials, and detailed bundles never enter the public repository'
+      'Financial balances, transactions, statements, credentials, and detailed bundles never enter the public repository',
+      'Voice deep links require one deliberate media tap; device-only remains no-spend, Automatic remains free-device-first, premium speech stays inside the rolling guard, and a blocked answer is replayed without another model call'
     ]
   },
   how_to_read: [
@@ -2698,6 +2729,58 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-18-voice-mode-reliability',
+      date: '2026-07-18',
+      commit: 'implemented on agent/voice-mode-reliability; commit pending',
+      branch: 'agent/voice-mode-reliability',
+      pull_request: 'pending; not yet merged or live',
+      title: 'Make Homebase Voice resilient on iPhone and own the Tesla voice entry',
+      type: 'feature+fix+voice+mobile+tesla+cost-routing+accessibility+tests+docs',
+      depends_on: ['2026-07-18-mobile-settings-navigation','2026-07-18-ai-credit-router','2026-07-18-automatic-provider-failover','2026-07-18-per-query-model-selector'],
+      files_changed: ['ai/index.html','ai/manifest.webmanifest','index.html','.github/scripts/test_voice_mode.js','.github/scripts/validate.py','README.md','ai/README.md','CLAUDE.md','FABLE_AUDIT_BRIEF.md','ROADMAP.md'],
+      interfaces_changed: ['DEFAULT_SETTINGS.speech','normalizeSpeechSettings','TTSQ','unlockAudio','ttsPump','voiceTTSPlan','selectVoiceTTSProvider','runAutomaticTTSFallback','ttsOutputFailed','ttsPlaybackBlocked','retryBlockedSpeech','playTTSBlob','ttsXAI','VOICE','chooseVoiceTranscript','voiceSTTPlan','selectVoiceSTTProvider','transcribeVoiceBlob','cloudCaptureAllowed','voiceListenSR','voiceListenWhisper','#voice-ov','#v-orb','#v-audio-retry','renderVoicePane','maybeAutoVoice','Tesla ai/?voice=1 launchers'],
+      changes: [
+        'Deep-linked voice now always waits for one deliberate tap before listening, so mobile Safari authorizes microphone input and later audio output in the same user-initiated session instead of poisoning the reusable audio element with an early failed autoplay attempt',
+        'Audio unlock is retried on every relevant user gesture; browser speech has start/error watchdogs, cloud audio reuses the gesture-authorized element, object URLs and handlers are cleaned up, and stale playback callbacks are isolated by play IDs',
+        'If speech output is blocked or silently never starts, the remaining spoken answer is preserved in TTSQ.blockedText and exposed through Enable sound/the orb; replay does not regenerate the response or spend model credits again',
+        'Safari recognition now keeps the best useful interim transcript when capture ends before isFinal, provides visible hearing feedback, handles service/network errors without tight loops, and can switch to configured cloud transcription when permitted',
+        'Cloud recording requests echo cancellation, noise suppression, automatic gain, adaptive quiet-speech detection, a longer natural pause, accurate Safari container extensions, and explicit background/mute discard behavior',
+        'Automatic voice tries free device speech first, then cost-ranks ready speech backups by modality: STT uses xAI, ElevenLabs, OpenAI while TTS uses xAI, OpenAI, ElevenLabs; Device only is an explicit no-cloud-spend choice, while named voice engines remain selectable',
+        'Automatic cloud transcription reuses the already-recorded local blob across cost-ordered providers after quota/auth/network/service failure, and Automatic TTS likewise advances through its price-ranked cloud plan before exposing the preserved-audio recovery state; explicit named engines remain terminal',
+        'xAI REST speech-to-text and text-to-speech use the existing configured xAI key, official API base, current fixed price estimates, selected built-in voice, and the shared trailing-30-day reservation ledger',
+        'Voice settings lead with one plain-language explanation and Play voice test; rate and ordinary chat speaking stay visible, while engine, language, and premium controls use the existing mobile disclosure pattern',
+        'The voice overlay is now an accessible dialog with a real keyboard-focusable orb, live status, safe-area/dynamic-viewport sizing, compact phone and short-landscape layouts, tap-to-finish listening, interruption, and background pause/resume handling',
+        'Unsupported browsers still open an honest Homebase Voice screen describing the microphone limitation instead of leaving the user behind a transient toast or retry loop',
+        'The Tesla Dashboard Live and Charging ChatGPT buttons, AI & Research ChatGPT tile, and More-menu voice label now launch Homebase Voice; the stale Nova PWA and menu branding is updated to Homebase'
+      ],
+      safety_guards: [
+        'Free device recognition and speech remain the first Automatic attempt; a cloud speech request occurs only after a real device failure or an explicit cloud-engine choice',
+        'Device only never selects a cloud STT/TTS provider, and every xAI/OpenAI/ElevenLabs speech estimate uses reserveFixedCloud before the provider request',
+        'Speech keys remain browser/vault configuration and are sent only to the selected official provider base; no key value, private transcript fixture, or paid response is stored in source, tests, logs, or changelog',
+        'Blocked output retains already-generated text locally and never resubmits the user prompt to an LLM',
+        'Backgrounding, muting, ending voice, or changing sessions stops/discards capture rather than submitting a hidden partial recording',
+        'Tesla microphone support is not claimed: the launcher is shipped, but browsers that expose no input render an honest limitation state'
+      ],
+      verification: [
+        'node .github/scripts/test_voice_mode.js passes interim/final transcript selection, legacy Automatic migration, explicit no-spend selection, modality-specific xAI/OpenAI/ElevenLabs cost order, deep-link gesture gate, blocked-answer recovery wiring, xAI endpoint wiring, and Tesla launcher ownership without network or provider calls',
+        'python3 .github/scripts/validate.py parses root and AI JavaScript, validates cache/updater, and passes failover, one-query selector, and voice harnesses; git diff --check passes',
+        'Local Browser exercised ai/?voice=1, the free device Play voice test and button recovery, the simplified Voice settings, Tesla Dashboard launchers, direct Tesla-to-voice navigation, and zero horizontal overflow at the available desktop viewport',
+        'Unauthenticated no-credit CORS preflights to the official https://api.x.ai/v1/stt and /tts endpoints returned HTTP 200 with wildcard origin/method/header allowance for the GitHub Pages origin',
+        'No cloud speech request, provider credit, WebLLM download, or API-key read was used for implementation verification'
+      ],
+      setup_required: [
+        'None for free device speech; the already-configured xAI key makes the cheapest automatic cloud speech backup eligible after the encrypted settings reach that device',
+        'After deployment, David should open Homebase Voice on iPhone, tap once, say a short and a longer sentence, confirm spoken output, then background/return once; test Tesla hardware separately because webpage microphone exposure is browser-controlled'
+      ],
+      known_limits: [
+        'Automated browser control cannot emulate a real iPhone audio session or Tesla microphone; the deterministic state machine and desktop browser path pass, but hardware confirmation remains required',
+        'The GitHub Pages client-side BYOK architecture necessarily makes configured provider keys readable to the local app; a private backend proxy would be a separate security architecture, not part of this change',
+        'Cloud speech still depends on provider CORS, available credits, the rolling application guard, network reachability, and the device allowing audio playback',
+        'Tesla may expose no microphone to webpages even though the Homebase Voice launcher and unsupported-state UI work correctly'
+      ],
+      next_model: 'After PR, merge, Pages, and public verification are recorded, treat the deterministic voice work as shipped. Use Fable time on real-device evidence or consequential security/lifecycle races, not another cosmetic voice redesign or paid model comparison.'
+    },
     {
       id: '2026-07-18-per-query-model-selector',
       date: '2026-07-18',
@@ -6248,9 +6331,20 @@ function seedProfileMemories(){
   lsSet(LS_SEED, applied);
   return added;
 }
+function normalizeSpeechSettings(speech){
+  speech = Object.assign({}, DEFAULT_SETTINGS.speech, speech || {});
+  /* v1 used "browser" as the default. v2 keeps the device voice first but
+     permits the cheapest configured cloud backup after a real device failure. */
+  if (!speech.engineVersion){
+    if (speech.engine === 'browser') speech.engine = 'auto';
+    speech.engineVersion = 2;
+  }
+  if (['auto','device','xai','openai','elevenlabs'].indexOf(speech.engine) < 0) speech.engine = 'auto';
+  return speech;
+}
 function loadState(){
   S.settings = Object.assign({}, DEFAULT_SETTINGS, lsGet(LS_SETTINGS, {}));
-  S.settings.speech = Object.assign({}, DEFAULT_SETTINGS.speech, S.settings.speech || {});
+  S.settings.speech = normalizeSpeechSettings(S.settings.speech);
   S.settings.council = Object.assign({}, DEFAULT_SETTINGS.council, S.settings.council || {});
   S.settings.cloudBudget = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, S.settings.cloudBudget || {});
   S.settings.modelPricing = S.settings.modelPricing || {};
@@ -9434,24 +9528,49 @@ function exportConvoMarkdown(){
 /* ============================ speech: TTS ============================ */
 var IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-var TTSQ = { queue: [], speaking: false, audio: null, sharedAudio: null, onDrain: null, resumeTimer: null };
+var TTSQ = {
+  queue: [], speaking: false, audio: null, audioCleanup: null, sharedAudio: null, onDrain: null, resumeTimer: null,
+  playId: 0, autoFallbackPlayId: 0, currentText: '', blockedText: '', watchdog: null,
+  audioUnlocked: false, unlockAttempted: false, lastError: ''
+};
 var SILENT_WAV = 'data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA';
-/* iOS only lets audio start from a user gesture — call this inside taps that
-   lead to speech, so later (async) playback is allowed. */
+function clearTTSWatchdog(){
+  if (TTSQ.watchdog){ clearTimeout(TTSQ.watchdog); TTSQ.watchdog = null; }
+}
+function markVoiceAudioReady(){
+  TTSQ.audioUnlocked = true;
+  TTSQ.lastError = '';
+  var ov = $('voice-ov');
+  if (ov) ov.classList.remove('audio-blocked');
+}
+/* iOS requires media playback to begin from a user action. This function is
+   intentionally safe to call on every tap: an earlier non-gesture attempt must
+   never poison the reusable audio element for the rest of the session. */
 function unlockAudio(){
+  TTSQ.unlockAttempted = true;
   try {
-    if (window.speechSynthesis && !speechSynthesis.speaking){
-      var u = new SpeechSynthesisUtterance(' ');
-      u.volume = 0; u.rate = 2;
-      speechSynthesis.speak(u);
+    if (window.speechSynthesis){
+      speechSynthesis.resume();
+      if (!speechSynthesis.speaking && !speechSynthesis.pending && !TTSQ.speaking){
+        var u = new SpeechSynthesisUtterance('\u00a0');
+        u.volume = 0.01; u.rate = 2;
+        u.onstart = markVoiceAudioReady;
+        u.onend = markVoiceAudioReady;
+        speechSynthesis.speak(u);
+      }
     }
   } catch(e){}
   try {
-    if (!TTSQ.sharedAudio){
-      TTSQ.sharedAudio = new Audio();
+    if (!TTSQ.audio){
+      if (!TTSQ.sharedAudio) TTSQ.sharedAudio = new Audio();
+      TTSQ.sharedAudio.setAttribute('playsinline', '');
+      TTSQ.sharedAudio.preload = 'auto';
       TTSQ.sharedAudio.src = SILENT_WAV;
       var p = TTSQ.sharedAudio.play();
-      if (p && p.catch) p.catch(function(){});
+      if (p && p.then) p.then(markVoiceAudioReady).catch(function(e){
+        TTSQ.audioUnlocked = false;
+        TTSQ.lastError = (e && e.message) || 'Sound needs a tap';
+      });
     }
   } catch(e){}
 }
@@ -9481,40 +9600,194 @@ function ttsPump(){
   }
   var text = TTSQ.queue.shift();
   TTSQ.speaking = true;
+  TTSQ.currentText = text;
+  var playId = ++TTSQ.playId;
   var eng = S.settings.speech.engine;
-  if (eng === 'elevenlabs' && getKey('elevenlabs') && S.settings.speech.elevenVoiceId){
-    ttsElevenLabs(text).catch(function(e){
+  if (eng === 'xai' && getKey('xai')){
+    ttsXAI(text, playId).catch(function(e){
+      if (playId !== TTSQ.playId) return;
+      console.warn('xai tts', e); ttsBrowser(text, playId);
+    });
+  } else if (eng === 'elevenlabs' && getKey('elevenlabs') && S.settings.speech.elevenVoiceId){
+    ttsElevenLabs(text, playId).catch(function(e){
+      if (playId !== TTSQ.playId) return;
       console.warn('elevenlabs tts', e);
-      if (getKey('openai')) ttsOpenAI(text).catch(function(e2){ console.warn('openai tts fallback', e2); ttsBrowser(text); });
-      else ttsBrowser(text);
+      if (getKey('openai')) ttsOpenAI(text, playId).catch(function(e2){
+        if (playId !== TTSQ.playId) return;
+        console.warn('openai tts fallback', e2); ttsBrowser(text, playId);
+      });
+      else ttsBrowser(text, playId);
     });
   } else if (eng === 'openai' && getKey('openai')){
-    ttsOpenAI(text).catch(function(e){ console.warn('openai tts', e); ttsBrowser(text); });
+    ttsOpenAI(text, playId).catch(function(e){
+      if (playId !== TTSQ.playId) return;
+      console.warn('openai tts', e); ttsBrowser(text, playId);
+    });
   } else {
-    ttsBrowser(text);
+    ttsBrowser(text, playId);
   }
 }
-function ttsDoneOne(){
+function ttsDoneOne(playId){
+  if (playId && playId !== TTSQ.playId) return;
+  clearTTSWatchdog();
+  TTSQ.currentText = '';
   TTSQ.speaking = false;
   ttsPump();
 }
-function ttsBrowser(text){
-  if (!window.speechSynthesis){ ttsDoneOne(); return; }
+function ttsPlaybackBlocked(text, err, playId){
+  if (playId && playId !== TTSQ.playId) return;
+  clearTTSWatchdog();
+  var pending = [text || TTSQ.currentText].concat(TTSQ.queue).filter(Boolean).join(' ').trim();
+  TTSQ.queue = [];
+  TTSQ.currentText = '';
+  TTSQ.speaking = false;
+  TTSQ.audioUnlocked = false;
+  TTSQ.blockedText = pending || TTSQ.blockedText;
+  TTSQ.lastError = (err && (err.message || err.error)) || 'Audio playback was blocked';
+  var ov = $('voice-ov');
+  if (ov && VOICE.active){
+    ov.classList.add('audio-blocked');
+    setVState('idle');
+    vStatus('Your answer is ready — enable sound');
+    vLine('Tap Enable sound or the orb. I’ll read the answer without asking again.');
+    if ($('v-hint')) $('v-hint').textContent = 'Safari needs one tap before it can play spoken replies';
+  } else {
+    toast('Sound was blocked — tap Play voice test in Settings → Voice', 'warn', 5000);
+  }
+}
+function voiceTTSPlan(engine){
+  engine = engine || (S.settings.speech && S.settings.speech.engine) || 'auto';
+  if (engine === 'device') return [];
+  if (engine === 'xai') return getKey('xai') ? ['xai'] : [];
+  if (engine === 'openai') return getKey('openai') ? ['openai'] : [];
+  if (engine === 'elevenlabs') return getKey('elevenlabs') && S.settings.speech.elevenVoiceId ? ['elevenlabs'] : [];
+  /* Automatic cloud backup order is current estimated price: xAI, then
+     OpenAI mini TTS, then ElevenLabs Flash. Device speech runs before this. */
+  var plan = [];
+  if (getKey('xai')) plan.push('xai');
+  if (getKey('openai')) plan.push('openai');
+  if (getKey('elevenlabs') && S.settings.speech.elevenVoiceId) plan.push('elevenlabs');
+  return plan;
+}
+function selectVoiceTTSProvider(engine){
+  return voiceTTSPlan(engine)[0] || '';
+}
+async function runAutomaticTTSFallback(text, playId){
+  var plan = voiceTTSPlan('auto'), lastErr;
+  for (var i = 0; i < plan.length; i++){
+    if (playId !== TTSQ.playId) return;
+    try {
+      if (plan[i] === 'xai') await ttsXAI(text, playId);
+      else if (plan[i] === 'openai') await ttsOpenAI(text, playId);
+      else await ttsElevenLabs(text, playId);
+      return;
+    } catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('No cloud speech output is configured');
+}
+function ttsOutputFailed(text, err, playId){
+  var eng = S.settings.speech.engine || 'auto';
+  var provider = eng === 'auto' ? selectVoiceTTSProvider('auto') : '';
+  if (provider && TTSQ.autoFallbackPlayId !== playId){
+    clearTTSWatchdog();
+    TTSQ.autoFallbackPlayId = playId;
+    runAutomaticTTSFallback(text, playId).catch(function(cloudErr){
+      if (playId === TTSQ.playId) ttsPlaybackBlocked(text, cloudErr || err, playId);
+    });
+    return;
+  }
+  ttsPlaybackBlocked(text, err, playId);
+}
+function retryBlockedSpeech(){
+  var text = TTSQ.blockedText;
+  if (!text) return false;
+  TTSQ.blockedText = '';
+  markVoiceAudioReady();
+  if ($('v-hint')) $('v-hint').textContent = 'Tap the orb to interrupt · conversation is saved to the chat';
+  setVState('speaking');
+  ttsEnqueue(text);
+  return true;
+}
+function ttsBrowser(text, playId){
+  if (!window.speechSynthesis){ ttsOutputFailed(text, new Error('Speech output is unavailable'), playId); return; }
   var u = new SpeechSynthesisUtterance(text);
   var v = pickVoice();
   if (v) u.voice = v;
   u.lang = S.settings.speech.lang || 'en-US';
   u.rate = clamp(+S.settings.speech.rate || 1, 0.5, 2);
-  u.onend = ttsDoneOne;
-  u.onerror = ttsDoneOne;
+  var started = false, handingOff = false;
+  u.onstart = function(){
+    if (playId !== TTSQ.playId) return;
+    started = true; markVoiceAudioReady(); clearTTSWatchdog();
+  };
+  u.onend = function(){ ttsDoneOne(playId); };
+  u.onerror = function(e){
+    if (playId !== TTSQ.playId) return;
+    if (handingOff) return;
+    var why = e && e.error;
+    if (why === 'interrupted' || why === 'canceled'){ ttsDoneOne(playId); return; }
+    ttsOutputFailed(text, new Error(why || 'Browser voice could not start'), playId);
+  };
   if (!TTSQ.resumeTimer && !IS_IOS){
     TTSQ.resumeTimer = setInterval(function(){
       if (speechSynthesis.speaking){ speechSynthesis.pause(); speechSynthesis.resume(); }
     }, 10000);
   }
-  speechSynthesis.speak(u);
+  try {
+    speechSynthesis.resume();
+    speechSynthesis.speak(u);
+    clearTTSWatchdog();
+    TTSQ.watchdog = setTimeout(function(){
+      if (playId === TTSQ.playId && TTSQ.speaking && !started){
+        handingOff = true;
+        try { speechSynthesis.cancel(); } catch(e){}
+        ttsOutputFailed(text, new Error('Browser voice did not start'), playId);
+      }
+    }, IS_IOS ? 3500 : 5000);
+  } catch(e){ ttsOutputFailed(text, e, playId); }
 }
-async function ttsOpenAI(text){
+function playTTSBlob(blob, text, playId){
+  return new Promise(function(resolve){
+    if (playId !== TTSQ.playId){ resolve(); return; }
+    var url = URL.createObjectURL(blob);
+    var audio = TTSQ.sharedAudio || new Audio();
+    TTSQ.sharedAudio = audio;
+    audio.setAttribute('playsinline', '');
+    audio.src = url;
+    TTSQ.audio = audio;
+    var cleaned = false;
+    function cleanup(){
+      if (cleaned) return; cleaned = true;
+      audio.onplaying = null; audio.onended = null; audio.onerror = null;
+      URL.revokeObjectURL(url);
+      if (TTSQ.audio === audio) TTSQ.audio = null;
+      if (TTSQ.audioCleanup === cleanup) TTSQ.audioCleanup = null;
+    }
+    TTSQ.audioCleanup = cleanup;
+    function fallbackToBrowser(){
+      if (cleaned) return;
+      cleanup();
+      if (playId === TTSQ.playId) ttsBrowser(text, playId);
+      resolve();
+    }
+    var audioStarted = false;
+    audio.onplaying = function(){
+      if (playId !== TTSQ.playId) return;
+      audioStarted = true; clearTTSWatchdog(); markVoiceAudioReady();
+    };
+    audio.onended = function(){ if (cleaned) return; cleanup(); ttsDoneOne(playId); resolve(); };
+    audio.onerror = fallbackToBrowser;
+    try {
+      var p = audio.play();
+      if (p && p.catch) p.catch(fallbackToBrowser);
+      clearTTSWatchdog();
+      TTSQ.watchdog = setTimeout(function(){
+        if (playId === TTSQ.playId && TTSQ.speaking && !audioStarted) fallbackToBrowser();
+      }, IS_IOS ? 4500 : 6000);
+    } catch(e){ fallbackToBrowser(); }
+  });
+}
+async function ttsOpenAI(text, playId){
   var input = text.slice(0, 3800);
   var minutes = Math.max(0.03, input.trim().split(/\s+/).length / 150);
   // Conservative audio-output estimate plus the published $0.60/M text-input rate.
@@ -9531,16 +9804,32 @@ async function ttsOpenAI(text){
     blob = await resp.blob();
     finishFixedCloud(reservation, {minutes:minutes, chars:input.length});
   } catch(e){ releaseCloudReservation(reservation); throw e; }
-  var url = URL.createObjectURL(blob);
-  /* reuse the gesture-unlocked element on iOS so playback isn't blocked */
-  var audio = TTSQ.sharedAudio || new Audio();
-  audio.src = url;
-  TTSQ.audio = audio;
-  audio.onended = function(){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); };
-  audio.onerror = function(){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); };
-  try { await audio.play(); } catch(e){ TTSQ.audio = null; ttsDoneOne(); }
+  await playTTSBlob(blob, text, playId);
 }
-async function ttsElevenLabs(text){
+async function ttsXAI(text, playId){
+  var input = text.slice(0, 6000);
+  var voice = S.settings.speech.xaiVoice || 'eve';
+  var reservation = reserveFixedCloud('xai', 'xai-tts', 'speech', input.length * 15 / 1000000);
+  var blob;
+  try {
+    var lang = String(S.settings.speech.lang || 'en').split('-')[0] || 'en';
+    var resp = await fetch(getBase('xai') + '/tts', {
+      method:'POST',
+      headers:{'content-type':'application/json', 'Authorization':'Bearer ' + getKey('xai')},
+      body:JSON.stringify({
+        text:input, voice_id:voice, language:lang,
+        speed:clamp(+S.settings.speech.rate || 1, 0.7, 1.5),
+        optimize_streaming_latency:1, text_normalization:true
+      }),
+      referrerPolicy:'no-referrer'
+    });
+    if (!resp.ok) throw await httpError(resp);
+    blob = await resp.blob();
+    finishFixedCloud(reservation, {chars:input.length}); reservation = null;
+  } catch(e){ if (reservation) releaseCloudReservation(reservation); throw e; }
+  await playTTSBlob(blob, text, playId);
+}
+async function ttsElevenLabs(text, playId){
   var input = text.slice(0, 4800);
   var model = S.settings.speech.elevenTtsModel || 'eleven_flash_v2_5';
   var voiceId = (S.settings.speech.elevenVoiceId || '').trim();
@@ -9559,12 +9848,7 @@ async function ttsElevenLabs(text){
     blob = await resp.blob();
     finishFixedCloud(reservation, {chars:input.length}); reservation = null;
   } catch(e){ if (reservation) releaseCloudReservation(reservation); throw e; }
-  var url = URL.createObjectURL(blob);
-  var audio = TTSQ.sharedAudio || new Audio();
-  audio.src = url; TTSQ.audio = audio;
-  audio.onended = function(){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); };
-  audio.onerror = function(){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); };
-  try { await audio.play(); } catch(e){ URL.revokeObjectURL(url); TTSQ.audio = null; ttsDoneOne(); }
+  await playTTSBlob(blob, text, playId);
 }
 function speakText(text){
   stopSpeaking();
@@ -9573,9 +9857,16 @@ function speakText(text){
 }
 function stopSpeaking(){
   TTSQ.queue = [];
+  TTSQ.blockedText = '';
+  TTSQ.currentText = '';
   TTSQ.speaking = false;
+  TTSQ.playId++;
+  clearTTSWatchdog();
+  var ov = $('voice-ov'); if (ov) ov.classList.remove('audio-blocked');
   if (window.speechSynthesis) speechSynthesis.cancel();
-  if (TTSQ.audio){ try { TTSQ.audio.pause(); } catch(e){} TTSQ.audio = null; }
+  if (TTSQ.audio){ try { TTSQ.audio.pause(); } catch(e){} }
+  if (TTSQ.audioCleanup) TTSQ.audioCleanup();
+  TTSQ.audio = null;
   if (TTSQ.resumeTimer){ clearInterval(TTSQ.resumeTimer); TTSQ.resumeTimer = null; }
 }
 function sentenceChunks(text){
@@ -9627,7 +9918,10 @@ function stopDictation(){
 }
 
 /* ============================ voice mode ============================ */
-var VOICE = { active:false, state:'idle', muted:false, buffer:'', rec:null, stream:null, replying:false };
+var VOICE = {
+  active:false, state:'idle', muted:false, buffer:'', rec:null, mediaRecorder:null, stream:null, replying:false,
+  failCount:0, forceCloudCapture:false, lastInterim:'', lastTranscript:'', lastError:''
+};
 function vStatus(t){ $('v-status').textContent = t; }
 function vLine(t){ $('v-line').textContent = t || ''; }
 function setVState(state){
@@ -9709,19 +10003,40 @@ function voiceVizKick(state){
     })(performance.now());
   }
 }
-function voiceSupported(){
-  return !!getSR() || !!getKey('openai') || !!getKey('elevenlabs');
+function voiceSTTPlan(engine){
+  engine = engine || (S.settings.speech && S.settings.speech.engine) || 'auto';
+  if (engine === 'device') return [];
+  if (engine === 'xai') return getKey('xai') ? ['xai'] : [];
+  if (engine === 'openai') return getKey('openai') ? ['openai'] : [];
+  if (engine === 'elevenlabs') return getKey('elevenlabs') ? ['elevenlabs'] : [];
+  /* xAI REST STT is currently the least-expensive configured cloud capture,
+     followed by ElevenLabs Scribe and OpenAI Whisper. */
+  var plan = [];
+  if (getKey('xai')) plan.push('xai');
+  if (getKey('elevenlabs')) plan.push('elevenlabs');
+  if (getKey('openai')) plan.push('openai');
+  return plan;
 }
+function selectVoiceSTTProvider(engine){
+  return voiceSTTPlan(engine)[0] || '';
+}
+function cloudSTTReady(){ return !!selectVoiceSTTProvider('auto'); }
+function cloudCaptureAllowed(){ return !!selectVoiceSTTProvider(S.settings.speech.engine); }
+function cloudTTSReady(){ return !!selectVoiceTTSProvider(S.settings.speech.engine); }
+function mediaCaptureSupported(){
+  return !!window.MediaRecorder && !!navigator.mediaDevices && !!navigator.mediaDevices.getUserMedia;
+}
+function voiceSupported(){ return !!getSR() || (cloudCaptureAllowed() && mediaCaptureSupported()); }
 function startVoiceMode(opts){
   opts = opts || {};
   if (VOICE.active){ endVoiceMode(); return; }
-  if (!voiceSupported()){
-    toast('Voice mode needs browser speech recognition, OpenAI, or ElevenLabs', 'warn', 4500);
-    return;
-  }
+  var supported = voiceSupported();
   ensureConvo();
   VOICE.active = true; VOICE.muted = false; VOICE.failCount = 0;
-  unlockAudio();
+  VOICE.forceCloudCapture = false; VOICE.lastInterim = ''; VOICE.lastTranscript = ''; VOICE.lastError = '';
+  TTSQ.blockedText = ''; TTSQ.lastError = '';
+  $('voice-ov').classList.remove('audio-blocked');
+  if (!opts.deferListen) unlockAudio();
   ensureVoiceWave();
   $('voice-ov').classList.add('open');
   voiceVizKick('idle');
@@ -9731,17 +10046,18 @@ function startVoiceMode(opts){
   TTSQ.onDrain = voiceTTSDrained;
   setVState('idle');
   vLine('');
+  if (!supported){
+    vStatus('Voice needs microphone access');
+    vLine('This browser does not expose speech input. Close Voice to continue in chat.');
+    if ($('v-hint')) $('v-hint').textContent = 'Try Homebase Voice on your iPhone or Mac';
+    return;
+  }
   if (opts.deferListen){
-    /* launched from a URL (no user gesture yet): wait for a tap on the orb
-       unless the mic permission is already granted */
-    vStatus('Tap the orb to talk');
-    try {
-      if (navigator.permissions && navigator.permissions.query){
-        navigator.permissions.query({name:'microphone'}).then(function(st){
-          if (st.state === 'granted' && VOICE.active && VOICE.state === 'idle') voiceListen();
-        }).catch(function(){});
-      }
-    } catch(e){}
+    /* A URL launch is not a durable media gesture on iOS. Always wait for one
+       explicit tap so both the microphone and spoken replies are authorized. */
+    vStatus('Tap once to start voice');
+    vLine('This enables your microphone and spoken answers together.');
+    if ($('v-hint')) $('v-hint').textContent = 'One tap, then the conversation stays hands-free';
     return;
   }
   voiceListen();
@@ -9755,17 +10071,44 @@ function endVoiceMode(){
   if (VIZ.raf){ cancelAnimationFrame(VIZ.raf); VIZ.raf = 0; }
   setVState('idle');
 }
-function stopVoiceRec(){
+function stopVoiceRec(discard){
   if (VOICE.rec){ try { VOICE.rec.abort ? VOICE.rec.abort() : VOICE.rec.stop(); } catch(e){} VOICE.rec = null; }
+  if (VOICE.mediaRecorder){
+    if (discard) VOICE.mediaRecorder.__homebaseDiscard = true;
+    try { if (VOICE.mediaRecorder.state !== 'inactive') VOICE.mediaRecorder.stop(); } catch(e){}
+    VOICE.mediaRecorder = null;
+  }
   if (VOICE.stream){ VOICE.stream.getTracks().forEach(function(t){ t.stop(); }); VOICE.stream = null; }
 }
 function voiceListen(){
   if (!VOICE.active || VOICE.muted) { setVState('idle'); return; }
+  if (TTSQ.blockedText){
+    setVState('idle');
+    $('voice-ov').classList.add('audio-blocked');
+    vStatus('Your answer is ready — enable sound');
+    return;
+  }
   if (VOICE.rec || VOICE.stream) return; /* already listening */
-  stopSpeaking();
+  if (TTSQ.speaking || TTSQ.queue.length || TTSQ.audio) stopSpeaking();
   var SR = getSR();
-  if (SR) voiceListenSR(SR);
-  else voiceListenWhisper();
+  var eng = S.settings.speech.engine || 'auto';
+  var explicitCloudReady = ['xai','openai','elevenlabs'].indexOf(eng) >= 0 && cloudCaptureAllowed();
+  if (SR && !VOICE.forceCloudCapture && !explicitCloudReady) voiceListenSR(SR);
+  else if (cloudCaptureAllowed()) voiceListenWhisper();
+  else {
+    setVState('idle');
+    vStatus('Voice listening is unavailable here');
+    vLine('You can retry, or continue in the text chat.');
+  }
+}
+function chooseVoiceTranscript(finals, interim){
+  var finalText = String(finals || '').replace(/\s+/g, ' ').trim();
+  var interimText = String(interim || '').replace(/\s+/g, ' ').trim();
+  if (finalText) return finalText;
+  /* Mobile Safari can end a capture after returning useful interim words but
+     before marking them final. Preserve that best transcript instead of
+     making the user repeat themselves; ignore only single-character noise. */
+  return interimText.length >= 2 ? interimText : '';
 }
 function voiceListenSR(SR){
   setVState('listening'); vLine('');
@@ -9773,26 +10116,42 @@ function voiceListenSR(SR){
   rec.lang = S.settings.speech.lang || 'en-US';
   rec.continuous = false;
   rec.interimResults = true;
-  var finals = '', startedAt = Date.now();
+  var finals = '', latestInterim = '', startedAt = Date.now(), recognitionError = '';
   rec.onresult = function(e){
     var interim = '';
     for (var i = e.resultIndex; i < e.results.length; i++){
       if (e.results[i].isFinal) finals += e.results[i][0].transcript + ' ';
       else interim += e.results[i][0].transcript;
     }
+    latestInterim = interim || latestInterim;
+    VOICE.lastInterim = latestInterim.trim();
+    vStatus('I hear you…');
     vLine(finals + interim);
   };
+  rec.onspeechstart = function(){ if (VOICE.rec === rec) vStatus('I hear you…'); };
+  rec.onspeechend = function(){ if (VOICE.rec === rec) vStatus('Got it…'); };
   rec.onerror = function(e){
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture'){
+    recognitionError = e.error || 'recognition-error';
+    VOICE.lastError = recognitionError;
+    if (recognitionError === 'not-allowed' || recognitionError === 'audio-capture'){
       toast('Microphone unavailable (' + e.error + ')', 'err');
       endVoiceMode();
+    } else if ((recognitionError === 'network' || recognitionError === 'service-not-allowed') && cloudCaptureAllowed()){
+      VOICE.forceCloudCapture = true;
+      vStatus('Switching to backup listening…');
     }
   };
   rec.onend = function(){
     if (!VOICE.active || VOICE.rec !== rec) return;
     VOICE.rec = null;
-    var txt = finals.trim();
-    if (txt){ VOICE.failCount = 0; voiceUtterance(txt); return; }
+    var txt = chooseVoiceTranscript(finals, latestInterim);
+    if (txt){ VOICE.failCount = 0; VOICE.lastTranscript = txt; voiceUtterance(txt); return; }
+    if ((recognitionError === 'network' || recognitionError === 'service-not-allowed') && !cloudCaptureAllowed()){
+      setVState('idle');
+      vStatus('Voice listening needs another tap');
+      vLine('Safari could not reach its speech service. Tap the orb to retry.');
+      return;
+    }
     /* speech recognition that dies instantly with nothing heard, repeatedly,
        means there is no working mic here (e.g. some in-car browsers) —
        stop the retry loop instead of spinning */
@@ -9804,20 +10163,62 @@ function voiceListenSR(SR){
       vStatus('Mic unavailable here — tap the orb to retry');
       return;
     }
-    if (!VOICE.muted) setTimeout(function(){ if (VOICE.active && VOICE.state === 'listening') voiceListen(); }, 250);
+    if (!VOICE.muted) setTimeout(function(){ if (VOICE.active && VOICE.state === 'listening') voiceListen(); }, 350);
   };
   VOICE.rec = rec;
   try { rec.start(); } catch(e){ VOICE.rec = null; setTimeout(voiceListen, 500); }
 }
+async function transcribeVoiceBlob(blob, ext, durationMin, engine){
+  var plan = voiceSTTPlan(engine), lastErr;
+  if (!plan.length) throw new Error('No cloud listening backup is configured');
+  for (var n = 0; n < plan.length; n++){
+    var sttProvider = plan[n], reservation;
+    try {
+      if (sttProvider === 'elevenlabs'){
+        reservation = reserveFixedCloud('elevenlabs', S.settings.speech.elevenSttModel || 'scribe_v2', 'transcription', durationMin * 0.22 / 60);
+      } else if (sttProvider === 'xai'){
+        reservation = reserveFixedCloud('xai', 'xai-stt', 'transcription', durationMin * 0.10 / 60);
+      } else {
+        reservation = reserveFixedCloud('openai', 'whisper-1', 'transcription', durationMin * 0.006);
+      }
+      var fd = new FormData();
+      fd.append('file', blob, 'voice.' + ext);
+      if (sttProvider === 'elevenlabs') fd.append('model_id', S.settings.speech.elevenSttModel || 'scribe_v2');
+      else if (sttProvider === 'xai'){
+        fd.append('format', 'true');
+        fd.append('language', String(S.settings.speech.lang || 'en').split('-')[0] || 'en');
+      } else fd.append('model', 'whisper-1');
+      var sttPath = sttProvider === 'elevenlabs' ? '/speech-to-text' : (sttProvider === 'xai' ? '/stt' : '/audio/transcriptions');
+      var resp = await fetch(getBase(sttProvider) + sttPath, {
+        method:'POST',
+        headers:sttProvider === 'elevenlabs' ? {'xi-api-key':getKey('elevenlabs')} : {'Authorization':'Bearer ' + getKey(sttProvider)},
+        body:fd, referrerPolicy:'no-referrer'
+      });
+      if (!resp.ok) throw await httpError(resp);
+      var result = await resp.json();
+      finishFixedCloud(reservation, {minutes:durationMin}); reservation = null;
+      return {text:(result.text || '').trim(), provider:sttProvider};
+    } catch(e){
+      if (reservation) releaseCloudReservation(reservation);
+      lastErr = e;
+      /* Explicit engines are terminal. Automatic mode alone may reuse the same
+         local recording with the next least-expensive configured provider. */
+      if (engine && engine !== 'auto') break;
+    }
+  }
+  throw lastErr || new Error('Transcription failed');
+}
 async function voiceListenWhisper(){
-  if (!window.MediaRecorder || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+  if (!mediaCaptureSupported()){
     toast('Audio recording is not supported in this browser', 'err');
     endVoiceMode();
     return;
   }
   setVState('listening'); vLine('');
   try {
-    var stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    var stream = await navigator.mediaDevices.getUserMedia({audio:{
+      echoCancellation:true, noiseSuppression:true, autoGainControl:true, channelCount:1
+    }});
     VOICE.stream = stream;
     var ctx = new (window.AudioContext || window.webkitAudioContext)();
     if (ctx.state === 'suspended'){ try { ctx.resume(); } catch(e){} }
@@ -9825,62 +10226,54 @@ async function voiceListenWhisper(){
     var an = ctx.createAnalyser(); an.fftSize = 1024;
     src.connect(an);
     var mr = new MediaRecorder(stream);
+    VOICE.mediaRecorder = mr;
     var chunks = [];
     mr.ondataavailable = function(e){ if (e.data.size) chunks.push(e.data); };
     var buf = new Uint8Array(an.fftSize);
-    var spoke = false, silenceMs = 0, t0 = Date.now();
+    var spoke = false, silenceMs = 0, speechMs = 0, noiseFloor = 0.008, calibration = 0, t0 = Date.now();
     var poll = setInterval(function(){
       an.getByteTimeDomainData(buf);
       var sum = 0;
       for (var i = 0; i < buf.length; i++){ var d = (buf[i] - 128) / 128; sum += d * d; }
       var rms = Math.sqrt(sum / buf.length);
-      if (rms > 0.02){ spoke = true; silenceMs = 0; }
+      var elapsed = Date.now() - t0;
+      if (!spoke && elapsed < 700){
+        noiseFloor = noiseFloor * 0.82 + Math.min(rms, 0.035) * 0.18;
+        calibration++;
+      }
+      var threshold = Math.max(0.010, Math.min(0.035, noiseFloor * 2.35));
+      if (elapsed > 180 && rms > threshold){ spoke = true; silenceMs = 0; speechMs += 100; }
       else silenceMs += 100;
-      if ((spoke && silenceMs > 1400) || Date.now() - t0 > 20000){
+      if ((spoke && speechMs >= 200 && silenceMs > 1800) || elapsed > 25000){
         clearInterval(poll);
         try { mr.stop(); } catch(e){}
       }
     }, 100);
     mr.onstop = async function(){
       clearInterval(poll);
+      if (VOICE.mediaRecorder === mr) VOICE.mediaRecorder = null;
       try { ctx.close(); } catch(e){}
       stream.getTracks().forEach(function(t){ t.stop(); });
       VOICE.stream = null;
-      if (!VOICE.active) return;
-      if (!spoke){ if (!VOICE.muted) voiceListen(); return; }
+      var discard = !!mr.__homebaseDiscard;
+      if (!VOICE.active || VOICE.muted || discard) return;
+      if (!spoke){
+        setVState('idle'); vStatus('I didn’t catch that'); vLine('Tap the orb and try again.');
+        return;
+      }
       setVState('thinking'); vLine('(transcribing…)');
       var durationMin = Math.max(0.01, (Date.now() - t0) / 60000);
-      var voiceReservation;
       try {
         var mt = mr.mimeType || 'audio/webm';
         var blob = new Blob(chunks, {type: mt});
         /* Safari records audio/mp4 — Whisper detects the format from the
            filename extension, so it must match the actual container. */
         var ext = /mp4|m4a|aac/.test(mt) ? 'mp4' : (/ogg/.test(mt) ? 'ogg' : (/wav/.test(mt) ? 'wav' : 'webm'));
-        var useEleven = S.settings.speech.engine === 'elevenlabs' && !!getKey('elevenlabs');
-        var sttProvider = useEleven ? 'elevenlabs' : 'openai';
-        if (sttProvider === 'openai' && !getKey('openai') && getKey('elevenlabs')) sttProvider = 'elevenlabs';
-        if (sttProvider === 'elevenlabs'){
-          voiceReservation = reserveFixedCloud('elevenlabs', S.settings.speech.elevenSttModel || 'scribe_v2', 'transcription', durationMin * 0.22 / 60);
-        } else {
-          voiceReservation = reserveFixedCloud('openai', 'whisper-1', 'transcription', durationMin * 0.006);
-        }
-        var fd = new FormData();
-        fd.append('file', blob, 'voice.' + ext);
-        if (sttProvider === 'elevenlabs') fd.append('model_id', S.settings.speech.elevenSttModel || 'scribe_v2');
-        else fd.append('model', 'whisper-1');
-        var resp = await fetch(getBase(sttProvider) + (sttProvider === 'elevenlabs' ? '/speech-to-text' : '/audio/transcriptions'), {
-          method:'POST',
-          headers:sttProvider === 'elevenlabs' ? {'xi-api-key':getKey('elevenlabs')} : {'Authorization':'Bearer ' + getKey('openai')},
-          body:fd, referrerPolicy:'no-referrer' });
-        if (!resp.ok) throw await httpError(resp);
-        var j = await resp.json();
-        finishFixedCloud(voiceReservation, {minutes:durationMin}); voiceReservation = null;
-        var txt = (j.text || '').trim();
+        var tr = await transcribeVoiceBlob(blob, ext, durationMin, S.settings.speech.engine);
+        var txt = tr.text;
         if (txt) voiceUtterance(txt);
         else if (!VOICE.muted) voiceListen();
       } catch(err){
-        if (voiceReservation) releaseCloudReservation(voiceReservation);
         toast('Transcription failed: ' + err.message, 'err');
         if (VOICE.active && !VOICE.muted) setTimeout(voiceListen, 800);
       }
@@ -9909,11 +10302,20 @@ function voiceDelta(t){
     VOICE.buffer = VOICE.buffer.slice(idx);
     var clean = stripForSpeech(ready);
     if (clean){
-      if (VOICE.state !== 'speaking') setVState('speaking');
-      vLine(clean.slice(-220));
-      ttsEnqueue(clean);
+      voiceSpeakOrHold(clean);
     }
   }
+}
+function voiceSpeakOrHold(text){
+  text = (text || '').trim();
+  if (!text) return;
+  if (TTSQ.blockedText){
+    TTSQ.blockedText = (TTSQ.blockedText + ' ' + text).trim();
+    return;
+  }
+  if (VOICE.state !== 'speaking') setVState('speaking');
+  vLine(text.slice(-220));
+  ttsEnqueue(text);
 }
 function voiceReplyDone(am){
   if (!VOICE.active) return;
@@ -9926,14 +10328,18 @@ function voiceReplyDone(am){
     return;
   }
   if (rest){
-    if (VOICE.state !== 'speaking') setVState('speaking');
-    ttsEnqueue(rest);
+    voiceSpeakOrHold(rest);
+  } else if (TTSQ.blockedText){
+    $('voice-ov').classList.add('audio-blocked');
+    setVState('idle');
+    vStatus('Your answer is ready — enable sound');
   } else if (!TTSQ.speaking && !TTSQ.queue.length){
     voiceListen();
   }
 }
 function voiceTTSDrained(){
   if (!VOICE.active || VOICE.replying) return;
+  if (TTSQ.blockedText) return;
   if (VOICE.state === 'speaking' || VOICE.state === 'thinking') voiceListen();
 }
 function initVoice(){
@@ -9945,17 +10351,49 @@ function initVoice(){
     if (VOICE.muted){ stopVoiceRec(); if (VOICE.state === 'listening') setVState('idle'); }
     else { unlockAudio(); voiceListen(); }
   });
-  $('v-orb').addEventListener('click', function(){
+  $('v-audio-retry').addEventListener('click', function(){
     if (!VOICE.active) return;
     unlockAudio();
+    retryBlockedSpeech();
+  });
+  $('v-orb').addEventListener('click', function(){
+    if (!VOICE.active) return;
+    if (TTSQ.blockedText){
+      unlockAudio();
+      retryBlockedSpeech();
+      return;
+    }
+    if (VOICE.state === 'listening'){
+      if (VOICE.rec){ try { VOICE.rec.stop(); } catch(e){} }
+      else if (VOICE.mediaRecorder){ try { VOICE.mediaRecorder.stop(); } catch(e){} }
+      return;
+    }
     if (VOICE.state === 'speaking' || VOICE.state === 'thinking'){
       stopSpeaking();
       stopGeneration();
       VOICE.buffer = '';
+      unlockAudio();
       setTimeout(voiceListen, 150);
     } else if (VOICE.state === 'idle'){
+      unlockAudio();
       VOICE.muted = false; $('v-mute').textContent = '🎙️';
+      if ($('v-hint')) $('v-hint').textContent = 'Tap the orb to interrupt · conversation is saved to the chat';
       voiceListen();
+    }
+  });
+  document.addEventListener('visibilitychange', function(){
+    if (!VOICE.active) return;
+    if (document.visibilityState !== 'visible'){
+      stopVoiceRec(true);
+      if (VOICE.state === 'listening'){
+        setVState('idle');
+        vStatus('Voice paused');
+        vLine('Return here and tap the orb to continue.');
+      }
+    } else if (!TTSQ.speaking && !TTSQ.blockedText && VOICE.state === 'idle'){
+      vStatus('Tap the orb to continue');
+    } else if (TTSQ.speaking && window.speechSynthesis){
+      try { speechSynthesis.resume(); } catch(e){}
     }
   });
   $('mic-btn').addEventListener('click', toggleDictation);
@@ -10914,7 +11352,22 @@ function renderChatPane(){
 function renderVoicePane(){
   var pane = $('pane-voice');
   pane.innerHTML = '';
-  var eng = row('Voice engine', 'Browser is free; cloud speech is included in the same trailing 30-day budget', '<select id="vs-eng"><option value="browser">Browser (free)</option><option value="openai">OpenAI (premium)</option><option value="elevenlabs">ElevenLabs (premium)</option></select>');
+  var intro = document.createElement('div');
+  intro.className = 'hint-box';
+  intro.style.margin = '0 0 12px';
+  intro.innerHTML = '<b>Voice works hands-free after one tap.</b><br>Homebase listens with the free device service first, keeps useful words Safari leaves unfinished, and automatically reads every voice-mode reply aloud.';
+  pane.appendChild(intro);
+  var testRow = row('Hear a voice test', 'Use this once if replies are silent on iPhone or in an installed app', '<button id="vs-play-test" class="sm-btn pri" type="button">Play voice test</button>');
+  pane.appendChild(testRow);
+  qs('#vs-play-test', pane).addEventListener('click', function(){
+    var b = this;
+    b.textContent = 'Playing…';
+    stopSpeaking();
+    unlockAudio();
+    speakText('Homebase voice is ready.');
+    setTimeout(function(){ if (b && b.isConnected) b.textContent = 'Play voice test'; }, 2600);
+  });
+  var eng = row('Voice engine', 'Automatic tries the free device voice first, then the cheapest configured cloud backup', '<select id="vs-eng"><option value="auto">Automatic (recommended)</option><option value="device">Device only (free)</option><option value="xai">xAI voice</option><option value="openai">OpenAI voice</option><option value="elevenlabs">ElevenLabs voice</option></select>');
   pane.appendChild(eng);
   var engSel = qs('#vs-eng', pane);
   engSel.value = S.settings.speech.engine;
@@ -10926,6 +11379,12 @@ function renderVoicePane(){
   var vs = qs('#vs-voice', pane);
   vs.value = S.settings.speech.voiceURI || '';
   vs.addEventListener('change', function(){ S.settings.speech.voiceURI = this.value; saveSettings(); });
+  var xvRow = row('xAI voice', 'Uses the xAI key already configured in AI connections', '<select id="vs-xv">' +
+    ['eve','ara','leo','rex','sal'].map(function(v){ return '<option value="' + v + '">' + v.charAt(0).toUpperCase() + v.slice(1) + '</option>'; }).join('') + '</select>');
+  pane.appendChild(xvRow);
+  var xv = qs('#vs-xv', pane);
+  xv.value = S.settings.speech.xaiVoice || 'eve';
+  xv.addEventListener('change', function(){ S.settings.speech.xaiVoice = this.value; saveSettings(); });
   var ovRow = row('OpenAI voice', '', '<select id="vs-ov">' +
     ['alloy','echo','fable','onyx','nova','shimmer','coral','sage'].map(function(v){ return '<option>' + v + '</option>'; }).join('') + '</select>');
   pane.appendChild(ovRow);
@@ -10965,13 +11424,15 @@ function renderVoicePane(){
   var li = qs('#vs-lang', pane);
   li.value = S.settings.speech.lang;
   li.addEventListener('change', function(){ S.settings.speech.lang = this.value.trim() || 'en-US'; saveSettings(); });
-  pane.appendChild(tglRow('Auto-speak replies', 'Read every reply aloud (outside voice mode)',
-    function(){ return S.settings.autoSpeak; }, function(v){ S.settings.autoSpeak = v; }));
+  var autoRow = tglRow('Speak regular chat replies', 'Voice mode always speaks; this also reads replies sent from normal Chat mode',
+    function(){ return S.settings.autoSpeak; }, function(v){ S.settings.autoSpeak = v; });
+  pane.appendChild(autoRow);
   var sup = document.createElement('div');
   sup.className = 'hint-box';
-  sup.innerHTML = 'Speech recognition: ' + (getSR() ? '✅ browser capture available (free)' : '⚠️ browser capture unavailable; voice mode will use the selected configured cloud engine') +
-    ' · Speech synthesis: ' + (window.speechSynthesis ? '✅ available' : '⚠️ unavailable');
+  sup.innerHTML = 'Listening: ' + (getSR() ? '✅ free device speech is available' : (cloudCaptureAllowed() && mediaCaptureSupported() ? '✅ cloud backup is configured' : '⚠️ no listening service is available')) +
+    '<br>Speaking: ' + (window.speechSynthesis ? '✅ device voice is available' : (cloudTTSReady() ? '✅ cloud voice can be used' : '⚠️ no speech output is available'));
   pane.appendChild(sup);
+  pane.appendChild(settingsDisclosure('Voice, language & premium options', [eng, vRow, xvRow, ovRow, ekRow, evRow, emRow, lRow, sup]));
 }
 
 function renderToolsPane(){
@@ -11209,7 +11670,7 @@ function renderDataPane(){
         if (!d || d.v !== 1) throw new Error('not a Homebase backup');
         if (!confirm('Import backup from ' + (d.exportedAt || '?') + '? This replaces current chats, memory, tasks and settings.')) return;
         S.settings = Object.assign({}, DEFAULT_SETTINGS, d.settings || {});
-        S.settings.speech = Object.assign({}, DEFAULT_SETTINGS.speech, (d.settings || {}).speech || {});
+        S.settings.speech = normalizeSpeechSettings((d.settings || {}).speech);
         S.settings.council = Object.assign({}, DEFAULT_SETTINGS.council, (d.settings || {}).council || {});
         S.settings.cloudBudget = Object.assign({}, DEFAULT_SETTINGS.cloudBudget, (d.settings || {}).cloudBudget || {});
         S.settings.modelCapabilities = S.settings.modelCapabilities || {};
@@ -11366,10 +11827,9 @@ function initShell(){
   }
 }
 /* Deep link: ai/?voice=1 (or #voice) jumps straight into voice mode —
-   used by the "🎙️ Nova Voice" button on the Tesla dashboard and by the
-   PWA shortcut. Browsers require a gesture for the mic, so it opens the
-   voice overlay in tap-to-talk state and goes fully hands-free when the
-   mic permission was already granted. */
+   used by Homebase Voice on the Tesla dashboard and by the PWA shortcut.
+   It always asks for one deliberate tap so mobile Safari authorizes both
+   microphone capture and later spoken replies before going hands-free. */
 function maybeAutoVoice(){
   var wantVoice = false;
   try {
@@ -11381,10 +11841,6 @@ function maybeAutoVoice(){
   if (!wantVoice) return false;
   try { openChatFloat(false); } catch(e){}
   lsSet(LS_BOOT, true); /* skip the welcome tour when deep-linked */
-  if (!voiceSupported()){
-    toast('Voice mode is not available in this browser — it needs the Web Speech API (Chrome/Edge/Safari) or an OpenAI key for Whisper. You can still type below.', 'warn', 6000);
-    return true;
-  }
   startVoiceMode({deferListen:true});
   return true;
 }
