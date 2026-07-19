@@ -36,9 +36,17 @@ new evidence contradicts them.
   pause / end), per-reply route + cost caption, engine badge, repeat button,
   opt-in echo-guarded barge-in. Every #75 contract (one-tap gate, blocked-answer
   recovery, free-first plans, tap-to-finish) preserved and re-verified.
-- ⏭ Remaining, in order: P1 failure recovery (stuck-UI under cancel/timeout in
-  team runs), P2 route comprehension outside voice mode, ledger-vs-provider
-  billing reconciliation, real-car barge-in echo test (ask David first).
+- 🔧 **Mobile voice hotfix** (David reported no sound + slowness on the app):
+  the audio-reactive meter had tapped the TTS playback element with
+  `createMediaElementSource`, which silences `<audio>` on mobile Safari.
+  Removed the tap (speaking visuals are now synthetic; only the mic is metered),
+  fast-flushed the first spoken chunk, tightened endpointing 1800→1200 ms, and
+  cut the silent-device-voice→cloud failover from 3500→1600 ms.
+- ⏭ Remaining, in order: mobile cloud-TTS-first option for reliable iOS sound
+  (recorded audio beats speechSynthesis on iOS) behind the cost guard; P1
+  failure recovery (stuck-UI under cancel/timeout in team runs); P2 route
+  comprehension outside voice mode; ledger-vs-provider billing reconciliation;
+  real-car barge-in echo test (ask David first).
 
 ## Homebase AI operating model (shipped 2026-07-18)
 

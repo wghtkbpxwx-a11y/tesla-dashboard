@@ -2730,6 +2730,7 @@ var HOMEBASE_CHANGELOG = {
     to: 'next model',
     objective: 'Build on the completed Fable P0/P1 audit fixes (2026-07-19 entry) and the reconciled voice UX layer; keep node ai/tests/homebase.test.js AND the validate.py harnesses green whenever touching routing, budget, teams, vault, guards, or voice',
     fable_audit_2026_07_19: 'The Fable session executed FABLE_AUDIT_BRIEF P0/P1 on branch claude/multimodal-ai-chatbot-4r8s23 (PR #80): sub-agent tool boundary enforced at execution time, reservation settle/release idempotency on chat and fixed-cost paths, cross-device deletion tombstones through the encrypted vault, a 45-check deterministic safety suite extracting the real production functions (ai/tests/homebase.test.js — includes the PR #71 failover cooldowns), and a voice UX layer (audio-reactive orb/bars, local voice commands, split captions with per-reply route/cost, engine badge, repeat, opt-in echo-guarded barge-in) ported ON TOP of the PR #75 reliability engine with every #75 contract preserved and re-verified (one-tap gate, blocked-answer recovery, free-first plans, tap-to-finish).',
+    voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely (speaking visuals are now a synthetic envelope; only the mic is ever metered, via a separate capture) so no metering failure can ever mute output. Latency: first spoken chunk fast-flushes on the opening clause, record→transcribe endpointing tightened 1800->1200ms (min 300ms speech), silent device-voice fails over to cloud in 1600ms (was 3500), and the redundant metering getUserMedia is skipped on mobile. New guard tests in scratchpad prove createMediaElementSource is never called on the playback element. See the 2026-07-19-voice-mobile-audio-latency entry.',
     state: 'PRs #58–#76 are merged and live; deployment status records are #72, #74, and #76, with PR #77 finalizing the voice record wording. PR #75 (squash merge 6c54670; implementation originated at 2953ebd) substantially upgrades Homebase Voice and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1. PR Validate, main Validate run 29670230087, and Pages run 29670229691 passed; record PR #76, main Validate run 29670347179, and Pages run 29670346746 also passed. Public production checks confirmed the one-tap voice overlay, audio-recovery control, xAI TTS implementation, voice test, zero horizontal overflow, three visible root voice links plus the More-menu launcher, no ChatGPT links, and direct Tesla-to-voice navigation. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and uses modality-priced xAI/OpenAI/ElevenLabs speech backup plans under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     latest_fix: 'PR #78 is merged and live as f3e71e6 (implementation originated at 5613294). It repairs the reproduced scheduled-agent Demo bypass: unpinned tasks use selectAIRoute plus runChat automatic failover and central cloud accounting, explicit task models remain terminal, result metadata follows the provider that answered, unavailable real models stop before tools with Try models again / AI connections recovery, quota cooldowns permit a bounded five-minute recovery probe after credits are added, and iOS page suspension synchronously flushes key edits. PR Validate run 29671132268, main Validate run 29671144920, and Pages run 29671144486 passed. Production at 390×844 confirmed the new contracts, honest paused card, both recovery controls, no tool call, and zero horizontal overflow. The deterministic scheduled-agent harness is part of validate.py.',
     start_here: [
@@ -2779,6 +2780,44 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-19-voice-mobile-audio-latency',
+      date: '2026-07-19',
+      commit: 'follows the PR #80 merge on the same branch; recorded in the PR that ships this fix',
+      branch: 'claude/multimodal-ai-chatbot-4r8s23 (restarted from main after #80)',
+      pull_request: 'new PR opened for this hotfix; number recorded in the PR itself',
+      title: 'Fix mobile voice: no sound (playback-element meter tap) + slowness',
+      type: 'fix+voice+mobile+performance+regression',
+      depends_on: ['2026-07-19-fable-audit-fixes-and-voice-ux','2026-07-18-voice-mode-reliability'],
+      files_changed: ['ai/index.html'],
+      interfaces_changed: ['VMETER (removed ttsAn/ttsWired)','vmeterMaybeWireTts (deleted)','vmeterActiveAnalyser','vmeterMicStart','voiceVizKick loop','unlockAudio','ttsBrowser watchdog','voiceListenWhisper endpointing','voiceDelta','voiceUtterance','VOICE.spokeChunk'],
+      reported_by: 'David, testing the installed mobile app: "It’s slow and it’s not making sound on my mobile app."',
+      root_cause: 'The PR #80 audio-reactive visualizer tapped the actual TTS playback element with createMediaElementSource(TTSQ.sharedAudio) and routed it analyser->destination. createMediaElementSource permanently reroutes an <audio> element into the Web Audio graph; on mobile Safari the AudioContext is suspended/fragile and a known WebKit bug silences blob-sourced tapped elements, so cloud TTS produced no sound and the extra context churn/rerouting added latency. This violated the module\'s own stated invariant that metering is cosmetic and must never affect playback.',
+      changes: [
+        'Removed the TTS playback tap entirely: deleted vmeterMaybeWireTts and its calls in unlockAudio and the viz loop; VMETER no longer holds ttsAn/ttsWired; vmeterActiveAnalyser returns only the mic analyser',
+        'Speaking-state visuals are now a synthetic syllable-like envelope for the orb plus the existing CSS bar animation — lively but incapable of touching real audio output',
+        'Only the microphone is ever metered, via a capture stream that is always separate from playback (the cloud-recorder analyser, or a desktop-only metering stream)',
+        'Latency: voiceDelta fast-flushes the FIRST chunk on the opening clause (sentence end, or a clause boundary at >=12 chars) so speech starts almost immediately; later chunks keep natural sentence sizing',
+        'Latency: record->transcribe endpointing tightened from 1800ms to 1200ms of trailing silence with a 300ms minimum-speech guard so it feels responsive without clipping pauses',
+        'Latency: a silent device voice now fails over to the configured cloud voice in 1600ms (iOS) / 2500ms instead of 3500/5000',
+        'Latency: the redundant dedicated metering getUserMedia is skipped on all mobile (was iOS-only), removing a second capture that competed with SR/recording'
+      ],
+      safety_guards: [
+        'No change to routing, budget, reservation, tombstone, sub-agent, or repository-write paths; the 45-check safety suite and all validate.py harnesses still pass',
+        'Every PR #75 voice contract preserved: one-tap deep-link gate, blocked-answer recovery, free-device-first plans, tap-to-finish, background pause, dialog accessibility',
+        'Spending still flows through reserveFixedCloud/finishFixedCloud (idempotent); the faster failover does not add spend — it only shortens the wait before an already-planned fallback'
+      ],
+      verification: [
+        'New mobile smoke (iPhone UA, 390x844, fake mic) instruments createMediaElementSource and proves it is NEVER called on the playback element (0 calls); confirms synthetic speaking envelope still animates, no dedicated metering stream on mobile, and the first-chunk fast-flush fires on the opening clause while an early "Sure," does not',
+        'node --check on extracted scripts; python3 .github/scripts/validate.py all green (incl. #75 mobile-voice, #71 failover, #73 selector, #78 scheduled harnesses); node ai/tests/homebase.test.js 45/45; the 21-check desktop voice UX smoke still passes',
+        'Source regression guards: no real createMediaElementSource call remains, endpointing is 1200ms, device-voice watchdog is 1600ms'
+      ],
+      known_limits: [
+        'Browser speechSynthesis remains inherently less reliable than recorded cloud audio on iOS; when it is silent the app now fails over to a configured cloud voice quickly, and with no cloud key the existing "enable sound" recovery still applies',
+        'Real on-device iPhone/Tesla confirmation still pending as always; this fix is verified deterministically and in an emulated mobile context'
+      ],
+      next_model: 'For truly great mobile voice the next high-value step is a streaming/low-latency cloud-TTS-first option on mobile (recorded audio is far more reliable than speechSynthesis on iOS) behind the existing cost guard, plus optional full-duplex barge-in. Do not reintroduce any createMediaElementSource tap on the playback element.'
+    },
     {
       id: '2026-07-19-fable-audit-fixes-and-voice-ux',
       date: '2026-07-19',
@@ -9869,7 +9908,6 @@ function unlockAudio(){
       });
     }
   } catch(e){}
-  try { if (typeof vmeterMaybeWireTts === 'function' && VOICE.active) vmeterMaybeWireTts(); } catch(e){}
 }
 function getVoices(){
   return (window.speechSynthesis && speechSynthesis.getVoices()) || [];
@@ -10040,7 +10078,7 @@ function ttsBrowser(text, playId){
         try { speechSynthesis.cancel(); } catch(e){}
         ttsOutputFailed(text, new Error('Browser voice did not start'), playId);
       }
-    }, IS_IOS ? 3500 : 5000);
+    }, IS_IOS ? 1600 : 2500); /* device voice fires onstart in <500ms when it works; fail over fast when it is silent */
   } catch(e){ ttsOutputFailed(text, e, playId); }
 }
 function playTTSBlob(blob, text, playId){
@@ -10218,7 +10256,7 @@ function stopDictation(){
 var VOICE = {
   active:false, state:'idle', muted:false, buffer:'', rec:null, mediaRecorder:null, stream:null, replying:false,
   failCount:0, forceCloudCapture:false, lastInterim:'', lastTranscript:'', lastError:'',
-  lastReply:'', lastSpoken:'', barge:null
+  lastReply:'', lastSpoken:'', barge:null, spokeChunk:false
 };
 function vStatus(t){ $('v-status').textContent = t; }
 function vLine(t){ $('v-line').textContent = t || ''; }
@@ -10245,14 +10283,15 @@ function ensureVoiceWave(){
   }
 }
 
-/* ---- audio metering: the orb and bars react to real sound levels.
-   Mic side: the cloud-capture path shares its analyser; the browser-SR path
-   opens a metering-only stream (skipped on iOS, where a second capture can
-   kill SpeechRecognition). TTS side: the shared <audio> element is routed
-   through an analyser once the AudioContext is confirmed running — never
-   before, because a media element wired into a suspended context goes
-   silent. Metering is cosmetic: every failure path leaves voice working. */
-var VMETER = { ctx:null, micAn:null, micStream:null, micSrc:null, ttsAn:null, ttsWired:false, level:0, buf:null, fbuf:null };
+/* ---- audio metering: the orb and bars react to real MIC levels only.
+   The listening capture (browser-SR metering stream on desktop, or the
+   cloud-capture recorder's own analyser) drives the visuals. We deliberately
+   NEVER tap the TTS playback element: createMediaElementSource() reroutes an
+   <audio> element into the Web Audio graph, and on mobile Safari that
+   silences playback entirely (suspended context + a known WebKit blob-source
+   bug). Speaking-state visuals are a synthetic envelope instead — cosmetic,
+   and no failure path can touch real audio output. */
+var VMETER = { ctx:null, micAn:null, micStream:null, micSrc:null, level:0, buf:null, fbuf:null };
 function vmeterCtx(){
   if (!VMETER.ctx){
     var AC = window.AudioContext || window.webkitAudioContext;
@@ -10262,20 +10301,13 @@ function vmeterCtx(){
   if (VMETER.ctx.state === 'suspended'){ try { VMETER.ctx.resume(); } catch(e){} }
   return VMETER.ctx;
 }
-function vmeterMaybeWireTts(){
-  if (VMETER.ttsWired || !TTSQ.sharedAudio) return;
-  var ctx = vmeterCtx();
-  if (!ctx || ctx.state !== 'running') return;
-  try {
-    var src = ctx.createMediaElementSource(TTSQ.sharedAudio);
-    var an = ctx.createAnalyser(); an.fftSize = 512; an.smoothingTimeConstant = 0.7;
-    src.connect(an); an.connect(ctx.destination);
-    VMETER.ttsAn = an;
-  } catch(e){ /* element may already be captured — leave audio untouched */ }
-  VMETER.ttsWired = true;
-}
 function vmeterMicStart(){
-  if (IS_IOS || VMETER.micAn || VMETER.micStream) return;
+  /* Desktop-only nicety: a dedicated metering stream for the browser-SR path.
+     Skipped on all mobile — a second getUserMedia competes with SR/recording
+     and adds startup latency; mobile listening visuals use the recorder's own
+     analyser (cloud path) or the synthetic envelope. */
+  if (IS_IOS || (document.body && document.body.classList.contains('is-mobile'))) return;
+  if (VMETER.micAn || VMETER.micStream) return;
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
   var ctx = vmeterCtx(); if (!ctx) return;
   navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}}).then(function(stream){
@@ -10303,9 +10335,9 @@ function vmeterRms(an){
   return Math.min(1, Math.sqrt(sum / VMETER.buf.length) * 4.5);
 }
 function vmeterActiveAnalyser(){
+  /* Only the mic is ever metered. Speaking uses a synthetic envelope so the
+     playback element is never rerouted (see the note on VMETER). */
   if (VOICE.state === 'listening') return VMETER.micAn;
-  /* cloud TTS plays through the tapped shared element; browser TTS has no tap */
-  if (VOICE.state === 'speaking' && TTSQ.audio) return VMETER.ttsAn;
   return null;
 }
 var VIZ = { raf: 0, particles: [], t0: 0, live:false };
@@ -10362,11 +10394,14 @@ function voiceVizKick(state){
       var W = cv.width, H = cv.height;
       ctx.clearRect(0, 0, W, H);
       var st = VOICE.state || 'idle';
-      vmeterMaybeWireTts();
       var an = vmeterActiveAnalyser();
-      var target = an ? vmeterRms(an) :
-        (st === 'thinking' ? 0.18 + 0.14 * Math.sin(now / 170) :
-         st === 'idle' ? 0 : 0.22 + 0.18 * Math.sin(now / 240));
+      var target;
+      if (an) target = vmeterRms(an);
+      else if (st === 'speaking') /* syllable-like pulse so speaking reads as a voice, not a metronome */
+        target = 0.30 + 0.26 * Math.abs(Math.sin(now / 125)) * (0.55 + 0.45 * Math.sin(now / 43));
+      else if (st === 'thinking') target = 0.16 + 0.12 * Math.sin(now / 170);
+      else if (st === 'listening') target = 0.20 + 0.14 * Math.sin(now / 220);
+      else target = 0;
       /* fast attack, slow decay — feels like sound, not a metronome */
       VMETER.level += (target - VMETER.level) * (target > VMETER.level ? 0.55 : 0.12);
       $('voice-ov').style.setProperty('--vlvl', VMETER.level.toFixed(3));
@@ -10669,7 +10704,11 @@ async function voiceListenWhisper(){
       var threshold = Math.max(0.010, Math.min(0.035, noiseFloor * 2.35));
       if (elapsed > 180 && rms > threshold){ spoke = true; silenceMs = 0; speechMs += 100; }
       else silenceMs += 100;
-      if ((spoke && speechMs >= 200 && silenceMs > 1800) || elapsed > 25000){
+      /* Snappier endpointing: end ~1.2s after speech stops (was 1.8s), but
+         require ~0.3s of real speech first so a short cough is not treated as
+         a full turn. Feels responsive without clipping natural mid-sentence
+         pauses. */
+      if ((spoke && speechMs >= 300 && silenceMs > 1200) || elapsed > 25000){
         clearInterval(poll);
         try { mr.stop(); } catch(e){}
       }
@@ -10746,20 +10785,32 @@ function voiceUtterance(txt){
   vYou(txt);
   vLine(''); vRoute('');
   VOICE.buffer = '';
+  VOICE.spokeChunk = false;
   VOICE.replying = true;
   sendMessage(txt);
 }
 function voiceDelta(t){
   if (!VOICE.active) return;
   VOICE.buffer += t;
-  var idx = -1;
-  var re = /[.!?\n]["')\]]*(?=\s|$)/g, m;
+  /* Get the FIRST chunk out as fast as possible so speech starts almost
+     immediately, then use larger natural sentence chunks for the rest. */
+  var firstChunk = !VOICE.spokeChunk;
+  var idx = -1, m, re = /[.!?\n]["')\]]*(?=\s|$)/g;
   while ((m = re.exec(VOICE.buffer))) idx = re.lastIndex;
-  if (idx > 20 || (idx > 0 && VOICE.buffer.length > 60)){
+  if (firstChunk && idx < 0){
+    /* no sentence end yet — break at the first clause boundary that is far
+       enough in to be worth speaking (an early "Sure," should not count) */
+    var cre = /[,;:—-]\s/g, cmm;
+    while ((cmm = cre.exec(VOICE.buffer))){ if (cmm.index >= 12){ idx = cmm.index + 1; break; } }
+  }
+  var need = firstChunk ? 8 : 20;
+  var cap = firstChunk ? 42 : 60;
+  if (idx > need || (idx > 0 && VOICE.buffer.length > cap)){
     var ready = VOICE.buffer.slice(0, idx);
     VOICE.buffer = VOICE.buffer.slice(idx);
     var clean = stripForSpeech(ready);
     if (clean){
+      VOICE.spokeChunk = true;
       voiceSpeakOrHold(clean);
     }
   }
