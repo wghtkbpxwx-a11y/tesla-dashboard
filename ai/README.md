@@ -241,7 +241,7 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
 - **Multimodal** — images (upload, paste, drag-drop, camera) to vision models;
   PDFs natively to Claude / Gemini / OpenAI; text/code files inlined; voice in
   and out.
-- **Voice mode** — cinematic neural voice UI (rings, particle field, waveform bars) with hands-free listen → think → speak. Tap the orb to interrupt. Browser speech APIs by default; optional OpenAI Whisper/TTS or ElevenLabs Flash/Scribe (Settings → Voice).
+- **Voice mode** — cinematic neural voice UI (rings, particle field, waveform bars) with hands-free listen → think → speak. Tap the orb to interrupt. Browser speech APIs by default; optional OpenAI Whisper/TTS or ElevenLabs Flash/Scribe (Settings → Voice). On phones, an opt-in **Prefer premium voice on this phone** plays your best cloud voice first (clearer and louder than the quiet iOS device voice) while falling back to free device speech when no key/budget is available.
 - **Agent tools** (wrench or `/tools`) — weather, web search, page reader, Wikipedia, calculator, clock, research (search+read), news, plan tools, memory CRUD, schedule tasks, dashboard mutation, and guarded repository read/search/draft-PR tools. Inline tool cards + plan board.
 - **Memory** — neural memory store with categories, importance, pins, search, smart injection, and auto-extract. 🧠 panel or agent tools.
 - **Scheduled tasks** — daily / weekly / every-N-minutes / one-off prompts
@@ -260,10 +260,18 @@ full-screen app (custom icon, safe-area aware, no zoom-on-focus). Long-press
 the icon (Android/desktop PWA) for a direct **Voice mode** shortcut. Voice
 mode always waits for one deliberate tap after a shortcut/deep link so iOS
 authorizes the microphone and later spoken replies together. Automatic mode
-uses free device speech first. If Safari ends recognition with useful interim
+uses free device speech first. **Note:** the iPhone device voice plays on the
+ringer audio channel, so it goes silent when the **Silent switch** is on and can
+sound quiet or uneven even when unmuted — verified live on iPhone 17 Pro Safari.
+Flip the Silent switch off (Control Centre bell) or turn on **Prefer premium
+voice on this phone** (Settings → Voice, shown at the top of the pane on mobile)
+to play a clear, louder cloud voice first. That opt-in only affects phones in
+Automatic mode with a ready cloud key; Automatic without it stays free-device-first,
+Device-only stays no-spend, and every cloud call still counts against the $50
+rolling budget. If Safari ends recognition with useful interim
 words, Homebase keeps them; if spoken output is blocked, it preserves the
 answer behind **Enable sound** instead of regenerating it. Settings → Voice has
-one **Play voice test** control, while engine, language, and premium voice
+one **Play voice test** control, while engine, language, and other premium voice
 choices remain under progressive disclosure. A configured xAI key is the
 lowest-cost automatic cloud transcription/output backup at the documented
 prices used by the app estimate; OpenAI and ElevenLabs remain optional choices.
@@ -293,9 +301,11 @@ python3 -c "import re;open('/tmp/ai.js','w').write('\n;\n'.join(re.findall(r'<sc
 The validation script also runs focused production-function harnesses for
 provider failover, the one-query model selector, and mobile voice reliability.
 The voice harness covers Safari interim-transcript recovery, free-only vs
-automatic provider selection, modality-specific cloud cost ordering, one-tap deep
-link gating, preserved blocked audio, and every Tesla-to-Homebase launcher
-without making provider calls.
+automatic provider selection, modality-specific cloud cost ordering, the mobile
+"prefer premium voice" opt-in (off = free-device-first, on = cloud-first with a
+ready key, no key = device/no-spend, device-only never spends, desktop unchanged),
+one-tap deep link gating, preserved blocked audio, and every Tesla-to-Homebase
+launcher without making provider calls.
 
 localStorage keys are namespaced `nova_*` (including `nova_cloud_usage_v1` for
 the rolling cost ledger); conversations live in IndexedDB
