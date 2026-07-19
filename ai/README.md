@@ -62,6 +62,17 @@ Homebase defaults to **Auto · best value**. For every new message it:
 4. raises the quality floor when the prompt names a model or says things such
    as “use your most advanced model” or “maximum quality.”
 
+In Automatic mode, Homebase also builds an ordered backup route. Providers
+without a configured key are skipped. If a provider rejects the request because
+its credits/quota, authentication, rate limit, network, or service is
+unavailable, Homebase releases the unused budget reservation and tries the next
+least-expensive model that still meets the task's capability and quality floor.
+Provider-wide failures enter a short runtime cooldown so parallel agents do not
+keep repeating the same failing call. Automatic failover stops after any visible
+partial response to avoid duplicate answers, and it never changes an explicitly
+selected manual model. If no real local or cloud model is available, the honest
+Demo response remains reachable so the interface does not strand the user.
+
 The default paid-cloud guard is **$50 across the trailing 30 days**, combined
 across all configured providers. It reserves a conservative maximum before
 each call (including concurrent Council calls), records the provider's token
@@ -70,7 +81,7 @@ OpenAI Whisper/TTS and ElevenLabs Flash/Scribe are included; Perplexity Sonar
 reserves its per-request search fee as well as token cost. Local models and
 browser speech cost $0. Unknown-price cloud models are blocked while the hard
 guard is enabled. The tracker and controls are in **Settings → Chat**, and every reply
-shows the selected model, route reason, tokens, and estimated cost.
+shows the model actually used, any fallback reason, tokens, and estimated cost.
 
 When encrypted cross-device sync is enabled, usage events are merged by ID
 through the private Drive vault, so phone and desktop contribute to the same

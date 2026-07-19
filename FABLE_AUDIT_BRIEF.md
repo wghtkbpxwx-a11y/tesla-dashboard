@@ -27,7 +27,7 @@ Run only this orientation pass before substantive work:
 ```sh
 git status --short
 python3 .github/scripts/validate.py
-rg -n "function (selectAIRoute|cloudRouteCandidates|buildAutoAgentTeam|runSubagentMember|runTeamLeadSynthesis|reserveCloudChat|finishCloudChat|releaseCloudReservation|mergeVaultPayload|proposeRepositoryChanges)|HOMEBASE_CHANGELOG" ai/index.html
+rg -n "function (selectAIRoute|cloudRouteCandidates|buildAutoFailoverPlan|runChat|buildAutoAgentTeam|runSubagentMember|runTeamLeadSynthesis|reserveCloudChat|finishCloudChat|releaseCloudReservation|mergeVaultPayload|proposeRepositoryChanges)|HOMEBASE_CHANGELOG" ai/index.html
 ```
 
 Then read, in order:
@@ -58,6 +58,12 @@ requires it. Do not begin with a broad visual redesign.
   MCP search were verified.
 - The live financial glance is private browser/import data. No real balances or
   transaction data belong in the public repository or test fixtures.
+- `.github/scripts/test_ai_failover.js` exercises the production failure
+  classifier and `runChat` path for missing keys, exhausted quota, provider
+  cooldown, next-cheapest-provider selection, no retry after a partial stream,
+  the six-paid-attempt bound, and the final Demo fallback without paid calls.
+  Extend this baseline for concurrency/accounting edge cases rather than
+  recreating the same cases in another harness.
 
 ## Priority work packages
 
@@ -70,7 +76,8 @@ Create a small deterministic harness around the pure or extractable decisions fo
 - task tier/classification and explicit “best model”/local/named-model requests;
 - model eligibility, direct-first/OpenRouter-fallback ordering, unknown pricing,
   and the rolling $50 hard stop;
-- reservation, settlement, cancellation, retry, and double-count prevention;
+- reservation, settlement, cancellation, concurrent failover, and double-count
+  prevention beyond the shipped single-call failover baseline;
 - specialist-team trigger, role count, per-role quality floor, aggregate team cap,
   partial failure, and lead synthesis fallback;
 - mobile WebLLM auto-skip while preserving deliberate manual selection.
@@ -109,7 +116,10 @@ billing remains authoritative; do not claim the app estimate is exact.
 Exercise cancellation and partial failure across parallel agents, cloud timeouts,
 local-model unload/reload, tool-loop exhaustion, unavailable Mac-local AI, and
 mobile background/resume. Look for stuck reservations, duplicate answers, infinite
-fallbacks, and multi-minute local tool chains.
+fallbacks, and multi-minute local tool chains. Treat the deterministic automatic
+provider failover tests as the starting point; focus additional effort on
+concurrent reservations, cancellation races, streamed tool calls, and team-level
+settlement.
 
 Keep LM Studio/Locally architecture honest: Locally uses Mac models through LM
 Link, but Safari has no documented direct API to the iPhone app. A secure remote

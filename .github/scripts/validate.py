@@ -27,11 +27,11 @@ def fail(msg):
     FAILS.append(msg)
 
 
-def check_js_parses(html):
+def check_js_parses(html, label="index.html"):
     """Extract every <script> block and make sure Node can parse it."""
     scripts = re.findall(r"<script>([\s\S]*?)</script>", html)
     if not scripts:
-        fail("no <script> blocks found in index.html")
+        fail(f"no <script> blocks found in {label}")
         return
     combined = "\n".join(scripts)
     with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as f:
@@ -40,7 +40,7 @@ def check_js_parses(html):
     try:
         r = subprocess.run(["node", "--check", path], capture_output=True, text=True)
         if r.returncode == 0:
-            ok(f"JS parses ({len(scripts)} script block(s), {len(combined)} chars)")
+            ok(f"{label} JS parses ({len(scripts)} script block(s), {len(combined)} chars)")
         else:
             fail("JS syntax error:\n" + (r.stderr.strip() or r.stdout.strip()))
     except FileNotFoundError:
@@ -84,15 +84,31 @@ def check_python():
         fail("update_cache.py failed to compile:\n" + r.stderr.strip())
 
 
+def check_ai_failover():
+    """Automatic routing must skip missing/exhausted providers without duplicate streams."""
+    target = ".github/scripts/test_ai_failover.js"
+    if not os.path.exists(target):
+        fail(f"{target} not found")
+        return
+    r = subprocess.run(["node", target], capture_output=True, text=True)
+    if r.returncode == 0:
+        print(r.stdout.rstrip())
+    else:
+        fail("AI automatic provider failover tests failed:\n" + (r.stderr.strip() or r.stdout.strip()))
+
+
 def main():
     if not os.path.exists("index.html"):
         print("index.html not found — run from the repo root", file=sys.stderr)
         sys.exit(2)
     html = open("index.html", encoding="utf-8").read()
+    ai_html = open("ai/index.html", encoding="utf-8").read()
     print("Validating Tesla dashboard...")
-    check_js_parses(html)
+    check_js_parses(html, "index.html")
+    check_js_parses(ai_html, "ai/index.html")
     check_cache(html)
     check_python()
+    check_ai_failover()
     print()
     if FAILS:
         print(f"FAILED: {len(FAILS)} check(s) did not pass — blocking deploy.")
