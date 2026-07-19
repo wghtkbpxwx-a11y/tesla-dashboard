@@ -177,13 +177,23 @@ Natural extensions, in rough order of value:
 5. Evolutions at level thresholds (new emoji + name per stage).
 6. Sound via the existing WebAudio beep pattern (timerBeep is the template).
 
-## Nova AI chat (`ai/`)
+## Homebase AI chat (`ai/`)
 
 Separate single-file app at `ai/index.html` (own README in `ai/`), served by
 the same Pages site. Multi-provider BYOK chat (Anthropic/OpenAI/Gemini/Groq/
 Perplexity/Kimi/DeepInfra/Mistral/DeepSeek/xAI, OpenRouter fallback,
 Ollama/LM Studio/llama.cpp/WebLLM + demo),
 voice mode (`ai/?voice=1` deep link), agent tools, memory, scheduled tasks.
+Voice deep links must wait for one explicit user tap before capture so mobile
+Safari authorizes both microphone input and later audio output. Preserve
+`chooseVoiceTranscript` interim-result recovery, the `TTSQ.blockedText`
+one-tap replay path, visibility pause/resume, and the device-only no-spend mode.
+Automatic voice tries free device speech first; only after a real device failure
+may it choose the least-expensive ready cloud voice route (xAI first, then a
+modality-specific OpenAI/ElevenLabs order), with every fixed speech/transcription
+estimate reserved in the same trailing-30-day ledger. Official provider keys remain pinned to their
+official API origins. Do not claim Tesla hardware microphone support: the
+dashboard launches Homebase Voice, but the in-car browser may not expose a mic.
 All credential fields must update `S.keys` on `input` for immediate tests and
 requests, call the debounced `persistKeys()` so nonstandard input paths survive
 reloads, and retain the `change` handler for an immediate final `saveKeys()`;
@@ -272,9 +282,11 @@ Treat its “already verified” section as a context-saving index: do not repea
 those checks without contradictory evidence, but verify source before changing a
 boundary. Prioritize deterministic tests and P0/P1 risks over copy, formatting,
 provider expansion, framework migration, or another broad visual pass.
-Dashboard More→Apps has "✦ Nova AI" / "🎙️ Nova Voice" `data-href` submenu
+Dashboard More→Apps has "✦ Homebase AI" / "🎙️ Homebase Voice" `data-href` submenu
 buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
-Nova uses `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
+The Live/Charging ChatGPT actions and the AI & Research ChatGPT tile were also
+replaced with `ai/?voice=1`; do not reintroduce an external ChatGPT launcher.
+Homebase retains legacy `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
 `nova_vault_sync_v2` tracks per-device sync metadata and per-section timestamps.
 The Google Drive vault is schema v2 and may contain memory, tasks, selected AI
 settings, `nova_cloud_usage_v1` events, and (only when `drive.syncSecrets` is

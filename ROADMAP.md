@@ -27,6 +27,11 @@ new evidence contradicts them.
 - ✅ A compact **Next** model dropdown in the composer can pin one query to an
   exact ready model, then returns to Automatic without changing the chat-wide
   routing preference or silently involving other models.
+- ✅ Mobile voice reliability and Tesla entry: one-tap iOS media authorization,
+  Safari interim-transcript recovery, adaptive quiet-speech capture, preserved
+  silent-answer replay, background pause/resume, a simple voice test, free-first
+  modality-priced xAI/OpenAI/ElevenLabs cloud fallback, and every former ChatGPT
+  launcher routed to Homebase Voice.
 - ✅ Automatic task-shaped specialist teams with parallel role execution,
   narrow tool/connector access, per-role model selection, and lead synthesis.
 - ✅ Guarded self-development: repository inspection plus exact multi-file

@@ -30,8 +30,13 @@ integrates the result. Explicit dashboard source requests can be turned into
 confirm-guarded GitHub branches and draft pull requests through repository
 read/search/edit tools configured in Homebase Settings → Development. The agent
 never writes directly to `main` and never stores API keys in the repository.
-Browser speech stays free by default; optional OpenAI and ElevenLabs speech
-usage flows through the same rolling budget.
+Voice mode tries free device recognition and speech first, preserves useful
+interim words that mobile Safari fails to finalize, and keeps a silent answer
+available for one-tap playback recovery. Automatic voice can use the cheapest
+configured cloud backup when the device service genuinely fails: xAI is the
+first STT/TTS backup; the next fallback is price-ranked separately by modality,
+and all premium speech usage flows through the same rolling budget. The Tesla
+Dashboard's former ChatGPT launchers now open Homebase Voice directly.
 The preferred local runtime is LM Studio with the tested `homebase-local`
 Qwen 3.5 9B 4-bit model. Its structured function calls can use Homebase tools;
 an optional scoped LM Studio token can also expose the installed Brave-search

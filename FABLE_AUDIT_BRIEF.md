@@ -27,7 +27,7 @@ Run only this orientation pass before substantive work:
 ```sh
 git status --short
 python3 .github/scripts/validate.py
-rg -n "function (selectAIRoute|cloudRouteCandidates|buildAutoFailoverPlan|runChat|buildAutoAgentTeam|runSubagentMember|runTeamLeadSynthesis|reserveCloudChat|finishCloudChat|releaseCloudReservation|mergeVaultPayload|proposeRepositoryChanges)|HOMEBASE_CHANGELOG" ai/index.html
+rg -n "function (selectAIRoute|cloudRouteCandidates|buildAutoFailoverPlan|runChat|buildAutoAgentTeam|runSubagentMember|runTeamLeadSynthesis|reserveCloudChat|finishCloudChat|releaseCloudReservation|mergeVaultPayload|proposeRepositoryChanges|chooseVoiceTranscript|selectVoiceSTTProvider|selectVoiceTTSProvider|ttsPlaybackBlocked)|HOMEBASE_CHANGELOG" ai/index.html
 ```
 
 Then read, in order:
@@ -69,6 +69,14 @@ requires it. Do not begin with a broad visual redesign.
   reset, and suppression of Council, specialist delegation, and silent failover.
   The native selector was also checked at 320×700 and 390×844 with no horizontal
   overflow. Treat this as shipped product behavior, not another P2 redesign task.
+- `.github/scripts/test_voice_mode.js` verifies production transcript recovery,
+  legacy free-first migration, explicit device-only no-spend behavior, xAI-first
+  modality-specific cloud cost ordering, one-tap deep-link gating,
+  preserved blocked-audio replay, and Tesla launcher ownership without provider
+  calls. Local browser checks also exercised the free voice test, voice overlay,
+  no-overflow desktop layout, and Tesla-to-voice navigation. Do not spend a Fable
+  session redoing this deterministic baseline; concentrate any voice follow-up on
+  real iPhone/Tesla hardware evidence, WebKit lifecycle races, or security findings.
 
 ## Priority work packages
 
@@ -125,6 +133,11 @@ fallbacks, and multi-minute local tool chains. Treat the deterministic automatic
 provider failover tests as the starting point; focus additional effort on
 concurrent reservations, cancellation races, streamed tool calls, and team-level
 settlement.
+
+For voice, treat the shipped voice harness as the baseline. A real-device check
+should confirm iPhone Safari recognition, speaker playback, audio recovery after
+backgrounding, and whether the current Tesla browser exposes microphone input.
+Do not infer Tesla microphone support from desktop Chromium.
 
 Keep LM Studio/Locally architecture honest: Locally uses Mac models through LM
 Link, but Safari has no documented direct API to the iPhone app. A secure remote

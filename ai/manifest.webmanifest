@@ -1,6 +1,6 @@
 {
-  "name": "Nova AI Chat",
-  "short_name": "Nova",
+  "name": "Homebase AI",
+  "short_name": "Homebase",
   "description": "Multi-provider AI chat with voice mode, agent tools, memory and scheduled tasks",
   "start_url": "./",
   "scope": "./",
