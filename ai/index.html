@@ -35,8 +35,9 @@
   --ok:#059669;
   --warn:#d97706;
   --danger:#e11d48;
-  --glow:0 0 48px rgba(99,102,241,.16);
-  --shadow:0 12px 40px rgba(79,90,160,.12);
+  --glow:0 0 48px rgba(99,102,241,.14);
+  --shadow:0 1px 2px rgba(30,41,80,.04), 0 12px 38px rgba(79,90,160,.10);
+  --shadow-sm:0 1px 2px rgba(30,41,80,.05), 0 4px 14px rgba(79,90,160,.07);
   --r:20px;
   --r-sm:14px;
   --font:"Google Sans",Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -50,9 +51,9 @@
   --asst-fg:var(--text);
   --sidebar-bg:rgba(255,255,255,.78);
   --topbar-h:58px;
-  --aurora-a:rgba(129,140,248,.42);
-  --aurora-b:rgba(56,189,248,.32);
-  --aurora-c:rgba(244,114,182,.24);
+  --aurora-a:rgba(129,140,248,.22);
+  --aurora-b:rgba(56,189,248,.13);
+  --aurora-c:rgba(99,102,241,.10);
   --surface-glass:rgba(255,255,255,.82);
 }
 [data-theme="dark"]{
@@ -72,13 +73,14 @@
   --ok:#34d399;
   --warn:#fbbf24;
   --danger:#fb7185;
-  --glow:0 0 48px rgba(129,140,248,.22);
-  --shadow:0 14px 48px rgba(0,0,0,.4);
+  --glow:0 0 48px rgba(129,140,248,.20);
+  --shadow:0 1px 2px rgba(0,0,0,.28), 0 18px 50px rgba(0,0,0,.40);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.28), 0 6px 20px rgba(0,0,0,.30);
   --user-bubble:#2d365c;
   --sidebar-bg:rgba(20,26,48,.88);
-  --aurora-a:rgba(129,140,248,.3);
-  --aurora-b:rgba(56,189,248,.2);
-  --aurora-c:rgba(244,114,182,.14);
+  --aurora-a:rgba(129,140,248,.20);
+  --aurora-b:rgba(56,189,248,.11);
+  --aurora-c:rgba(129,140,248,.10);
   --surface-glass:rgba(26,32,56,.82);
 }
 [data-theme="light"]{
@@ -95,12 +97,13 @@
   --acc2:#0ea5e9;
   --acc-soft:rgba(79,70,229,.12);
   --acc-soft2:rgba(79,70,229,.24);
-  --shadow:0 12px 40px rgba(79,90,160,.12);
+  --shadow:0 1px 2px rgba(30,41,80,.04), 0 12px 38px rgba(79,90,160,.10);
+  --shadow-sm:0 1px 2px rgba(30,41,80,.05), 0 4px 14px rgba(79,90,160,.07);
   --user-bubble:#e0e7ff;
   --sidebar-bg:rgba(255,255,255,.78);
-  --aurora-a:rgba(129,140,248,.42);
-  --aurora-b:rgba(56,189,248,.32);
-  --aurora-c:rgba(244,114,182,.24);
+  --aurora-a:rgba(129,140,248,.22);
+  --aurora-b:rgba(56,189,248,.13);
+  --aurora-c:rgba(99,102,241,.10);
   --surface-glass:rgba(255,255,255,.82);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
@@ -111,16 +114,16 @@ body{
   margin:0; font-family:var(--font); font-size:var(--fs); color:var(--text);
   background:var(--bg); overflow:hidden;
   letter-spacing:-.011em;
-  -webkit-font-smoothing:antialiased;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
 }
 body::before{
   content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
   background:
-    radial-gradient(1100px 640px at 10% -10%, var(--aurora-a), transparent 58%),
-    radial-gradient(920px 560px at 95% 0%, var(--aurora-b), transparent 52%),
-    radial-gradient(820px 500px at 50% 108%, var(--aurora-c), transparent 55%),
-    radial-gradient(640px 420px at 72% 42%, rgba(167,139,250,.16), transparent 50%);
-  opacity:1;
+    radial-gradient(1200px 720px at 8% -14%, var(--aurora-a), transparent 62%),
+    radial-gradient(1040px 640px at 98% -6%, var(--aurora-b), transparent 58%),
+    radial-gradient(920px 560px at 50% 116%, var(--aurora-c), transparent 60%);
+  opacity:.9;
 }
 button{font-family:inherit; font-size:inherit; color:inherit; background:none; border:none; cursor:pointer; padding:0}
 input,textarea,select{font-family:inherit; font-size:inherit; color:var(--text)}
@@ -547,7 +550,7 @@ a:hover{text-decoration:underline}
 .mode-pill .mp-ico{
   width:24px; height:24px; border-radius:8px; display:grid; place-items:center;
   font-size:12px; color:#fff; background:var(--pill-grad, linear-gradient(145deg,#818cf8,#6366f1));
-  box-shadow:0 2px 8px color-mix(in srgb, var(--pill-c, #6366f1) 35%, transparent);
+  box-shadow:0 1px 5px color-mix(in srgb, var(--pill-c, #6366f1) 18%, transparent);
 }
 .mode-pill .mp-label{line-height:1}
 
@@ -782,12 +785,13 @@ a:hover{text-decoration:underline}
   display:grid; place-items:center; flex:none; border-radius:12px;
   width:36px; height:36px;
   color:var(--hc, #4f46e5);
-  background:linear-gradient(160deg, color-mix(in srgb, var(--hc,#4f46e5) 18%, #fff), color-mix(in srgb, var(--hc,#4f46e5) 8%, transparent));
-  border:1px solid color-mix(in srgb, var(--hc,#4f46e5) 28%, transparent);
-  box-shadow:0 2px 8px color-mix(in srgb, var(--hc,#4f46e5) 18%, transparent);
+  background:linear-gradient(160deg, color-mix(in srgb, var(--hc,#4f46e5) 12%, #fff), color-mix(in srgb, var(--hc,#4f46e5) 5%, transparent));
+  border:1px solid color-mix(in srgb, var(--hc,#4f46e5) 16%, transparent);
+  box-shadow:0 1px 5px color-mix(in srgb, var(--hc,#4f46e5) 12%, transparent);
 }
 [data-theme="dark"] .ico-badge{
-  background:linear-gradient(160deg, color-mix(in srgb, var(--hc,#818cf8) 28%, transparent), color-mix(in srgb, var(--hc,#818cf8) 10%, transparent));
+  background:linear-gradient(160deg, color-mix(in srgb, var(--hc,#818cf8) 20%, transparent), color-mix(in srgb, var(--hc,#818cf8) 7%, transparent));
+  border-color:color-mix(in srgb, var(--hc,#818cf8) 22%, transparent);
 }
 .conn-card .cc-ico{
   width:44px !important; height:44px !important; border-radius:14px;
@@ -941,15 +945,15 @@ a:hover{text-decoration:underline}
   padding:8px 4px 4px;
 }
 .dash-hero h1{
-  margin:0; font-size:clamp(26px,3.5vw,34px); font-weight:700; letter-spacing:-.04em;
-  background:linear-gradient(115deg,#312e81 0%,#4f46e5 40%,#0284c7 100%);
+  margin:0; font-size:clamp(25px,3.3vw,33px); font-weight:750; letter-spacing:-.035em; line-height:1.08;
+  background:linear-gradient(108deg,#1e1b4b 0%,#4338ca 48%,#0369a1 100%);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
 }
 [data-theme="dark"] .dash-hero h1{
-  background:linear-gradient(115deg,#e0e7ff,#a5b4fc,#7dd3fc);
+  background:linear-gradient(108deg,#eef2ff,#b4bffc,#7dd3fc);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
 }
-.dash-hero .dh-sub{color:var(--text2); font-size:13.5px; margin-top:4px}
+.dash-hero .dh-sub{color:var(--text2); font-size:13.5px; margin-top:5px; letter-spacing:-.006em}
 .dash-hero .dh-stamp{font-size:11.5px; color:var(--text3); font-weight:600}
 
 .dash-grid{
@@ -962,14 +966,14 @@ a:hover{text-decoration:underline}
   background:var(--surface-glass);
   border:1px solid var(--border);
   border-radius:18px;
-  padding:14px 15px 13px;
-  box-shadow:0 6px 24px rgba(79,90,160,.07);
+  padding:15px 16px 14px;
+  box-shadow:var(--shadow-sm);
   backdrop-filter:blur(14px);
   min-height:140px;
   display:flex; flex-direction:column; gap:10px;
-  transition:border-color .15s, box-shadow .15s, transform .15s;
+  transition:border-color .18s, box-shadow .18s, transform .18s cubic-bezier(.22,1,.36,1);
 }
-.d-card:hover{border-color:var(--border2); box-shadow:0 10px 32px rgba(79,90,160,.1)}
+.d-card:hover{border-color:var(--border2); box-shadow:var(--shadow); transform:translateY(-2px)}
 .d-card.span-6{grid-column:span 6}
 .d-card.span-8{grid-column:span 8}
 .d-card.span-12{grid-column:span 12}
@@ -2722,7 +2726,8 @@ var HOMEBASE_CHANGELOG = {
     fable_audit_2026_07_19: 'The Fable session executed FABLE_AUDIT_BRIEF P0/P1 on branch claude/multimodal-ai-chatbot-4r8s23 (PR #80): sub-agent tool boundary enforced at execution time, reservation settle/release idempotency on chat and fixed-cost paths, cross-device deletion tombstones through the encrypted vault, a 45-check deterministic safety suite extracting the real production functions (ai/tests/homebase.test.js — includes the PR #71 failover cooldowns), and a voice UX layer (audio-reactive orb/bars, local voice commands, split captions with per-reply route/cost, engine badge, repeat, opt-in echo-guarded barge-in) ported ON TOP of the PR #75 reliability engine with every #75 contract preserved and re-verified (one-tap gate, blocked-answer recovery, free-first plans, tap-to-finish).',
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
     voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
-    state: 'PR #82 (concurrency/vault/team CI) and PR #83 (Wave 1 P0 security hardening) are on main. This branch adds the advanced-voice work (loud buffer TTS + mobile-first + futuristic energy-orb UI) on top. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device.',
+    app_ui_polish_2026_07_20: 'David: "focus on the total UI — text, icons, overall experience," not just the orb. A cohesive design-token pass across ai/index.html (no per-screen redraw, no behaviour change): the multi-hue aurora background wash was calmed to a disciplined indigo/sky (dropped the pink; ~40-50% lower opacity) so screens read premium and not busy; a layered elevation system (--shadow / --shadow-sm two-layer) replaces flat shadows and lifts cards on hover (translateY); typography gained optimizeLegibility + grayscale smoothing and a refined greeting gradient/tracking; the colored icon badges (.ico-badge) and mode-chip icons were softened (lower tint/border/shadow) to read as tasteful accents instead of loud rainbow chrome. Verified across light, dark, chat, and mobile; all validate.py harnesses + voice smokes still pass. See the 2026-07-20-app-ui-polish entry.',
+    state: 'PR #82 (concurrency/vault/team CI) and PR #83 (Wave 1 P0 security hardening) are on main. This branch adds the advanced-voice work (loud buffer TTS + mobile-first + futuristic energy-orb UI) plus a cohesive total-UI design-token polish on top. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device.',
     latest_fix: 'Advanced voice: loud Web Audio buffer TTS (gain+limiter, iOS-safe), mobile cloud-first output, and a dynamic canvas energy orb. Prior on main: Wave 1 P0 security (developerMode off by default, explicit /dev write intent, mandatory write confirm, run_js removed, 12-char vault passphrase) and PR #82 concurrency harnesses.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
@@ -2771,6 +2776,39 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-app-ui-polish',
+      date: '2026-07-20',
+      commit: 'recorded in the PR that ships this change (same branch as the voice work)',
+      branch: 'claude/multimodal-ai-chatbot-4r8s23',
+      pull_request: 'the advanced-voice + UI-polish PR; number recorded in the PR itself',
+      title: 'Total-UI polish: calmer palette, layered elevation, refined type, cohesive icons',
+      type: 'ui+design-system+polish',
+      depends_on: ['2026-07-20-voice-energy-orb'],
+      reported_by: 'David: "don\'t focus on the orb alone — also focus on the total UI: text, icons, and overall experience."',
+      files_changed: ['ai/index.html'],
+      interfaces_changed: ['CSS design tokens (:root / [data-theme] --aurora-a/b/c, --shadow, new --shadow-sm)','body + body::before background wash','.dash-hero h1 greeting','.d-card elevation/hover','.ico-badge','.mode-pill .mp-ico'],
+      changes: [
+        'Calmed the background: the aurora wash dropped its pink hue for a disciplined indigo/sky and lowered opacity ~40-50% (both themes + the [data-theme] overrides), and body::before dropped its 4th purple radial — the app reads premium and cohesive instead of busy/rainbow',
+        'Layered elevation: --shadow is now a two-layer soft shadow and a new --shadow-sm was added; .d-card uses them and lifts with a subtle translateY on hover for real depth',
+        'Typography: added text-rendering:optimizeLegibility + -moz-osx-font-smoothing:grayscale; refined the greeting gradient (deeper, less neon) with tighter tracking and line-height, and tightened the subtitle',
+        'Iconography cohesion: softened the colored .ico-badge tint/border/shadow and the mode-chip icon glow so they read as tasteful accents while keeping their color-coding — no more loud rainbow chrome',
+        'Purely presentational token/component CSS: no IDs, handlers, routing, budget, vault, voice, or repository behaviour changed; all element IDs preserved'
+      ],
+      safety_guards: [
+        'No functional change: validate.py (all #82/#83 + voice harnesses), ai/tests/homebase.test.js 45/45, and the 20 mobile + 21 desktop voice smokes all still pass',
+        'Voice overlay visuals unaffected (it uses its own background, not the aurora tokens)'
+      ],
+      verification: [
+        'node --check on extracted scripts; python3 .github/scripts/validate.py all green; node ai/tests/homebase.test.js 45/45; voice smokes green',
+        'Before/after screenshots on desktop light, desktop dark, and the chat float confirm the calmer, more cohesive look with preserved layout and legibility'
+      ],
+      known_limits: [
+        'This is a shared-token polish; per-screen bespoke redesigns (e.g. a denser chat toolbar, settings provider rows) remain future work if desired',
+        'On-device appearance still depends on the user\'s theme and browser font rendering'
+      ],
+      next_model: 'If more UI work is requested, continue at the design-token/component level (elevation, type scale, spacing rhythm) rather than one-off screen tweaks; keep changes presentational and behaviour-free, and re-run the voice smokes since they assert some overlay CSS.'
+    },
     {
       id: '2026-07-20-voice-energy-orb',
       date: '2026-07-20',
