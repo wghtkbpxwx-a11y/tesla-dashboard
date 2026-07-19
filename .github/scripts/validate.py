@@ -148,6 +148,11 @@ def check_node_harness(target, label):
         fail(f"{label} failed:\n" + (r.stderr.strip() or r.stdout.strip()))
 
 
+def check_subagent_allowlist():
+    """Sub-agents must be refused any tool outside their read-only allowlist."""
+    check_node_harness(".github/scripts/test_subagent_allowlist.js", "Sub-agent tool allowlist tests")
+
+
 def check_cloud_budget_concurrency():
     """Parallel reservations must honor the $50 hard stop and settle without double-count."""
     check_node_harness(".github/scripts/test_cloud_budget_concurrency.js", "Cloud budget concurrency tests")
@@ -183,6 +188,7 @@ def main():
     check_query_model_selector()
     check_voice_mode()
     check_scheduled_agent_routing()
+    check_subagent_allowlist()
     check_cloud_budget_concurrency()
     check_vault_merge()
     check_specialist_team()

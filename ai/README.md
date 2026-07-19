@@ -232,7 +232,7 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
 
 - **Automatic task teams** — task-shaped parallel specialists with per-role tools, cost-aware model assignment, and lead-agent synthesis. Configure in Settings → Chat.
 - **Model Council (optional)** — manually fan a prompt to 2–5 chosen models in parallel, then synthesize a consensus answer. Toggle ⚖️ in the top bar or `/council`. Configure members in Settings → Council.
-- **Agent mode** — multi-step tool loop (configurable rounds), `create_plan` / `update_plan_step`, `research`, memory CRUD, `run_js` sandbox. Personas: Agent & Researcher. `/agent` enables tools + agent persona.
+- **Agent mode** — multi-step tool loop (configurable rounds), `create_plan` / `update_plan_step`, `research`, memory CRUD. Personas: Agent & Researcher. `/agent` enables tools + agent persona.
 - **Neural Memory** — categorized, importance-ranked, pinned facts with smart relevance injection, search/filter UI, auto-extract, and agent tools (`search_memory`, `remember`, `update_memory`, `forget_memory`).
 - **Chat** — streaming responses, markdown + syntax-highlighted code with copy
   buttons, tables, stop/regenerate/edit-and-resend, branch a chat from any
@@ -242,7 +242,7 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
   PDFs natively to Claude / Gemini / OpenAI; text/code files inlined; voice in
   and out.
 - **Voice mode** — cinematic neural voice UI (rings, particle field, waveform bars) with hands-free listen → think → speak. Tap the orb to interrupt. Browser speech APIs by default; optional OpenAI Whisper/TTS or ElevenLabs Flash/Scribe (Settings → Voice).
-- **Agent tools** (wrench or `/tools`) — weather, web search, page reader, Wikipedia, calculator, clock, research (search+read), news, plan tools, memory CRUD, `run_js` sandbox, schedule tasks, dashboard mutation, and guarded repository read/search/draft-PR tools. Inline tool cards + plan board.
+- **Agent tools** (wrench or `/tools`) — weather, web search, page reader, Wikipedia, calculator, clock, research (search+read), news, plan tools, memory CRUD, schedule tasks, dashboard mutation, and guarded repository read/search/draft-PR tools. Inline tool cards + plan board.
 - **Memory** — neural memory store with categories, importance, pins, search, smart injection, and auto-extract. 🧠 panel or agent tools.
 - **Scheduled tasks** — daily / weekly / every-N-minutes / one-off prompts
   that run automatically, post results to a dedicated ⏰ chat and fire a
