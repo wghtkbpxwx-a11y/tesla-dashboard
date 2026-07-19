@@ -102,6 +102,34 @@ function main() {
   assert((dashboard.match(/ai\/\?voice=1/g) || []).length >= 4 && /Homebase Voice/.test(dashboard),
     'Tesla dashboard voice entry points must open Homebase Voice');
 
+  // --- loud/high-quality voice + mobile-sound regression guards ---
+  // The playback <audio> element must NEVER be tapped with a
+  // MediaElementSource — that silences cloud TTS on mobile Safari. Check the
+  // functions where a tap could live (not the changelog prose that documents
+  // this rule) so the guard is robust against its own description.
+  const audioFns = ['unlockAudio','playTTSBuffer','playTTSBlob','voiceVizKick','vmeterActiveAnalyser']
+    .map(extractFunction).join('\n');
+  assert(!/createMediaElementSource/.test(audioFns),
+    'no audio playback/metering function may tap the element via createMediaElementSource (silences mobile audio)');
+  assert(!/function\s+vmeterMaybeWireTts/.test(source),
+    'the removed element-tap helper (vmeterMaybeWireTts) must not return');
+  // Loud playback goes through a decoded AudioBuffer + gain + limiter, which is
+  // safe on iOS and lets output exceed the <audio> 100% ceiling.
+  const playBuffer = extractFunction('playTTSBuffer');
+  assert(/createBufferSource\(\)/.test(playBuffer) && /createGain\(\)/.test(playBuffer) &&
+    /createDynamicsCompressor\(\)/.test(playBuffer),
+    'the loud Web Audio TTS path (buffer + gain + limiter) must be present');
+  assert((source.match(/await playTTSBuffer\(blob, text, playId\)/g) || []).length >= 3,
+    'all cloud TTS providers must play through the loud buffer path');
+  assert(/u\.volume = 1;/.test(extractFunction('ttsBrowser')),
+    'the browser speech path must request maximum volume');
+  const pump = extractFunction('ttsPump');
+  assert(/mobileCloudVoice/.test(pump) && /is-mobile/.test(pump) && /selectVoiceTTSProvider/.test(pump),
+    'mobile automatic voice must prefer a ready cloud voice for loudness/reliability');
+  // Premium redesign: the childish rainbow starfield/aurora is gone.
+  assert(!/class="v-stars"/.test(source) && !/class="v-aurora"/.test(source),
+    'the rainbow starfield/aurora nodes must stay removed from the voice overlay');
+
   console.log('  ✓ mobile voice reliability and Tesla launcher tests pass');
 }
 

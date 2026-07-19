@@ -1390,154 +1390,146 @@ body.is-desktop .chat-float[data-state="open"]{
 #connectors-btn.on{color:var(--acc);background:var(--acc-soft)}
 
 /* ============================= Voice overlay ============================= */
+/* Voice overlay — premium single-orb design (modeled on ChatGPT Advanced Voice
+   / Gemini Live): one luminous sphere on a deep near-black field, no rainbow,
+   no starfield. The sphere breathes with the real voice level (--vlvl). */
 #voice-ov{
   position:fixed; inset:0; z-index:100; display:none; flex-direction:column;
   align-items:center; justify-content:center; gap:0; --vlvl:0;
   min-height:100dvh; padding:max(28px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));
   text-align:center; overflow:hidden;
   overscroll-behavior:none; touch-action:manipulation;
-  background:radial-gradient(ellipse at 50% 42%, #14141b 0%, #050506 65%, #000 100%);
+  background:radial-gradient(130% 92% at 50% 34%, #0a1020 0%, #06080f 55%, #020205 100%);
 }
 #voice-ov.open{display:flex}
-#voice-ov .v-aurora{
-  position:absolute; left:50%; top:38%; width:130vmax; height:130vmax; pointer-events:none;
-  transform:translate(-50%,-50%);
-  background:conic-gradient(from 0deg,
-    rgba(139,124,247,.10), rgba(56,189,248,.07), rgba(240,107,216,.06),
-    rgba(139,124,247,.10));
-  filter:blur(70px); opacity:.7; animation:vAurora 36s linear infinite;
-}
-@keyframes vAurora{to{transform:translate(-50%,-50%) rotate(360deg)}}
-#voice-ov .v-stars{
-  position:absolute; inset:0; pointer-events:none; opacity:.4;
-  background-image:
-    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,.5), transparent),
-    radial-gradient(1px 1px at 28% 62%, rgba(56,189,248,.45), transparent),
-    radial-gradient(1.5px 1.5px at 72% 28%, rgba(139,124,247,.5), transparent),
-    radial-gradient(1px 1px at 88% 70%, rgba(255,255,255,.35), transparent),
-    radial-gradient(1px 1px at 45% 85%, rgba(56,189,248,.4), transparent),
-    radial-gradient(1.5px 1.5px at 60% 12%, rgba(255,255,255,.3), transparent);
-  animation:vStarDrift 40s linear infinite;
-}
-@keyframes vStarDrift{to{transform:translateY(-18px)}}
-#v-canvas{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:.85}
-.v-stage{position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:22px; width:min(640px,100%)}
-.v-rings{position:relative; width:220px; height:220px; display:grid; place-items:center}
+#voice-ov .v-aurora, #voice-ov .v-stars{display:none}
+#v-canvas{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:.5}
+.v-stage{position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:24px; width:min(640px,100%)}
+.v-rings{position:relative; width:240px; height:240px; display:grid; place-items:center}
 .v-ring{
-  position:absolute; border-radius:50%; border:1px solid rgba(139,124,247,.22);
-  box-shadow:0 0 24px rgba(139,124,247,.1); animation:vRingPulse 3.2s ease-in-out infinite;
+  position:absolute; border-radius:50%; border:1px solid rgba(150,185,255,.10);
+  animation:vRingPulse 4.4s ease-in-out infinite;
 }
 .v-ring.r1{width:100%;height:100%}
-.v-ring.r2{width:78%;height:78%; border-color:rgba(56,189,248,.2); animation-delay:.4s}
-.v-ring.r3{width:58%;height:58%; border-color:rgba(240,107,216,.18); animation-delay:.8s}
-@keyframes vRingPulse{0%,100%{transform:scale(1); opacity:.55}50%{transform:scale(1.05); opacity:1}}
+.v-ring.r2{width:74%;height:74%; border-color:rgba(150,185,255,.06); animation-delay:.7s}
+.v-ring.r3{display:none}
+@keyframes vRingPulse{0%,100%{transform:scale(1); opacity:.5}50%{transform:scale(1.04); opacity:.9}}
 #v-glow{
-  position:absolute; width:180px; height:180px; border-radius:50%; pointer-events:none; z-index:2;
-  background:radial-gradient(circle, rgba(56,189,248,.5), rgba(139,124,247,.25) 55%, transparent 72%);
-  opacity:calc(var(--vlvl) * .9); filter:blur(14px);
-  transform:scale(calc(.9 + var(--vlvl) * .5));
+  position:absolute; width:230px; height:230px; border-radius:50%; pointer-events:none; z-index:1;
+  background:radial-gradient(circle, rgba(84,150,255,.5), rgba(60,90,230,.15) 55%, transparent 72%);
+  opacity:calc(.34 + var(--vlvl) * .6); filter:blur(26px);
+  transform:scale(calc(.85 + var(--vlvl) * .55));
   transition:opacity .12s linear;
 }
 #v-orb{
-  width:112px;height:112px; border-radius:50%; position:relative; cursor:pointer; z-index:3;
-  border:0; padding:0; color:#fff; -webkit-appearance:none;
-  background:conic-gradient(from 0deg,var(--acc),var(--acc2),#f06bd8,var(--acc));
-  animation:orbSpin 8s linear infinite; display:grid; place-items:center;
+  width:136px;height:136px; border-radius:50%; position:relative; cursor:pointer; z-index:3;
+  border:0; padding:0; color:#fff; -webkit-appearance:none; isolation:isolate;
   --vbase:1;
-  transform:scale(calc(var(--vbase) + var(--vlvl) * .12));
-  transition:box-shadow .3s;
-  box-shadow:0 0 40px rgba(139,124,247,.35);
+  transform:scale(calc(var(--vbase) + var(--vlvl) * .14));
+  transition:transform .09s ease-out, box-shadow .45s ease, background .45s ease;
+  background:radial-gradient(circle at 38% 30%,
+    #f3fbff 0%, #c6e6ff 13%, #74b6ff 33%, #3f74e8 58%, #23388f 79%, #14205a 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.12),
+    inset 0 -14px 30px rgba(10,20,70,.55),
+    0 12px 46px -8px rgba(60,120,240,.55),
+    0 0 64px rgba(90,150,255,calc(.22 + var(--vlvl) * .5));
 }
-#v-orb:active{filter:brightness(1.15)}
-#v-orb:focus-visible{outline:3px solid #7dd3fc;outline-offset:8px}
-#v-orb::before{content:""; position:absolute; inset:8px; border-radius:50%; background:radial-gradient(circle at 40% 35%, #1c1c24, #0a0a0c 70%)}
+#v-orb:active{filter:brightness(1.08)}
+#v-orb:focus-visible{outline:3px solid #9cc6ff;outline-offset:9px}
+/* glossy specular highlight */
+#v-orb::before{
+  content:""; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle at 33% 25%, rgba(255,255,255,.9), rgba(255,255,255,0) 44%);
+  mix-blend-mode:screen; opacity:.72;
+}
+/* slow liquid-light sweep across the sphere */
 #v-orb::after{
-  content:""; position:absolute; inset:-12px; border-radius:50%;
-  background:conic-gradient(from 180deg, transparent, rgba(56,189,248,.3), transparent 40%);
-  animation:orbSpin 4s linear infinite reverse; z-index:-1; opacity:.7;
+  content:""; position:absolute; inset:-1px; border-radius:50%; z-index:-1;
+  background:conic-gradient(from 0deg, rgba(255,255,255,0), rgba(170,215,255,.6), rgba(255,255,255,0) 40%);
+  filter:blur(7px); opacity:.5; animation:orbSpin 7s linear infinite;
 }
-#v-orb .v-ico{position:relative; font-size:36px; z-index:2; filter:drop-shadow(0 0 10px rgba(139,124,247,.5)); animation:orbCounter 8s linear infinite}
+#v-orb .v-ico{display:none} /* the sphere is the hero — no glyph */
 @keyframes orbSpin{to{transform:rotate(360deg)}}
-@keyframes orbCounter{to{transform:rotate(-360deg)}}
-#voice-ov.listening .v-ring{border-color:rgba(56,189,248,.4); animation-duration:1.6s}
-#voice-ov.listening #v-orb{box-shadow:0 0 50px 8px rgba(56,189,248,.35); --vbase:1.06}
-#voice-ov.listening #v-glow{background:radial-gradient(circle, rgba(56,189,248,.55), rgba(34,211,238,.25) 55%, transparent 72%)}
-#voice-ov.thinking .v-ring{animation-duration:1.1s}
-#voice-ov.thinking #v-orb{animation-duration:1.4s; box-shadow:0 0 55px 10px rgba(139,124,247,.4)}
-#voice-ov.thinking #v-orb .v-ico{animation-duration:1.4s}
-#voice-ov.speaking .v-ring{border-color:rgba(240,107,216,.35)}
-#voice-ov.speaking #v-orb{box-shadow:0 0 60px 12px rgba(139,124,247,.45); --vbase:1.04}
-#voice-ov.speaking #v-glow{background:radial-gradient(circle, rgba(240,107,216,.45), rgba(139,124,247,.3) 55%, transparent 72%)}
-#v-wave{display:flex; align-items:center; justify-content:center; gap:3px; height:42px; width:min(300px,82vw)}
-#v-wave .bar{width:3px; height:8px; border-radius:3px; background:linear-gradient(180deg,var(--acc2),var(--acc)); animation:vBarIdle 1.2s ease-in-out infinite}
+#voice-ov.listening #v-orb{
+  --vbase:1.05;
+  background:radial-gradient(circle at 38% 30%, #f0ffff 0%, #bff2ff 13%, #59d6f2 34%, #26a6d8 60%, #14618f 82%, #0b3350 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14), inset 0 -14px 30px rgba(6,40,60,.5), 0 12px 46px -8px rgba(40,190,230,.5), 0 0 68px rgba(60,210,240,calc(.28 + var(--vlvl) * .5));
+}
+#voice-ov.listening #v-glow{background:radial-gradient(circle, rgba(64,210,240,.5), rgba(40,160,220,.15) 55%, transparent 72%)}
+#voice-ov.thinking #v-orb{--vbase:1; filter:saturate(.82) brightness(.9)}
+#voice-ov.thinking #v-orb::after{animation-duration:2.6s}
+#voice-ov.speaking #v-orb{--vbase:1.03}
+#v-wave{display:flex; align-items:flex-end; justify-content:center; gap:3px; height:34px; width:min(260px,74vw); opacity:.92}
+#v-wave .bar{width:2.5px; height:6px; border-radius:3px; background:linear-gradient(180deg,#d7ecff,#5a95ff); opacity:.55; animation:vBarIdle 1.3s ease-in-out infinite}
 #v-wave .bar:nth-child(odd){animation-delay:.15s}
 #v-wave .bar:nth-child(3n){animation-delay:.35s}
-@keyframes vBarIdle{0%,100%{height:6px; opacity:.45}50%{height:18px; opacity:.9}}
-#voice-ov.listening #v-wave:not(.live) .bar{animation:vBarListen .55s ease-in-out infinite}
-@keyframes vBarListen{0%,100%{height:8px}50%{height:36px}}
-#voice-ov.speaking #v-wave:not(.live) .bar{animation:vBarSpeak .4s ease-in-out infinite}
-@keyframes vBarSpeak{0%,100%{height:10px}50%{height:32px}}
-#voice-ov.thinking #v-wave .bar{animation:vBarThink 1s ease-in-out infinite}
-@keyframes vBarThink{0%,100%{height:6px; opacity:.3}50%{height:14px; opacity:.7}}
+@keyframes vBarIdle{0%,100%{height:5px; opacity:.4}50%{height:14px; opacity:.75}}
+#voice-ov.listening #v-wave:not(.live) .bar{animation:vBarListen .6s ease-in-out infinite}
+@keyframes vBarListen{0%,100%{height:6px}50%{height:28px}}
+#voice-ov.speaking #v-wave:not(.live) .bar{animation:vBarSpeak .42s ease-in-out infinite}
+@keyframes vBarSpeak{0%,100%{height:8px}50%{height:26px}}
+#voice-ov.thinking #v-wave .bar{animation:vBarThink 1.1s ease-in-out infinite}
+@keyframes vBarThink{0%,100%{height:5px; opacity:.25}50%{height:11px; opacity:.6}}
 #v-wave.live .bar{animation:none; transition:height .09s ease-out, opacity .25s}
 #v-badge{
-  font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--acc2); padding:5px 12px; border-radius:100px;
-  border:1px solid rgba(56,189,248,.25); background:rgba(56,189,248,.08);
+  font-size:9.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+  color:rgba(158,196,255,.75); padding:5px 13px; border-radius:100px;
+  border:1px solid rgba(130,165,255,.16); background:rgba(120,160,255,.06);
 }
 #v-status{
-  font-size:22px; font-weight:650; min-height:28px; letter-spacing:-.03em; color:#fff;
+  font-size:21px; font-weight:600; min-height:28px; letter-spacing:-.02em; color:#f4f7ff;
   background:none; -webkit-text-fill-color:unset;
 }
 #v-you{
-  color:rgba(255,255,255,.5); font-size:13.5px; max-width:540px; min-height:18px;
+  color:rgba(210,224,255,.52); font-size:13.5px; max-width:540px; min-height:18px;
   overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-  font-style:italic; padding:0 8px;
+  padding:0 8px;
 }
-#v-line{color:rgba(255,255,255,.72); font-size:15.5px; max-width:560px; min-height:48px; line-height:1.55; overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; padding:0 8px}
+#v-line{color:rgba(233,240,255,.82); font-size:16px; max-width:560px; min-height:48px; line-height:1.55; overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; padding:0 8px; font-weight:420}
 #v-route{
-  font-size:11px; color:rgba(255,255,255,.35); min-height:14px; max-width:520px;
+  font-size:10.5px; color:rgba(180,198,235,.34); min-height:14px; max-width:520px;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--mono);
 }
 #v-audio-retry{
   display:none; min-height:44px; padding:10px 18px; border-radius:999px;
-  border:1px solid rgba(125,211,252,.45); background:rgba(56,189,248,.14);
-  color:#e0f2fe; font-size:14px; font-weight:700;
+  border:1px solid rgba(140,190,255,.45); background:rgba(84,150,255,.15);
+  color:#e6f0ff; font-size:14px; font-weight:600;
 }
 #voice-ov.audio-blocked #v-audio-retry{display:inline-flex;align-items:center;justify-content:center}
-#v-ctl{display:flex; gap:16px; margin-top:4px}
+#v-ctl{display:flex; gap:18px; margin-top:6px}
 #v-ctl .v-btn{
   width:56px;height:56px; border-radius:50%;
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
-  display:grid; place-items:center; font-size:20px; color:#fff; transition:all .2s;
+  background:rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.11);
+  display:grid; place-items:center; font-size:20px; color:#fff; transition:all .2s; backdrop-filter:blur(4px);
 }
-#v-ctl .v-btn .hb-ico{width:22px;height:22px;stroke:#fff}
-#v-ctl .v-btn:hover{border-color:rgba(255,255,255,.25); transform:scale(1.05)}
-#v-ctl .v-btn.on{background:rgba(56,189,248,.18); border-color:rgba(56,189,248,.4)}
-#v-ctl .v-btn.end{background:var(--danger); border-color:transparent}
-#v-hint{font-size:12.5px; color:rgba(255,255,255,.4); margin-top:2px; max-width:520px; line-height:1.5}
+#v-ctl .v-btn .hb-ico{width:22px;height:22px;stroke:#eaf1ff}
+#v-ctl .v-btn:hover{border-color:rgba(255,255,255,.28); transform:scale(1.05); background:rgba(255,255,255,.09)}
+#v-ctl .v-btn.on{background:rgba(84,150,255,.2); border-color:rgba(120,170,255,.45)}
+#v-ctl .v-btn.end{background:rgba(232,72,96,.92); border-color:transparent}
+#v-hint{font-size:12px; color:rgba(190,205,240,.4); margin-top:2px; max-width:520px; line-height:1.5}
 @media(max-width:520px){
-  .v-stage{gap:14px}
-  .v-rings{width:min(52vw,190px);height:min(52vw,190px)}
-  #v-orb{width:100px;height:100px}
-  #v-glow{width:150px;height:150px}
+  .v-stage{gap:18px}
+  .v-rings{width:min(56vw,208px);height:min(56vw,208px)}
+  #v-orb{width:118px;height:118px}
+  #v-glow{width:190px;height:190px}
   #v-status{font-size:20px}
-  #v-line{font-size:14.5px;min-height:44px;-webkit-line-clamp:3}
-  #v-hint{max-width:300px;line-height:1.4}
+  #v-line{font-size:15px;min-height:44px;-webkit-line-clamp:3}
+  #v-hint{max-width:320px;line-height:1.4}
 }
 @media(max-height:620px) and (orientation:landscape){
   #voice-ov{justify-content:flex-start;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top))}
   .v-stage{gap:10px}
-  .v-rings{width:128px;height:128px}
-  #v-orb{width:76px;height:76px}
-  #v-glow{width:104px;height:104px}
-  #v-wave{height:24px}
+  .v-rings{width:132px;height:132px}
+  #v-orb{width:84px;height:84px}
+  #v-glow{width:118px;height:118px}
+  #v-wave{height:22px}
   #v-line{min-height:24px;-webkit-line-clamp:2}
   #v-you{min-height:0}
   #v-ctl .v-btn{width:48px;height:48px}
 }
 @media (prefers-reduced-motion: reduce){
-  #voice-ov .v-stars, #voice-ov .v-aurora, #v-orb, #v-orb::after, #v-orb .v-ico, .v-ring{animation:none !important}
+  #v-orb, #v-orb::after, .v-ring{animation:none !important}
   #v-wave .bar{animation:none !important}
 }
 
@@ -1738,8 +1730,6 @@ body.is-desktop .chat-float[data-state="open"]{
 
 <!-- Voice overlay -->
 <div id="voice-ov" role="dialog" aria-modal="true" aria-label="Homebase Voice">
-  <div class="v-stars" aria-hidden="true"></div>
-  <div class="v-aurora" aria-hidden="true"></div>
   <canvas id="v-canvas" aria-hidden="true"></canvas>
   <div class="v-stage">
     <div id="v-badge">Voice</div>
@@ -2164,7 +2154,8 @@ var DEFAULT_SETTINGS = {
   council: { mode: 'debate', members: [], synthesizer: null },
   speech: { lang: 'en-CA', voiceURI: '', rate: 1.0, engine: 'auto', engineVersion: 2,
     xaiVoice: 'eve', openaiVoice: 'nova', elevenVoiceId: '',
-    elevenTtsModel: 'eleven_flash_v2_5', elevenSttModel: 'scribe_v2', bargeIn: false },
+    elevenTtsModel: 'eleven_flash_v2_5', elevenSttModel: 'scribe_v2', bargeIn: false,
+    volume: 2.0, mobileCloudVoice: true },
   baseURL: {},
   webllmModel: 'Llama-3.2-1B-Instruct-q4f16_1-MLC'
 };
@@ -2732,9 +2723,10 @@ var HOMEBASE_CHANGELOG = {
     p0_security_hardening_2026_07_19: 'Agent 1B implemented Agent 1C\'s Wave 1 P0 review on branch homebase/ai-p0-security-harden (rebased onto main after PR #82). developerMode defaults false; sourceChangeAuthorized() requires explicit /dev or a pull-request phrase; proposeRepositoryChanges() ALWAYS confirms regardless of devConfirmWrites; run_js removed; vault passphrase minimum 12 chars. test_subagent_allowlist.js (17 checks) wired into validate.py. Do NOT reintroduce run_js, loosen sourceChangeAuthorized, or make the repo-write confirm optional.',
     wave1_p0_concurrency_tests_2026_07_19: 'Agent 1A shipped (merged as PR #82): test_cloud_budget_concurrency.js, test_vault_merge.js, test_specialist_team.js, plus ai/tests/homebase.test.js in validate.py.',
     fable_audit_2026_07_19: 'The Fable session executed FABLE_AUDIT_BRIEF P0/P1 on branch claude/multimodal-ai-chatbot-4r8s23 (PR #80): sub-agent tool boundary enforced at execution time, reservation settle/release idempotency on chat and fixed-cost paths, cross-device deletion tombstones through the encrypted vault, a 45-check deterministic safety suite extracting the real production functions (ai/tests/homebase.test.js — includes the PR #71 failover cooldowns), and a voice UX layer (audio-reactive orb/bars, local voice commands, split captions with per-reply route/cost, engine badge, repeat, opt-in echo-guarded barge-in) ported ON TOP of the PR #75 reliability engine with every #75 contract preserved and re-verified (one-tap gate, blocked-answer recovery, free-first plans, tap-to-finish).',
-    voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely (speaking visuals are now a synthetic envelope; only the mic is ever metered, via a separate capture) so no metering failure can ever mute output. Latency: first spoken chunk fast-flushes on the opening clause, record→transcribe endpointing tightened 1800->1200ms (min 300ms speech), silent device-voice fails over to cloud in 1600ms (was 3500), and the redundant metering getUserMedia is skipped on mobile. New guard tests in scratchpad prove createMediaElementSource is never called on the playback element. See the 2026-07-19-voice-mobile-audio-latency entry.',
-    state: 'PR #82 (concurrency/vault/team CI) is on main. This branch rebases Wave 1 P0 security hardening (#83) onto that tip. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device.',
-    latest_fix: 'Wave 1 P0 security: developerMode off by default, explicit /dev write intent, mandatory write confirm, run_js removed, 12-char vault passphrase, sub-agent allowlist harness. Prior: PR #82 concurrency harnesses; PR #80/#81 Fable audit + voice mobile sound fix.',
+    voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
+    voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
+    state: 'PR #82 (concurrency/vault/team CI) and PR #83 (Wave 1 P0 security hardening) are on main. This branch adds the advanced-voice work (loud buffer TTS + mobile-first + futuristic energy-orb UI) on top. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device.',
+    latest_fix: 'Advanced voice: loud Web Audio buffer TTS (gain+limiter, iOS-safe), mobile cloud-first output, and a dynamic canvas energy orb. Prior on main: Wave 1 P0 security (developerMode off by default, explicit /dev write intent, mandatory write confirm, run_js removed, 12-char vault passphrase) and PR #82 concurrency harnesses.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py (all Wave 1 harnesses + ai/tests/homebase.test.js)',
@@ -2860,6 +2852,45 @@ var HOMEBASE_CHANGELOG = {
         'Specialist partial-failure behavioural test mirrors the sendMessage catch/Promise.all pattern; full sendMessage DOM pipeline remains browser-only'
       ],
       next_model: 'Continue Wave 1 P0 security hardening without redoing these harnesses'
+    },
+    {
+      id: '2026-07-19-voice-loud-premium',
+      date: '2026-07-19',
+      commit: 'follows the #81 merge on the same branch; recorded in the PR that ships this upgrade',
+      branch: 'claude/multimodal-ai-chatbot-4r8s23 (restarted from main after #81)',
+      pull_request: 'new PR for this voice upgrade; number recorded in the PR itself',
+      title: 'Advanced voice: loud high-quality cloud TTS, mobile-first, premium GPT/Gemini-style UI',
+      type: 'feature+voice+mobile+audio+ui+performance',
+      depends_on: ['2026-07-19-voice-mobile-audio-latency','2026-07-18-voice-mode-reliability'],
+      reported_by: 'David: "too quiet on my phone (though it makes sound now); tube it up to advanced-voice capability like GPT or Gemini; the Tesla mic does not work so it receives sound via my phone on the charging plate; it looks like Sesame Street — model it on other voice-mode UIs."',
+      context: 'The phone is now the actual voice device in the car (Tesla in-car browser exposes no working mic; the phone on the charging plate captures speech and plays the reply, typically through the car over Bluetooth). So mobile loudness, reliability, and polish are the whole product here.',
+      files_changed: ['ai/index.html','.github/scripts/test_voice_mode.js'],
+      interfaces_changed: ['playTTSBuffer (new)','ttsBoost (new)','playTTSBlob (volume=1 + fallback)','ttsXAI/ttsOpenAI/ttsElevenLabs (buffer path)','ttsPump (mobile cloud-first)','ttsBrowser (u.volume=1)','stopSpeaking (stop buffer source)','unlockAudio (resume shared AudioContext)','TTSQ.bufSource/bufCleanup','VMETER.ttsAn (restored, buffer-sourced)','vmeterActiveAnalyser','DEFAULT_SETTINGS.speech.volume + .mobileCloudVoice','renderVoicePane (loudness slider + best-voice-on-phone toggle)','#voice-ov CSS + markup (premium sphere)','voiceVizKick particles'],
+      changes: [
+        'LOUDNESS + QUALITY: new playTTSBuffer decodes each cloud-TTS clip (decodeAudioData) and plays it AudioBufferSourceNode -> GainNode (S.settings.speech.volume, default 2.0x, range 0.8-4x) -> DynamicsCompressor (limiter, no harsh clipping) -> AnalyserNode -> destination. This exceeds an <audio> element\'s 100% ceiling and is loud + clean',
+        'SAFE ON iOS: the buffer-source graph is NOT createMediaElementSource, so it cannot trigger the mobile-Safari playback-silence bug that the #81 hotfix removed. playTTSBlob (element) remains the fallback when Web Audio is unavailable, the context is not gesture-unlocked, or a clip will not decode; browser speechSynthesis volume is set to 1',
+        'MOBILE-FIRST VOICE: ttsPump, on a phone (is-mobile) in Automatic with speech.mobileCloudVoice (default true), prefers a ready cloud voice — far louder and more reliable than iOS speechSynthesis — inside the rolling $50 guard. Device-only remains the explicit no-spend choice',
+        'REAL VOICE REACTIVITY (safely): the orb, glow, and waveform react to the actual spoken audio again via VMETER.ttsAn, which now comes from the buffer AnalyserNode instead of an element tap; unlockAudio resumes the shared AudioContext on the user gesture so the loud path is ready immediately',
+        'PREMIUM UI: the voice overlay was redesigned from the colorful rainbow "Sesame Street" look to a single luminous sphere (radial gradient core, glossy specular highlight, slow liquid-light sheen, reactive bloom) on a deep near-black field, modeled on ChatGPT Advanced Voice / Gemini Live. The rainbow conic orb, aurora sweep, and starfield were removed; the waveform is a refined monochrome-blue; particles are few and faint; listening tints cyan, speaking stays blue, thinking dims',
+        'SETTINGS: Voice loudness slider (0.8-4x) and a Best-voice-on-phone toggle; the status hint now tells the user plainly when only the quiet device voice is configured and to add an xAI/OpenAI key for a loud, natural voice'
+      ],
+      safety_guards: [
+        'No change to routing, budget, reservation, tombstone, sub-agent, or repository-write paths; the 45-check safety suite and every validate.py harness pass',
+        'Cloud TTS spend still flows through reserveFixedCloud/finishFixedCloud (idempotent) and the $50 rolling guard; mobile cloud-first is a user-facing preference (default on) with an explicit free Device-only alternative',
+        'CI guards added to .github/scripts/test_voice_mode.js: forbid re-tapping the playback element in the audio functions, require the buffer+gain+limiter path, require all three cloud providers to use it, require browser volume=1, and require the rainbow starfield/aurora to stay removed'
+      ],
+      verification: [
+        'python3 .github/scripts/validate.py all green including the extended voice harness; node --check on extracted scripts; node ai/tests/homebase.test.js 45/45',
+        'Mobile smoke (iPhone UA, 390x844): 20 checks — createMediaElementSource never called on the playback element, buffer+gain+limiter path present, all cloud providers use it, browser volume max, mobile cloud-first present, rainbow removed, first-chunk fast-flush, endpointing 1200ms',
+        'Desktop voice UX smoke: 21 checks still pass (all element IDs preserved through the redesign)',
+        'Screenshots (phone, speaking + listening) confirm the premium luminous sphere and clean layout'
+      ],
+      known_limits: [
+        'The dramatic loudness/quality win requires a configured cloud voice key (xAI/OpenAI/ElevenLabs); with only the device voice, iOS caps loudness and quality — the UI now says so and points to adding a key',
+        'decodeAudioData adds a few ms per sentence vs. direct element playback — negligible for short clips and well worth the loudness/reactivity',
+        'Real on-device iPhone + car-Bluetooth loudness still needs David\'s confirmation; verified deterministically and in an emulated mobile context'
+      ],
+      next_model: 'If David wants even lower latency, add streaming/chunked cloud TTS (fetch smaller segments) and optional full-duplex barge-in. Do NOT reintroduce a createMediaElementSource tap on the playback element. Keep the loud buffer path and the premium single-sphere UI.'
     },
     {
       id: '2026-07-19-voice-mobile-audio-latency',
@@ -9947,7 +9978,7 @@ var IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
 var TTSQ = {
   queue: [], speaking: false, audio: null, audioCleanup: null, sharedAudio: null, onDrain: null, resumeTimer: null,
   playId: 0, autoFallbackPlayId: 0, currentText: '', blockedText: '', watchdog: null,
-  audioUnlocked: false, unlockAttempted: false, lastError: ''
+  audioUnlocked: false, unlockAttempted: false, lastError: '', bufSource: null, bufCleanup: null
 };
 var SILENT_WAV = 'data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA';
 function clearTTSWatchdog(){
@@ -9989,6 +10020,9 @@ function unlockAudio(){
       });
     }
   } catch(e){}
+  /* Resume the shared AudioContext on this gesture so the loud buffer-based
+     TTS path is ready to play immediately (iOS only starts it from a tap). */
+  try { vmeterCtx(); } catch(e){}
 }
 function getVoices(){
   return (window.speechSynthesis && speechSynthesis.getVoices()) || [];
@@ -10019,6 +10053,16 @@ function ttsPump(){
   TTSQ.currentText = text;
   var playId = ++TTSQ.playId;
   var eng = S.settings.speech.engine;
+  /* The phone is the real voice device in the car (Tesla mic is dead; the
+     phone sits on the charging plate and does capture + playback). iOS
+     speechSynthesis is quiet and unreliable, so on mobile 'auto' we prefer a
+     ready cloud voice — louder and far more consistent — inside the rolling
+     budget. 'Device only' stays an explicit no-spend choice. */
+  if (eng === 'auto' && S.settings.speech.mobileCloudVoice &&
+      document.body.classList.contains('is-mobile')){
+    var mobileCloud = selectVoiceTTSProvider('auto');
+    if (mobileCloud) eng = mobileCloud;
+  }
   if (eng === 'xai' && getKey('xai')){
     ttsXAI(text, playId).catch(function(e){
       if (playId !== TTSQ.playId) return;
@@ -10131,6 +10175,7 @@ function ttsBrowser(text, playId){
   if (v) u.voice = v;
   u.lang = S.settings.speech.lang || 'en-US';
   u.rate = clamp(+S.settings.speech.rate || 1, 0.5, 2);
+  u.volume = 1; /* max — speechSynthesis cannot exceed 1; cloud path handles real loudness */
   var started = false, handingOff = false;
   u.onstart = function(){
     if (playId !== TTSQ.playId) return;
@@ -10162,6 +10207,59 @@ function ttsBrowser(text, playId){
     }, IS_IOS ? 1600 : 2500); /* device voice fires onstart in <500ms when it works; fail over fast when it is silent */
   } catch(e){ ttsOutputFailed(text, e, playId); }
 }
+function ttsBoost(){ return clamp(+S.settings.speech.volume || 1, 0.5, 4); }
+/* Loud, high-quality TTS playback through Web Audio. Decoding the clip into an
+   AudioBuffer and routing it gain -> limiter -> analyser -> destination is how
+   you get real loudness (well past an <audio> element's 100 % ceiling) and a
+   live analyser for the orb WITHOUT createMediaElementSource — which silences
+   <audio> elements on mobile Safari. Falls back to the element path whenever
+   Web Audio is unavailable, the context is not gesture-unlocked yet, or the
+   clip cannot be decoded, so playback is never lost. */
+async function playTTSBuffer(blob, text, playId){
+  if (playId !== TTSQ.playId) return;
+  var ctx = vmeterCtx();
+  if (!ctx || ctx.state !== 'running') return playTTSBlob(blob, text, playId);
+  var audioBuf;
+  try {
+    var arr = await blob.arrayBuffer();
+    audioBuf = await new Promise(function(res, rej){
+      var p = ctx.decodeAudioData(arr.slice(0), res, rej);
+      if (p && p.then) p.then(res).catch(rej);
+    });
+  } catch(e){ return playTTSBlob(blob, text, playId); }
+  if (playId !== TTSQ.playId) return;
+  return new Promise(function(resolve){
+    var cleaned = false, src, gain, comp, an;
+    function cleanup(){
+      if (cleaned) return; cleaned = true;
+      try { src.onended = null; } catch(e){}
+      try { src.stop(); } catch(e){}
+      try { src.disconnect(); gain.disconnect(); comp.disconnect(); an.disconnect(); } catch(e){}
+      if (VMETER.ttsAn === an) VMETER.ttsAn = null;
+      if (TTSQ.bufSource === src) TTSQ.bufSource = null;
+      if (TTSQ.bufCleanup === cleanup) TTSQ.bufCleanup = null;
+    }
+    try {
+      src = ctx.createBufferSource(); src.buffer = audioBuf;
+      gain = ctx.createGain(); gain.gain.value = ttsBoost();
+      comp = ctx.createDynamicsCompressor(); /* limiter: boost hard, never clip harshly */
+      try {
+        comp.threshold.value = -6; comp.knee.value = 6; comp.ratio.value = 12;
+        comp.attack.value = 0.003; comp.release.value = 0.2;
+      } catch(e){}
+      an = ctx.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = 0.75;
+      src.connect(gain); gain.connect(comp); comp.connect(an); an.connect(ctx.destination);
+      VMETER.ttsAn = an; TTSQ.bufSource = src; TTSQ.bufCleanup = cleanup;
+      markVoiceAudioReady(); clearTTSWatchdog();
+      src.onended = function(){ if (cleaned) return; cleanup(); ttsDoneOne(playId); resolve(); };
+      src.start();
+    } catch(e){
+      cleanup();
+      if (playId === TTSQ.playId){ playTTSBlob(blob, text, playId).then(resolve); return; }
+      resolve();
+    }
+  });
+}
 function playTTSBlob(blob, text, playId){
   return new Promise(function(resolve){
     if (playId !== TTSQ.playId){ resolve(); return; }
@@ -10169,6 +10267,7 @@ function playTTSBlob(blob, text, playId){
     var audio = TTSQ.sharedAudio || new Audio();
     TTSQ.sharedAudio = audio;
     audio.setAttribute('playsinline', '');
+    audio.volume = 1;
     audio.src = url;
     TTSQ.audio = audio;
     var cleaned = false;
@@ -10220,7 +10319,7 @@ async function ttsOpenAI(text, playId){
     blob = await resp.blob();
     finishFixedCloud(reservation, {minutes:minutes, chars:input.length});
   } catch(e){ releaseCloudReservation(reservation); throw e; }
-  await playTTSBlob(blob, text, playId);
+  await playTTSBuffer(blob, text, playId);
 }
 async function ttsXAI(text, playId){
   var input = text.slice(0, 6000);
@@ -10243,7 +10342,7 @@ async function ttsXAI(text, playId){
     blob = await resp.blob();
     finishFixedCloud(reservation, {chars:input.length}); reservation = null;
   } catch(e){ if (reservation) releaseCloudReservation(reservation); throw e; }
-  await playTTSBlob(blob, text, playId);
+  await playTTSBuffer(blob, text, playId);
 }
 async function ttsElevenLabs(text, playId){
   var input = text.slice(0, 4800);
@@ -10264,7 +10363,7 @@ async function ttsElevenLabs(text, playId){
     blob = await resp.blob();
     finishFixedCloud(reservation, {chars:input.length}); reservation = null;
   } catch(e){ if (reservation) releaseCloudReservation(reservation); throw e; }
-  await playTTSBlob(blob, text, playId);
+  await playTTSBuffer(blob, text, playId);
 }
 function speakText(text){
   stopSpeaking();
@@ -10280,6 +10379,7 @@ function stopSpeaking(){
   clearTTSWatchdog();
   var ov = $('voice-ov'); if (ov) ov.classList.remove('audio-blocked');
   if (window.speechSynthesis) speechSynthesis.cancel();
+  if (TTSQ.bufCleanup) TTSQ.bufCleanup();
   if (TTSQ.audio){ try { TTSQ.audio.pause(); } catch(e){} }
   if (TTSQ.audioCleanup) TTSQ.audioCleanup();
   TTSQ.audio = null;
@@ -10372,7 +10472,7 @@ function ensureVoiceWave(){
    silences playback entirely (suspended context + a known WebKit blob-source
    bug). Speaking-state visuals are a synthetic envelope instead — cosmetic,
    and no failure path can touch real audio output. */
-var VMETER = { ctx:null, micAn:null, micStream:null, micSrc:null, level:0, buf:null, fbuf:null };
+var VMETER = { ctx:null, micAn:null, micStream:null, micSrc:null, ttsAn:null, level:0, buf:null, fbuf:null };
 function vmeterCtx(){
   if (!VMETER.ctx){
     var AC = window.AudioContext || window.webkitAudioContext;
@@ -10416,9 +10516,12 @@ function vmeterRms(an){
   return Math.min(1, Math.sqrt(sum / VMETER.buf.length) * 4.5);
 }
 function vmeterActiveAnalyser(){
-  /* Only the mic is ever metered. Speaking uses a synthetic envelope so the
-     playback element is never rerouted (see the note on VMETER). */
+  /* The mic drives the listening visuals; the buffer-based TTS analyser drives
+     the speaking visuals. VMETER.ttsAn comes from an AudioBufferSourceNode
+     (playTTSBuffer), NOT from tapping the <audio> element, so the orb reacts
+     to the real voice without ever risking mobile playback. */
   if (VOICE.state === 'listening') return VMETER.micAn;
+  if (VOICE.state === 'speaking') return VMETER.ttsAn;
   return null;
 }
 var VIZ = { raf: 0, particles: [], t0: 0, live:false };
@@ -10457,13 +10560,14 @@ function voiceVizKick(state){
     cv.style.width = w + 'px'; cv.style.height = h + 'px';
   }
   if (!VIZ.particles.length){
-    for (var i = 0; i < 48; i++){
+    /* few, faint motes — a calm premium field, not confetti */
+    for (var i = 0; i < 20; i++){
       VIZ.particles.push({
         x: Math.random(), y: Math.random(),
-        r: 0.6 + Math.random() * 2.2,
-        vx: (Math.random() - 0.5) * 0.00035,
-        vy: (Math.random() - 0.5) * 0.00035,
-        a: 0.15 + Math.random() * 0.45
+        r: 0.5 + Math.random() * 1.6,
+        vx: (Math.random() - 0.5) * 0.0003,
+        vy: (Math.random() - 0.5) * 0.0003,
+        a: 0.06 + Math.random() * 0.20
       });
     }
   }
@@ -10490,10 +10594,10 @@ function voiceVizKick(state){
       var pulse = 0.5 + 0.5 * Math.sin((now - VIZ.t0) / (st === 'thinking' ? 180 : 320));
       var g = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, Math.min(W,H)*0.35);
       var glow = 0.06 + pulse * 0.05 + VMETER.level * 0.12;
-      var c1 = st === 'listening' ? 'rgba(34,211,238,' + glow + ')' :
-               st === 'speaking' ? 'rgba(124,108,245,' + glow + ')' :
-               st === 'thinking' ? 'rgba(124,108,245,' + (glow * 0.8) + ')' :
-               'rgba(124,108,245,0.05)';
+      var c1 = st === 'listening' ? 'rgba(64,210,240,' + glow + ')' :
+               st === 'speaking' ? 'rgba(84,150,255,' + glow + ')' :
+               st === 'thinking' ? 'rgba(90,150,255,' + (glow * 0.8) + ')' :
+               'rgba(90,150,255,0.05)';
       g.addColorStop(0, c1); g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
       var speed = (st === 'idle' ? 1 : 2.2) * (1 + VMETER.level * 2.5);
@@ -10505,8 +10609,8 @@ function voiceVizKick(state){
         ctx.beginPath();
         ctx.arc(p.x * W, p.y * H, p.r * (window.devicePixelRatio||1), 0, Math.PI*2);
         ctx.fillStyle = st === 'listening'
-          ? 'rgba(34,211,238,' + p.a + ')'
-          : 'rgba(180,170,255,' + p.a + ')';
+          ? 'rgba(120,220,255,' + p.a + ')'
+          : 'rgba(170,200,255,' + p.a + ')';
         ctx.fill();
       });
       VIZ.raf = requestAnimationFrame(loop);
@@ -12116,6 +12220,11 @@ function renderVoicePane(){
   var ri = qs('#vs-rate', pane), rv = qs('#vs-rate-v', pane);
   ri.value = S.settings.speech.rate; rv.textContent = S.settings.speech.rate + '×';
   ri.addEventListener('input', function(){ S.settings.speech.rate = +this.value; rv.textContent = this.value + '×'; saveSettings(); });
+  var volRow = row('Voice loudness', 'Boosts spoken replies well past the normal ceiling (cloud voices). Great for a phone on the charging plate playing through the car.', '<input id="vs-vol" type="range" min="0.8" max="4" step="0.1" style="width:150px"><span id="vs-vol-v" style="width:44px; text-align:right; font-family:var(--mono); font-size:12px"></span>');
+  pane.appendChild(volRow);
+  var vi = qs('#vs-vol', pane), vv = qs('#vs-vol-v', pane);
+  vi.value = S.settings.speech.volume || 2; vv.textContent = (S.settings.speech.volume || 2).toFixed(1) + '×';
+  vi.addEventListener('input', function(){ S.settings.speech.volume = +this.value; vv.textContent = (+this.value).toFixed(1) + '×'; saveSettings(); });
   var lRow = row('Speech language', 'BCP-47 tag for recognition + default voice', '<input id="vs-lang" type="text" style="width:110px">');
   pane.appendChild(lRow);
   var li = qs('#vs-lang', pane);
@@ -12124,15 +12233,19 @@ function renderVoicePane(){
   var autoRow = tglRow('Speak regular chat replies', 'Voice mode always speaks; this also reads replies sent from normal Chat mode',
     function(){ return S.settings.autoSpeak; }, function(v){ S.settings.autoSpeak = v; });
   pane.appendChild(autoRow);
+  var mobCloudRow = tglRow('Best voice on phone', 'On a phone, automatically use a high-quality cloud voice (louder and far more reliable than the phone\'s built-in voice) when a voice key is configured. Stays inside your spending limit. Turn off to stay device-only and free.',
+    function(){ return S.settings.speech.mobileCloudVoice !== false; }, function(v){ S.settings.speech.mobileCloudVoice = v; });
+  pane.appendChild(mobCloudRow);
   var bargeRow = tglRow('Talk over the assistant (beta)', 'Keep the mic open while it speaks so you can interrupt hands-free. Works best with headphones or a cabin mic — open speakers can hear themselves. Needs the free device listening; not available on iPhone/iPad.',
     function(){ return !!S.settings.speech.bargeIn; }, function(v){ S.settings.speech.bargeIn = v; });
   pane.appendChild(bargeRow);
+  var haveCloudVoice = !!selectVoiceTTSProvider('auto');
   var sup = document.createElement('div');
   sup.className = 'hint-box';
   sup.innerHTML = 'Listening: ' + (getSR() ? '✅ free device speech is available' : (cloudCaptureAllowed() && mediaCaptureSupported() ? '✅ cloud backup is configured' : '⚠️ no listening service is available')) +
-    '<br>Speaking: ' + (window.speechSynthesis ? '✅ device voice is available' : (cloudTTSReady() ? '✅ cloud voice can be used' : '⚠️ no speech output is available'));
+    '<br>Speaking: ' + (haveCloudVoice ? '✅ high-quality cloud voice ready (loud, reliable on phones)' : (window.speechSynthesis ? '⚠️ only the device voice is set — quiet on iPhone. Add an xAI or OpenAI key above for a loud, natural voice.' : '⚠️ no speech output is available'));
   pane.appendChild(sup);
-  pane.appendChild(settingsDisclosure('Voice, language & premium options', [eng, vRow, xvRow, ovRow, ekRow, evRow, emRow, lRow, bargeRow, sup]));
+  pane.appendChild(settingsDisclosure('Voice, language & premium options', [eng, vRow, xvRow, ovRow, ekRow, evRow, emRow, lRow, mobCloudRow, bargeRow, sup]));
 }
 
 function renderToolsPane(){
