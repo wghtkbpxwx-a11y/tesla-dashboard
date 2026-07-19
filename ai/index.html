@@ -2681,7 +2681,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
-    state: 'PRs #58–#73 are merged and live; deployment status records are #72 and #74. The agent/voice-mode-reliability branch now implements a substantial Homebase Voice reliability upgrade and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1; its PR/merge/Pages lineage is still pending. The new deterministic voice harness passes without provider calls, and local browser checks cover the deep-link overlay, free output test, settings experience, root dashboard launchers, direct Tesla-to-voice navigation, and zero horizontal overflow at the tested desktop viewport. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and may use the least-expensive ready xAI/ElevenLabs/OpenAI speech backup under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require post-deployment device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    state: 'PRs #58–#73 are merged and live; deployment status records are #72 and #74. Commit 2953ebd on agent/voice-mode-reliability implements a substantial Homebase Voice reliability upgrade and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1; its PR/merge/Pages lineage is still pending. The new deterministic voice harness passes without provider calls, and local browser checks cover the deep-link overlay, free output test, settings experience, root dashboard launchers, direct Tesla-to-voice navigation, and zero horizontal overflow at the tested desktop viewport. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and may use the least-expensive ready xAI/ElevenLabs/OpenAI speech backup under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require post-deployment device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2732,7 +2732,7 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-voice-mode-reliability',
       date: '2026-07-18',
-      commit: 'implemented on agent/voice-mode-reliability; commit pending',
+      commit: '2953ebd (branch implementation; PR/merge lineage pending)',
       branch: 'agent/voice-mode-reliability',
       pull_request: 'pending; not yet merged or live',
       title: 'Make Homebase Voice resilient on iPhone and own the Tesla voice entry',
