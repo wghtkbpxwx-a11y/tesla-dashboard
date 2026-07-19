@@ -2652,7 +2652,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
-    state: 'PRs #58–#71 are merged and live; deployment status is documented by PR #72. The agent/add-query-model-selector branch now adds a compact, exact, one-message model dropdown with deterministic tests and 320/390 px mobile verification; its commit, PR, merge, and Pages status must be recorded before calling it live. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, simplified mobile/model-picker, and automatic provider failover work is deployed. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    state: 'PRs #58–#71 are merged and live; deployment status is documented by PR #72. Draft PR #73 (implementation commit 9600d64) adds a compact, exact, one-message model dropdown with deterministic tests and 320/390 px mobile verification; merge and Pages status must still be recorded before calling it live. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, simplified mobile/model-picker, and automatic provider failover work is deployed. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2701,9 +2701,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-per-query-model-selector',
       date: '2026-07-18',
-      commit: 'pending on agent/add-query-model-selector',
+      commit: '9600d64 (implementation commit; lineage metadata follows in the same PR)',
       branch: 'agent/add-query-model-selector',
-      pull_request: 'not opened yet; implementation and deterministic/mobile validation complete locally',
+      pull_request: '#73 (draft; implementation and deterministic/mobile validation complete, checks pending)',
       title: 'Choose an exact model for one query without changing Automatic mode',
       type: 'feature+mobile+ux+routing+safety+tests+docs',
       depends_on: ['2026-07-18-automatic-provider-failover','2026-07-18-mobile-settings-navigation'],
