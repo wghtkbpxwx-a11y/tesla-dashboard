@@ -1392,13 +1392,22 @@ body.is-desktop .chat-float[data-state="open"]{
 /* ============================= Voice overlay ============================= */
 #voice-ov{
   position:fixed; inset:0; z-index:100; display:none; flex-direction:column;
-  align-items:center; justify-content:center; gap:0;
+  align-items:center; justify-content:center; gap:0; --vlvl:0;
   min-height:100dvh; padding:max(28px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));
   text-align:center; overflow:hidden;
   overscroll-behavior:none; touch-action:manipulation;
-  background:radial-gradient(ellipse at 50% 42%, #16161c 0%, #050506 65%, #000 100%);
+  background:radial-gradient(ellipse at 50% 42%, #14141b 0%, #050506 65%, #000 100%);
 }
 #voice-ov.open{display:flex}
+#voice-ov .v-aurora{
+  position:absolute; left:50%; top:38%; width:130vmax; height:130vmax; pointer-events:none;
+  transform:translate(-50%,-50%);
+  background:conic-gradient(from 0deg,
+    rgba(139,124,247,.10), rgba(56,189,248,.07), rgba(240,107,216,.06),
+    rgba(139,124,247,.10));
+  filter:blur(70px); opacity:.7; animation:vAurora 36s linear infinite;
+}
+@keyframes vAurora{to{transform:translate(-50%,-50%) rotate(360deg)}}
 #voice-ov .v-stars{
   position:absolute; inset:0; pointer-events:none; opacity:.4;
   background-image:
@@ -1422,14 +1431,24 @@ body.is-desktop .chat-float[data-state="open"]{
 .v-ring.r2{width:78%;height:78%; border-color:rgba(56,189,248,.2); animation-delay:.4s}
 .v-ring.r3{width:58%;height:58%; border-color:rgba(240,107,216,.18); animation-delay:.8s}
 @keyframes vRingPulse{0%,100%{transform:scale(1); opacity:.55}50%{transform:scale(1.05); opacity:1}}
+#v-glow{
+  position:absolute; width:180px; height:180px; border-radius:50%; pointer-events:none; z-index:2;
+  background:radial-gradient(circle, rgba(56,189,248,.5), rgba(139,124,247,.25) 55%, transparent 72%);
+  opacity:calc(var(--vlvl) * .9); filter:blur(14px);
+  transform:scale(calc(.9 + var(--vlvl) * .5));
+  transition:opacity .12s linear;
+}
 #v-orb{
   width:112px;height:112px; border-radius:50%; position:relative; cursor:pointer; z-index:3;
   border:0; padding:0; color:#fff; -webkit-appearance:none;
   background:conic-gradient(from 0deg,var(--acc),var(--acc2),#f06bd8,var(--acc));
   animation:orbSpin 8s linear infinite; display:grid; place-items:center;
-  transition:transform .35s cubic-bezier(.34,1.4,.64,1), box-shadow .3s;
+  --vbase:1;
+  transform:scale(calc(var(--vbase) + var(--vlvl) * .12));
+  transition:box-shadow .3s;
   box-shadow:0 0 40px rgba(139,124,247,.35);
 }
+#v-orb:active{filter:brightness(1.15)}
 #v-orb:focus-visible{outline:3px solid #7dd3fc;outline-offset:8px}
 #v-orb::before{content:""; position:absolute; inset:8px; border-radius:50%; background:radial-gradient(circle at 40% 35%, #1c1c24, #0a0a0c 70%)}
 #v-orb::after{
@@ -1441,23 +1460,26 @@ body.is-desktop .chat-float[data-state="open"]{
 @keyframes orbSpin{to{transform:rotate(360deg)}}
 @keyframes orbCounter{to{transform:rotate(-360deg)}}
 #voice-ov.listening .v-ring{border-color:rgba(56,189,248,.4); animation-duration:1.6s}
-#voice-ov.listening #v-orb{box-shadow:0 0 50px 8px rgba(56,189,248,.35); transform:scale(1.06)}
+#voice-ov.listening #v-orb{box-shadow:0 0 50px 8px rgba(56,189,248,.35); --vbase:1.06}
+#voice-ov.listening #v-glow{background:radial-gradient(circle, rgba(56,189,248,.55), rgba(34,211,238,.25) 55%, transparent 72%)}
 #voice-ov.thinking .v-ring{animation-duration:1.1s}
 #voice-ov.thinking #v-orb{animation-duration:1.4s; box-shadow:0 0 55px 10px rgba(139,124,247,.4)}
 #voice-ov.thinking #v-orb .v-ico{animation-duration:1.4s}
 #voice-ov.speaking .v-ring{border-color:rgba(240,107,216,.35)}
-#voice-ov.speaking #v-orb{box-shadow:0 0 60px 12px rgba(139,124,247,.45); transform:scale(1.04)}
-#v-wave{display:flex; align-items:center; justify-content:center; gap:3px; height:42px; width:min(280px,80vw)}
+#voice-ov.speaking #v-orb{box-shadow:0 0 60px 12px rgba(139,124,247,.45); --vbase:1.04}
+#voice-ov.speaking #v-glow{background:radial-gradient(circle, rgba(240,107,216,.45), rgba(139,124,247,.3) 55%, transparent 72%)}
+#v-wave{display:flex; align-items:center; justify-content:center; gap:3px; height:42px; width:min(300px,82vw)}
 #v-wave .bar{width:3px; height:8px; border-radius:3px; background:linear-gradient(180deg,var(--acc2),var(--acc)); animation:vBarIdle 1.2s ease-in-out infinite}
 #v-wave .bar:nth-child(odd){animation-delay:.15s}
 #v-wave .bar:nth-child(3n){animation-delay:.35s}
 @keyframes vBarIdle{0%,100%{height:6px; opacity:.45}50%{height:18px; opacity:.9}}
-#voice-ov.listening #v-wave .bar{animation:vBarListen .55s ease-in-out infinite}
+#voice-ov.listening #v-wave:not(.live) .bar{animation:vBarListen .55s ease-in-out infinite}
 @keyframes vBarListen{0%,100%{height:8px}50%{height:36px}}
-#voice-ov.speaking #v-wave .bar{animation:vBarSpeak .4s ease-in-out infinite}
+#voice-ov.speaking #v-wave:not(.live) .bar{animation:vBarSpeak .4s ease-in-out infinite}
 @keyframes vBarSpeak{0%,100%{height:10px}50%{height:32px}}
 #voice-ov.thinking #v-wave .bar{animation:vBarThink 1s ease-in-out infinite}
 @keyframes vBarThink{0%,100%{height:6px; opacity:.3}50%{height:14px; opacity:.7}}
+#v-wave.live .bar{animation:none; transition:height .09s ease-out, opacity .25s}
 #v-badge{
   font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
   color:var(--acc2); padding:5px 12px; border-radius:100px;
@@ -1467,7 +1489,16 @@ body.is-desktop .chat-float[data-state="open"]{
   font-size:22px; font-weight:650; min-height:28px; letter-spacing:-.03em; color:#fff;
   background:none; -webkit-text-fill-color:unset;
 }
-#v-line{color:rgba(255,255,255,.65); font-size:15.5px; max-width:560px; min-height:48px; line-height:1.55; overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; padding:0 8px}
+#v-you{
+  color:rgba(255,255,255,.5); font-size:13.5px; max-width:540px; min-height:18px;
+  overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  font-style:italic; padding:0 8px;
+}
+#v-line{color:rgba(255,255,255,.72); font-size:15.5px; max-width:560px; min-height:48px; line-height:1.55; overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; padding:0 8px}
+#v-route{
+  font-size:11px; color:rgba(255,255,255,.35); min-height:14px; max-width:520px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--mono);
+}
 #v-audio-retry{
   display:none; min-height:44px; padding:10px 18px; border-radius:999px;
   border:1px solid rgba(125,211,252,.45); background:rgba(56,189,248,.14);
@@ -1480,13 +1511,16 @@ body.is-desktop .chat-float[data-state="open"]{
   background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
   display:grid; place-items:center; font-size:20px; color:#fff; transition:all .2s;
 }
+#v-ctl .v-btn .hb-ico{width:22px;height:22px;stroke:#fff}
 #v-ctl .v-btn:hover{border-color:rgba(255,255,255,.25); transform:scale(1.05)}
+#v-ctl .v-btn.on{background:rgba(56,189,248,.18); border-color:rgba(56,189,248,.4)}
 #v-ctl .v-btn.end{background:var(--danger); border-color:transparent}
-#v-hint{font-size:12.5px; color:rgba(255,255,255,.4); margin-top:2px}
+#v-hint{font-size:12.5px; color:rgba(255,255,255,.4); margin-top:2px; max-width:520px; line-height:1.5}
 @media(max-width:520px){
-  .v-stage{gap:16px}
+  .v-stage{gap:14px}
   .v-rings{width:min(52vw,190px);height:min(52vw,190px)}
   #v-orb{width:100px;height:100px}
+  #v-glow{width:150px;height:150px}
   #v-status{font-size:20px}
   #v-line{font-size:14.5px;min-height:44px;-webkit-line-clamp:3}
   #v-hint{max-width:300px;line-height:1.4}
@@ -1496,9 +1530,15 @@ body.is-desktop .chat-float[data-state="open"]{
   .v-stage{gap:10px}
   .v-rings{width:128px;height:128px}
   #v-orb{width:76px;height:76px}
+  #v-glow{width:104px;height:104px}
   #v-wave{height:24px}
   #v-line{min-height:24px;-webkit-line-clamp:2}
+  #v-you{min-height:0}
   #v-ctl .v-btn{width:48px;height:48px}
+}
+@media (prefers-reduced-motion: reduce){
+  #voice-ov .v-stars, #voice-ov .v-aurora, #v-orb, #v-orb::after, #v-orb .v-ico, .v-ring{animation:none !important}
+  #v-wave .bar{animation:none !important}
 }
 
 /* ============================= Toasts / lightbox / misc ============================= */
@@ -1699,21 +1739,26 @@ body.is-desktop .chat-float[data-state="open"]{
 <!-- Voice overlay -->
 <div id="voice-ov" role="dialog" aria-modal="true" aria-label="Homebase Voice">
   <div class="v-stars" aria-hidden="true"></div>
+  <div class="v-aurora" aria-hidden="true"></div>
   <canvas id="v-canvas" aria-hidden="true"></canvas>
   <div class="v-stage">
-    <div id="v-badge">Neural Voice</div>
+    <div id="v-badge">Voice</div>
     <div class="v-rings">
       <div class="v-ring r1"></div>
       <div class="v-ring r2"></div>
       <div class="v-ring r3"></div>
+      <div id="v-glow" aria-hidden="true"></div>
       <button id="v-orb" type="button" title="Tap to interrupt or talk" aria-label="Talk to Homebase"><span class="v-ico">✦</span></button>
     </div>
     <div id="v-wave" aria-hidden="true"></div>
     <div id="v-status" role="status" aria-live="polite">Voice mode</div>
+    <div id="v-you" aria-live="off"></div>
     <div id="v-line" aria-live="polite"></div>
+    <div id="v-route"></div>
     <button id="v-audio-retry" type="button">Enable sound</button>
     <div id="v-ctl">
       <button class="v-btn" id="v-mute" title="Pause listening">🎙️</button>
+      <button class="v-btn" id="v-again" title="Repeat the last reply" aria-label="Repeat the last reply"></button>
       <button class="v-btn end" id="v-end" title="End voice mode">✕</button>
     </div>
     <div id="v-hint">Tap the orb to interrupt · conversation is saved to the chat</div>
@@ -2119,7 +2164,7 @@ var DEFAULT_SETTINGS = {
   council: { mode: 'debate', members: [], synthesizer: null },
   speech: { lang: 'en-CA', voiceURI: '', rate: 1.0, engine: 'auto', engineVersion: 2,
     xaiVoice: 'eve', openaiVoice: 'nova', elevenVoiceId: '',
-    elevenTtsModel: 'eleven_flash_v2_5', elevenSttModel: 'scribe_v2' },
+    elevenTtsModel: 'eleven_flash_v2_5', elevenSttModel: 'scribe_v2', bargeIn: false },
   baseURL: {},
   webllmModel: 'Llama-3.2-1B-Instruct-q4f16_1-MLC'
 };
@@ -2354,7 +2399,10 @@ var ICON_SVG = {
   camera: '<path d="M4 8.2h2.8l1.4-2h7.6l1.4 2H20a1.2 1.2 0 0 1 1.2 1.2v8.4A1.2 1.2 0 0 1 20 19H4a1.2 1.2 0 0 1-1.2-1.2V9.4A1.2 1.2 0 0 1 4 8.2z" fill="currentColor" opacity=".12"/><path d="M4 8.2h2.8l1.4-2h7.6l1.4 2H20a1.2 1.2 0 0 1 1.2 1.2v8.4A1.2 1.2 0 0 1 20 19H4a1.2 1.2 0 0 1-1.2-1.2V9.4A1.2 1.2 0 0 1 4 8.2z"/><circle cx="12" cy="13" r="3.1"/>',
   weather: '<circle cx="12" cy="12" r="4" fill="currentColor" opacity=".15"/><circle cx="12" cy="12" r="4"/><path d="M12 3.2v1.8M12 19v1.8M3.2 12h1.8M19 12h1.8M5.6 5.6l1.3 1.3M17.1 17.1l1.3 1.3M5.6 18.4l1.3-1.3M17.1 6.9l1.3-1.3"/><path d="M16.5 15.2a3.6 3.6 0 1 0-1.1-7 4.4 4.4 0 0 0-8.2 1.4 3 3 0 0 0 .4 5.95"/>',
   sports: '<circle cx="12" cy="12" r="8.2" fill="currentColor" opacity=".12"/><circle cx="12" cy="12" r="8.2"/><path d="M12 3.8c2.2 1.9 3.5 4.8 3.5 8.2S14.2 18.3 12 20.2c-2.2-1.9-3.5-4.8-3.5-8.2S9.8 5.7 12 3.8z"/><path d="M4.3 9.2h15.4M4.3 14.8h15.4"/>',
-  bank_alt: '<path d="M4 10h16M6 10v8M10 10v8M14 10v8M18 10v8M3 18h18M12 4l8 5H4l8-5z"/>'
+  bank_alt: '<path d="M4 10h16M6 10v8M10 10v8M14 10v8M18 10v8M3 18h18M12 4l8 5H4l8-5z"/>',
+  micOff: '<rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" opacity=".15"/><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 12a6 6 0 0 0 12 0M12 18v3"/><path d="M4 4l16 16"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  redo: '<path d="M20 8.5a8.3 8.3 0 1 0 1.6 6.6"/><path d="M21.5 3.5v5h-5"/>'
 };
 function iconSvg(name, size, opts){
   opts = opts || {};
@@ -9776,6 +9824,7 @@ function unlockAudio(){
       });
     }
   } catch(e){}
+  try { if (typeof vmeterMaybeWireTts === 'function' && VOICE.active) vmeterMaybeWireTts(); } catch(e){}
 }
 function getVoices(){
   return (window.speechSynthesis && speechSynthesis.getVoices()) || [];
@@ -10123,10 +10172,13 @@ function stopDictation(){
 /* ============================ voice mode ============================ */
 var VOICE = {
   active:false, state:'idle', muted:false, buffer:'', rec:null, mediaRecorder:null, stream:null, replying:false,
-  failCount:0, forceCloudCapture:false, lastInterim:'', lastTranscript:'', lastError:''
+  failCount:0, forceCloudCapture:false, lastInterim:'', lastTranscript:'', lastError:'',
+  lastReply:'', lastSpoken:'', barge:null
 };
 function vStatus(t){ $('v-status').textContent = t; }
 function vLine(t){ $('v-line').textContent = t || ''; }
+function vYou(t){ var el = $('v-you'); if (el) el.textContent = t ? '“' + t + '”' : ''; }
+function vRoute(t){ var el = $('v-route'); if (el) el.textContent = t || ''; }
 function setVState(state){
   VOICE.state = state;
   var ov = $('voice-ov');
@@ -10136,11 +10188,7 @@ function setVState(state){
   else if (state === 'thinking') vStatus('Thinking…');
   else if (state === 'speaking') vStatus('Speaking');
   else vStatus(VOICE.muted ? 'Paused — tap the orb to talk' : 'Voice mode');
-  if ($('v-badge')){
-    $('v-badge').textContent = state === 'listening' ? 'Live Capture' :
-      state === 'thinking' ? 'Neural Process' :
-      state === 'speaking' ? 'Vocal Output' : 'Neural Voice';
-  }
+  if (state === 'speaking') voiceBargeStart(); else voiceBargeStop();
   voiceVizKick(state);
 }
 function ensureVoiceWave(){
@@ -10151,7 +10199,95 @@ function ensureVoiceWave(){
     w.appendChild(b);
   }
 }
-var VIZ = { raf: 0, particles: [], t0: 0 };
+
+/* ---- audio metering: the orb and bars react to real sound levels.
+   Mic side: the cloud-capture path shares its analyser; the browser-SR path
+   opens a metering-only stream (skipped on iOS, where a second capture can
+   kill SpeechRecognition). TTS side: the shared <audio> element is routed
+   through an analyser once the AudioContext is confirmed running — never
+   before, because a media element wired into a suspended context goes
+   silent. Metering is cosmetic: every failure path leaves voice working. */
+var VMETER = { ctx:null, micAn:null, micStream:null, micSrc:null, ttsAn:null, ttsWired:false, level:0, buf:null, fbuf:null };
+function vmeterCtx(){
+  if (!VMETER.ctx){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    try { VMETER.ctx = new AC(); } catch(e){ return null; }
+  }
+  if (VMETER.ctx.state === 'suspended'){ try { VMETER.ctx.resume(); } catch(e){} }
+  return VMETER.ctx;
+}
+function vmeterMaybeWireTts(){
+  if (VMETER.ttsWired || !TTSQ.sharedAudio) return;
+  var ctx = vmeterCtx();
+  if (!ctx || ctx.state !== 'running') return;
+  try {
+    var src = ctx.createMediaElementSource(TTSQ.sharedAudio);
+    var an = ctx.createAnalyser(); an.fftSize = 512; an.smoothingTimeConstant = 0.7;
+    src.connect(an); an.connect(ctx.destination);
+    VMETER.ttsAn = an;
+  } catch(e){ /* element may already be captured — leave audio untouched */ }
+  VMETER.ttsWired = true;
+}
+function vmeterMicStart(){
+  if (IS_IOS || VMETER.micAn || VMETER.micStream) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  var ctx = vmeterCtx(); if (!ctx) return;
+  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}}).then(function(stream){
+    if (!VOICE.active){ stream.getTracks().forEach(function(t){ t.stop(); }); return; }
+    try {
+      VMETER.micStream = stream;
+      VMETER.micSrc = ctx.createMediaStreamSource(stream);
+      var an = ctx.createAnalyser(); an.fftSize = 512; an.smoothingTimeConstant = 0.65;
+      VMETER.micSrc.connect(an);
+      VMETER.micAn = an;
+    } catch(e){ vmeterMicStop(); }
+  }).catch(function(){});
+}
+function vmeterMicStop(){
+  if (VMETER.micSrc){ try { VMETER.micSrc.disconnect(); } catch(e){} VMETER.micSrc = null; }
+  if (VMETER.micStream){ VMETER.micStream.getTracks().forEach(function(t){ t.stop(); }); VMETER.micStream = null; }
+  VMETER.micAn = null;
+}
+function vmeterRms(an){
+  if (!an) return 0;
+  if (!VMETER.buf || VMETER.buf.length !== an.fftSize) VMETER.buf = new Uint8Array(an.fftSize);
+  try { an.getByteTimeDomainData(VMETER.buf); } catch(e){ return 0; }
+  var sum = 0;
+  for (var i = 0; i < VMETER.buf.length; i++){ var d = (VMETER.buf[i] - 128) / 128; sum += d * d; }
+  return Math.min(1, Math.sqrt(sum / VMETER.buf.length) * 4.5);
+}
+function vmeterActiveAnalyser(){
+  if (VOICE.state === 'listening') return VMETER.micAn;
+  /* cloud TTS plays through the tapped shared element; browser TTS has no tap */
+  if (VOICE.state === 'speaking' && TTSQ.audio) return VMETER.ttsAn;
+  return null;
+}
+var VIZ = { raf: 0, particles: [], t0: 0, live:false };
+function vizBars(an){
+  var w = $('v-wave'); if (!w) return;
+  var bars = w.childNodes, n = bars.length;
+  if (!an){
+    if (VIZ.live){
+      VIZ.live = false; w.classList.remove('live');
+      for (var i = 0; i < n; i++){ bars[i].style.height = ''; bars[i].style.opacity = ''; }
+    }
+    return;
+  }
+  if (!VIZ.live){ VIZ.live = true; w.classList.add('live'); }
+  if (!VMETER.fbuf || VMETER.fbuf.length !== an.frequencyBinCount) VMETER.fbuf = new Uint8Array(an.frequencyBinCount);
+  try { an.getByteFrequencyData(VMETER.fbuf); } catch(e){ return; }
+  var half = Math.ceil(n / 2);
+  for (var k = 0; k < half; k++){
+    /* speech band, non-linear spread, mirrored center-out */
+    var bin = 2 + Math.floor(Math.pow(k / half, 1.55) * 80);
+    var v = VMETER.fbuf[Math.min(bin, VMETER.fbuf.length - 1)] / 255;
+    var h = Math.max(5, Math.round(5 + v * 34));
+    var l = half - 1 - k, r = half + k;
+    if (bars[l]){ bars[l].style.height = h + 'px'; bars[l].style.opacity = (0.4 + v * 0.6).toFixed(2); }
+    if (bars[r] && r < n){ bars[r].style.height = h + 'px'; bars[r].style.opacity = (0.4 + v * 0.6).toFixed(2); }
+  }
+}
 function voiceVizKick(state){
   ensureVoiceWave();
   var cv = $('v-canvas'); if (!cv) return;
@@ -10181,18 +10317,28 @@ function voiceVizKick(state){
       var W = cv.width, H = cv.height;
       ctx.clearRect(0, 0, W, H);
       var st = VOICE.state || 'idle';
+      vmeterMaybeWireTts();
+      var an = vmeterActiveAnalyser();
+      var target = an ? vmeterRms(an) :
+        (st === 'thinking' ? 0.18 + 0.14 * Math.sin(now / 170) :
+         st === 'idle' ? 0 : 0.22 + 0.18 * Math.sin(now / 240));
+      /* fast attack, slow decay — feels like sound, not a metronome */
+      VMETER.level += (target - VMETER.level) * (target > VMETER.level ? 0.55 : 0.12);
+      $('voice-ov').style.setProperty('--vlvl', VMETER.level.toFixed(3));
+      vizBars(an);
       var pulse = 0.5 + 0.5 * Math.sin((now - VIZ.t0) / (st === 'thinking' ? 180 : 320));
-      // soft aura
       var g = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, Math.min(W,H)*0.35);
-      var c1 = st === 'listening' ? 'rgba(34,211,238,' + (0.10+pulse*0.08) + ')' :
-               st === 'speaking' ? 'rgba(124,108,245,' + (0.12+pulse*0.1) + ')' :
-               st === 'thinking' ? 'rgba(124,108,245,' + (0.08+pulse*0.06) + ')' :
+      var glow = 0.06 + pulse * 0.05 + VMETER.level * 0.12;
+      var c1 = st === 'listening' ? 'rgba(34,211,238,' + glow + ')' :
+               st === 'speaking' ? 'rgba(124,108,245,' + glow + ')' :
+               st === 'thinking' ? 'rgba(124,108,245,' + (glow * 0.8) + ')' :
                'rgba(124,108,245,0.05)';
       g.addColorStop(0, c1); g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+      var speed = (st === 'idle' ? 1 : 2.2) * (1 + VMETER.level * 2.5);
       VIZ.particles.forEach(function(p){
-        p.x += p.vx * (st === 'idle' ? 1 : 2.2);
-        p.y += p.vy * (st === 'idle' ? 1 : 2.2);
+        p.x += p.vx * speed;
+        p.y += p.vy * speed;
         if (p.x < 0 || p.x > 1) p.vx *= -1;
         if (p.y < 0 || p.y > 1) p.vy *= -1;
         ctx.beginPath();
@@ -10230,6 +10376,28 @@ function mediaCaptureSupported(){
   return !!window.MediaRecorder && !!navigator.mediaDevices && !!navigator.mediaDevices.getUserMedia;
 }
 function voiceSupported(){ return !!getSR() || (cloudCaptureAllowed() && mediaCaptureSupported()); }
+function voiceEngineLabel(){
+  var stt = getSR() ? 'Browser mic' :
+    ({xai:'xAI capture', elevenlabs:'Scribe capture', openai:'Whisper capture'})[selectVoiceSTTProvider(S.settings.speech.engine)] || 'No mic engine';
+  var tts = ({xai:'xAI voice', openai:'OpenAI voice', elevenlabs:'ElevenLabs voice'})[selectVoiceTTSProvider(S.settings.speech.engine)] || 'Device voice';
+  if ((S.settings.speech.engine || 'auto') === 'auto' && window.speechSynthesis) tts = 'Device voice first';
+  return stt + ' · ' + tts;
+}
+function voiceMuteIcon(){
+  var b = $('v-mute');
+  if (b){ b.innerHTML = iconSvg(VOICE.muted ? 'micOff' : 'voice', 22, {strokeWidth:2}); b.classList.toggle('on', VOICE.muted); }
+}
+function voiceSetMuted(v){
+  VOICE.muted = !!v;
+  voiceMuteIcon();
+  if (VOICE.muted){
+    stopVoiceRec();
+    voiceBargeStop();
+    if (VOICE.state === 'listening') setVState('idle');
+  } else if (VOICE.active){
+    unlockAudio(); voiceListen();
+  }
+}
 function startVoiceMode(opts){
   opts = opts || {};
   if (VOICE.active){ endVoiceMode(); return; }
@@ -10237,18 +10405,23 @@ function startVoiceMode(opts){
   ensureConvo();
   VOICE.active = true; VOICE.muted = false; VOICE.failCount = 0;
   VOICE.forceCloudCapture = false; VOICE.lastInterim = ''; VOICE.lastTranscript = ''; VOICE.lastError = '';
+  VOICE.lastReply = ''; VOICE.lastSpoken = '';
   TTSQ.blockedText = ''; TTSQ.lastError = '';
   $('voice-ov').classList.remove('audio-blocked');
   if (!opts.deferListen) unlockAudio();
   ensureVoiceWave();
   $('voice-ov').classList.add('open');
   voiceVizKick('idle');
-  $('v-mute').textContent = '🎙️';
+  voiceMuteIcon();
+  if ($('v-again')) $('v-again').innerHTML = iconSvg('redo', 20, {strokeWidth:2});
+  if ($('v-end')) $('v-end').innerHTML = iconSvg('close', 20, {strokeWidth:2.2});
+  if ($('v-badge')) $('v-badge').textContent = voiceEngineLabel();
   PIPE_HOOKS.onDelta = voiceDelta;
   PIPE_HOOKS.onDone = voiceReplyDone;
   TTSQ.onDrain = voiceTTSDrained;
   setVState('idle');
-  vLine('');
+  vLine(''); vYou(''); vRoute('');
+  if (supported && getSR()) vmeterMicStart(); /* cloud capture shares its own analyser */
   if (!supported){
     vStatus('Voice needs microphone access');
     vLine('This browser does not expose speech input. Close Voice to continue in chat.');
@@ -10270,6 +10443,9 @@ function endVoiceMode(){
   PIPE_HOOKS.onDelta = null; PIPE_HOOKS.onDone = null; TTSQ.onDrain = null;
   stopSpeaking();
   stopVoiceRec();
+  voiceBargeStop();
+  vmeterMicStop();
+  VOICE.buffer = '';
   $('voice-ov').classList.remove('open');
   if (VIZ.raf){ cancelAnimationFrame(VIZ.raf); VIZ.raf = 0; }
   setVState('idle');
@@ -10428,6 +10604,7 @@ async function voiceListenWhisper(){
     var src = ctx.createMediaStreamSource(stream);
     var an = ctx.createAnalyser(); an.fftSize = 1024;
     src.connect(an);
+    VMETER.micAn = an; /* drive the orb/bars from this capture */
     var mr = new MediaRecorder(stream);
     VOICE.mediaRecorder = mr;
     var chunks = [];
@@ -10455,6 +10632,7 @@ async function voiceListenWhisper(){
     mr.onstop = async function(){
       clearInterval(poll);
       if (VOICE.mediaRecorder === mr) VOICE.mediaRecorder = null;
+      if (VMETER.micAn === an) VMETER.micAn = null;
       try { ctx.close(); } catch(e){}
       stream.getTracks().forEach(function(t){ t.stop(); });
       VOICE.stream = null;
@@ -10487,9 +10665,41 @@ async function voiceListenWhisper(){
     endVoiceMode();
   }
 }
+/* Short spoken phrases that control voice mode locally — no model call, no
+   cost, instant. Only whole short utterances match, so normal sentences that
+   merely contain "stop" still reach the model. */
+function voiceCommand(txt){
+  var t = String(txt || '').toLowerCase().replace(/[^a-z'\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!t || t.split(' ').length > 5) return false;
+  if (/^(stop|cancel|stop talking|be quiet|quiet|shush|hush|never ?mind|okay stop|ok stop)$/.test(t)){
+    stopSpeaking(); stopGeneration(); VOICE.buffer = '';
+    setTimeout(voiceListen, 200);
+    return true;
+  }
+  if (/^(end voice( mode)?|exit voice( mode)?|close voice( mode)?|goodbye|good bye)$/.test(t)){
+    endVoiceMode(); return true;
+  }
+  if (/^(repeat( that)?( please)?|say (that|it) again|what was that)$/.test(t)){
+    if (VOICE.lastReply){ setVState('speaking'); vLine(VOICE.lastReply.slice(0, 220)); speakText(VOICE.lastReply); }
+    else voiceListen();
+    return true;
+  }
+  if (/^((start|begin) (a )?new (chat|conversation)|new (chat|conversation)|start over|fresh chat)$/.test(t)){
+    createConvo();
+    vYou(''); vLine(''); vRoute('');
+    setVState('speaking'); ttsEnqueue('Fresh chat started.');
+    return true;
+  }
+  if (/^(pause|pause listening|mute|stop listening)$/.test(t)){
+    voiceSetMuted(true); return true;
+  }
+  return false;
+}
 function voiceUtterance(txt){
+  if (voiceCommand(txt)) return;
   setVState('thinking');
-  vLine('“' + txt + '”');
+  vYou(txt);
+  vLine(''); vRoute('');
   VOICE.buffer = '';
   VOICE.replying = true;
   sendMessage(txt);
@@ -10512,6 +10722,7 @@ function voiceDelta(t){
 function voiceSpeakOrHold(text){
   text = (text || '').trim();
   if (!text) return;
+  VOICE.lastSpoken = (VOICE.lastSpoken + ' ' + text).slice(-400);
   if (TTSQ.blockedText){
     TTSQ.blockedText = (TTSQ.blockedText + ' ' + text).trim();
     return;
@@ -10525,6 +10736,14 @@ function voiceReplyDone(am){
   VOICE.replying = false;
   var rest = stripForSpeech(VOICE.buffer);
   VOICE.buffer = '';
+  if (am && !am.error){
+    VOICE.lastReply = stripForSpeech(am.text || '').slice(0, 1500);
+    var why = am.routeReason || '';
+    if (!why && am.model){
+      try { why = modelInfo(am.provider, am.model).label || am.model; } catch(e){ why = am.model || ''; }
+    }
+    vRoute(why);
+  }
   if (am && am.error){
     vLine('⚠️ ' + am.error);
     setTimeout(function(){ if (VOICE.active) voiceListen(); }, 1500);
@@ -10545,14 +10764,67 @@ function voiceTTSDrained(){
   if (TTSQ.blockedText) return;
   if (VOICE.state === 'speaking' || VOICE.state === 'thinking') voiceListen();
 }
+
+/* ---- opt-in hands-free interruption (Settings → Voice) ----
+   While the assistant speaks, keep a recognizer open; sustained speech that
+   is not an echo of the current reply interrupts and takes over. Browser-SR
+   only, not on iOS (a second capture kills SR there), and off by default —
+   cabin speakers without echo cancellation can hear themselves. */
+function voiceEchoLike(txt){
+  var words = String(txt || '').toLowerCase().split(/\s+/).filter(function(w){ return w.length > 2; });
+  if (!words.length) return true;
+  var spoken = (VOICE.lastSpoken || '').toLowerCase();
+  var hits = 0;
+  words.forEach(function(w){ if (spoken.indexOf(w) >= 0) hits++; });
+  return hits / words.length > 0.6;
+}
+function voiceBargeStart(){
+  if (!S.settings.speech.bargeIn || IS_IOS || VOICE.barge || !VOICE.active || VOICE.muted) return;
+  var SR = getSR(); if (!SR) return;
+  var rec = new SR();
+  rec.lang = S.settings.speech.lang || 'en-US';
+  rec.continuous = true;
+  rec.interimResults = false;
+  rec.onresult = function(e){
+    var txt = '';
+    for (var i = e.resultIndex; i < e.results.length; i++){
+      if (e.results[i].isFinal) txt += e.results[i][0].transcript + ' ';
+    }
+    txt = txt.trim();
+    if (!txt || txt.split(/\s+/).length < 3 || voiceEchoLike(txt)) return;
+    voiceBargeStop();
+    stopSpeaking(); stopGeneration();
+    VOICE.buffer = '';
+    voiceUtterance(txt);
+  };
+  rec.onerror = function(){};
+  rec.onend = function(){
+    if (VOICE.barge === rec){
+      VOICE.barge = null;
+      if (VOICE.active && VOICE.state === 'speaking') setTimeout(voiceBargeStart, 200);
+    }
+  };
+  VOICE.barge = rec;
+  try { rec.start(); } catch(e){ VOICE.barge = null; }
+}
+function voiceBargeStop(){
+  if (VOICE.barge){
+    var r = VOICE.barge; VOICE.barge = null;
+    try { r.abort ? r.abort() : r.stop(); } catch(e){}
+  }
+}
 function initVoice(){
   $('voice-btn').addEventListener('click', startVoiceMode);
   $('v-end').addEventListener('click', endVoiceMode);
-  $('v-mute').addEventListener('click', function(){
-    VOICE.muted = !VOICE.muted;
-    this.textContent = VOICE.muted ? '🔇' : '🎙️';
-    if (VOICE.muted){ stopVoiceRec(); if (VOICE.state === 'listening') setVState('idle'); }
-    else { unlockAudio(); voiceListen(); }
+  $('v-mute').addEventListener('click', function(){ voiceSetMuted(!VOICE.muted); });
+  if ($('v-again')) $('v-again').addEventListener('click', function(){
+    if (!VOICE.active) return;
+    unlockAudio();
+    if (VOICE.lastReply){
+      stopVoiceRec();
+      setVState('speaking'); vLine(VOICE.lastReply.slice(0, 220));
+      speakText(VOICE.lastReply);
+    }
   });
   $('v-audio-retry').addEventListener('click', function(){
     if (!VOICE.active) return;
@@ -10579,8 +10851,8 @@ function initVoice(){
       setTimeout(voiceListen, 150);
     } else if (VOICE.state === 'idle'){
       unlockAudio();
-      VOICE.muted = false; $('v-mute').textContent = '🎙️';
-      if ($('v-hint')) $('v-hint').textContent = 'Tap the orb to interrupt · conversation is saved to the chat';
+      VOICE.muted = false; voiceMuteIcon();
+      if ($('v-hint')) $('v-hint').textContent = 'Tap the orb to interrupt · say “stop”, “repeat that” or “new chat” · saved to the chat';
       voiceListen();
     }
   });
@@ -11603,7 +11875,7 @@ function renderVoicePane(){
   var intro = document.createElement('div');
   intro.className = 'hint-box';
   intro.style.margin = '0 0 12px';
-  intro.innerHTML = '<b>Voice works hands-free after one tap.</b><br>Homebase listens with the free device service first, keeps useful words Safari leaves unfinished, and automatically reads every voice-mode reply aloud.';
+  intro.innerHTML = '<b>Voice works hands-free after one tap.</b><br>Homebase listens with the free device service first, keeps useful words Safari leaves unfinished, and automatically reads every voice-mode reply aloud.<br>You can also say “stop”, “repeat that”, “new chat”, “pause” or “end voice mode” — these work instantly and never cost anything.';
   pane.appendChild(intro);
   var testRow = row('Hear a voice test', 'Use this once if replies are silent on iPhone or in an installed app', '<button id="vs-play-test" class="sm-btn pri" type="button">Play voice test</button>');
   pane.appendChild(testRow);
@@ -11675,12 +11947,15 @@ function renderVoicePane(){
   var autoRow = tglRow('Speak regular chat replies', 'Voice mode always speaks; this also reads replies sent from normal Chat mode',
     function(){ return S.settings.autoSpeak; }, function(v){ S.settings.autoSpeak = v; });
   pane.appendChild(autoRow);
+  var bargeRow = tglRow('Talk over the assistant (beta)', 'Keep the mic open while it speaks so you can interrupt hands-free. Works best with headphones or a cabin mic — open speakers can hear themselves. Needs the free device listening; not available on iPhone/iPad.',
+    function(){ return !!S.settings.speech.bargeIn; }, function(v){ S.settings.speech.bargeIn = v; });
+  pane.appendChild(bargeRow);
   var sup = document.createElement('div');
   sup.className = 'hint-box';
   sup.innerHTML = 'Listening: ' + (getSR() ? '✅ free device speech is available' : (cloudCaptureAllowed() && mediaCaptureSupported() ? '✅ cloud backup is configured' : '⚠️ no listening service is available')) +
     '<br>Speaking: ' + (window.speechSynthesis ? '✅ device voice is available' : (cloudTTSReady() ? '✅ cloud voice can be used' : '⚠️ no speech output is available'));
   pane.appendChild(sup);
-  pane.appendChild(settingsDisclosure('Voice, language & premium options', [eng, vRow, xvRow, ovRow, ekRow, evRow, emRow, lRow, sup]));
+  pane.appendChild(settingsDisclosure('Voice, language & premium options', [eng, vRow, xvRow, ovRow, ekRow, evRow, emRow, lRow, bargeRow, sup]));
 }
 
 function renderToolsPane(){
