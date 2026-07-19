@@ -2717,7 +2717,7 @@ var HOMEBASE_CHANGELOG = {
   path: 'ai/index.html',
   pages_url: 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/ai/',
   repo: 'wghtkbpxwx-a11y/tesla-dashboard',
-  updated: '2026-07-18',
+  updated: '2026-07-19',
   audience: 'AI agents and models editing or reasoning about this dashboard — not end-user UI',
   documentation_policy: [
     'Every model/session that changes code, configuration, data contracts, tools, routing, UI, safety behaviour, documentation, or deployment state must add or update a changelog entry before handoff',
@@ -2727,8 +2727,9 @@ var HOMEBASE_CHANGELOG = {
     'The next model must read current_handoff plus the newest entries before scoping or editing'
   ],
   current_handoff: {
-    to: 'Fable',
-    objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
+    to: 'next model',
+    objective: 'Build on the completed Fable P0/P1 audit fixes (2026-07-19 entry) and the reconciled voice UX layer; keep node ai/tests/homebase.test.js AND the validate.py harnesses green whenever touching routing, budget, teams, vault, guards, or voice',
+    fable_audit_2026_07_19: 'The Fable session executed FABLE_AUDIT_BRIEF P0/P1 on branch claude/multimodal-ai-chatbot-4r8s23 (PR #80): sub-agent tool boundary enforced at execution time, reservation settle/release idempotency on chat and fixed-cost paths, cross-device deletion tombstones through the encrypted vault, a 45-check deterministic safety suite extracting the real production functions (ai/tests/homebase.test.js — includes the PR #71 failover cooldowns), and a voice UX layer (audio-reactive orb/bars, local voice commands, split captions with per-reply route/cost, engine badge, repeat, opt-in echo-guarded barge-in) ported ON TOP of the PR #75 reliability engine with every #75 contract preserved and re-verified (one-tap gate, blocked-answer recovery, free-first plans, tap-to-finish).',
     state: 'PRs #58–#76 are merged and live; deployment status records are #72, #74, and #76, with PR #77 finalizing the voice record wording. PR #75 (squash merge 6c54670; implementation originated at 2953ebd) substantially upgrades Homebase Voice and replaces every Tesla Dashboard ChatGPT launcher with ai/?voice=1. PR Validate, main Validate run 29670230087, and Pages run 29670229691 passed; record PR #76, main Validate run 29670347179, and Pages run 29670346746 also passed. Public production checks confirmed the one-tap voice overlay, audio-recovery control, xAI TTS implementation, voice test, zero horizontal overflow, three visible root voice links plus the More-menu launcher, no ChatGPT links, and direct Tesla-to-voice navigation. Automatic voice is free-device-first, preserves Safari interim words and blocked spoken answers, and uses modality-priced xAI/OpenAI/ElevenLabs speech backup plans under the same rolling budget. Real iPhone Safari and Tesla hardware microphone behavior still require device confirmation. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     latest_fix: 'PR #78 is merged and live as f3e71e6 (implementation originated at 5613294). It repairs the reproduced scheduled-agent Demo bypass: unpinned tasks use selectAIRoute plus runChat automatic failover and central cloud accounting, explicit task models remain terminal, result metadata follows the provider that answered, unavailable real models stop before tools with Try models again / AI connections recovery, quota cooldowns permit a bounded five-minute recovery probe after credits are added, and iOS page suspension synchronously flushes key edits. PR Validate run 29671132268, main Validate run 29671144920, and Pages run 29671144486 passed. Production at 390×844 confirmed the new contracts, honest paused card, both recovery controls, no tool call, and zero horizontal overflow. The deterministic scheduled-agent harness is part of validate.py.',
     start_here: [
@@ -2739,12 +2740,11 @@ var HOMEBASE_CHANGELOG = {
       'ai/README.md and the Homebase sections of CLAUDE.md only when a boundary contract needs clarification'
     ],
     review_areas: [
-      'P0: extend the shipped single-call automatic failover harness into concurrent reservation/settlement, cancellation, team partial-failure, and mobile WebLLM tests',
-      'P0: adversarial repository-mutation, connector least-privilege, prompt-injection, official-host, LM Studio MCP, and secret-boundary review',
-      'P1: encrypted vault conflict/tombstone/deduplication/wrong-passphrase/interrupted-sync correctness and usage-ledger reconciliation',
-      'P1: cancellation, cloud/local timeout, model unload, tool-loop exhaustion, partial-agent failure, and mobile background recovery',
-      'P1: after deployment, use concrete iPhone/Tesla hardware evidence to audit WebKit voice lifecycle or microphone limitations; preserve the deterministic free-first/no-spend and blocked-answer recovery contracts',
-      'P2 only after P0/P1: route/cost/degradation/frontier-request comprehension in the simplified UI'
+      'DONE 2026-07-19 (do not redo without new evidence): reservation/settlement idempotency, sub-agent boundary, tombstone/vault merge, routing floors/ordering/cooldowns, mobile WebLLM skip, team caps, repoPath/validateSourceText/getBase adversarial checks — all covered in ai/tests/homebase.test.js',
+      'P1 remaining: stuck-UI states under cancellation/timeout during parallel team runs (money paths are now idempotent; the open question is presentation)',
+      'P1: after deployment, use concrete iPhone/Tesla hardware evidence to audit WebKit voice lifecycle or microphone limitations; preserve the deterministic free-first/no-spend and blocked-answer recovery contracts, and test opt-in barge-in in the real cabin before recommending it',
+      'P1: usage-ledger reconciliation against provider billing exports (provider billing stays authoritative)',
+      'P2: route/cost/degradation comprehension outside voice mode (voice mode now shows a per-reply route + cost line; chat surfaces it in message meta only)'
     ],
     preserve: [
       'Hard estimated $50 trailing-30-day application guard and central runChat reservation/accounting path',
@@ -2753,7 +2753,8 @@ var HOMEBASE_CHANGELOG = {
       'Repository writes remain explicit-request, confirm-guarded, secret-scanned, new-branch, draft-PR-only, never direct-to-main',
       'API keys and private connector fields are uploaded only inside the client-side AES-GCM vault and only while encrypted-secret sync is enabled; OAuth access tokens and the passphrase never enter the vault',
       'Financial balances, transactions, statements, credentials, and detailed bundles never enter the public repository',
-      'Voice deep links require one deliberate media tap; device-only remains no-spend, Automatic remains free-device-first, premium speech stays inside the rolling guard, and a blocked answer is replayed without another model call'
+      'Voice deep links require one deliberate media tap; device-only remains no-spend, Automatic remains free-device-first, premium speech stays inside the rolling guard, and a blocked answer is replayed without another model call',
+      'SUBAGENT_BLOCKED_TOOLS is enforced at schema AND execution time; vault tombstones carry only {id, ts}; keep node ai/tests/homebase.test.js passing — it extracts the real production functions, so drift fails loudly'
     ]
   },
   how_to_read: [
@@ -2778,6 +2779,50 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-19-fable-audit-fixes-and-voice-ux',
+      date: '2026-07-19',
+      commit: 'c7447de (safety fixes + tests), 7ce9b17 (voice UX layer); changelog/roadmap sync follows on the same branch',
+      branch: 'claude/multimodal-ai-chatbot-4r8s23',
+      pull_request: '#80 (draft; opened against main, rebased onto 764f708/#79 after PRs #71–#79 landed mid-session; merged state recorded by the PR itself)',
+      title: 'Execute the Fable audit P0/P1 fixes with a deterministic test suite, then layer voice UX onto the #75 reliability engine',
+      type: 'security+fix+tests+feature+voice',
+      depends_on: ['2026-07-18-voice-mode-reliability','2026-07-18-automatic-provider-failover','2026-07-18-scheduled-agent-real-model-routing','2026-07-18-fable-audit-brief','2026-07-18-cross-device-vault-v2'],
+      files_changed: ['ai/index.html','ai/tests/homebase.test.js','ROADMAP.md'],
+      interfaces_changed: ['SUBAGENT_BLOCKED_TOOLS','subagentAllowedTool','toolsForNames','runSubagentMember','finishCloudChat','releaseCloudReservation','finishFixedCloud','buildVaultPayload','mergeVaultPayload','applyVaultPayload','forget_memory tool','memory/task delete handlers','loadTombstones/addTombstones/mergeTombstoneLists/applyTombstoneFilter','VOICE/VMETER/VIZ','voiceCommand','voiceBargeStart/voiceBargeStop','voiceSetMuted/voiceMuteIcon','voiceEngineLabel','vYou/vRoute','setVState','startVoiceMode/endVoiceMode','voiceListenWhisper (analyser share)','voiceSpeakOrHold','voiceReplyDone','initVoice','unlockAudio (meter hook)','DEFAULT_SETTINGS.speech.bargeIn','renderVoicePane','ICON_SVG (micOff/close/redo)','#voice-ov markup/CSS'],
+      changes: [
+        'Sub-agent read-only boundary is enforced at execution time: blocked mutating tools (dashboard/repository/connector writes, scheduling, memory writes, plans) are stripped from advertised schemas AND refused per-call, closing the gap where local or prompt-injected models emit tool names they were never given',
+        'Budget reservations settle exactly once: finishCloudChat, releaseCloudReservation, and finishFixedCloud honour a settled flag, so finish-then-release or duplicate callbacks can no longer double-decrement concurrent reservations or record spend after cancellation',
+        'Cross-device deletion tombstones ({id, ts} only, 90-day TTL, newest-wins, edit-beats-delete): recorded by all five delete sites (forget_memory by id and by query, memory row delete, delete-all, task delete), synced inside the encrypted vault payload, merged and filtered in mergeVaultPayload and applyVaultPayload — deleted memories/tasks no longer resurrect through the id-union merge; old app versions ignore the extra key safely',
+        'ai/tests/homebase.test.js: 45 deterministic checks that extract the real production functions into a sandbox — budget hard stop, unknown-pricing block, reservation idempotency, ledger hygiene, tier/floor routing, direct-before-OpenRouter, freshness-vs-mutation split, PR #71 failover cooldown skip/expiry, mobile WebLLM auto-skip, named/frontier requests, team caps, tombstone semantics, secret stripping, repoPath/validateSourceText/getBase origin pinning',
+        'Voice aesthetics: orb scale, glow halo, and the 28-bar waveform follow real audio levels — the cloud-capture analyser is shared with the meter, browser-SR listening gets a metering-only stream (skipped on iOS), and cloud TTS is tapped through an AudioContext wired only once confirmed running so playback can never be muted by a suspended context; aurora backdrop, level-driven particles, prefers-reduced-motion support, SVG icon controls',
+        'Voice capability: local zero-cost voice commands (stop/cancel, repeat that, new chat, pause, end voice mode — whole short utterances only); a repeat button; split captions showing your words, the streaming reply, and a per-reply plain-language route + estimated-cost line; the badge shows the active STT · TTS engine pair',
+        'Opt-in hands-free interruption (Settings → Voice, default off): a recognizer stays open while the assistant speaks, ignores echoes of the current reply (word-overlap guard) and utterances under three words; browser-SR only and disabled on iOS',
+        'All PR #75 contracts preserved verbatim and re-verified: one-tap deep-link gesture gate, blocked-answer recovery (Enable sound), free-device-first plans, tap-to-finish listening, background pause, dialog accessibility'
+      ],
+      safety_guards: [
+        'All FABLE_AUDIT_BRIEF invariants preserved: $50 rolling hard stop through the central reservation path, local-first routing, read-only sub-agents, draft-PR-only repository writes, official-origin key pinning, OAuth/passphrase never in the vault',
+        'Tombstones never contain deleted text — only ids and timestamps — inside the same AES-GCM payload',
+        'Voice commands run entirely locally (no model call, no spend); barge-in is off by default, never runs on iOS, and cannot start when muted',
+        'STT/TTS spending still flows through reserveFixedCloud/finishFixedCloud, now idempotent'
+      ],
+      verification: [
+        'node ai/tests/homebase.test.js: 45 passed, 0 failed (against the post-#79 codebase)',
+        'python3 .github/scripts/validate.py: all checks passed including the #75 mobile-voice harness, #71 failover, #73 selector, and #78 scheduled-routing suites; extracted scripts pass node --check',
+        '21-check Playwright smoke (headless Chromium): overlay lifecycle, listening, engine badge, live bars, SVG controls + preserved Enable-sound button, glow/aurora, meter attach, commands accept/reject/new-chat, captions, barge-in default-off/opt-in/stop, echo guard, mute round-trip, teardown, and the preserved ?voice=1 one-tap gate — no JS errors',
+        'First implementation (pre-rebase) was built against 28c12c8; after PRs #71–#79 landed mid-session the branch was restarted from 764f708 and the voice layer re-derived against the #75 engine rather than force-merged over it'
+      ],
+      setup_required: [
+        'Nothing new. Barge-in is opt-in under Settings → Voice; speech keys remain optional'
+      ],
+      known_limits: [
+        'The audio-reactive waveform falls back to CSS animation when no analyser exists (device TTS, iOS SR listening) — visual only',
+        'Barge-in has not been tested against a real Tesla cabin (speaker echo); it stays off unless David enables it',
+        'A deliberately deleted profile-seed memory could reappear on a device that never ran the seeder before the deletion; the LS_SEED applied-list makes this rare',
+        'The routing suite mocks provider/pricing tables (decision logic is real, catalog data is fixture) — price-drift issues still need the live catalog check'
+      ],
+      next_model: 'Keep node ai/tests/homebase.test.js AND the validate.py harnesses green; extend the suite for any routing/budget/team/vault/guard change. Remaining queue: stuck-UI recovery under team cancellation, route comprehension outside voice mode, ledger-vs-billing reconciliation, real-car barge-in echo test (ask David first).'
+    },
     {
       id: '2026-07-18-scheduled-agent-real-model-routing',
       date: '2026-07-18',
