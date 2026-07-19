@@ -2629,7 +2629,7 @@ var HOMEBASE_CHANGELOG = {
   current_handoff: {
     to: 'Fable',
     objective: 'Use FABLE_AUDIT_BRIEF.md to perform a high-signal architecture, security, reliability, and product audit; implement clear P0/P1 fixes and avoid redoing verified setup, smoke tests, or cosmetic work',
-    state: 'PRs #58–#69 are merged and live. Draft PR #71 (implementation commit 4d2c155) adds deterministic, request-time Automatic failover for missing keys and quota/auth/rate-limit/network/provider failures; merge and Pages status must still be recorded before calling it live. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, and simplified mobile/model-picker work is deployed. Static validation passes locally, including the new failover harness. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
+    state: 'PRs #58–#71 are merged and live. PR #71 (squash merge 35cbe23; implementation originated at 4d2c155) adds deterministic, request-time Automatic failover for missing keys and quota/auth/rate-limit/network/provider failures. Validate and Pages passed on main, and the public app was checked for the production failover functions and changelog entry; deployment status is documented by PR #72. FABLE_AUDIT_BRIEF.md remains the canonical next-session entrypoint. Routing, rolling-budget, specialist-team, guarded repository-write, encrypted-vault, direct-provider, LM Studio/MCP, xAI, credential-persistence, simplified mobile/model-picker, and automatic provider failover work is deployed. Google Drive consent/passphrase push-pull still requires the user on each device. Locally can use Mac models through LM Link, but Safari has no documented direct API to the iPhone app; secure remote HTTPS access remains an explicit future architecture choice.',
     start_here: [
       'FABLE_AUDIT_BRIEF.md — canonical priority order, verified facts, invariants, low-value exclusions, and deliverable contract',
       'Run python3 .github/scripts/validate.py, then use the single rg command in the brief to jump to the critical functions',
@@ -2678,9 +2678,9 @@ var HOMEBASE_CHANGELOG = {
     {
       id: '2026-07-18-automatic-provider-failover',
       date: '2026-07-18',
-      commit: '4d2c155 (implementation commit; lineage metadata follows in the same PR)',
+      commit: '35cbe23 (PR #71 squash merge; implementation originated at 4d2c155)',
       branch: 'agent/auto-provider-failover',
-      pull_request: '#71 (draft; implementation and deterministic validation complete, checks pending)',
+      pull_request: '#71 (merged 2026-07-18; live on GitHub Pages); deployment record #72',
       title: 'Keep Automatic chat working across missing keys and exhausted providers',
       type: 'fix+routing+reliability+budget+agents+tests+docs',
       depends_on: ['2026-07-18-direct-provider-router-v2','2026-07-18-agent-orchestrator','2026-07-18-cloud-key-debounced-persistence','2026-07-18-fable-audit-brief'],
@@ -2704,7 +2704,8 @@ var HOMEBASE_CHANGELOG = {
       verification: [
         'node .github/scripts/test_ai_failover.js passes missing-key skip, OpenAI quota to xAI continuation, provider cooldown, no-provider Demo, no retry after partial output, and six-attempt-bound cases',
         'python3 .github/scripts/validate.py parses root and AI JavaScript, validates the embedded cache, compiles the updater, and runs the failover harness',
-        'git diff --check passes; no live or paid provider request was made'
+        'git diff --check passes; no live or paid provider request was made',
+        'PR #71 Validate passed; main Validate and Pages deployment passed for 35cbe23; the public Pages HTML contains autoFailurePolicy, buildAutoFailoverPlan, runChatAttempt, and this changelog entry'
       ],
       setup_required: [
         'Configure and fund at least one cloud provider or make a local runtime reachable for genuine AI answers; otherwise Homebase deliberately falls back to Demo',
