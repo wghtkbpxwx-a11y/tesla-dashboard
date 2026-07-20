@@ -168,6 +168,10 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 .fc-mini .fc-day{font-family:var(--fd);text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);font-size:10px;font-weight:800}
 .fc-mini .fc-ico{font-size:18px;color:var(--t1);display:flex}
 .fc-mini .fc-temps{color:var(--t1)}
+/* Wide screens (the car display): spread the 5-day strip across the full width
+   instead of a left-hugging scroll, so the Live panel reads as one balanced
+   composition. Mobile keeps the horizontal scroll (base rule above). */
+@media(min-width:761px){.live-forecast-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:10px;overflow:visible}.live-forecast-row .fc-mini{flex-shrink:1}}
 /* Weather instrument panel — sits in the right column of the hero grid */
 .live-hero-weather{grid-area:weather;display:flex;align-items:center;gap:14px;cursor:pointer;padding:14px 18px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);min-height:96px;min-width:200px;transition:background .18s,border-color .18s,transform .18s;position:relative;overflow:hidden}
 .live-hero-weather::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:.55}
@@ -1119,7 +1123,7 @@ body[data-mode="charging"] .charge-session{
       <!-- Three equal reach targets — Voice is the filled primary -->
       <div class="command-actions" aria-label="Quick actions">
         <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read weather, headlines and scores aloud">Briefing</button>
-        <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
+        <a class="command-action voice" href="ai/?voice=1" title="Open Homebase — your full AI assistant (the corner orb handles quick voice)">Homebase</a>
         <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Full-screen glance view">Glance</button>
       </div>
 
