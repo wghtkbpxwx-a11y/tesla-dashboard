@@ -185,6 +185,11 @@ def check_subagent_allowlist():
     check_node_harness(".github/scripts/test_subagent_allowlist.js", "Sub-agent tool allowlist tests")
 
 
+def check_connectors_voice():
+    """Dashboard brief helpers, Gmail MIME encode, and voice connector controls."""
+    check_node_harness(".github/scripts/test_connectors_voice.js", "Connectors + voice read/write harness")
+
+
 def check_cloud_budget_concurrency():
     """Parallel reservations must honor the $50 hard stop and settle without double-count."""
     check_node_harness(".github/scripts/test_cloud_budget_concurrency.js", "Cloud budget concurrency tests")
@@ -222,6 +227,7 @@ def main():
     check_voice_mode()
     check_scheduled_agent_routing()
     check_subagent_allowlist()
+    check_connectors_voice()
     check_cloud_budget_concurrency()
     check_vault_merge()
     check_specialist_team()

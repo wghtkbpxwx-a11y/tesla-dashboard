@@ -241,8 +241,9 @@ Agent can pin notes and toggle widgets via `update_dashboard` / speech.
 - **Multimodal** — images (upload, paste, drag-drop, camera) to vision models;
   PDFs natively to Claude / Gemini / OpenAI; text/code files inlined; voice in
   and out.
-- **Voice mode** — cinematic neural voice UI (rings, particle field, waveform bars) with hands-free listen → think → speak. Tap the orb to interrupt. Browser speech APIs by default; optional OpenAI Whisper/TTS or ElevenLabs Flash/Scribe (Settings → Voice).
-- **Agent tools** (wrench or `/tools`) — weather, web search, page reader, Wikipedia, calculator, clock, research (search+read), news, plan tools, memory CRUD, schedule tasks, dashboard mutation, and guarded repository read/search/draft-PR tools. Inline tool cards + plan board.
+- **Voice mode** — cinematic neural voice UI with hands-free listen → think → speak. Tap the orb to interrupt. Shortcut chips (**Brief / Traffic / Inbox / Pin**) and spoken commands (“brief me”, “traffic”, “inbox”) pull live connector data without a model round-trip. Browser speech APIs by default; optional OpenAI Whisper/TTS or ElevenLabs Flash/Scribe (Settings → Voice).
+- **Connectors** — Tier labels: **Live read** / **Read/Write** / **Link** / **Path**. Tesla Dashboard `brief|traffic|news|pharmacy` reads `DASHBOARD_CACHE`. **Gmail** uses Google OAuth (same Client ID as Drive) for inbox/search plus confirm-guarded send. Calendar reads a secret iCal URL. Drive vault push/pull. Notes scratchpad read/write/append. Link cards only open sites.
+- **Agent tools** (wrench or `/tools`) — weather, web search, page reader, Wikipedia, calculator, clock, research (search+read), news, plan tools, memory CRUD, schedule tasks, dashboard mutation, connectors (`list_connectors` / `read_connector` / `use_connector`), and guarded repository read/search/draft-PR tools. Inline tool cards + plan board.
 - **Memory** — neural memory store with categories, importance, pins, search, smart injection, and auto-extract. 🧠 panel or agent tools.
 - **Scheduled tasks** — daily / weekly / every-N-minutes / one-off prompts
   that run automatically, post results to a dedicated ⏰ chat and fire a

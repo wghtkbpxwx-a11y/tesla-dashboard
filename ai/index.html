@@ -1524,6 +1524,14 @@ body.is-desktop .chat-float[data-state="open"]{
 #v-ctl .v-btn:hover{border-color:rgba(255,255,255,.28); transform:scale(1.05); background:rgba(255,255,255,.09)}
 #v-ctl .v-btn.on{background:rgba(84,150,255,.2); border-color:rgba(120,170,255,.45)}
 #v-ctl .v-btn.end{background:rgba(232,72,96,.92); border-color:transparent}
+#v-quick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px;max-width:520px}
+#v-quick .v-chip{
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:rgba(234,241,255,.9);
+  border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:600;min-height:36px;cursor:pointer;
+  transition:background .15s ease, border-color .15s ease, transform .12s ease
+}
+#v-quick .v-chip:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.28)}
+#v-quick .v-chip:active{transform:scale(.97)}
 #v-hint{font-size:12px; color:rgba(190,205,240,.4); margin-top:2px; max-width:520px; line-height:1.5}
 @media(max-width:520px){
   .v-stage{gap:18px}
@@ -3157,7 +3165,13 @@ body.is-mobile.chat-open #dash-scroll{
       <button class="v-btn" id="v-again" title="Repeat the last reply" aria-label="Repeat the last reply"></button>
       <button class="v-btn end" id="v-end" title="End voice mode">✕</button>
     </div>
-    <div id="v-hint">Tap the orb to interrupt · conversation is saved to the chat</div>
+    <div id="v-quick" role="group" aria-label="Voice connector shortcuts">
+      <button type="button" class="v-chip" data-v-act="brief">Brief</button>
+      <button type="button" class="v-chip" data-v-act="traffic">Traffic</button>
+      <button type="button" class="v-chip" data-v-act="inbox">Inbox</button>
+      <button type="button" class="v-chip" data-v-act="pin">Pin note</button>
+    </div>
+    <div id="v-hint">Say “brief me”, “traffic”, or “inbox” · or tap a chip · tap the orb to interrupt</div>
   </div>
 </div>
 
@@ -3293,7 +3307,7 @@ body.is-mobile.chat-open #dash-scroll{
   <div class="modal wide">
     <div class="mo-head"><h2>Connectors</h2><button class="icon-btn" data-close="connectors-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="mo-body">
-      <div class="conn-banner"><b>Built for David.</b> Curated for David: Budget Project, Monarch, pharmacy refs, ICBC/Tesla, teams, AI tools, and an encrypted Drive vault. Toggle only what you use.</div>
+      <div class="conn-banner"><b>Live vs link.</b> Cards tagged <b>Live read</b> / <b>Read/Write</b> pull or mutate real data (Tesla Dashboard cache, Gmail OAuth, Calendar iCal, Drive vault, notes). <b>Link</b> cards only open sites. Gmail: set the OAuth Client ID under Drive, enable Gmail API in Google Cloud for that client, then tap <b>Connect Gmail</b>. Sends always ask for confirmation.</div>
       <div id="conn-grid" class="conn-grid"></div>
     </div>
   </div>
@@ -3647,7 +3661,11 @@ var UI_MODES = [
     color: '#38bdf8',
     grad: 'linear-gradient(145deg,#38bdf8,#0284c7)',
     placeholder: 'Tap Voice to start, or type…',
-    apply: function(){ /* launch handled separately */ }
+    apply: function(){
+      var c = ensureConvo();
+      c.toolsOn = true;
+      try { updateToolsBtn(); persistConvo(c); } catch(e){}
+    }
   },
   {
     id: 'agent',
@@ -4192,8 +4210,9 @@ var HOMEBASE_CHANGELOG = {
     'The next model must read current_handoff plus the newest entries before scoping or editing'
   ],
   current_handoff: {
-    to: 'next model',
-    objective: 'Design-depth pass on cursor/design-depth-de9b: clock-first Live gravity, floating header island, sliding dock pill, Drive-scale/Charging-priority, quiet Now line, edge-fade rails, lead-story emphasis. Homebase Messages rhythm + composer-as-product. Finance Wallet hero. No capabilities removed. Preserve DASHBOARD_CACHE, voice entry points, query-model disclosure, vault/budget/routing.',
+    to: 'next model / David morning check',
+    objective: 'Connectors + Voice read/write on cursor/connectors-voice-rw-de9b: Gmail OAuth inbox+confirm-send, dashboard brief/traffic from real cache, voice chips/commands. David: enable Gmail API + Connect Gmail after merge.',
+    connectors_voice_rw_2026_07_20: 'THIS PASS. Gmail nova_gmail_auth_v1 (readonly+send), dashboard brief|traffic|news|pharmacy with flattenNews/DriveBC incidents, notes append, voice Brief/Traffic/Inbox/Pin + local commands, connector capability labels. Sub-agents still blocked from use_connector. OAuth tokens never vaulted.',
     design_depth_2026_07_20: 'THIS PASS. Structural+CSS on /, /ai/, /finance/. Live hero reordered: clock/weather → Now line → actions → charge → mode. Dock #dock-pill slides under active tab (syncDockPill on goPanel/resize/applyDockOrder). Drive hides mode+forecast+freshness and enlarges Voice; Charging lifts timer. Freshness reload glyph reveals on hover/focus. Feed lead story + quieter meta. Homebase empty-state breathing, message gap, composer thumb focus. Finance Wallet hero + quieter empty import. IDs preserved: now-title, now-detail, mode-status, fresh-chip, command-actions, dock-pill.',
     apple_simplicity_2026_07_20: 'THIS PASS. CSS-first quiet instrument UI across /, /ai/, /finance/ on branch cursor/apple-tesla-ui-de9b. Dashboard: frosted header island for date/weather/stocks; iOS segmented Drive|Parked|Charging + news tabs; soft dock selected state (accent-soft fill, not mint brick); Voice remains sole solid CTA; Briefing/Glance quiet; flattened cockpit-command nesting; Large Title sec-titles; spring press; cam-dot ::before-only (44px hit targets preserved). Homebase: frosted topbar, segmented mode pills with elevated active, spring FAB/send, iMessage bubble radii, mobile sheet grabber, composer focus ring. Finance: quiet labels (no shouty uppercase), thinner budget tracks, pill action bar with soft Sync primary, Wallet-like hero numbers. Copy: dashboard brand-sub Home; Homebase brand.sub Home. Verified: extract+node --check; cache JSON; voice entry points ≥4.',
     ux_optimization_2026_07_20: 'THIS PASS. ai/index.html only. HTML: added `<button id="query-model-toggle" aria-controls="query-model-control" aria-expanded="false">Next model</button>` before `#query-model-control` inside `#comp-hint`, added `hidden` to `#query-model-control`, and swapped `style="display:none"` on `#hint-tools`/`#hint-council` for the `hidden` attribute + aria-hidden. JS: new `applyQueryModelDisclosure()` helper (progressive disclosure — show when override OR select currently focused, override state renders "Next: <label>"), refreshQueryModelSelect() now calls it, initQueryModelSelect() wires the toggle click (unhide → focus → showPicker) and a delayed 180 ms select-blur collapse; updateHints() no longer touches hint-tools/hint-council `style.display` but keeps state accurate via `dataset.on`. CSS: one appended UX OPTIMIZATION block at the end of `<style>` — `#query-model-toggle` chip (dashed border, 30/36 px min-height, hidden when open), `#hint-tools/#hint-council{display:none !important}`, mobile `.cf-modes` scroll-snap + mask-image edge fade + 44 px snap pills, `#chat-scroll` flex:1 + `#composer-wrap` flex:none with safe-area padding, `#jump-btn` 44×44 bumped clear of the composer, mobile `#sync-pill` un-hidden as compact 36 px ellipsis chip with a <380 px narrower fallback, and a desktop-only `@media (min-width:901px)` composer gap bump (10 px + 2 px left margin on send). Preserved IDs: query-model-control, query-model-select, hint-tools, hint-council, hint-model, hint-tokens, chat-scroll, jump-btn, composer, composer-wrap, cf-modes, sync-pill, mic-btn, send-btn, attach-btn, voice-btn (stashed), council-btn (stashed). Retains: every prior 2026-07-20 fix (calm typography, functional excellence, hot-rod cockpit) untouched. Verified: python3 extract-scripts + node --check clean; python3 .github/scripts/validate.py green.',
@@ -4208,9 +4227,11 @@ var HOMEBASE_CHANGELOG = {
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
     voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
     app_ui_polish_2026_07_20: 'Earlier same-day token polish (indigo aurora calm-down). Superseded for palette by cockpit_wave0_2026_07_20 teal system; elevation/type lessons still apply.',
-    state: 'Design-depth UI on branch cursor/design-depth-de9b. Prior apple-simplicity + UX optimization retained.',
-    latest_fix: 'Design depth — clock-first Live, sliding dock pill, Drive/Charging behaviour, Messages-like Homebase, Wallet Finance hierarchy.',
+    state: 'PR #104 open (draft) on cursor/connectors-voice-rw-de9b — awaiting review/merge + Gmail API setup.',
+    latest_fix: 'Connectors + Voice read/write (Gmail OAuth, dashboard brief/traffic, voice chips).',
     start_here: [
+      'HOMEBASE_CHANGELOG entry 2026-07-20-connectors-voice-rw',
+      'Connectors → Drive Client ID → Connect Gmail; enable Gmail API',
       'HOMEBASE_FINANCE_EXCELLENCE_PLAN.md — Wave inventory for /ai/ and /finance/',
       'DASHBOARD_EXCELLENCE_PLAN.md — Tesla dashboard waves (cache.json still highest leverage)',
       'FABLE_AUDIT_BRIEF.md — verified P0/P1 security packages; do not re-audit without evidence',
@@ -4240,7 +4261,8 @@ var HOMEBASE_CHANGELOG = {
       'Financial balances, transactions, statements, credentials, and detailed bundles never enter the public repository',
       'Voice deep links require one deliberate media tap; device-only remains no-spend, Automatic remains free-device-first, premium speech stays inside the rolling guard, and a blocked answer is replayed without another model call',
       'SUBAGENT_BLOCKED_TOOLS is enforced at schema AND execution time; vault tombstones carry only {id, ts}; keep validate.py harnesses and ai/tests/homebase.test.js passing — they extract real production functions, so drift fails loudly',
-      'Tesla wordmark on the main dashboard; shared teal cockpit craft across apps without claiming Tesla mic support'
+      'Tesla wordmark on the main dashboard; shared teal cockpit craft across apps without claiming Tesla mic support',
+      'Gmail send ALWAYS uses browser confirm; nova_gmail_auth_v1 stays device-local and never enters the vault'
     ]
   },
   how_to_read: [
@@ -4265,6 +4287,55 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-connectors-voice-rw',
+      date: '2026-07-20',
+      commit: '561a97b',
+      branch: 'cursor/connectors-voice-rw-de9b',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/104',
+      title: 'Connectors + Voice read/write — Gmail OAuth, dashboard brief/traffic, voice chips',
+      type: 'feat+connectors+voice',
+      depends_on: ['2026-07-20-design-depth','2026-07-19-p0-security'],
+      reported_by: 'David: build connectors and voice with real read/write; write/send email; pull connector info.',
+      summary: 'Promoted Tier-A connectors to real data paths. Fixed Tesla Dashboard brief against actual DASHBOARD_CACHE shapes (weather current, feed dict news, DriveBC cam events). Added Gmail OAuth inbox read and confirm-guarded send reusing the Drive OAuth Client ID. Voice mode forces tools on, adds Brief/Traffic/Inbox/Pin chips and local spoken commands that call connectors without a model round-trip.',
+      files_changed: ['ai/index.html','.github/scripts/test_connectors_voice.js'],
+      interfaces_changed: [
+        'CONNECTOR_DEFS kind + gmail/dashboard/notes/drive/calendar actions',
+        'formatDashboardBrief/flattenTrafficIncidents/loadDashboardCacheForConnector',
+        'gmailRequestToken/gmailListMessages/gmailSendMessage/nova_gmail_auth_v1',
+        'runConnector dashboard/gmail/notes/drive',
+        'use_connector/read_connector/list_connectors tool schemas',
+        'voiceCommand/voiceRunConnector/voiceQuickAction/#v-quick',
+        'startVoiceMode toolsOn',
+        'HOMEBASE_CHANGELOG.current_handoff'
+      ],
+      behaviour: [
+        'dashboard brief includes weather, headlines, traffic incidents, teams, stocks',
+        'gmail inbox/search via Gmail API; send requires confirm()',
+        'Voice chips Brief/Traffic/Inbox call connectors directly; Pin routes through agent tools',
+        'Connectors UI shows Live read / Read/Write / Link / Path and Gmail Connect button'
+      ],
+      guards: [
+        'gmail send always confirm-guarded; OAuth tokens not vaulted',
+        'SUBAGENT_BLOCKED_TOOLS still includes use_connector',
+        'read_connector rejects send/write/append/push/pull',
+        'DASHBOARD_CACHE marker untouched; Drive vault scopes unchanged (drive.file only)'
+      ],
+      verification: ['extract+node --check','validate.py','test_connectors_voice.js','test_voice_mode.js','test_subagent_allowlist.js'],
+      setup: [
+        'Google Cloud: enable Gmail API on the same OAuth Web client as Drive',
+        'Authorized JS origin https://wghtkbpxwx-a11y.github.io',
+        'Connectors → paste Client ID under Drive → Connect Gmail'
+      ],
+      known_limits: [
+        'Calendar remains iCal read-only (no Google Calendar write yet)',
+        'Link-tier connectors (banks, Lexicomp, sports sites) still open URLs only',
+        'Voice email send still goes through the agent + confirm, not a local command',
+        'Car browser may lack mic; phone is the voice surface'
+      ],
+      dependencies: ['Existing Drive GIS OAuth Client ID'],
+      next_model: 'After merge, tell David to Connect Gmail and hard-reload. Optional follow-up: Calendar write, Tesla notes_v4 bridge, Gmail reply-all.'
+    },
     {
       id: '2026-07-20-design-depth',
       date: '2026-07-20',
@@ -5830,9 +5901,9 @@ var HOMEBASE_CHANGELOG = {
     },
     {
       id: 'plan-gmail-live',
-      title: 'Optional Gmail/Calendar OAuth widgets (beyond iCal/deep-links)',
-      status: 'idea',
-      notes: 'Needs Google Cloud OAuth scopes; keep privacy-first'
+      title: 'Gmail OAuth inbox + confirm-send (Calendar write still open)',
+      status: 'partial',
+      notes: 'Gmail shipped 2026-07-20-connectors-voice-rw; Calendar remains iCal read-only'
     },
     {
       id: 'plan-budget-sync',
@@ -6432,19 +6503,171 @@ function flattenNews(newsObj, limit){
   limit = limit || 8;
   var items = [];
   if (!newsObj) return items;
+  if (Array.isArray(newsObj)){
+    newsObj.forEach(function(it){
+      items.push({
+        title: (it && (it.title || it)) || '',
+        link: (it && (it.link || it.url)) || '',
+        source: (it && it.source) || '',
+        date: (it && (it.published || it.pubDate || it.date)) || ''
+      });
+    });
+    return items.slice(0, limit);
+  }
   Object.keys(newsObj).forEach(function(feed){
     var entry = newsObj[feed];
     var feedItems = Array.isArray(entry) ? entry : (entry && Array.isArray(entry.items) ? entry.items : []);
+    var host = String(feed).replace(/^https?:\/\//,'').split('/')[0];
     feedItems.forEach(function(it){
       items.push({
         title: it.title || it,
         link: it.link || it.url || '',
-        source: feed.replace(/^https?:\/\//,'').split('/')[0],
-        date: it.published || it.date || ''
+        source: it.source || host,
+        date: it.published || it.pubDate || it.date || ''
       });
     });
   });
   return items.slice(0, limit);
+}
+
+function flattenTrafficIncidents(cameras, limit){
+  limit = limit || 6;
+  var incidents = [];
+  (cameras || []).forEach(function(cam){
+    (cam.events || []).forEach(function(ev){
+      incidents.push({
+        road: ev.road || cam.name || ('Cam ' + cam.id),
+        cam: cam.name || ('Cam ' + cam.id),
+        type: ev.type || 'Event',
+        sev: ev.severity || '',
+        desc: ev.desc || '',
+        km: ev.km,
+        updated: ev.updated || ''
+      });
+    });
+  });
+  var rank = { MAJOR:0, major:0, MODERATE:1, moderate:1, MINOR:2, minor:2 };
+  incidents.sort(function(a, b){
+    var ra = rank[a.sev] != null ? rank[a.sev] : 5;
+    var rb = rank[b.sev] != null ? rank[b.sev] : 5;
+    return ra - rb;
+  });
+  return incidents.slice(0, limit);
+}
+
+function formatWeatherBrief(cache){
+  var w = (cache && cache.weather) || {};
+  var cur = w.current || w;
+  var temp = cur.temperature_2m != null ? cur.temperature_2m : cur.temp;
+  var feels = cur.apparent_temperature != null ? cur.apparent_temperature : cur.feels;
+  var code = cur.weather_code;
+  var cond = (typeof WMO_CODES !== 'undefined' && WMO_CODES[code]) ? WMO_CODES[code] : (cur.desc || '');
+  var loc = (S.settings && S.settings.homeLocation) || 'Surrey, BC';
+  if (temp == null && !cond) return '';
+  var line = 'Weather @ ' + loc + ':';
+  if (temp != null) line += ' ' + temp + '°C';
+  if (feels != null) line += ' (feels ' + feels + '°)';
+  if (cond) line += ' · ' + cond;
+  if (cur.relative_humidity_2m != null) line += ' · humidity ' + cur.relative_humidity_2m + '%';
+  if (cur.wind_speed_10m != null) line += ' · wind ' + cur.wind_speed_10m + ' km/h';
+  return line;
+}
+
+function formatScoresBrief(cache, limit){
+  limit = limit || 4;
+  var scores = (LIVE && LIVE.scores && LIVE.scores.length) ? LIVE.scores
+    : ((cache && cache.scores) || []);
+  if (!scores.length) return [];
+  return scores.slice(0, limit).map(function(g){
+    var home = g.home || {}, away = g.away || {};
+    var line = (g.team || g.league || 'Game') + ': ' +
+      (away.abbr || away.name || '?') + ' ' + (away.score != null ? away.score : '-') +
+      ' @ ' + (home.abbr || home.name || '?') + ' ' + (home.score != null ? home.score : '-');
+    if (g.status || g.state) line += ' (' + (g.status || g.state) + ')';
+    return line;
+  });
+}
+
+function formatStocksBrief(cache, limit){
+  limit = limit || 6;
+  var stocks = (cache && cache.stocks) || {};
+  var keys = Object.keys(stocks).slice(0, limit);
+  return keys.map(function(k){
+    var p = stockPrice(stocks[k]);
+    if (!p || p.price == null) return k;
+    return k + ' ' + (typeof p.price === 'number' ? p.price.toFixed(p.price < 5 ? 4 : 2) : p.price);
+  }).filter(Boolean);
+}
+
+function formatDashboardBrief(cache, opts){
+  opts = opts || {};
+  var lines = ['Tesla Dashboard snapshot (' + ((cache && cache.updated) || 'unknown time') + ')'];
+  var wx = formatWeatherBrief(cache);
+  if (wx) lines.push(wx);
+  if (!opts.skipNews){
+    var news = flattenNews(cache && cache.news, opts.newsLimit || 5);
+    if (news.length){
+      lines.push('Headlines:');
+      news.forEach(function(n, i){ lines.push('  ' + (i + 1) + '. ' + n.title + (n.source ? ' (' + n.source + ')' : '')); });
+    }
+  }
+  if (!opts.skipTraffic){
+    var traffic = flattenTrafficIncidents(cache && cache.cameras, opts.trafficLimit || 4);
+    if (traffic.length){
+      lines.push('Traffic:');
+      traffic.forEach(function(inc){
+        lines.push('  • ' + (inc.sev ? inc.sev + ' · ' : '') + inc.road + ' — ' +
+          String(inc.desc || inc.type).slice(0, 110) +
+          (inc.km != null ? ' (~' + inc.km + ' km from ' + inc.cam + ')' : ''));
+      });
+    } else {
+      lines.push('Traffic: no DriveBC events near favourited cams in cache.');
+    }
+  }
+  if (!opts.skipSports){
+    var scores = formatScoresBrief(cache, 4);
+    if (scores.length){
+      lines.push('My teams:');
+      scores.forEach(function(s){ lines.push('  • ' + s); });
+    } else {
+      var sports = flattenNews(cache && cache.sports, 3);
+      if (sports.length){
+        lines.push('Sports:');
+        sports.forEach(function(s){ lines.push('  • ' + s.title); });
+      }
+    }
+  }
+  if (!opts.skipStocks){
+    var stk = formatStocksBrief(cache, 6);
+    if (stk.length) lines.push('Stocks: ' + stk.join(' · '));
+  }
+  if (opts.includePharmacy){
+    var ph = flattenNews(cache && cache.pharmacy, 3);
+    if (ph.length){
+      lines.push('Pharmacy / clinical:');
+      ph.forEach(function(p){ lines.push('  • ' + p.title + (p.source ? ' (' + p.source + ')' : '')); });
+    }
+  }
+  return lines.join('\n');
+}
+
+async function loadDashboardCacheForConnector(cfg){
+  if (DASH.cache && DASH.updated && (Date.now() - DASH.updated) < 5 * 60 * 1000) return DASH.cache;
+  try {
+    await fetchDashboardCache();
+    if (DASH.cache) return DASH.cache;
+  } catch(e){}
+  var base = ((cfg && cfg.url) || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/').replace(/\/?$/, '/');
+  var html = await withTimeout(function(sig){
+    return fetch(base, {signal:sig, mode:'cors', cache:'no-store'}).then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status); return r.text();
+    });
+  }, 12000);
+  var m = html.match(/var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n/);
+  if (!m) throw new Error('Dashboard reachable but cache block not found. Open: ' + base);
+  var cache = JSON.parse(m[1]);
+  DASH.cache = cache; DASH.updated = Date.now();
+  return cache;
 }
 
 async function fetchDashboardCache(){
@@ -7101,11 +7324,12 @@ var CONNECTOR_DEFS = [
   /* —— Life OS / home —— */
   {
     id: 'dashboard', name: 'Tesla Dashboard', category: 'Home',
-    desc: 'In-car HQ: weather, traffic cams, sports, watchlist.',
+    desc: 'Live read from DASHBOARD_CACHE — weather, news, traffic, sports, stocks.',
     icon: 'car', grad: 'linear-gradient(145deg,#1fb8a8,#0f766e)',
+    kind: 'data',
     fields: [{key:'url', label:'URL', placeholder:'https://…/tesla-dashboard/', secret:false}],
     defaults: { on:true, url:'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/' },
-    actions: ['brief']
+    actions: ['brief','traffic','news','pharmacy','status']
   },
   {
     id: 'family', name: 'Family Command Center', category: 'Home',
@@ -7119,14 +7343,16 @@ var CONNECTOR_DEFS = [
     id: 'tasks', name: 'Homebase rituals', category: 'Home',
     desc: 'Scheduled Homebase prompts & reminders.',
     icon: 'tasks', grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
+    kind: 'data',
     fields: [], defaults: { on:true }, actions: ['list']
   },
   {
     id: 'notes', name: 'Quick notes', category: 'Home',
-    desc: 'Local scratchpad in this browser only.',
+    desc: 'Local scratchpad — agent can read and overwrite.',
     icon: 'memory', grad: 'linear-gradient(145deg,#f59e0b,#b45309)',
+    kind: 'mutate',
     fields: [{key:'pad', label:'Scratchpad', placeholder:'Ideas…', secret:false}],
-    defaults: { on:true, pad:'' }, actions: ['read','write']
+    defaults: { on:true, pad:'' }, actions: ['read','write','append']
   },
 
   /* —— Money (your real stack) —— */
@@ -7321,28 +7547,31 @@ var CONNECTOR_DEFS = [
   /* —— Google workspace you already use —— */
   {
     id: 'gmail', name: 'Gmail', category: 'Google',
-    desc: 'Compose / search deep-links.',
+    desc: 'OAuth inbox read + confirm-guarded send. Reuses the Drive OAuth Client ID.',
     icon: 'mail', grad: 'linear-gradient(145deg,#f87171,#dc2626)',
-    fields: [{key:'email', label:'Address', placeholder:'you@gmail.com', secret:false}],
-    defaults: { on:true, email:'' }, actions: ['compose','search']
+    kind: 'mutate',
+    fields: [{key:'email', label:'From address (optional)', placeholder:'you@gmail.com', secret:false}],
+    defaults: { on:true, email:'' }, actions: ['status','inbox','search','send','compose']
   },
   {
     id: 'calendar', name: 'Google Calendar', category: 'Google',
-    desc: 'Live dashboard events need a secret iCal URL (Calendar → Settings → Integrate calendar).',
+    desc: 'Read upcoming events from a secret iCal URL (Calendar → Settings → Integrate calendar).',
     icon: 'calendar', grad: 'linear-gradient(145deg,#60a5fa,#2563eb)',
+    kind: 'data',
     fields: [{key:'ical', label:'Secret iCal URL', placeholder:'https://calendar.google.com/calendar/ical/…/basic.ics', secret:false}],
-    defaults: { on:true, ical:'' }, actions: ['open','upcoming']
+    defaults: { on:true, ical:'' }, actions: ['upcoming','open']
   },
   {
     id: 'drive', name: 'Google Drive vault', category: 'Google',
-    desc: 'Encrypted Homebase sync across phone and desktop.',
+    desc: 'Encrypted Homebase sync across phone and desktop. Client ID also powers Gmail OAuth.',
     icon: 'cloud', grad: 'linear-gradient(145deg,#fbbf24,#d97706)',
+    kind: 'mutate',
     fields: [
       {key:'clientId', label:'OAuth Client ID', placeholder:'….apps.googleusercontent.com', secret:false},
       {key:'fileName', label:'Vault file', placeholder:'homebase-memory.vault.json', secret:false}
     ],
     defaults: { on:true, clientId:'', fileName:'homebase-memory.vault.json', autoSync:true, syncSecrets:true, fileId:'' },
-    actions: ['search','push','pull']
+    actions: ['status','push','pull','search']
   },
   {
     id: 'icloud', name: 'iCloud.com', category: 'Google',
@@ -7504,8 +7733,19 @@ function renderConnectors(){
       qs('.cc-ico', card).textContent = def.icon;
     }
     qs('.cc-title', card).textContent = def.name;
-    qs('.cc-desc', card).textContent = def.desc;
-    qs('.cc-status', card).textContent = st.on ? 'Connected' : 'Off';
+    var kind = def.kind || (def.actions && def.actions.indexOf('open') === 0 && def.actions.length === 1 ? 'link' : '');
+    if (!kind){
+      if (def.id === 'family' || def.id === 'work_pharmacy' || def.id === 'mythic') kind = 'path';
+      else if (connectorOpenUrl(def.id) && !(def.actions || []).some(function(a){ return a !== 'open' && a !== 'status'; })) kind = 'link';
+      else kind = 'data';
+    }
+    var kindLabel = kind === 'mutate' ? 'Read/Write' : kind === 'data' ? 'Live read' : kind === 'path' ? 'Path' : 'Link';
+    qs('.cc-desc', card).textContent = '[' + kindLabel + '] ' + def.desc;
+    var gmailReady = def.id === 'gmail' && !!gmailAccessToken();
+    qs('.cc-status', card).textContent = !st.on ? 'Off'
+      : (def.id === 'gmail' ? (gmailReady ? 'Gmail connected' : (gmailClientId() ? 'OAuth ready — connect' : 'Needs Drive Client ID'))
+      : (def.id === 'drive' ? ((st.clientId || '').trim() ? 'Client ID set' : 'Needs Client ID')
+      : (st.on ? 'Enabled' : 'Off')));
     var fields = qs('[data-fields]', card);
     (def.fields || []).forEach(function(f){
       var inp = document.createElement('input');
@@ -7532,6 +7772,30 @@ function renderConnectors(){
       testBtn.disabled = false; testBtn.textContent = 'Test';
     });
     acts.appendChild(testBtn);
+    if (def.id === 'gmail'){
+      var gBtn = document.createElement('button');
+      gBtn.className = 'sm-btn pri'; gBtn.type = 'button';
+      gBtn.textContent = gmailAccessToken() ? 'Reconnect' : 'Connect Gmail';
+      gBtn.addEventListener('click', async function(){
+        gBtn.disabled = true; gBtn.textContent = '…';
+        try {
+          await gmailRequestToken(true);
+          toast('Gmail connected — inbox read + confirm-guarded send', 'ok', 3600);
+          renderConnectors();
+        } catch(e){ toast(e.message || String(e), 'err', 4200); gBtn.disabled = false; gBtn.textContent = 'Connect Gmail'; }
+      });
+      acts.appendChild(gBtn);
+      if (gmailAccessToken()){
+        var disc = document.createElement('button');
+        disc.className = 'sm-btn'; disc.type = 'button'; disc.textContent = 'Disconnect';
+        disc.addEventListener('click', function(){
+          saveGmailAuth(null);
+          toast('Gmail disconnected on this device', 'ok');
+          renderConnectors();
+        });
+        acts.appendChild(disc);
+      }
+    }
     var pathIds = {budget:1, family:1, work_pharmacy:1, mythic:1};
     if (connectorOpenUrl(def.id) || pathIds[def.id]){
       var openBtn = document.createElement('button');
@@ -7627,41 +7891,40 @@ async function runConnector(id, action, args){
   action = (action || 'status').toLowerCase();
 
   if (id === 'dashboard'){
-    var base = (cfg.url || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/').replace(/\/?$/, '/');
     try {
-      var html = await withTimeout(function(sig){
-        return fetch(base, {signal:sig, mode:'cors'}).then(function(r){
-          if (!r.ok) throw new Error('HTTP ' + r.status); return r.text();
-        });
-      }, 12000);
-      var m = html.match(/var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n/);
-      if (!m) return 'Dashboard reachable but cache block not found. Open: ' + base;
-      var cache = JSON.parse(m[1]);
-      var lines = ['Tesla Dashboard snapshot (' + (cache.updated || 'unknown time') + ')'];
-      if (cache.weather){
-        var w = cache.weather;
-        lines.push('Weather: ' + (w.temp != null ? w.temp + '°' : '') + (w.desc ? ' ' + w.desc : '') + (w.location ? ' @ ' + w.location : ''));
+      var cache = await loadDashboardCacheForConnector(cfg);
+      if (action === 'traffic'){
+        var incidents = flattenTrafficIncidents(cache.cameras, 8);
+        if (!incidents.length) return 'No DriveBC events near cached cameras (' + ((cache.cameras || []).length) + ' cams). Cache: ' + (cache.updated || '?');
+        return 'Traffic near favourites (' + (cache.updated || '?') + '):\n' + incidents.map(function(inc){
+          return '• ' + (inc.sev ? '[' + inc.sev + '] ' : '') + inc.road + ' — ' + String(inc.desc || inc.type).slice(0, 140) +
+            (inc.km != null ? ' (~' + inc.km + ' km)' : '');
+        }).join('\n');
       }
-      if (cache.news && cache.news.length){
-        lines.push('Headlines:');
-        cache.news.slice(0, 5).forEach(function(n, i){ lines.push('  ' + (i+1) + '. ' + (n.title || n)); });
+      if (action === 'news'){
+        var headlines = flattenNews(cache.news, 8);
+        if (!headlines.length) return 'No headlines in dashboard cache.';
+        return 'Headlines (' + (cache.updated || '?') + '):\n' + headlines.map(function(n, i){
+          return (i + 1) + '. ' + n.title + (n.source ? ' — ' + n.source : '') + (n.link ? '\n   ' + n.link : '');
+        }).join('\n');
       }
-      if (cache.sports && cache.sports.length){
-        lines.push('Sports:');
-        cache.sports.slice(0, 4).forEach(function(s){ lines.push('  • ' + (s.title || JSON.stringify(s))); });
+      if (action === 'pharmacy'){
+        var pharm = flattenNews(cache.pharmacy, 6);
+        if (!pharm.length) return 'No pharmacy/clinical RSS in dashboard cache.';
+        return 'Clinical / pharmacy feeds (' + (cache.updated || '?') + '):\n' + pharm.map(function(n, i){
+          return (i + 1) + '. ' + n.title + (n.source ? ' — ' + n.source : '');
+        }).join('\n');
       }
-      if (cache.stocks){
-        var keys = Object.keys(cache.stocks).slice(0, 6);
-        if (keys.length){
-          lines.push('Stocks: ' + keys.map(function(k){
-            var v = cache.stocks[k];
-            return k + (v && v.price != null ? ' ' + v.price : '');
-          }).join(' · '));
-        }
+      if (action === 'status'){
+        return 'Dashboard cache ' + (cache.updated || 'unknown') +
+          ' · cams ' + ((cache.cameras || []).length) +
+          ' · news feeds ' + (cache.news && typeof cache.news === 'object' ? Object.keys(cache.news).length : 0) +
+          ' · scores ' + ((cache.scores || []).length);
       }
-      return lines.join('\n');
+      /* brief (default) */
+      return formatDashboardBrief(cache, { includePharmacy: /pharmacy|clinical|rx/i.test(String(args.query || '')) });
     } catch(e){
-      return 'Error reading dashboard: ' + e.message + ' — URL: ' + base;
+      return 'Error reading dashboard: ' + e.message + ' — URL: ' + ((cfg.url || 'https://wghtkbpxwx-a11y.github.io/tesla-dashboard/'));
     }
   }
 
@@ -7693,15 +7956,34 @@ async function runConnector(id, action, args){
   }
 
   if (id === 'gmail'){
-    if (action === 'compose' || args.to || args.subject || args.body){
-      var params = [];
-      if (args.to) params.push('to=' + encodeURIComponent(args.to));
-      if (args.subject) params.push('su=' + encodeURIComponent(args.subject));
-      if (args.body) params.push('body=' + encodeURIComponent(args.body));
-      return 'Gmail compose link:\nhttps://mail.google.com/mail/?view=cm&fs=1' + (params.length ? '&' + params.join('&') : '');
+    if (action === 'compose'){
+      var cparams = [];
+      if (args.to) cparams.push('to=' + encodeURIComponent(args.to));
+      if (args.subject) cparams.push('su=' + encodeURIComponent(args.subject));
+      if (args.body) cparams.push('body=' + encodeURIComponent(args.body));
+      return 'Gmail compose link:\nhttps://mail.google.com/mail/?view=cm&fs=1' + (cparams.length ? '&' + cparams.join('&') : '');
     }
-    var q = args.query || 'is:inbox';
-    return 'Gmail search link:\nhttps://mail.google.com/mail/u/0/#search/' + encodeURIComponent(q);
+    try {
+      if (action === 'status') return await gmailStatus();
+      if (action === 'send'){
+        return await gmailSendMessage({
+          to: args.to,
+          subject: args.subject,
+          body: args.body || args.text,
+          from: args.from || cfg.email
+        });
+      }
+      var gq = (action === 'search' && (args.query || args.q))
+        ? String(args.query || args.q).trim()
+        : (args.query ? String(args.query).trim() : 'is:inbox newer_than:7d');
+      if (!gq) gq = 'is:inbox newer_than:7d';
+      return await gmailListMessages(gq, Math.min(12, Math.max(3, +args.limit || 8)));
+    } catch(e){
+      var fallbackQ = args.query || 'is:inbox';
+      return 'Gmail API error: ' + (e.message || e) +
+        '\nFallback search link:\nhttps://mail.google.com/mail/u/0/#search/' + encodeURIComponent(fallbackQ) +
+        '\nSetup: Connectors → Google Drive Client ID + Connect Gmail; enable Gmail API on that OAuth client.';
+    }
   }
 
   if (id === 'calendar'){
@@ -7719,6 +8001,15 @@ async function runConnector(id, action, args){
   }
 
   if (id === 'drive'){
+    if (action === 'status'){
+      var hasCid = !!(cfg.clientId || '').trim();
+      var tok = driveAccessToken();
+      return 'Drive vault: ' + (hasCid ? 'Client ID set' : 'missing OAuth Client ID') +
+        ' · token ' + (tok ? 'ready' : 'not connected') +
+        ' · file ' + (cfg.fileName || 'homebase-memory.vault.json') +
+        ' · autoSync ' + (cfg.autoSync ? 'on' : 'off') +
+        ' · Gmail OAuth uses this same Client ID';
+    }
     if (action === 'push' || action === 'sync'){
       try { await vaultPushToDrive(); return 'Encrypted vault pushed to Google Drive.'; }
       catch(e){ return 'Error: ' + (e.message || e); }
@@ -7802,10 +8093,16 @@ async function runConnector(id, action, args){
   }
 
   if (id === 'notes'){
-    if (action === 'write' && args.text){
-      cfg.pad = String(args.text);
+    if (action === 'write' && (args.text || args.body)){
+      cfg.pad = String(args.text || args.body);
       S.connectors.notes = cfg; saveConnectors();
       return 'Quick note saved (' + cfg.pad.length + ' chars).';
+    }
+    if (action === 'append' && (args.text || args.body)){
+      var add = String(args.text || args.body).trim();
+      cfg.pad = (cfg.pad ? String(cfg.pad).replace(/\s+$/, '') + '\n' : '') + add;
+      S.connectors.notes = cfg; saveConnectors();
+      return 'Appended to quick notes (' + cfg.pad.length + ' chars total).';
     }
     return cfg.pad ? ('Quick notes:\n' + cfg.pad) : 'Quick notes pad is empty.';
   }
@@ -8321,6 +8618,178 @@ async function driveGetToken(interactive){
   var t = driveAccessToken();
   if (t) return t;
   return driveRequestToken(!!interactive);
+}
+
+/* ---- Gmail OAuth (reuses Drive Client ID; separate token; never vaulted) ---- */
+var LS_GMAIL_AUTH = 'nova_gmail_auth_v1';
+var GMAIL_SCOPES = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send';
+
+function loadGmailAuth(){ return lsGet(LS_GMAIL_AUTH, null); }
+function saveGmailAuth(auth){
+  if (auth) lsSet(LS_GMAIL_AUTH, auth);
+  else try { localStorage.removeItem(LS_GMAIL_AUTH); } catch(e){}
+}
+function gmailAccessToken(){
+  var auth = loadGmailAuth();
+  if (!auth || !auth.access_token) return null;
+  if (auth.expires_at && Date.now() > auth.expires_at - 60000) return null;
+  return auth.access_token;
+}
+function gmailClientId(){
+  return (connectorCfg('drive').clientId || '').trim();
+}
+function gmailRequestToken(interactive){
+  return new Promise(function(resolve, reject){
+    var clientId = gmailClientId();
+    if (!clientId){
+      reject(new Error('Add a Google OAuth Client ID in Connectors → Google Drive (shared with Gmail)'));
+      return;
+    }
+    ensureGis(function(){
+      try {
+        var client = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: GMAIL_SCOPES,
+          callback: function(resp){
+            if (resp.error){ reject(new Error(resp.error)); return; }
+            var auth = {
+              access_token: resp.access_token,
+              expires_at: Date.now() + ((resp.expires_in || 3600) * 1000),
+              scope: resp.scope || GMAIL_SCOPES
+            };
+            saveGmailAuth(auth);
+            resolve(auth.access_token);
+          },
+          error_callback: function(err){
+            reject(new Error((err && err.message) || 'Gmail auth failed'));
+          }
+        });
+        client.requestAccessToken({ prompt: interactive ? 'consent' : '' });
+      } catch(e){ reject(e); }
+    });
+  });
+}
+async function gmailGetToken(interactive){
+  var t = gmailAccessToken();
+  if (t) return t;
+  return gmailRequestToken(!!interactive);
+}
+async function gmailApi(path, opts){
+  opts = opts || {};
+  var token = gmailAccessToken();
+  if (!token){
+    if (opts.interactive === false) throw new Error('Gmail not connected — tap Connect Gmail in Connectors');
+    token = await gmailGetToken(!!opts.interactive);
+  }
+  var headers = Object.assign({}, opts.headers || {}, { Authorization: 'Bearer ' + token });
+  var res = await fetch('https://gmail.googleapis.com' + path, {
+    method: opts.method || 'GET',
+    headers: headers,
+    body: opts.body || undefined
+  });
+  if (res.status === 401){
+    saveGmailAuth(null);
+    if (opts.interactive !== true) throw new Error('Gmail session expired — reconnect in Connectors');
+    token = await gmailRequestToken(true);
+    headers.Authorization = 'Bearer ' + token;
+    res = await fetch('https://gmail.googleapis.com' + path, {
+      method: opts.method || 'GET',
+      headers: headers,
+      body: opts.body || undefined
+    });
+  }
+  return res;
+}
+function gmailHeader(headers, name){
+  name = String(name || '').toLowerCase();
+  for (var i = 0; i < (headers || []).length; i++){
+    if (String(headers[i].name || '').toLowerCase() === name) return headers[i].value || '';
+  }
+  return '';
+}
+function gmailEncodeRaw(msg){
+  var to = String(msg.to || '').trim();
+  var subject = String(msg.subject || '').trim();
+  var body = String(msg.body || '');
+  var from = String(msg.from || '').trim();
+  var lines = [];
+  if (from) lines.push('From: ' + from);
+  lines.push('To: ' + to);
+  lines.push('Subject: ' + subject);
+  lines.push('MIME-Version: 1.0');
+  lines.push('Content-Type: text/plain; charset="UTF-8"');
+  lines.push('Content-Transfer-Encoding: 8bit');
+  lines.push('');
+  lines.push(body);
+  var raw = lines.join('\r\n');
+  var b64 = btoa(unescape(encodeURIComponent(raw)));
+  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+async function gmailStatus(){
+  if (!gmailClientId()) return 'Gmail: missing OAuth Client ID (set it under Connectors → Google Drive).';
+  if (!gmailAccessToken()) return 'Gmail: Client ID ready — tap Connect Gmail to authorize inbox read + send.';
+  try {
+    var res = await gmailApi('/gmail/v1/users/me/profile', {interactive:true});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    return 'Gmail connected as ' + (data.emailAddress || '?') +
+      ' · messagesTotal ' + (data.messagesTotal != null ? data.messagesTotal : '?') +
+      ' · threadsTotal ' + (data.threadsTotal != null ? data.threadsTotal : '?');
+  } catch(e){
+    return 'Gmail token present but profile failed: ' + (e.message || e);
+  }
+}
+async function gmailListMessages(query, limit){
+  limit = clamp(+limit || 8, 1, 12);
+  var q = String(query || 'is:inbox newer_than:7d').trim();
+  var list = await gmailApi('/gmail/v1/users/me/messages?maxResults=' + limit + '&q=' + encodeURIComponent(q), {interactive:true});
+  if (!list.ok){
+    var errTxt = await list.text().catch(function(){ return ''; });
+    throw new Error('list HTTP ' + list.status + (errTxt ? ': ' + errTxt.slice(0, 160) : ''));
+  }
+  var data = await list.json();
+  var msgs = data.messages || [];
+  if (!msgs.length) return 'No Gmail messages for query: ' + q;
+  var lines = ['Gmail (' + q + ') — ' + msgs.length + ' message(s):'];
+  for (var i = 0; i < msgs.length; i++){
+    var mid = msgs[i].id;
+    var det = await gmailApi('/gmail/v1/users/me/messages/' + encodeURIComponent(mid) + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date', {interactive:false});
+    if (!det.ok){ lines.push((i + 1) + '. (id ' + mid + ' — metadata unavailable)'); continue; }
+    var m = await det.json();
+    var headers = (m.payload && m.payload.headers) || [];
+    var from = gmailHeader(headers, 'From');
+    var subject = gmailHeader(headers, 'Subject') || '(no subject)';
+    var date = gmailHeader(headers, 'Date');
+    var snippet = (m.snippet || '').replace(/\s+/g, ' ').trim().slice(0, 140);
+    lines.push((i + 1) + '. ' + subject);
+    lines.push('   From: ' + (from || '?') + (date ? ' · ' + date : ''));
+    if (snippet) lines.push('   ' + snippet);
+  }
+  return lines.join('\n');
+}
+async function gmailSendMessage(msg){
+  var to = String((msg && msg.to) || '').trim();
+  var subject = String((msg && msg.subject) || '').trim();
+  var body = String((msg && msg.body) || '');
+  if (!to || to.indexOf('@') < 0) return 'Error: send needs a valid to= email address.';
+  if (!subject) return 'Error: send needs a subject=.';
+  if (!body.trim()) return 'Error: send needs body= text.';
+  /* Always confirm — sub-agents cannot call use_connector; lead still needs a human tap. */
+  var preview = 'Send email via Gmail?\n\nTo: ' + to + '\nSubject: ' + subject + '\n\n' + body.slice(0, 500) + (body.length > 500 ? '…' : '');
+  if (typeof confirm !== 'function' || !confirm(preview)) return 'Cancelled: email was not sent.';
+  var raw = gmailEncodeRaw({ to: to, subject: subject, body: body, from: (msg && msg.from) || '' });
+  var res = await gmailApi('/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    interactive: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw: raw })
+  });
+  if (!res.ok){
+    var t = await res.text().catch(function(){ return ''; });
+    throw new Error('send HTTP ' + res.status + (t ? ': ' + t.slice(0, 200) : ''));
+  }
+  var out = await res.json();
+  return 'Email sent to ' + to + ' · id ' + (out.id || '?') + ' · subject "' + subject + '"';
 }
 
 async function driveApi(path, opts){
@@ -10675,33 +11144,41 @@ TOOLS.push(
 );
 TOOLS.push(
   { name:'list_connectors',
-    description:'List available service connectors (Gmail, Calendar, GitHub, Tesla Dashboard, etc.) and whether each is enabled.',
+    description:'List available service connectors and whether each is enabled. Marks capability kind: data, mutate, link, or path.',
     params:{}, required:[],
     run: async function(){
       return CONNECTOR_DEFS.map(function(d){
         var on = connectorOn(d.id);
-        return (on ? 'ON ' : 'off') + ' · ' + d.id + ' — ' + d.name + ': ' + d.desc;
+        var kind = d.kind || 'link';
+        var extra = '';
+        if (d.id === 'gmail') extra = gmailAccessToken() ? ' · oauth ok' : ' · oauth needed';
+        if (d.id === 'drive') extra = (connectorCfg('drive').clientId || '').trim() ? ' · client id set' : ' · need client id';
+        return (on ? 'ON ' : 'off') + ' · ' + d.id + ' [' + kind + ']' + extra + ' — ' + d.name + ': ' + d.desc;
       }).join('\n');
     }},
   { name:'read_connector',
-    description:'Use a connector in read-only mode for specialist research. Mutating actions such as compose, send, create, update, delete, or write are rejected.',
-    params:{ connector:{type:'string'}, action:{type:'string'}, query:{type:'string'}, repo:{type:'string'}, location:{type:'string'} }, required:['connector'],
+    description:'Use a connector in read-only mode for specialist research (dashboard brief/traffic/news, gmail inbox/search, calendar upcoming, etc.). Mutating actions such as send, write, append, push, pull, create, update, delete are rejected.',
+    params:{ connector:{type:'string'}, action:{type:'string'}, query:{type:'string'}, repo:{type:'string'}, location:{type:'string'}, limit:{type:'number'} }, required:['connector'],
     run:async function(a){
       var action = String(a.action || 'status').toLowerCase();
-      if (/\b(compose|send|create|update|delete|remove|write|push|post|upload|share|move|cancel)\b/.test(action))
+      if (/\b(compose|send|create|update|delete|remove|write|append|push|pull|post|upload|share|move|cancel)\b/.test(action))
         return 'Error: read_connector only permits read-only actions.';
       return runConnector(String(a.connector || '').toLowerCase(), action, {
-        query:a.query, repo:a.repo, location:a.location
+        query:a.query, repo:a.repo, location:a.location, limit:a.limit
       });
     }},
   { name:'use_connector',
-    description:'Use a connected service. Connectors: dashboard, github, gmail, calendar, drive, weather, web, tasks. Actions e.g. dashboard:brief, github:repos|issues, gmail:compose|search, calendar:upcoming|open, weather:now, web:search, tasks:list.',
+    description:'Use a connected service with real read/write where supported. dashboard: brief|traffic|news|pharmacy|status. gmail: status|inbox|search|send|compose (send ALWAYS confirms in the browser; needs Connect Gmail OAuth). calendar: upcoming. drive: status|push|pull. notes: read|write|append. weather: now. tasks: list. github: repos|issues. Link-only connectors return open URLs.',
     params:{
       connector:{type:'string'},
       action:{type:'string'},
       query:{type:'string'},
       repo:{type:'string'},
-      to:{type:'string'}, subject:{type:'string'}, body:{type:'string'},
+      to:{type:'string', description:'Gmail send/compose recipient'},
+      subject:{type:'string', description:'Gmail subject'},
+      body:{type:'string', description:'Gmail body or notes text'},
+      text:{type:'string', description:'Alias for notes/gmail body'},
+      limit:{type:'number'},
       location:{type:'string'}
     }, required:['connector'],
     run: async function(a){
@@ -11125,7 +11602,10 @@ function buildSystem(convo, opts){
       'You have agent tools — use them when they improve accuracy (live data, math, research, memory, planning, scheduling).',
       'For multi-step work: call create_plan first, execute tools, mark steps with update_plan_step, then answer clearly.',
       'Use search_memory before inventing personal facts; use remember / update_memory / forget_memory to maintain memory.',
-      'When the user asks about email, calendar, Drive, GitHub, the Tesla dashboard, or connected services, call list_connectors / use_connector.',
+      'When the user asks about email, calendar, Drive, GitHub, the Tesla dashboard, traffic, news, or connected services, call list_connectors / use_connector (or read_connector for read-only).',
+      'Gmail: use_connector gmail action=inbox|search|status to READ mail after the user has tapped Connect Gmail. To SEND mail use action=send with to, subject, and body — Homebase always shows a browser confirm before sending. Never claim mail was sent unless the tool returns “Email sent”.',
+      'Tesla Dashboard: use_connector dashboard action=brief|traffic|news|pharmacy for live DASHBOARD_CACHE data (weather, headlines, DriveBC events, teams, stocks).',
+      'Notes scratchpad: use_connector notes action=read|write|append. Dashboard pins still use update_dashboard pin_note.',
       'You can UPDATE the Homebase life dashboard live: call list_dashboard then update_dashboard (pin_note, set_widget, reorder_widget, add_hub_link, refresh, set_home_location, etc.). When the user says things like “put this on my dashboard”, “hide sports”, “add a link to Monarch”, “refresh my dashboard”, or “pin a reminder”, use these tools — the UI updates immediately.',
       'For requested SOURCE-CODE work, inspect with list_repository_files, search_repository, and read_repository_file. Only after an explicit user request, use propose_repository_changes with exact unique replacements. Every source PR must include an updated HOMEBASE_CHANGELOG entry describing lineage, files, interfaces/settings, exact behaviour, safety boundaries, verification, setup, limits, and next-model handoff. The tool rejects undocumented source PRs. It creates a new branch and draft pull request; never place secrets in source, never write directly to the base branch, and never claim a source change happened unless the tool returns a pull-request URL.',
       'Dashboard history and roadmap for agents lives in HOMEBASE_CHANGELOG (window.HOMEBASE_CHANGELOG, hidden #homebase-changelog, and list_dashboard → Changelog section). Before any handoff after changing code, configuration, contracts, tools, routing, UI, safety, documentation, or deployment state, append/update the newest changelog entry and current_handoff; update planned items; preserve history; do not show the changelog as a user-facing card unless asked.',
@@ -12945,7 +13425,9 @@ function startVoiceMode(opts){
   opts = opts || {};
   if (VOICE.active){ endVoiceMode(); return; }
   var supported = voiceSupported();
-  ensureConvo();
+  var c = ensureConvo();
+  /* Voice connector shortcuts need tools; keep them on for the session. */
+  if (c){ c.toolsOn = true; try { updateToolsBtn(); persistConvo(c); } catch(e){} }
   VOICE.active = true; VOICE.muted = false; VOICE.failCount = 0;
   VOICE.forceCloudCapture = false; VOICE.lastInterim = ''; VOICE.lastTranscript = ''; VOICE.lastError = '';
   VOICE.lastReply = ''; VOICE.lastSpoken = '';
@@ -12964,6 +13446,7 @@ function startVoiceMode(opts){
   TTSQ.onDrain = voiceTTSDrained;
   setVState('idle');
   vLine(''); vYou(''); vRoute('');
+  if ($('v-hint')) $('v-hint').textContent = 'Say “brief me”, “traffic”, or “inbox” · or tap a chip · tap the orb to interrupt';
   if (supported && getSR()) vmeterMicStart(); /* cloud capture shares its own analyser */
   if (!supported){
     vStatus('Voice needs microphone access');
@@ -12976,7 +13459,7 @@ function startVoiceMode(opts){
        explicit tap so both the microphone and spoken replies are authorized. */
     vStatus('Tap once to start voice');
     vLine('This enables your microphone and spoken answers together.');
-    if ($('v-hint')) $('v-hint').textContent = 'One tap, then the conversation stays hands-free';
+    if ($('v-hint')) $('v-hint').textContent = 'One tap, then try Brief / Traffic / Inbox chips';
     return;
   }
   voiceListen();
@@ -13215,9 +13698,48 @@ async function voiceListenWhisper(){
 /* Short spoken phrases that control voice mode locally — no model call, no
    cost, instant. Only whole short utterances match, so normal sentences that
    merely contain "stop" still reach the model. */
+function voiceSpeakLocal(text, label){
+  var spoken = stripForSpeech(String(text || '')).replace(/\s+/g, ' ').trim().slice(0, 1200);
+  if (!spoken) spoken = 'Nothing to report.';
+  VOICE.replying = false;
+  VOICE.lastReply = spoken;
+  vYou(label || '');
+  vRoute(label || 'connector');
+  setVState('speaking');
+  vLine(spoken.slice(0, 220));
+  ttsEnqueue(spoken);
+}
+async function voiceRunConnector(id, action, args, label){
+  if (!VOICE.active) return;
+  stopSpeaking();
+  stopVoiceRec(true);
+  setVState('thinking');
+  vYou(label || (id + ' ' + action));
+  vLine('Pulling ' + (label || id) + '…');
+  vRoute('connector · ' + id);
+  VOICE.replying = true;
+  try {
+    var r = await runConnector(id, action, args || {});
+    voiceSpeakLocal(r, label || (id + ':' + action));
+  } catch(e){
+    voiceSpeakLocal('Sorry — ' + (e.message || e), label || id);
+  }
+}
+function voiceQuickAction(act){
+  act = String(act || '').toLowerCase();
+  if (act === 'brief') return voiceRunConnector('dashboard', 'brief', {}, 'Dashboard brief');
+  if (act === 'traffic') return voiceRunConnector('dashboard', 'traffic', {}, 'Traffic');
+  if (act === 'inbox') return voiceRunConnector('gmail', 'inbox', {}, 'Inbox');
+  if (act === 'pin'){
+    unlockAudio();
+    voiceUtterance('Ask me in one short question what to pin on my Homebase dashboard, then call update_dashboard with action pin_note using my answer.');
+    return;
+  }
+  if (act === 'news') return voiceRunConnector('dashboard', 'news', {}, 'News');
+}
 function voiceCommand(txt){
   var t = String(txt || '').toLowerCase().replace(/[^a-z'\s]/g, ' ').replace(/\s+/g, ' ').trim();
-  if (!t || t.split(' ').length > 5) return false;
+  if (!t || t.split(' ').length > 6) return false;
   if (/^(stop|cancel|stop talking|be quiet|quiet|shush|hush|never ?mind|okay stop|ok stop)$/.test(t)){
     stopSpeaking(); stopGeneration(); VOICE.buffer = '';
     setTimeout(voiceListen, 200);
@@ -13239,6 +13761,18 @@ function voiceCommand(txt){
   }
   if (/^(pause|pause listening|mute|stop listening)$/.test(t)){
     voiceSetMuted(true); return true;
+  }
+  if (/^(brief( me)?|morning brief|dashboard brief|what'?s (on )?(the )?dashboard|give me (a |the )?brief)$/.test(t)){
+    voiceRunConnector('dashboard', 'brief', {}, 'Dashboard brief'); return true;
+  }
+  if (/^(traffic|how'?s (the )?traffic|road(s)?|commute|drive ?bc)$/.test(t)){
+    voiceRunConnector('dashboard', 'traffic', {}, 'Traffic'); return true;
+  }
+  if (/^(inbox|check (my )?(email|mail|gmail)|any (new )?(email|mail)|read (my )?(email|mail|inbox))$/.test(t)){
+    voiceRunConnector('gmail', 'inbox', {}, 'Inbox'); return true;
+  }
+  if (/^(headlines|news brief|what'?s (in )?the news)$/.test(t)){
+    voiceRunConnector('dashboard', 'news', {}, 'News'); return true;
   }
   return false;
 }
@@ -13385,6 +13919,15 @@ function initVoice(){
       speakText(VOICE.lastReply);
     }
   });
+  var vQuick = $('v-quick');
+  if (vQuick){
+    vQuick.addEventListener('click', function(e){
+      var btn = e.target && e.target.closest ? e.target.closest('[data-v-act]') : null;
+      if (!btn || !VOICE.active) return;
+      unlockAudio();
+      voiceQuickAction(btn.getAttribute('data-v-act'));
+    });
+  }
   $('v-audio-retry').addEventListener('click', function(){
     if (!VOICE.active) return;
     unlockAudio();
