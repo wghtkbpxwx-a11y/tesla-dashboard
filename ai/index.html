@@ -2567,9 +2567,321 @@ body.is-mobile .cf-modes .mode-pill{min-height:44px}
   .hub-tile,.msg,#chat-fab{transition:none!important;animation:none!important}
 }
 
+
+/* ==========================================================================
+   iOS NATIVE PASS (2026-07-20) — Homebase as an iPhone app.
+   Messages composer, continuous bubbles, inset grouped Settings,
+   nav materials, offline banner, date separators.
+   Capabilities added in JS: Share sheet, soft haptics, mic↔send morph,
+   offline awareness. Nothing removed.
+   ========================================================================== */
+:root{
+  --ios-spring:cubic-bezier(.32,.72,0,1);
+  --ios-r:20px;
+  --composer-r:22px;
+  --ios-sep:rgba(60,60,67,.18);
+}
+[data-theme="dark"]{
+  --ios-sep:rgba(84,84,88,.55);
+  --user-bubble:#0a8468;
+}
+
+/* System materials — nav / sheets */
+#topbar{
+  background:color-mix(in srgb, var(--bg) 72%, transparent) !important;
+  backdrop-filter:saturate(1.8) blur(28px) !important;
+  -webkit-backdrop-filter:saturate(1.8) blur(28px) !important;
+  border-bottom:0 !important;
+  box-shadow:0 0.5px 0 var(--ios-sep);
+}
+.tb-app{font-size:17px;font-weight:650;letter-spacing:-.02em}
+.tb-sub{font-size:12px;font-weight:500;opacity:.55}
+
+/* Chat float = Messages window */
+.chat-float{
+  border-radius:24px !important;
+  border:0.5px solid var(--ios-sep) !important;
+  background:var(--bg) !important;
+  box-shadow:0 18px 60px rgba(0,0,0,.28) !important;
+  backdrop-filter:none !important;
+}
+body.is-mobile .chat-float[data-state="open"],
+body.is-mobile .chat-float[data-state="expanded"]{
+  border-radius:0 !important;
+  right:0 !important; left:0 !important; bottom:0 !important; top:0 !important;
+  width:100% !important; height:100% !important;
+  height:100dvh !important;
+}
+.cf-head{
+  background:color-mix(in srgb, var(--bg) 78%, transparent) !important;
+  backdrop-filter:saturate(1.8) blur(24px);
+  -webkit-backdrop-filter:saturate(1.8) blur(24px);
+  border-bottom:0 !important;
+  box-shadow:none;
+  transition:box-shadow .2s;
+}
+.cf-head.scrolled{box-shadow:0 0.5px 0 var(--ios-sep)}
+.cf-title{font-size:17px;font-weight:650;letter-spacing:-.022em}
+.cf-meta{font-size:12px;font-weight:500;opacity:.5}
+.cf-orb{
+  width:30px;height:30px;border-radius:9px;
+  background:var(--acc) !important;
+  box-shadow:none !important;
+}
+
+/* Modes as true UISegmentedControl */
+.cf-modes{
+  gap:0 !important; padding:2px !important; border-radius:9px !important;
+  background:color-mix(in srgb, var(--text) 8%, transparent) !important;
+  border:none !important;
+}
+.mode-pill{
+  border:none !important; border-radius:7px !important;
+  min-height:28px; font-size:12px !important; font-weight:600 !important;
+  letter-spacing:0 !important; color:var(--text2) !important;
+  background:transparent !important;
+  transition:background .18s var(--ios-spring), color .18s, transform .15s var(--ios-spring);
+}
+.mode-pill.active{
+  background:var(--bg2) !important; color:var(--text) !important;
+  box-shadow:0 0.5px 1px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.06) !important;
+}
+[data-theme="dark"] .mode-pill.active{
+  background:rgba(255,255,255,.92) !important; color:#0f1319 !important;
+}
+body.is-mobile .cf-modes .mode-pill{min-height:36px !important; font-size:13px !important}
+
+/* iMessage bubbles */
+.msg{gap:8px}
+.msg .avatar{width:28px;height:28px;border-radius:50%;font-size:0}
+.msg.user .avatar{display:none !important}
+.msg.user .bubble{
+  background:var(--user-bubble) !important;
+  color:#fff !important;
+  border-radius:18px 18px 4px 18px !important;
+  padding:9px 13px !important;
+  box-shadow:none !important;
+  border:none !important;
+  -webkit-user-select:text; user-select:text;
+}
+[data-theme="light"] .msg.user .bubble{background:#0d8f74 !important}
+.msg.assistant .bubble{
+  background:color-mix(in srgb, var(--text) 7%, transparent) !important;
+  border:none !important;
+  border-radius:18px 18px 18px 4px !important;
+  padding:9px 13px !important;
+  -webkit-user-select:text; user-select:text;
+}
+.msg .meta{font-size:11px; opacity:.42; font-weight:500}
+.msg .actions .icon-btn{width:32px;height:32px;border-radius:50%}
+
+/* Date separators — Apple Messages */
+.day-sep{
+  display:flex; align-items:center; justify-content:center;
+  margin:14px 0 6px; pointer-events:none;
+}
+.day-sep span{
+  font-size:12px; font-weight:600; color:var(--text3);
+  letter-spacing:-.01em; padding:4px 10px;
+  background:color-mix(in srgb, var(--bg) 70%, transparent);
+  border-radius:999px;
+}
+
+/* Messages composer — mic ↔ send */
+#composer-wrap{
+  background:color-mix(in srgb, var(--bg) 88%, transparent) !important;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-top:0.5px solid var(--ios-sep);
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom)) !important;
+}
+#composer{
+  border-radius:22px !important;
+  border:0.5px solid var(--ios-sep) !important;
+  background:color-mix(in srgb, var(--bg2) 92%, transparent) !important;
+  box-shadow:none !important;
+  padding:6px 6px 6px 6px !important;
+  gap:4px !important;
+  align-items:flex-end;
+}
+#composer:focus-within{
+  border-color:color-mix(in srgb, var(--acc) 40%, var(--ios-sep)) !important;
+  box-shadow:0 0 0 3px var(--acc-soft) !important;
+}
+#attach-btn{
+  width:34px;height:34px;min-width:34px;border-radius:50% !important;
+  background:color-mix(in srgb, var(--text) 8%, transparent);
+  color:var(--acc);
+}
+#input{
+  font-size:17px !important; line-height:1.35 !important;
+  padding:8px 6px !important; min-height:34px;
+}
+#input::placeholder{color:var(--text3); font-weight:400}
+#mic-btn,#send-btn{
+  width:34px !important; height:34px !important; min-width:34px !important;
+  border-radius:50% !important; margin:0 !important;
+  transition:opacity .18s var(--ios-spring), transform .18s var(--ios-spring), background .15s, width .18s, margin .18s;
+}
+#send-btn{
+  background:var(--acc) !important;
+  box-shadow:none !important;
+  color:#04120e !important;
+}
+#send-btn svg{stroke:#04120e; width:16px; height:16px}
+#send-btn.stop{background:var(--danger) !important}
+#send-btn.stop svg{stroke:#fff; fill:#fff}
+/* Messages morph: empty → mic; typing → send; streaming → stop */
+#composer:not(.has-text):not(.is-sending) #send-btn{
+  width:0 !important; min-width:0 !important; opacity:0; margin:0 !important;
+  pointer-events:none; overflow:hidden; padding:0 !important; border:0 !important;
+}
+#composer.has-text:not(.is-sending) #mic-btn:not(.rec),
+#composer.is-sending #mic-btn:not(.rec){
+  width:0 !important; min-width:0 !important; opacity:0; margin:0 !important;
+  pointer-events:none; overflow:hidden; padding:0 !important;
+}
+body.is-mobile #mic-btn, body.is-mobile #send-btn,
+body.is-mobile #attach-btn{
+  width:36px !important; height:36px !important; min-width:36px !important;
+}
+body.is-mobile #composer.has-text:not(.is-sending) #send-btn,
+body.is-mobile #composer.is-sending #send-btn{
+  width:36px !important; min-width:36px !important; opacity:1; pointer-events:auto;
+}
+body.is-mobile #composer:not(.has-text):not(.is-sending) #mic-btn{
+  width:36px !important; min-width:36px !important; opacity:1; pointer-events:auto;
+}
+
+/* Empty chat — Apple calm */
+.chat-float #empty-state.hub-home{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:60%; padding:32px 24px !important; text-align:center;
+}
+.chat-float #empty-state .hub-hero h1{
+  font-size:28px !important; font-weight:700 !important; letter-spacing:-.03em !important;
+  margin:12px 0 6px;
+}
+.chat-float #empty-state .subhead{
+  font-size:15px !important; line-height:1.4; color:var(--text2); max-width:22rem;
+  margin:0 auto 18px !important;
+}
+.chat-float #empty-state .hero-orb{
+  width:64px; height:64px; margin:0 auto;
+}
+.chat-float #empty-state .hub-foot{display:flex !important; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:8px !important}
+.prompt-chip{
+  min-height:36px; border-radius:999px; font-weight:600; font-size:14px;
+  border:0.5px solid var(--ios-sep); background:color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+/* Hub home (dashboard behind chat) — large title energy */
+#empty-state.hub-home:not(.chat-empty) .hub-hero h1{
+  font-size:clamp(28px,5vw,36px)!important; font-weight:700!important; letter-spacing:-.035em!important;
+}
+#empty-state.hub-home:not(.chat-empty) .subhead{font-size:15px; color:var(--text2)}
+
+/* Settings = inset grouped list */
+.modal{
+  border-radius:14px !important;
+  border:0.5px solid var(--ios-sep) !important;
+  box-shadow:0 24px 80px rgba(0,0,0,.4) !important;
+}
+body.is-mobile .modal{border-radius:12px 12px 0 0 !important}
+body.is-mobile .modal::before{
+  content:""; display:block; width:36px; height:5px; border-radius:3px;
+  background:color-mix(in srgb, var(--text) 22%, transparent);
+  margin:8px auto 2px; opacity:.9;
+}
+.mo-head{
+  padding:14px 16px !important;
+  border-bottom:0.5px solid var(--ios-sep) !important;
+}
+.mo-head h2{font-size:17px !important; font-weight:650 !important}
+.mo-body{background:var(--bg); padding:12px 16px 28px !important}
+.set-sec h3{
+  font-size:13px !important; font-weight:400 !important; text-transform:none !important;
+  letter-spacing:0 !important; color:var(--text3) !important;
+  margin:22px 4px 8px !important; padding:0;
+}
+.set-sec .set-row, .set-pane > .set-row, .settings-disclosure-body .set-row{
+  background:var(--bg2);
+  margin:0;
+  padding:12px 14px !important;
+  border-bottom:0.5px solid var(--ios-sep) !important;
+}
+.set-sec .set-row:first-of-type,
+.settings-disclosure-body .set-row:first-child{
+  border-radius:12px 12px 0 0;
+}
+.set-sec .set-row:last-child,
+.settings-disclosure-body .set-row:last-child{
+  border-radius:0 0 12px 12px;
+  border-bottom:none !important;
+}
+.set-sec .set-row:only-child,
+.settings-disclosure-body .set-row:only-child{border-radius:12px}
+.tgl{
+  width:51px !important; height:31px !important;
+  background:rgba(120,120,128,.32) !important; border:none !important;
+}
+.tgl::after{
+  width:27px !important; height:27px !important; top:2px !important; left:2px !important;
+  box-shadow:0 1px 3px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.1) !important;
+}
+.tgl.on{background:var(--acc) !important}
+.tgl.on::after{transform:translateX(20px)}
+
+/* Offline / network banner */
+#net-banner{
+  position:fixed; top:0; left:0; right:0; z-index:400;
+  display:none; align-items:center; justify-content:center; gap:8px;
+  padding:calc(6px + env(safe-area-inset-top)) 14px 8px;
+  background:rgba(60,60,67,.92); color:#fff;
+  font-size:13px; font-weight:600; letter-spacing:-.01em;
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+}
+#net-banner.show{display:flex}
+#net-banner.online-flash{
+  background:rgba(13,143,116,.94);
+}
+body.has-net-banner #app{padding-top:0}
+
+/* FAB — solid, not rainbow orb */
+#chat-fab{
+  background:var(--acc) !important;
+  color:#04120e !important;
+  border-radius:18px !important;
+  box-shadow:0 8px 28px rgba(0,0,0,.28) !important;
+  font-weight:700 !important;
+}
+#chat-fab .fab-orb{background:rgba(0,0,0,.12) !important}
+
+/* Sidebar search — iOS rounded field */
+.sb-search{
+  border-radius:10px !important;
+  background:color-mix(in srgb, var(--text) 8%, transparent) !important;
+  border:none !important;
+}
+.convo{border-radius:12px; min-height:52px}
+.convo.on{background:var(--acc-soft) !important}
+
+#jump-btn{
+  border-radius:50% !important;
+  width:40px; height:40px;
+  border:0.5px solid var(--ios-sep);
+  background:color-mix(in srgb, var(--bg2) 90%, transparent);
+  backdrop-filter:blur(12px);
+}
+
+@media(prefers-reduced-motion:reduce){
+  .mode-pill,#mic-btn,#send-btn,.msg{transition:none!important}
+}
+
 </style>
 </head>
 <body>
+<div id="net-banner" role="status" aria-live="polite" hidden></div>
 <div id="app">
   <!-- ================= Sidebar ================= -->
   <aside id="sidebar">
@@ -2663,7 +2975,7 @@ body.is-mobile .cf-modes .mode-pill{min-height:44px}
         <div id="pending-atts"></div>
         <div id="composer">
           <button class="icon-btn" id="attach-btn" title="Attach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
-          <textarea id="input" rows="1" placeholder="Ask Homebase…"></textarea>
+          <textarea id="input" rows="1" placeholder="Ask anything"></textarea>
           <button class="icon-btn" id="mic-btn" title="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
           <button id="send-btn" title="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
         </div>
@@ -3604,7 +3916,7 @@ function renderHubHome(){
     '<div class="hub-hero">' +
       '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core">'+iconSvg('home',26,{strokeWidth:1.7})+'</div></div>' +
       '<h1>'+greet+', David</h1>' +
-      '<p class="subhead">Homebase — your hub for AI, the Tesla dashboard, work, and life.</p>' +
+      '<p class="subhead">AI, your car dashboard, work, and life — in one place.</p>' +
     '</div>' +
     '<div class="hub-grid">'+tiles+'</div>' +
     '<div class="hub-foot">' +
@@ -10727,6 +11039,27 @@ function internalHistory(convo, uptoIndex){
 
 /* ============================ message rendering ============================ */
 var MSG_ELS = {};
+function dayKey(ts){
+  var d = new Date(ts || Date.now());
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+function dayLabel(ts){
+  var d = new Date(ts || Date.now());
+  var now = new Date();
+  var start = function(x){ return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); };
+  var diff = start(now) - start(d);
+  if (diff === 0) return 'Today';
+  if (diff === 86400000) return 'Yesterday';
+  return d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+}
+function daySepEl(ts){
+  var el = document.createElement('div');
+  el.className = 'day-sep';
+  el.setAttribute('role', 'separator');
+  el.innerHTML = '<span></span>';
+  el.firstChild.textContent = dayLabel(ts);
+  return el;
+}
 function renderChat(){
   var chat = $('chat');
   chat.innerHTML = '';
@@ -10736,7 +11069,15 @@ function renderChat(){
     chat.appendChild(emptyStateEl());
     return;
   }
-  c.messages.forEach(function(m){ chat.appendChild(msgEl(m, c)); });
+  var lastDay = null;
+  c.messages.forEach(function(m){
+    var dk = dayKey(m.ts);
+    if (dk !== lastDay){
+      chat.appendChild(daySepEl(m.ts));
+      lastDay = dk;
+    }
+    chat.appendChild(msgEl(m, c));
+  });
   scrollBottom(true);
 }
 function emptyStateEl(){
@@ -10747,8 +11088,8 @@ function emptyStateEl(){
   d.innerHTML =
     '<div class="hub-hero" style="margin-bottom:0">' +
       '<div class="hero-orb"><div class="orb-glow"></div><div class="orb-core" id="chat-empty-orb"></div></div>' +
-      '<h1>Homebase AI</h1>' +
-      '<p class="subhead">Ask anything — research, plan, remember, or run agent tools. Your dashboard stays behind this window.</p>' +
+      '<h1>Homebase</h1>' +
+      '<p class="subhead">Ask anything. Research, plan, remember, or run tools — privately on your device when you want.</p>' +
       '<div class="hub-foot" style="margin-top:14px">' +
         '<button type="button" class="prompt-chip" data-q="Summarize what you know about me and suggest three useful next actions.">What do you know?</button>' +
         '<button type="button" class="prompt-chip" data-q="Run a Surrey morning brief with weather, news, and a clinical pearl." data-tools="1">Morning brief</button>' +
@@ -10952,8 +11293,19 @@ function metaRow(m, convo){
   var I_BRANCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M8.5 6H13a3 3 0 0 1 3 3v0M8.5 18H13a3 3 0 0 0 3-3v0"/></svg>';
   var I_DEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg>';
   act('Copy', I_COPY, function(){
-    navigator.clipboard.writeText(m.text || '').then(function(){ toast('Copied', 'ok', 1200); });
+    navigator.clipboard.writeText(m.text || '').then(function(){ softHaptic(8); toast('Copied', 'ok', 1200); });
   });
+  var I_SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>';
+  if (m.text){
+    act('Share', I_SHARE, function(){
+      var payload = { text: m.text };
+      if (navigator.share){
+        navigator.share(payload).then(function(){ softHaptic(8); }).catch(function(){});
+      } else {
+        navigator.clipboard.writeText(m.text).then(function(){ softHaptic(8); toast('Copied to share', 'ok', 1400); });
+      }
+    });
+  }
   if (m.role === 'assistant'){
     act('Read aloud', I_SPK, function(){ speakText(stripForSpeech(m.text || '')); });
     act('Regenerate', I_RGN, function(){ regenMsg(m.id); });
@@ -10977,6 +11329,39 @@ function schedulePaint(m, convo){
   });
 }
 
+
+/* ============================ iOS network banner ============================ */
+function updateNetBanner(){
+  var b = $('net-banner');
+  if (!b) return;
+  var online = typeof navigator === 'undefined' || navigator.onLine !== false;
+  if (online){
+    if (b.classList.contains('show') && b.dataset.wasOffline === '1'){
+      b.dataset.wasOffline = '0';
+      b.textContent = 'Back online';
+      b.classList.add('show', 'online-flash');
+      b.hidden = false;
+      setTimeout(function(){ b.classList.remove('show', 'online-flash'); b.hidden = true; }, 1600);
+    } else {
+      b.classList.remove('show', 'online-flash');
+      b.hidden = true;
+    }
+  } else {
+    b.dataset.wasOffline = '1';
+    b.textContent = "You're offline — local and browser models still work";
+    b.classList.add('show');
+    b.classList.remove('online-flash');
+    b.hidden = false;
+  }
+}
+function initNetBanner(){
+  updateNetBanner();
+  try {
+    window.addEventListener('online', updateNetBanner);
+    window.addEventListener('offline', updateNetBanner);
+  } catch (e) {}
+}
+
 /* ============================ scrolling ============================ */
 function scrollBottom(force){
   if (!S.stick && !force) return;
@@ -10985,12 +11370,14 @@ function scrollBottom(force){
 }
 function initScroll(){
   var sc = $('chat-scroll');
+  var head = document.querySelector('.cf-head');
   sc.addEventListener('scroll', function(){
     var near = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 90;
     S.stick = near;
     $('jump-btn').classList.toggle('show', !near);
+    if (head) head.classList.toggle('scrolled', sc.scrollTop > 8);
   });
-  $('jump-btn').addEventListener('click', function(){ S.stick = true; scrollBottom(true); });
+  $('jump-btn').addEventListener('click', function(){ S.stick = true; scrollBottom(true); softHaptic(8); });
 }
 
 /* ============================ send pipeline ============================ */
@@ -11011,6 +11398,7 @@ async function sendMessage(rawText, opts){
   var queryOverride = opts.queryModelOverride || (!opts.regen ? S.queryModelOverride : null);
   if (!opts.regen){
     if (!text && !S.pendingAtts.length) return;
+    softHaptic(12);
     if (text.charAt(0) === '/' && handleSlash(text)) { $('input').value = ''; autoresize(); updateSendBtn(); return; }
     var um = { id: uuid(), role:'user', text: text, ts: Date.now(),
       images: S.pendingAtts.filter(function(a){ return a.kind === 'image'; }).map(function(a){ return a.dataUrl; }),
@@ -11393,18 +11781,31 @@ function autoresize(){
   ta.style.height = 'auto';
   ta.style.height = Math.min(200, ta.scrollHeight) + 'px';
 }
+function softHaptic(ms){
+  try {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(ms || 10);
+  } catch (e) {}
+}
 function updateSendBtn(){
   var b = $('send-btn');
+  var comp = $('composer');
+  var hasText = !!( ($('input') && $('input').value.trim()) || (S.pendingAtts && S.pendingAtts.length) );
+  if (comp){
+    comp.classList.toggle('has-text', hasText || !!S.sending);
+    comp.classList.toggle('is-sending', !!S.sending);
+  }
   if (S.sending){
     b.disabled = false;
     b.classList.add('stop');
     b.title = 'Stop';
+    b.setAttribute('aria-label', 'Stop');
     b.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>';
   } else {
     b.classList.remove('stop');
     b.title = 'Send';
+    b.setAttribute('aria-label', 'Send');
     b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
-    b.disabled = !($('input').value.trim() || S.pendingAtts.length);
+    b.disabled = !hasText;
   }
 }
 function queryModelValue(provider, model){
@@ -14420,6 +14821,7 @@ async function boot(){
   initShell();
   initComposer();
   initScroll();
+  try { initNetBanner(); } catch (e) {}
   initVoice();
   initMemory();
   initConnectors();
