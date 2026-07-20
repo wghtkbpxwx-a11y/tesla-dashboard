@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Updated: 2026-07-20 Excellence pass v1 — cockpit UI polish, type, header, dock -->
+<!-- Updated: 2026-07-20 Apple simplicity — quiet instrument UI -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -683,6 +683,232 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
 .mode-btn{font-weight:600;font-size:12px;letter-spacing:.04em;padding:12px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:520px){.mode-btn{font-size:11.5px;letter-spacing:.02em;padding:12px 6px}}
 
+
+/* ================================================================
+   APPLE SIMPLICITY PASS (2026-07-20) — quiet instrument UI.
+   Smooth · functional · simple · still feature-rich.
+   iOS segmented selection + Tesla glance hierarchy:
+   one solid primary (Voice), soft elevated selected states,
+   sentence-case chrome, spring press, flattened nesting.
+   ================================================================ */
+:root{
+  --spring:cubic-bezier(.32,.72,0,1);
+  --ease:cubic-bezier(.25,.1,.25,1);
+  --r:18px;
+  --r-sm:14px;
+  --r-xs:10px;
+}
+/* Soft press language — tactile, not flashy */
+button,.dock-btn,.command-action,.mode-btn,.ntab,.row,.stock-chip,.fc-mini,.fresh-chip,.glance-btn{
+  transition:background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease),transform .18s var(--spring),box-shadow .2s var(--ease),opacity .2s var(--ease);
+}
+@media(prefers-reduced-motion:reduce){
+  button,.dock-btn,.command-action,.mode-btn,.ntab,.row,.panel,.dock-submenu{transition:none!important;animation:none!important}
+  @keyframes fadeUp{from{opacity:0}to{opacity:1}}
+}
+
+/* Header: frosted strip, instruments as one island */
+#header{
+  padding:8px 20px;
+  background:rgba(5,7,10,.72);
+  backdrop-filter:saturate(1.4) blur(28px);
+  -webkit-backdrop-filter:saturate(1.4) blur(28px);
+  border-bottom:1px solid transparent;
+  box-shadow:0 1px 0 var(--hair);
+}
+html.light #header{background:rgba(255,255,255,.78)}
+#header::after{display:none}
+#s-right{
+  gap:0;
+  padding:3px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--line);
+}
+#s-date,#weather-widget,#stock-widget{
+  border:none;background:transparent;border-radius:999px;min-height:40px;
+}
+#s-date:hover,#weather-widget:hover,#stock-widget:hover{background:var(--surface2)}
+.brand-sub{text-transform:none;letter-spacing:.04em;font-weight:600;opacity:.9}
+.tesla-logo{filter:none}
+
+/* Hero: one surface — clock is the product */
+.live-hero{
+  padding:20px 20px 18px;
+  border-radius:22px;
+  background:rgba(12,16,22,.55);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  box-shadow:none;
+}
+html.light .live-hero{background:rgba(255,255,255,.72)}
+.live-hero::before{opacity:.35}
+.live-hero-clock{font-weight:500;letter-spacing:-.04em;text-shadow:none}
+.live-hero-date,.live-hero-greet,.live-hero-desc{
+  text-transform:none;letter-spacing:-.01em;font-weight:500;
+}
+.live-hero-greet{color:var(--t2);font-size:13px;letter-spacing:0;margin-bottom:4px}
+.live-hero-date{font-size:15px;color:var(--t2);margin-top:8px;letter-spacing:0}
+.live-hero-weather{
+  border-radius:18px;border:none;background:var(--surface2);min-height:88px;
+}
+.live-hero-weather::before{display:none}
+.fresh-chip{
+  text-transform:none;letter-spacing:0;font-weight:600;font-size:12px;
+  border:none;background:var(--surface2);border-radius:999px;min-height:40px;
+}
+.fresh-chip .fresh-dot{width:7px;height:7px;box-shadow:none}
+
+/* Command deck: flat, no double box */
+.cockpit-command{
+  padding:0;border:none;background:transparent;box-shadow:none;gap:12px;
+}
+.command-eyebrow{
+  text-transform:none;letter-spacing:0;font-size:12px;font-weight:600;color:var(--t3);
+}
+/* iOS segmented control */
+.mode-picker{
+  gap:0;padding:3px;border-radius:12px;border:none;background:rgba(255,255,255,.06);
+}
+html.light .mode-picker{background:rgba(12,16,22,.06)}
+.mode-btn{
+  text-transform:none;letter-spacing:0;font-weight:600;font-size:14px;
+  border-radius:10px;min-height:44px;padding:10px 12px;
+}
+.mode-btn.active{
+  background:rgba(255,255,255,.92);color:#0f1319;
+  box-shadow:0 1px 3px rgba(0,0,0,.18),0 4px 12px rgba(0,0,0,.08);
+}
+html.light .mode-btn.active{background:#fff;color:#0f1319;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.now-focus{
+  border:none;background:var(--surface2);border-radius:16px;padding:14px 16px;
+}
+.now-focus::before{display:none}
+.now-copy strong{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.now-copy span{font-size:13px;font-weight:500}
+
+/* Primary actions: Voice is the only filled CTA */
+.command-actions{gap:8px}
+.command-action{
+  text-transform:none;letter-spacing:0;font-weight:600;font-size:14px;
+  border:none;border-radius:14px;min-height:48px;background:var(--surface2);color:var(--t1);
+}
+.command-action:active{transform:scale(.97)}
+.command-action.briefing-btn{
+  background:var(--surface2);color:var(--t1);border:none;
+}
+.command-action.briefing-btn:hover{background:var(--accent-soft);color:var(--accent)}
+.command-action.briefing-btn.speaking{background:var(--accent);color:#05070a}
+.command-action.voice{
+  background:var(--accent);color:#05070a;box-shadow:none;font-weight:700;
+}
+.command-action.voice:hover{background:var(--accent2);filter:brightness(1.02)}
+.command-action.glance-cta{background:var(--surface2);color:var(--t1)}
+.command-action.glance-cta:hover{background:var(--accent-soft);color:var(--accent)}
+.charge-session{border:none;border-radius:16px}
+.charge-preset{
+  text-transform:none;letter-spacing:0;font-weight:600;border:none;
+  background:rgba(255,255,255,.08);border-radius:12px;
+}
+
+/* Dock — iOS tab bar: soft select, not a mint brick */
+#dock{
+  bottom:max(12px,env(safe-area-inset-bottom));
+  padding:6px;gap:4px;border-radius:22px;border:1px solid var(--line);
+  background:rgba(10,14,20,.78);
+  backdrop-filter:saturate(1.5) blur(28px);
+  -webkit-backdrop-filter:saturate(1.5) blur(28px);
+  box-shadow:0 12px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06);
+}
+html.light #dock{background:rgba(255,255,255,.82)}
+#dock::before{display:none}
+.dock-btn{
+  text-transform:none;letter-spacing:0;font-weight:600;font-size:13px;
+  border-radius:16px;min-height:48px;padding:10px 18px;color:var(--t2);
+}
+.dock-btn.on{
+  background:var(--accent-soft);color:var(--accent);box-shadow:none;
+}
+.dock-btn.on:hover{background:var(--accent-soft2);color:var(--accent)}
+.dock-btn:active{transform:scale(.96)}
+.dock-submenu{
+  bottom:calc(72px + env(safe-area-inset-bottom));
+  border-radius:20px;padding:10px;
+  background:rgba(10,14,20,.92);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  transition:opacity .22s var(--spring),transform .22s var(--spring);
+}
+.dock-submenu-item{
+  text-transform:none;letter-spacing:0;font-weight:600;font-size:15px;
+  border-radius:12px;min-height:48px;padding:14px 16px;
+}
+.dock-submenu-item.on{background:var(--accent-soft);color:var(--accent)}
+
+/* Section titles — large, quiet, Apple Large Title energy */
+.sec-title{
+  text-transform:none;letter-spacing:-.02em;font-size:20px;font-weight:600;
+  color:var(--t1);margin:0 0 14px 2px;gap:8px;
+}
+.sec-title .live-dot{width:6px;height:6px}
+
+/* Segmented tabs (news / cams / games) */
+.news-tabs{
+  gap:0;padding:3px;border:none;border-radius:12px;background:rgba(255,255,255,.06);
+}
+html.light .news-tabs{background:rgba(12,16,22,.06)}
+.ntab{
+  text-transform:none;letter-spacing:0;font-weight:600;font-size:13px;
+  border-radius:10px;min-height:40px;padding:8px 14px;color:var(--t2);
+}
+.ntab.on{
+  background:rgba(255,255,255,.92);color:#0f1319;box-shadow:0 1px 3px rgba(0,0,0,.14);
+}
+html.light .ntab.on{background:#fff}
+
+/* Cards: quieter hairlines */
+.cardgroup{
+  border-radius:20px;border:1px solid var(--line);box-shadow:none;
+  background:rgba(12,16,22,.45);
+}
+html.light .cardgroup{background:rgba(255,255,255,.7)}
+.cardgroup::before{opacity:.4}
+.row{min-height:72px;padding:14px 18px}
+.row:hover{box-shadow:none;background:var(--surface2)}
+.row:active{transform:scale(.99)}
+
+/* Stocks / forecast chips — pill quieter */
+.stock-chip,.fc-mini,.wx-meta{
+  border:none;background:var(--surface2);border-radius:14px;
+}
+.fc-mini.today{box-shadow:none;border:1px solid var(--accent-soft2)}
+.wx-meta .wm-l,.fc-mini .fc-day{text-transform:none;letter-spacing:0;font-weight:600}
+
+/* Glance: calmer */
+.gl-date,.gl-wx .gl-desc,.gl-tag,.gl-hint{text-transform:none;letter-spacing:0}
+.gl-tag{border:none;border-radius:999px;font-weight:600}
+.glance-btn{text-transform:none;letter-spacing:0;border:none;border-radius:14px;font-weight:600}
+
+/* Panel enter — softer */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.panel{animation:fadeUp .4s var(--spring) forwards}
+
+/* App tiles — less shout */
+.app-panel .rl-t{text-transform:none;letter-spacing:-.01em;font-weight:600}
+.app-panel .row{border-radius:20px;border:none;background:var(--surface2)}
+.app-panel .row::before{display:none}
+
+.cam-hint{opacity:.55;font-size:12px;font-weight:500;letter-spacing:0;text-transform:none}
+.cam-dots{gap:8px;margin:10px 0 4px}
+.cam-dot::before{width:8px;height:8px;box-shadow:none;transition:transform .2s var(--spring),background .2s var(--ease),opacity .2s}
+.cam-dot.on::before{transform:scale(1.35);box-shadow:none}
+
+@media(max-width:760px){
+  #s-right{max-width:100%}
+  .command-action{font-size:13px;padding:10px 6px}
+  .sec-title{font-size:18px}
+  #dock{border-radius:20px}
+}
+
 </style>
 </head>
 <body data-mode="parked">
@@ -696,7 +922,7 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
       </svg>
       <div class="brand-lockup">
         <span class="tesla-word">TESLA</span>
-        <span class="brand-sub">Cockpit</span>
+        <span class="brand-sub">Home</span>
       </div>
     </div>
     <div id="s-date">———</div>
@@ -739,9 +965,9 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
             </div>
           </div>
           <div class="command-actions">
-            <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read the weather, headlines and scores aloud">🔊 Briefing</button>
-            <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">🎙 Voice</a>
-            <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Big, at-a-glance view">⛶ Glance</button>
+            <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read the weather, headlines and scores aloud">Briefing</button>
+            <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
+            <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Big, at-a-glance view">Glance</button>
           </div>
         </div>
       </div>

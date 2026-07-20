@@ -55,6 +55,45 @@
     .action-inner button{font-family:var(--ui);font-weight:600;letter-spacing:.05em}
     details.card summary{font-family:var(--ui);font-weight:600;letter-spacing:.06em}
     button,.button{font-weight:600}
+  
+    /* APPLE SIMPLICITY PASS (2026-07-20) — quiet wallet UI */
+    :root{--spring:cubic-bezier(.32,.72,0,1);--ease:cubic-bezier(.25,.1,.25,1);--radius:18px}
+    .top::after{height:1px;background:var(--line);opacity:.8}
+    .top .ghost,.status,.section-head h2,.section-head span,.card-label,.brand small,.action-inner button,.privacy,.pill,.alert small,.empty::before{
+      text-transform:none;letter-spacing:0
+    }
+    .brand small{font-size:11px;font-weight:600;opacity:.85}
+    .hero-copy h1{font-weight:500;letter-spacing:-.035em}
+    .hero-metrics{border:none;border-radius:16px;background:rgba(255,255,255,.04);gap:0}
+    .hero-metric{border-left-color:rgba(255,255,255,.06)}
+    .hero-metric small{font-size:11px;font-weight:600;color:var(--muted)}
+    .card{border-radius:18px;box-shadow:none;border:1px solid var(--line)}
+    .section-head{border-bottom-color:var(--line);margin-top:36px}
+    .section-head h2{font-size:13px;font-weight:600;color:var(--muted);font-family:var(--ui)}
+    .metric-value{font-weight:500;letter-spacing:-.03em}
+    .track{height:8px;border-radius:999px;border:none;box-shadow:none;background:rgba(255,255,255,.08)}
+    .fill{border-radius:999px;box-shadow:none}
+    .row::before{width:2px;border-radius:1px;box-shadow:none;opacity:.7}
+    .actions{
+      background:rgba(5,7,10,.72);backdrop-filter:saturate(1.4) blur(28px);-webkit-backdrop-filter:saturate(1.4) blur(28px);
+      border-top:1px solid transparent;box-shadow:0 -1px 0 var(--line)
+    }
+    .action-inner{border:none;border-radius:16px;background:rgba(255,255,255,.05);gap:4px;padding:4px}
+    .action-inner button{border:none!important;border-radius:12px;font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink);min-height:48px}
+    .action-inner .primary{border-radius:12px;box-shadow:none}
+    button,.button{font-weight:600;border-radius:12px;transition:transform .18s var(--spring),background .15s,border-color .15s}
+    button:active,.button:active{transform:scale(.97)}
+    .primary{box-shadow:none}
+    .empty{border-radius:22px;border:1px solid var(--line)}
+    .empty::before{letter-spacing:.04em;font-size:11px}
+    .empty h2{font-weight:500;letter-spacing:-.03em}
+    .toast{border-radius:14px;font-weight:600}
+    @media(prefers-color-scheme:light){
+      .actions{background:rgba(237,240,243,.78)}
+      .action-inner{background:rgba(12,16,22,.05)}
+      .hero-metrics{background:rgba(12,16,22,.04)}
+    }
+
   </style>
 </head>
 <body>
@@ -62,7 +101,7 @@
   <header class="top">
     <div class="top-inner">
       <div class="bar">
-        <div class="brand"><div class="mark">PF</div><div class="brand-lockup"><strong>Pederson Finances</strong><small>Private</small></div></div>
+        <div class="brand"><div class="mark">PF</div><div class="brand-lockup"><strong>Pederson Finances</strong><small>Local</small></div></div>
         <span class="status blocked" id="statusBadge">Not loaded</span>
         <div class="bar-actions">
           <button class="ghost hidden" id="installBtn" type="button">Install</button>
