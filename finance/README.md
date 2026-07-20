@@ -21,3 +21,6 @@ signals on a near-black cockpit, horizontal meters, dense rows, and sharp
 segmented controls, with all private-data and browser-local sync boundaries unchanged.
 Wave 2 tightens touch targets (48px+ controls), import/sync toasts, and an
 aria-live status region without changing storage keys or the sync channel.
+Wave 3 polishes narrow-screen layout: safe-area action bar, scroll-snap hero
+metrics, and a stacked Sync CTA under 380px — document scroll only, no sticky
+section heads.

@@ -2261,6 +2261,129 @@ body.is-mobile .cf-modes .mode-pill .mp-ico{ width:18px; height:18px; }
 .hcr-grip,#hint-tools,#hint-council{ font-weight:500; letter-spacing:.04em; }
 /* Any prompt-chip pill or FAB label that used ultra-wide tracking */
 [class*="mo-"][class*="head"], .prompt-chip-head{ letter-spacing:.06em; font-weight:600; }
+
+/* ============================================================================
+   UX OPTIMIZATION PASS (2026-07-20-ux-optimization)
+   Reduce redundant controls, improve touch/scroll on mobile/desktop/Tesla.
+   Progressive disclosure — no capability removed.
+   ========================================================================== */
+
+/* --- Composer: progressive-disclosure Next-model toggle ------------------- */
+/* Compact chip replaces the always-visible select. Expands to the same
+   #query-model-control so tests keep resolving #query-model-select. */
+#query-model-toggle{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 11px; min-height:30px;
+  border:1px dashed var(--border); border-radius:999px;
+  background:transparent; color:var(--text3);
+  font:inherit; font-size:11px; font-weight:650; letter-spacing:.04em;
+  cursor:pointer; white-space:nowrap;
+  transition:border-color .12s, color .12s, background .12s;
+}
+#query-model-toggle:hover,
+#query-model-toggle:focus-visible{
+  color:var(--text2); border-color:var(--border2); background:var(--bg2);
+}
+#query-model-toggle[hidden]{ display:none !important; }
+#query-model-control[hidden]{ display:none !important; }
+body.is-mobile #query-model-toggle{ min-height:36px; padding:7px 12px; font-size:12px; }
+
+/* --- Hide the redundant tool/council hint chips visually ----------------- */
+/* Mode pills already communicate 🔧 Agent / ⚖️ Council. Keep the DOM +
+   data-* so JS updates continue to work; only visually collapse. */
+#hint-tools, #hint-council{ display:none !important; }
+
+/* --- Mobile mode rail: 44px pills, scroll-snap, thumb-safe padding ------- */
+body.is-mobile .cf-modes{
+  display:flex !important;
+  gap:8px !important;
+  padding:6px 12px !important;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  /* Soft edge fade so users see there's more to scroll. */
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+          mask-image:linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+  scrollbar-width:none;
+}
+body.is-mobile .cf-modes::-webkit-scrollbar{ display:none; }
+body.is-mobile .cf-modes .mode-pill{
+  scroll-snap-align:center;
+  min-height:44px !important;
+  padding:10px 14px !important;
+  font-size:13px !important;
+  flex:none !important;
+  white-space:nowrap;
+}
+body.is-mobile .cf-modes .mode-pill .mp-ico{ width:20px; height:20px; }
+
+/* --- Chat float scrolling: composer stays pinned with safe-area padding -- */
+.chat-float{ display:flex; flex-direction:column; min-height:0; }
+.chat-float #chat-scroll{
+  flex:1 1 auto; min-height:0;
+  overflow-y:auto; overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.chat-float #composer-wrap{
+  flex:none;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+}
+body.is-mobile .chat-float #composer-wrap{
+  padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+/* --- Jump-to-latest: 44x44 tap target that never overlaps send ----------- */
+#jump-btn{
+  min-width:44px; min-height:44px;
+  padding:0 16px; gap:8px;
+  display:none; align-items:center; justify-content:center;
+}
+#jump-btn.show{ display:inline-flex; }
+#jump-btn:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+.chat-float #jump-btn{
+  /* Sit clearly above the composer, not over the send button. Composer is
+     centered horizontally in the float, so keeping jump-btn centered as well
+     keeps it away from the right-edge send button. */
+  left:50%; right:auto; transform:translateX(-50%);
+  bottom:calc(96px + env(safe-area-inset-bottom, 0px));
+}
+body.is-mobile .chat-float #jump-btn{
+  bottom:calc(108px + env(safe-area-inset-bottom, 0px));
+  padding:0 18px; font-size:13.5px;
+}
+
+/* --- Topbar on mobile: keep vault visible but compact -------------------- */
+body.is-mobile #topbar{ gap:6px; }
+body.is-mobile #topbar > .icon-btn{
+  width:44px !important; height:44px !important; min-width:44px !important;
+}
+/* Un-hide sync-pill on mobile (was display:none) with compact instrument chip
+   — Vault status is critical enough that a shortened pill beats total hiding. */
+body.is-mobile #sync-pill{
+  display:inline-flex !important;
+  align-items:center; justify-content:center;
+  min-height:36px; padding:6px 10px;
+  max-width:96px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-size:11.5px; letter-spacing:.02em;
+}
+@media (max-width:380px){
+  body.is-mobile #sync-pill{
+    max-width:64px; padding:6px 8px; font-size:11px;
+  }
+  body.is-mobile #topbar{ gap:4px; padding:8px 8px; }
+}
+
+/* --- Desktop composer: reduce mis-taps between attach/mic/send ----------- */
+@media (min-width:901px){
+  #composer{ gap:10px !important; padding:10px !important; }
+  #composer > .icon-btn{ margin:0; }
+  #composer > #send-btn{ margin-left:2px; }
+  .cf-actions{ gap:5px; }
+}
+
+/* --- Ensure the Next-model chip aligns tidily inside the hint row -------- */
+#comp-hint{ flex-wrap:wrap; }
+#comp-hint > .grow{ min-width:8px; }
 </style>
 </head>
 <body>
@@ -2362,13 +2485,14 @@ body.is-mobile .cf-modes .mode-pill .mp-ico{ width:18px; height:18px; }
           <button id="send-btn" title="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
         </div>
         <div id="comp-hint">
-          <label id="query-model-control" title="Choose a model for only the next message">
+          <button type="button" id="query-model-toggle" aria-expanded="false" aria-controls="query-model-control" title="Pick a model for just the next message">Next model</button>
+          <label id="query-model-control" title="Choose a model for only the next message" hidden>
             <span>Next</span>
             <select id="query-model-select" aria-label="Model for the next message"><option value="auto">Automatic · best value</option></select>
           </label>
           <span id="hint-model"></span>
-          <span id="hint-tools" style="display:none">🔧 agent</span>
-          <span id="hint-council" style="display:none">⚖️ council</span>
+          <span id="hint-tools" hidden aria-hidden="true">🔧 agent</span>
+          <span id="hint-council" hidden aria-hidden="true">⚖️ council</span>
           <span class="grow"></span>
           <span id="hint-tokens" title="Approximate tokens in context"></span>
         </div>
@@ -3442,7 +3566,8 @@ var HOMEBASE_CHANGELOG = {
   ],
   current_handoff: {
     to: 'next model',
-    objective: 'Calm typography pass on all three surfaces on branch cursor/functional-excellence-de9b (uncommitted). David rejected the Wave 1 Syne "gaming/tacky" display face and asked for Apple/Tesla-smooth type. All three apps (index.html, ai/index.html, finance/index.html) now use a pure system UI stack (-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", system-ui, "Helvetica Neue", sans-serif) for both text and display, and ui-monospace/SFMono-Regular/SF Mono/Menlo/Consolas ONLY on code — no web fonts loaded (Google Fonts <link> tags removed entirely). Ultra-wide 0.18-0.28em uppercase tracking on ex-Syne micro-labels pulled back to <=0.08em; display font-weights dropped from 800 to 600/700; big-number negative letter-spacing relaxed from -3/-4px to -1 to -2px with tabular-nums preserved. Card radius tokens softened to 16px, small radius 12px, XS radius 8px for Apple feel; finance --radius 12->14. Mode picker (Drive|Parked|Charging) letter-spacing dropped 1.6px -> 0.04em with white-space:nowrap so "Charging" no longer clips in light mode. Copy softened: brand.sub "Command Cockpit" -> "Cockpit"; #tb-sub "Command deck" -> "Home" (JS FAB-state string synced); Pederson brand small "Private cockpit" -> "Private". Mint #2af5c4 accent + every functional-excellence fix retained. Retains: functional_excellence_2026_07_20 error beacon, sendMessage/runTask finally cleanup, sub-agent abort, vault plain-language surface, voice-viz throttle, mobile 44 px touch targets, fetchCached fallbacks, Drive-mode scope. Next: verify on the real car and iterate spacing/weight if David still sees anything shouty; consider self-hosting a licensed Apple-alike (e.g. Inter) as a fallback for Android/Tesla if system stack renders inconsistently.',
+    objective: 'UX optimization pass on branch cursor/ux-optimization-de9b (uncommitted per instruction). Reduces redundant controls and improves touch/scroll on mobile / desktop / Tesla browser without removing any capability — progressive disclosure and relocation only. (1) Composer "Next" model selector: new compact `#query-model-toggle` ("Next model") chip replaces the always-visible `#query-model-control`; the control is `hidden` by default and re-appears whenever S.queryModelOverride is set (chosen state, shows "Next: <label>") OR the user taps the toggle (aria-expanded=true → focuses the select, calls showPicker if available). Blur-with-no-pick collapses back after 180ms. `#query-model-control` and `#query-model-select` IDs and handlers preserved so the per-message failover test path stays intact. (2) `#hint-tools` and `#hint-council` marked `hidden` + `display:none !important` because the mode pills already communicate 🔧/⚖️. JS still updates their state via `dataset.on` so a future disclosure or a11y consumer can read it. `#hint-model` and `#hint-tokens` retained. (3) Mobile mode rail (`body.is-mobile .cf-modes`): 44 px min-height pills, `scroll-snap-type:x mandatory`, `scroll-snap-align:center`, 6/12 px thumb padding, and a mask-image linear-gradient edge fade so the horizontal overflow reads as scrollable — the mode row stays on its own grid row so the header does not force horizontal scroll of everything. (4) `#chat-scroll` remains the only scroll region inside the float, `#composer-wrap` is `flex:none` with `env(safe-area-inset-bottom)` padding, and `#jump-btn` is now min 44×44 and vertically bumped to `bottom:calc(96/108px + safe-area)` so it never overlaps the send button. (5) Topbar mobile: `#sync-pill` un-hidden (was `display:none !important`) as a compact 36 px chip with `max-width:96px` ellipsis, collapsing to 64 px under 380 px width so Vault status stays visible without crowding the icon buttons; refresh/connectors/settings icon buttons remain 44×44. (6) Desktop composer: `#composer` gap raised to 10 px inside a 901 px+ media query with a 2 px left margin on `#send-btn` so attach / mic / send have more slop between them. Constraint list preserved: no routing/budget/vault/voice weakening; validate.py passes; node --check clean on the extracted inline JS. Do NOT: reintroduce the always-visible Next selector, remove `#query-model-toggle`, unhide hint-tools/hint-council, weaken the vault push guard, drop the safe-area padding, or bring back `body.is-mobile #sync-pill{display:none}`.',
+    ux_optimization_2026_07_20: 'THIS PASS. ai/index.html only. HTML: added `<button id="query-model-toggle" aria-controls="query-model-control" aria-expanded="false">Next model</button>` before `#query-model-control` inside `#comp-hint`, added `hidden` to `#query-model-control`, and swapped `style="display:none"` on `#hint-tools`/`#hint-council` for the `hidden` attribute + aria-hidden. JS: new `applyQueryModelDisclosure()` helper (progressive disclosure — show when override OR select currently focused, override state renders "Next: <label>"), refreshQueryModelSelect() now calls it, initQueryModelSelect() wires the toggle click (unhide → focus → showPicker) and a delayed 180 ms select-blur collapse; updateHints() no longer touches hint-tools/hint-council `style.display` but keeps state accurate via `dataset.on`. CSS: one appended UX OPTIMIZATION block at the end of `<style>` — `#query-model-toggle` chip (dashed border, 30/36 px min-height, hidden when open), `#hint-tools/#hint-council{display:none !important}`, mobile `.cf-modes` scroll-snap + mask-image edge fade + 44 px snap pills, `#chat-scroll` flex:1 + `#composer-wrap` flex:none with safe-area padding, `#jump-btn` 44×44 bumped clear of the composer, mobile `#sync-pill` un-hidden as compact 36 px ellipsis chip with a <380 px narrower fallback, and a desktop-only `@media (min-width:901px)` composer gap bump (10 px + 2 px left margin on send). Preserved IDs: query-model-control, query-model-select, hint-tools, hint-council, hint-model, hint-tokens, chat-scroll, jump-btn, composer, composer-wrap, cf-modes, sync-pill, mic-btn, send-btn, attach-btn, voice-btn (stashed), council-btn (stashed). Retains: every prior 2026-07-20 fix (calm typography, functional excellence, hot-rod cockpit) untouched. Verified: python3 extract-scripts + node --check clean; python3 .github/scripts/validate.py green.',
     type_smooth_2026_07_20: 'THIS PASS. Purely visual: Syne + JetBrains Mono removed from all three apps; --f/--fd/--font/--font-display/--display/--ui now point at the system stack; --mono is ui-monospace/SFMono. Google Fonts <link> tags removed in index.html, ai/index.html, and finance/index.html. Radii: dashboard --r 14->16, --r-sm 10->12, --r-xs 6->8; ai/ mirror; finance --radius 12->14. Calm-type override blocks appended at the tail of each stylesheet so source-order wins without !important (dashboard covers .tesla-word, .live-hero-clock/-date/-greet/-desc/-temp, .gl-* hero, .fresh-chip, .dock-btn, .sec-title, .rl-t, .ntab, .cam-nav-btn, .btn/-voice, .command-eyebrow/-action, .now-copy strong, .charge-*, .app-panel .rl-t, .mode-btn overflow fix incl. sub-520 media; ai/ covers .brand .nm/.sub, .sb-sec/.sb-dash-link, .tb-app/-sub, .d-head h3, .d-metric/.cf-metric/.hb-display, .cf-title/-meta, .mode-pill, .d-badge, .mo-tab, .mm-group, #query-model-control>span, .hcr-grip/#hint-tools/#hint-council, #v-badge letter-spacing 0.28em->0.08em + weight 800->700 with !important preserved; finance covers .brand strong/small, .mark, .top .ghost, .status, .hero-copy h1, .hero-metric small/b, .privacy, .section-head h2/span, .card-label, .metric-value, .health small/b, .budget/.row small, .amount, .pill, .alert small, .empty::before/h2, .action-inner button, details.card summary, button/.button). h1-h4 in ai/ dropped -0.025em/700 -> -0.02em/600. Copy: brand.sub "Command Cockpit" -> "Cockpit"; #tb-sub "Command deck" -> "Home" (fab-state JS string synced at line ~6052); finance "Private cockpit" -> "Private". Comment "Syne section titles" -> "system-font section titles" in dashboard. Zero functional contracts touched: DASHBOARD_CACHE marker intact, no handlers moved, no JS logic edited outside the tb-sub string, all IDs preserved. Verified: python3 extract-scripts + node --check clean on all three files; python3 .github/scripts/validate.py green. Historical HOMEBASE_CHANGELOG prose still mentions Syne for provenance — no CSS font stack still names Syne or JetBrains Mono.',
     functional_excellence_2026_07_20: 'PRIOR SAME-DAY PASS retained in this branch. All fixes are in ai/index.html only. Beacon: #err-beacon in <body>, CSS in <style>, listeners at top of first <script>; DOMContentLoaded wrapped so a boot throw still surfaces the chip; last error saved to nova_last_error_v1 (distinct from dashboard last_error_v1). sendMessage now has a finally block that always clears S.sending, S.abort, and repaints (each cleanup step try-guarded); AbortError inside a live Council also marks any state==="run" members as "stopped" so their spinner cards resolve. runTask mirrors the finally contract for t.running. runSubagentMember now checks S.abort.signal.aborted before each execTool and after the loop so Stop is honored mid-tool-loop. bootVaultSync distinguishes need-pass (amber pill, "Vault locked") vs decrypt-fail vs network vs other, toasts once per session (latches reset on a healthy ok status), and never weakens the vaultPushToDrive "Sync stopped to protect the existing Drive vault" abort. voiceVizKick renders every other frame when VOICE.state==="idle" and VMETER.level<0.08 (halves idle canvas cost). loadState hardens S.convos = [] up front. Mobile CSS: #send-btn 44x44 (radius 10), #mic-btn 44x44, body.is-mobile .icon-btn 44x44, body.is-mobile .cf-modes .mode-pill min-height 38px + 13px font. New sync-pill "needs-pass" amber style added. Nothing else in CSS/JS moved.',
     cockpit_hotrod_wave1_2026_07_20: 'Homebase-only unmistakable structural refresh (branch cursor/complete-ui-refresh-de9b). Fonts: Google Fonts Syne (display) + Plus Jakarta Sans (UI) + JetBrains Mono (mono). Palette: dark #05070a/#0a0e14/#12161d, light #f2f4f7 cool-gray; steel #8b95a8; hairline borders rgba(255,255,255,.08); accent mint #2af5c4 (dark) / #0d8f74 (light) with derived --acc-soft/--acc-glow. DEFAULT_SETTINGS.accent moved to #2af5c4; loadState migration extended to convert legacy indigo (#4f46e5/#6366f1/#818cf8) AND legacy Wave-0 teal (#0f9f94/#3dd6c6/#1fb8a8/#1ec8b8) to the new mint so returning users see the change. ACCENTS palette reordered with mint first. theme-color meta and applyTheme meta content aligned to #05070a/#f2f4f7. Structural chrome: brand.logo is a geometric mint diamond in a dark tile; brand.sub now "Command Cockpit"; topbar subtitle now "Command deck"; new-chat is an outlined button with a mint accent bar; hub tiles have a top mint hairline instead of rounded rainbow icons; chat float is flatter with a segmented mode-pill control; composer is a sharper 12px command bar with a mint square send button; FAB is a geometric mint diamond, not a rainbow orb; modals/popovers use denser rows and instrument section labels; scrollbars slimmed. Mode-specific voice/agent/research/council recognition hues intentionally preserved via the existing --pill-c / --hc CSS variables driving mode-pills and hub tiles. All key JS IDs preserved (sidebar, topbar, composer, chat-float, chat-fab, model-btn, send-btn, mic-btn, voice-ov, settings-ov, tab handlers, cf-modes, cf-actions, hub-nav, mo-tabs, model-menu, attach-menu, cf-more-menu, sync-pill, connectors-btn, settings-btn, hub-tile hooks). Only two small copy touches to HTML (brand subtitle and #tb-sub default) plus one JS string sync so the FAB-state topbar subtitle still matches; every handler stays bound to its existing selector. Verified: python3 extract-scripts + node --check clean.',
@@ -3454,8 +3579,8 @@ var HOMEBASE_CHANGELOG = {
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
     voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
     app_ui_polish_2026_07_20: 'Earlier same-day token polish (indigo aurora calm-down). Superseded for palette by cockpit_wave0_2026_07_20 teal system; elevation/type lessons still apply.',
-    state: 'Homebase functional-excellence pass on branch cursor/functional-excellence-de9b (uncommitted). Wave 1 hot-rod cockpit already applied on cursor/complete-ui-refresh-de9b. FABLE_AUDIT_BRIEF.md remains the security/routing audit entrypoint.',
-    latest_fix: 'Calm typography — Syne + JetBrains Mono removed from all three apps for a pure system stack (Apple/Tesla-smooth); softer radii; mode-picker "Charging" overflow fixed; Command Cockpit / Command Deck / Private cockpit copy softened. Every functional-excellence fix retained.',
+    state: 'Homebase UX optimization pass on branch cursor/ux-optimization-de9b (uncommitted per instruction). Prior 2026-07-20 passes (calm typography, functional-excellence, Wave 1 hot-rod cockpit) all retained. FABLE_AUDIT_BRIEF.md remains the security/routing audit entrypoint.',
+    latest_fix: 'UX optimization — composer "Next model" selector collapsed behind a progressive-disclosure toggle, redundant hint-tools/hint-council chips hidden, mobile mode rail gets 44 px scroll-snap pills with a mask-image edge fade, jump-btn resized to 44×44 and repositioned clear of the send button, composer stays pinned with safe-area padding, mobile sync-pill un-hidden as a compact ellipsis chip, and desktop composer gains extra breathing room between attach/mic/send.',
     start_here: [
       'HOMEBASE_FINANCE_EXCELLENCE_PLAN.md — Wave inventory for /ai/ and /finance/',
       'DASHBOARD_EXCELLENCE_PLAN.md — Tesla dashboard waves (cache.json still highest leverage)',
@@ -3468,6 +3593,7 @@ var HOMEBASE_CHANGELOG = {
       'DONE Homebase Wave 1 hot-rod refresh (branch cursor/complete-ui-refresh-de9b, uncommitted)',
       'DONE Pederson Finances Wave 1 hot-rod refresh (branch cursor/complete-ui-refresh-de9b, uncommitted)',
       'DONE Homebase functional excellence pass (branch cursor/functional-excellence-de9b, uncommitted) — see 2026-07-20-functional-excellence entry',
+      'DONE Homebase UX optimization pass (branch cursor/ux-optimization-de9b, uncommitted) — see 2026-07-20-ux-optimization entry',
       'P1 next: bring the Tesla dashboard shell forward to match Wave 1 hot-rod (Syne headers, mint accent, sharper radii) if David likes the direction',
       'P1: extend the /ai/ error beacon into an on-device "last error" viewer in Settings → Data (currently only stashes to nova_last_error_v1)',
       'P1: team cancel/timeout stuck-UI; scheduler architecture spike (finally-cleanup now guarantees t.running clears — timeouts still pending)',
@@ -3508,6 +3634,61 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-ux-optimization',
+      date: '2026-07-20',
+      commit: 'not yet committed — user instructed do-not-commit for this pass',
+      branch: 'cursor/ux-optimization-de9b',
+      pull_request: 'none opened by this session',
+      title: 'Homebase UX optimization — reduce redundant controls, improve touch/scroll on mobile/desktop/Tesla',
+      type: 'ui+ux+accessibility+mobile',
+      depends_on: ['2026-07-20-type-smooth','2026-07-20-functional-excellence','2026-07-20-cockpit-hotrod-wave1-homebase'],
+      reported_by: 'David: cut redundant controls in the chat float, improve touch on mobile, keep progressive disclosure — do not remove capabilities.',
+      files_changed: ['ai/index.html'],
+      interfaces_changed: [
+        'New `#query-model-toggle` compact chip button (aria-controls="query-model-control", aria-expanded starts false) placed before `#query-model-control` inside `#comp-hint`',
+        '`#query-model-control` gets a `hidden` attribute so it collapses by default; it re-appears whenever S.queryModelOverride is set OR the toggle is tapped (aria-expanded="true" + focus + optional showPicker)',
+        'New JS helper applyQueryModelDisclosure() — reads S.queryModelOverride and document.activeElement, renders the toggle in either compact ("Next model") or chosen ("Next: <label>") state, and toggles hidden on both the toggle chip and #query-model-control',
+        'refreshQueryModelSelect() now calls applyQueryModelDisclosure() at the end so external callers still see a consistent disclosure state after every refresh (including the post-send override-clear path in sendMessage)',
+        'initQueryModelSelect() adds a click handler on #query-model-toggle (unhide → focus select → showPicker where supported) and a 180 ms delayed blur handler on #query-model-select that collapses back to the compact chip if the user did not pick anything',
+        '`#hint-tools` and `#hint-council` markup switched from `style="display:none"` to the `hidden` attribute + `aria-hidden="true"` and hidden globally with `#hint-tools,#hint-council{display:none !important}` in the appended UX block; updateHints() no longer touches their style.display but keeps state accurate via `dataset.on`',
+        'CSS: one appended UX OPTIMIZATION PASS (2026-07-20-ux-optimization) block at the very end of `<style>` — mobile .cf-modes scroll-snap (x mandatory) + mask-image edge fade + 44 px min-height pills with scroll-snap-align:center, `.chat-float` becomes an explicit flex column with `#chat-scroll` as the only scroll region and `#composer-wrap` flex:none with env(safe-area-inset-bottom) padding, `#jump-btn` bumped to 44×44 and repositioned to bottom:calc(96/108 px + safe-area) so it never overlaps `#send-btn`, `body.is-mobile #sync-pill` un-hidden as a 36 px ellipsis chip (max-width 96 px → 64 px under 380 px), `@media (min-width:901px) #composer` gap raised to 10 px with a 2 px left margin on `#send-btn`'
+      ],
+      changes: [
+        'Composer "Next" model selector is a compact "Next model" chip by default; tap expands the same `#query-model-control` the override state uses, so the per-message failover contract and tests targeting `#query-model-select` still resolve the identical DOM',
+        'When the user has selected a one-shot model, the chip renders as "Next: <label>" so the chosen state is unmistakable without hunting for the select',
+        'Mode pills already communicate 🔧 Agent / ⚖️ Council so the duplicate `#hint-tools` and `#hint-council` chips are visually hidden — their DOM and state updates stay so future disclosure or a11y consumers can still read them',
+        'On mobile, the chat-float mode rail is a proper 44 px scroll-snap carousel with a mask-image edge fade, and it sits on its own grid row so it never forces horizontal scroll of the whole header',
+        'The chat-float now guarantees `#chat-scroll` is the only scroll region and `#composer-wrap` stays pinned across the safe-area inset; the "jump to latest" button is a full 44×44 target that sits clear of the send button',
+        'On mobile, the Drive vault pill is visible again as a compact 36 px ellipsis chip (was hidden entirely), so users can still see "Vault locked" / "Vault synced" without opening Settings',
+        'On desktop (min-width 901 px), the composer gains 10 px gaps between attach / mic / send so mis-taps drop'
+      ],
+      preserved_ids: [
+        'query-model-control','query-model-select','hint-tools','hint-council','hint-model','hint-tokens',
+        'chat-scroll','jump-btn','composer','composer-wrap','composer > attach-btn/input/mic-btn/send-btn',
+        'cf-modes','cf-actions','model-btn','tools-btn','chat-new','cf-more','chat-min',
+        'voice-btn (stashed)','council-btn (stashed)','memory-btn (stashed)','tasks-btn (stashed)','chat-expand (stashed)',
+        'sync-pill','connectors-btn','dash-refresh','settings-btn'
+      ],
+      safety_guards: [
+        'No routing, budget, vault, voice, MCP, sub-agent, tool-scope, or repository-write behaviour was touched — only CSS, HTML markup for the new toggle, and JS around applyQueryModelDisclosure/initQueryModelSelect/updateHints',
+        'sendMessage still clears S.queryModelOverride and calls refreshQueryModelSelect() after a per-message override runs; the new applyQueryModelDisclosure() call inside refreshQueryModelSelect() collapses the chip back to the compact state so the composer stays tidy',
+        'FABLE-verified vaultPushToDrive merge/decrypt guard, cloud reservation path, and one-tap voice gate are unchanged',
+        'Every prior 2026-07-20 pass (calm typography, functional excellence, Wave 1 hot-rod cockpit) is byte-untouched aside from the additions listed above'
+      ],
+      verification: [
+        'python3 extract-scripts one-liner from CLAUDE.md against /workspace/ai/index.html, then node --check on the extracted JS — clean',
+        'python3 .github/scripts/validate.py — passes',
+        'Manual reasoning: applyQueryModelDisclosure() gates on S.queryModelOverride OR (aria-expanded="true" AND select is document.activeElement); refresh calls it, change calls it, toggle click sets aria-expanded and unhides synchronously before focus so the select is targetable, blur waits 180 ms so a native <option> click still commits an override before the collapse'
+      ],
+      setup: ['No secrets or new environment variables. Existing users see the composer with a single "Next model" chip instead of an always-visible select; every prior behaviour is one tap away.'],
+      known_limits: [
+        'Not committed or pushed because the user explicitly requested do-not-commit for this pass',
+        '#sync-pill mobile ellipsis truncates the longest states ("Vault synced" fits, "Sync error" fits; "Syncing…" and "Vault locked" fit at ≥380 px; on very narrow widths the label is truncated but the color class and title tooltip still convey status)',
+        'showPicker() is only supported on Chromium ≥97 / Safari ≥17.4; on older browsers focus alone opens the native picker or exposes it with a follow-up tap'
+      ],
+      next_model: 'Preserve `#query-model-toggle` + applyQueryModelDisclosure() + the delayed blur collapse. Do NOT reintroduce the always-visible select, and do NOT unhide `#hint-tools`/`#hint-council` — the mode pills already own that signal. If you extend the disclosure pattern to `#hint-model`, keep the DOM nodes + state updates so tests that read them via ID still work. Keep `body.is-mobile #sync-pill` visible as an ellipsis chip; the vault status is important enough that hiding it is a regression.'
+    },
     {
       id: '2026-07-20-type-smooth',
       date: '2026-07-20',
@@ -10993,6 +11174,31 @@ function queryOverrideRoute(pick, latestUser, convo){
     reason:'Chosen for this message · ' + ((PROVIDERS[pick.provider] && PROVIDERS[pick.provider].name) || pick.provider) + ' · ' + (modelInfo(pick.provider, pick.model).label || pick.model)
   };
 }
+function applyQueryModelDisclosure(){
+  /* Progressive disclosure: compact "Next model" toggle collapses the select
+     into a single tap. When an override is set (chosen state) OR the user
+     just expanded via the toggle and the select still has focus, show
+     #query-model-control. Never removes the select or its handlers — the
+     picker just hides so the composer isn't crowded. */
+  var control = $('query-model-control');
+  var toggle = $('query-model-toggle');
+  if (!control || !toggle) return;
+  var override = !!S.queryModelOverride;
+  var select = $('query-model-select');
+  var selectFocused = select && document.activeElement === select;
+  var manuallyOpen = toggle.getAttribute('aria-expanded') === 'true' && selectFocused;
+  var show = override || manuallyOpen;
+  control.hidden = !show;
+  toggle.hidden = show;
+  toggle.setAttribute('aria-expanded', show ? 'true' : 'false');
+  if (override){
+    var opt = select && select.selectedOptions && select.selectedOptions[0];
+    var label = opt ? opt.textContent : '';
+    toggle.textContent = label ? ('Next: ' + label.split(' · ')[0]) : 'Next model';
+  } else {
+    toggle.textContent = 'Next model';
+  }
+}
 function refreshQueryModelSelect(){
   var select = $('query-model-select');
   if (!select) return;
@@ -11025,6 +11231,7 @@ function refreshQueryModelSelect(){
   if (!exists){ S.queryModelOverride = null; wanted = 'auto'; }
   select.value = wanted;
   $('query-model-control').classList.toggle('chosen', wanted !== 'auto');
+  applyQueryModelDisclosure();
 }
 function initQueryModelSelect(){
   var select = $('query-model-select');
@@ -11037,15 +11244,48 @@ function initQueryModelSelect(){
     if (S.queryModelOverride && S.queryModelOverride.provider === 'webllm'){
       toast('This browser model downloads once, then stays cached on this device', null, 3800);
     }
+    applyQueryModelDisclosure();
   });
+  var toggle = $('query-model-toggle');
+  if (toggle){
+    toggle.addEventListener('click', function(){
+      /* Reveal the same #query-model-control the override state uses, so tests
+         targeting query-model-select still resolve the identical DOM. */
+      toggle.setAttribute('aria-expanded', 'true');
+      var sel = $('query-model-select');
+      if (sel){
+        /* Un-hide first so focus() targets a visible element. */
+        var control = $('query-model-control');
+        if (control){ control.hidden = false; toggle.hidden = true; }
+        try { sel.focus({ preventScroll:true }); } catch(_){ sel.focus(); }
+        try { if (typeof sel.showPicker === 'function') sel.showPicker(); } catch(_){}
+      }
+      applyQueryModelDisclosure();
+    });
+    /* If the user opened the select but didn't pick anything (still auto),
+       collapse back to the compact toggle on blur so the composer stays tidy.
+       Delayed so a click inside the native <option> list doesn't fire blur
+       before the change handler records the pick. */
+    select.addEventListener('blur', function(){
+      setTimeout(function(){
+        if (!S.queryModelOverride){
+          toggle.setAttribute('aria-expanded', 'false');
+          applyQueryModelDisclosure();
+        }
+      }, 180);
+    });
+  }
 }
 function updateHints(){
   var c = activeConvo();
   var p = c ? c.provider : S.settings.provider;
   var m = c ? c.model : S.settings.model;
   $('hint-model').textContent = (PROVIDERS[p] ? PROVIDERS[p].name : p) + ' · ' + (modelInfo(p, m).label || m);
-  $('hint-tools').style.display = (c && c.toolsOn) ? '' : 'none';
-  if ($('hint-council')) $('hint-council').style.display = S.settings.councilOn ? '' : 'none';
+  /* hint-tools / hint-council are hidden by CSS + [hidden] to avoid duplicating
+     the mode pills, but data attributes stay accurate so future disclosure or
+     tests can still read them. */
+  var ht = $('hint-tools'); if (ht){ ht.dataset.on = (c && c.toolsOn) ? '1' : '0'; }
+  var hc = $('hint-council'); if (hc){ hc.dataset.on = S.settings.councilOn ? '1' : '0'; }
   if ($('hint-model') && S.settings.uiMode && S.settings.uiMode !== 'chat'){
     var mn = modeById(S.settings.uiMode).title;
     $('hint-model').textContent = mn + ' · ' + (PROVIDERS[p] ? PROVIDERS[p].name : p) + ' · ' + (modelInfo(p, m).label || m);

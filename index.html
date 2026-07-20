@@ -94,7 +94,7 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 #stock-widget #stk-chg.up{color:var(--accent)} #stock-widget #stk-chg.down{color:var(--red)}
 
 /* MAIN */
-#main{flex:1;padding:24px 32px 140px;overflow:visible;-webkit-user-select:text;user-select:text}
+#main{flex:1;padding:24px 32px max(140px,calc(120px + env(safe-area-inset-bottom)));overflow:visible;-webkit-user-select:text;user-select:text}
 
 /* LIVE PANEL HERO — instrument command deck, no soft blobs */
 .live-hero{position:relative;overflow:hidden;background:
@@ -106,7 +106,7 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 .live-hero-time > .live-hero-clockwrap{grid-area:clock;min-width:0}
 .live-hero-clock{font-family:var(--fd);font-size:clamp(56px,9vw,104px);font-weight:800;line-height:0.9;letter-spacing:-3px;font-variant-numeric:tabular-nums;color:var(--t1);text-shadow:0 0 60px rgba(42,245,196,.08)}
 .live-hero-date{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--t2);margin-top:10px;text-transform:uppercase;letter-spacing:2.5px}
-.live-hero-chiprow{grid-area:chips;display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.live-hero-chiprow{grid-area:chips;display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;opacity:.92}
 .fresh-chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:9px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);font-family:var(--fd);font-size:11px;font-weight:800;color:var(--t2);cursor:pointer;white-space:nowrap;transition:all .18s;text-transform:uppercase;letter-spacing:1.2px}
 .fresh-chip:hover{background:var(--surface2);color:var(--t1);border-color:var(--line2)}
 .fresh-chip .fresh-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 10px var(--accent-glow)}
@@ -171,11 +171,12 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
 /* DOCK — bottom instrument rail, segmented pill bar (kill floating bubble) */
-#dock{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;align-items:stretch;gap:4px;padding:5px;background:linear-gradient(180deg,rgba(10,14,20,.92),rgba(6,8,12,.94));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--r);border:1px solid var(--line2);box-shadow:0 20px 40px -12px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.04);z-index:200;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;transition:all .25s cubic-bezier(.34,.69,.66,1)}
+#dock{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;align-items:stretch;gap:6px;padding:5px;padding-bottom:max(5px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(10,14,20,.92),rgba(6,8,12,.94));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--r);border:1px solid var(--line2);box-shadow:0 20px 40px -12px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.04);z-index:200;max-width:calc(100% - 20px);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;transition:all .25s cubic-bezier(.34,.69,.66,1)}
+#dock::-webkit-scrollbar{display:none}
 html.light #dock{background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(248,250,252,.96))}
 #dock::-webkit-scrollbar{display:none}
 #dock::before{content:'';position:absolute;left:12%;right:12%;top:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--accent-soft2),transparent);pointer-events:none}
-.dock-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;min-height:48px;border-radius:var(--r-sm);color:var(--t2);font-family:var(--fd);font-size:14px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;transition:background .15s ease,color .15s ease;white-space:nowrap;cursor:grab;background:transparent;user-select:none;position:relative}
+.dock-btn{display:flex;flex:1 1 auto;align-items:center;justify-content:center;gap:8px;padding:12px 20px;min-height:48px;border-radius:var(--r-sm);color:var(--t2);font-family:var(--fd);font-size:14px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;transition:background .15s ease,color .15s ease;white-space:nowrap;cursor:grab;background:transparent;user-select:none;position:relative;scroll-snap-align:start}
 .dock-btn:hover{background:var(--surface2);color:var(--t1)}
 .dock-btn.on{background:var(--accent);color:#05070a;box-shadow:inset 0 -2px 0 rgba(0,0,0,.15),0 8px 22px -8px var(--accent-glow)}
 .dock-btn.on:hover{background:var(--accent2);color:#05070a}
@@ -255,8 +256,9 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .feed-m{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--fd);font-size:10.5px;color:var(--t3);text-transform:uppercase;letter-spacing:1.4px;font-weight:700}
 .feed-src{color:var(--accent);font-weight:800}
 /* Segmented control (news tabs) */
-.news-tabs{margin-left:auto;display:flex;gap:2px;padding:3px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm)}
-.ntab{padding:12px 14px;min-height:48px;border-radius:var(--r-xs);font-family:var(--fd);font-size:11px;font-weight:800;color:var(--t3);background:transparent;border:none;text-transform:uppercase;letter-spacing:1.3px;transition:background .15s,color .15s;cursor:pointer}
+.news-tabs{margin-left:auto;display:flex;gap:2px;padding:3px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm);max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scrollbar-width:none}
+.news-tabs::-webkit-scrollbar{display:none}
+.ntab{flex-shrink:0;scroll-snap-align:start;padding:12px 14px;min-height:48px;border-radius:var(--r-xs);font-family:var(--fd);font-size:11px;font-weight:800;color:var(--t3);background:transparent;border:none;text-transform:uppercase;letter-spacing:1.3px;transition:background .15s,color .15s;cursor:pointer}
 .cam-nav-btn{min-height:48px;min-width:64px;padding:12px 18px;border-radius:var(--r-xs);font-family:var(--fd);font-size:12px;font-weight:800;color:var(--t2);background:var(--surface);border:1px solid var(--line);text-transform:uppercase;letter-spacing:1.3px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
 .cam-nav-btn:hover{background:var(--surface2);color:var(--t1);border-color:var(--line2)}
 .cam-nav-btn:active{transform:scale(.97)}
@@ -417,6 +419,14 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 .cam-pager::-webkit-scrollbar{height:10px}
 .cam-pager::-webkit-scrollbar-thumb{background:var(--line2);border-radius:5px}
 .cam-pager::-webkit-scrollbar-track{background:var(--surface);border-radius:5px}
+.cam-dots{display:flex;justify-content:center;align-items:center;gap:6px;margin:6px 0 2px;flex-wrap:wrap}
+.cam-dots:empty{display:none}
+.cam-dot{-webkit-appearance:none;appearance:none;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border:none;background:transparent;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.cam-dot::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--line2);transition:background .15s,transform .15s;box-shadow:0 0 0 1px var(--line)}
+.cam-dot:hover::before{background:var(--t3)}
+.cam-dot.on::before{background:var(--accent);transform:scale(1.35);box-shadow:0 0 10px var(--accent-glow)}
+.cam-dot:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+.cam-hint{text-align:center;font-family:var(--fd);font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.4px;margin:2px 0 8px;opacity:.7}
 .cam-page{min-width:100%;scroll-snap-align:start;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-content:start}
 .cam-card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}
 .cam-card img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;background:var(--surface)}
@@ -527,12 +537,14 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
   #header{padding:8px 14px;height:auto;gap:10px;min-height:52px}
   #s-left,#s-right{gap:10px}
   #s-date{font-size:10px;padding:6px 10px}
-  #stock-widget{font-size:12px;padding:6px 10px}#stock-widget .stk-label{font-size:9px}
+  #stock-widget{font-size:12px;padding:6px 10px;gap:6px}#stock-widget .stk-label{display:none}
+  #header{flex-wrap:wrap;row-gap:6px}
+  #s-left{flex:1 1 auto;min-width:0}#s-right{flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
   #weather-widget{padding:6px 10px}.w-icon{font-size:20px}.w-temp{font-size:14px}
-  #main{padding:14px 14px 110px}
+  #main{padding:14px 14px max(120px,calc(96px + env(safe-area-inset-bottom)))}
   .split{grid-template-columns:1fr}
   .rl-t{font-size:17px}.appicon{width:52px;height:52px}.appicon svg{width:32px;height:32px}
-  #dock{gap:2px;padding:4px;bottom:10px}.dock-btn{padding:10px 14px;font-size:13px;letter-spacing:1.1px}
+  #dock{gap:3px;padding:4px;padding-bottom:max(4px,env(safe-area-inset-bottom));bottom:10px;justify-content:flex-start}.dock-btn{flex:0 0 auto;padding:10px 14px;font-size:13px;letter-spacing:1.1px;min-height:48px}
   #stocks-dropdown{width:calc(100vw - 24px);left:12px;margin-left:0}
   .cam-page{grid-template-columns:1fr}
   .mon-start-grid{grid-template-columns:1fr}
@@ -559,9 +571,9 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 .now-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
 .now-copy strong{font-family:var(--fd);font-size:17px;font-weight:700;line-height:1.2;letter-spacing:-.1px;color:var(--t1)}
 .now-copy span{font-size:13px;line-height:1.35;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Square mint-accent action buttons (Briefing / Voice) */
-.command-actions{display:flex;align-items:stretch;gap:6px}
-.command-action{display:flex;align-items:center;justify-content:center;gap:8px;min-width:100px;min-height:48px;padding:10px 16px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--t1);font-family:var(--fd);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;transition:background .15s,color .15s,border-color .15s,transform .1s}
+/* Three equal primary actions (Briefing / Voice / Glance) */
+.command-actions{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap}
+.command-action{flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:8px;min-width:110px;min-height:48px;padding:10px 16px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--t1);font-family:var(--fd);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;transition:background .15s,color .15s,border-color .15s,transform .1s;white-space:nowrap}
 .command-action:active{transform:scale(.97)}
 .command-action:hover{background:var(--surface2);border-color:var(--line2)}
 .command-action.briefing-btn{background:var(--accent-soft);color:var(--accent);border-color:var(--accent-soft2)}
@@ -569,6 +581,8 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 .command-action.briefing-btn.speaking{background:var(--accent);color:#05070a;border-color:var(--accent)}
 .command-action.voice{background:var(--accent);color:#05070a;border-color:var(--accent);box-shadow:0 8px 22px -6px var(--accent-glow)}
 .command-action.voice:hover{background:var(--accent2);color:#05070a}
+.command-action.glance-cta{background:var(--surface);color:var(--t1);border-color:var(--line)}
+.command-action.glance-cta:hover{background:var(--surface2);border-color:var(--accent-soft2);color:var(--accent)}
 .charge-session{display:none;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:12px 14px;background:var(--accent-soft);border:1px solid var(--accent-soft2);border-radius:var(--r-sm)}
 body[data-mode="charging"] .charge-session{display:grid}
 .charge-time{display:flex;align-items:baseline;gap:10px;min-width:0}
@@ -581,7 +595,7 @@ body[data-mode="charging"] .charge-session{display:grid}
 body[data-mode="drive"] #p-live #stock-widget,body[data-mode="drive"] #p-live .live-stocks-row,body[data-mode="drive"] #p-live .live-indices,body[data-mode="drive"] #p-live .live-digest,body[data-mode="drive"] #p-live .live-quote,body[data-mode="drive"] #p-live .split{display:none!important}
 body[data-mode="drive"] .live-hero{gap:18px;padding:22px}
 body[data-mode="drive"] .live-hero-time{gap:20px 28px}
-@media(max-width:760px){.command-mode{flex-direction:column;align-items:stretch;gap:6px}.mode-picker{width:100%}.cockpit-status{grid-template-columns:1fr}.command-actions{min-height:42px}.command-action{flex:1;min-width:0}.charge-session{grid-template-columns:1fr}.charge-presets{flex-wrap:wrap}.live-hero-time{grid-template-columns:1fr;grid-template-areas:'clock' 'weather' 'chips';gap:14px}.now-copy span{white-space:normal}.charge-time{flex-wrap:wrap}}
+@media(max-width:760px){.command-mode{flex-direction:column;align-items:stretch;gap:6px}.mode-picker{width:100%}.cockpit-status{grid-template-columns:1fr}.command-actions{min-height:42px;gap:6px;flex-wrap:nowrap}.command-action{flex:1 1 0;min-width:0;padding:10px 8px;font-size:11.5px;letter-spacing:1px}.charge-session{grid-template-columns:1fr}.charge-presets{flex-wrap:wrap}.charge-presets .charge-preset{flex:1 1 0;min-width:0}.live-hero-time{grid-template-columns:1fr;grid-template-areas:'clock' 'weather' 'chips';gap:14px}.live-hero-chiprow{justify-content:flex-start}.now-copy span{white-space:normal}.charge-time{flex-wrap:wrap}}
 
 
 /* CARPLAY-STYLE APP LAUNCHERS — sharper tiles + top mint accent hairline */
@@ -727,6 +741,7 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
           <div class="command-actions">
             <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read the weather, headlines and scores aloud">🔊 Briefing</button>
             <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">🎙 Voice</a>
+            <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Big, at-a-glance view">⛶ Glance</button>
           </div>
         </div>
       </div>
@@ -740,7 +755,6 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
           <button class="charge-preset" type="button" onclick="startChargeTimer(15)">15 min</button>
           <button class="charge-preset" type="button" onclick="startChargeTimer(30)">30 min</button>
           <button class="charge-preset" type="button" onclick="startChargeTimer(60)">60 min</button>
-          <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">🎙 Voice</a>
         </div>
       </div>
 
@@ -757,11 +771,10 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
           </div>
           <div class="live-hero-icon" id="live-icon">🌤</div>
         </div>
-        <div class="live-hero-chiprow">
+        <div class="live-hero-chiprow" aria-label="Data status">
           <button class="fresh-chip" id="fresh-chip" onclick="location.href = location.pathname + '?v=' + Date.now() + (location.hash || '')" title="Data refreshes automatically every hour — tap to reload now">
             <span class="fresh-dot"></span><span id="fresh-chip-txt">Checking data…</span><span style="font-size:13px">⟳</span>
           </button>
-          <button class="glance-btn" onclick="glanceOpen()" title="Big, at-a-glance view">⛶ Glance</button>
         </div>
       </div>
       <!-- Glanceable 5-day forecast strip (no tap needed) -->
@@ -1195,6 +1208,8 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
       </div>
     </div>
     <div class="cam-pager" id="cam-pager"><div class="muted">Loading cameras…</div></div>
+    <div class="cam-dots" id="cam-dots" role="tablist" aria-label="Camera pages"></div>
+    <div class="cam-hint" id="cam-hint">Swipe for more cameras · tap a dot to jump</div>
     <div style="margin-top:14px;font-size:12px;color:var(--t3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <span>★ Favourite up to 4 cameras to pin them to page 1 · images live from DriveBC · incident data refreshes hourly</span>
       <a href="https://x.com/DriveBC" target="_blank" rel="noopener" style="color:var(--accent);font-weight:700">@DriveBC on X ↗</a>
@@ -2006,7 +2021,11 @@ function goPanel(p) {
   if (submenuItem) submenuItem.classList.add('on');
   var panel = document.getElementById('p-' + p);
   if (panel) panel.classList.add('on');
-  window.scrollTo(0, 0);
+  try {
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  } catch (e) {
+    window.scrollTo(0, 0);
+  }
   closeDockSubmenu();
   if (p === 'games') {
     if (document.getElementById('game-shoot').style.display !== 'none') shootLoopStart();
@@ -5654,16 +5673,56 @@ function renderCameras(bust) {
 function camUpdateIndicator() {
   var pager = document.getElementById('cam-pager');
   var ind = document.getElementById('cam-page-ind');
-  if (!pager || !ind) return;
+  var dots = document.getElementById('cam-dots');
+  var hint = document.getElementById('cam-hint');
+  if (!pager) return;
   var pages = pager.querySelectorAll('.cam-page').length;
-  if (!pages) { ind.textContent = ''; return; }
-  var cur = Math.round(pager.scrollLeft / Math.max(pager.clientWidth, 1)) + 1;
-  ind.textContent = 'Page ' + Math.min(cur, pages) + ' of ' + pages;
+  if (!pages) {
+    if (ind) ind.textContent = '';
+    if (dots) dots.innerHTML = '';
+    if (hint) hint.style.display = 'none';
+    return;
+  }
+  var cur = Math.round(pager.scrollLeft / Math.max(pager.clientWidth, 1));
+  var curDisplay = Math.min(cur + 1, pages);
+  if (ind) ind.textContent = 'Page ' + curDisplay + ' of ' + pages;
+  if (hint) hint.style.display = pages > 1 ? '' : 'none';
+  if (dots) {
+    if (pages <= 1) {
+      dots.innerHTML = '';
+    } else if (dots.children.length !== pages) {
+      dots.innerHTML = '';
+      for (var i = 0; i < pages; i++) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cam-dot' + (i === cur ? ' on' : '');
+        b.setAttribute('role', 'tab');
+        b.setAttribute('aria-label', 'Camera page ' + (i + 1));
+        b.setAttribute('aria-selected', i === cur ? 'true' : 'false');
+        b.setAttribute('data-page', String(i));
+        b.onclick = (function(idx) { return function() { camGoto(idx); }; })(i);
+        dots.appendChild(b);
+      }
+    } else {
+      var kids = dots.children;
+      for (var j = 0; j < kids.length; j++) {
+        var on = j === cur;
+        kids[j].classList.toggle('on', on);
+        kids[j].setAttribute('aria-selected', on ? 'true' : 'false');
+      }
+    }
+  }
 }
 function camPage(dir) {
   var pager = document.getElementById('cam-pager');
   if (!pager) return;
   pager.scrollBy({left: dir * pager.clientWidth, behavior: 'smooth'});
+  setTimeout(camUpdateIndicator, 350);
+}
+function camGoto(idx) {
+  var pager = document.getElementById('cam-pager');
+  if (!pager) return;
+  pager.scrollTo({left: idx * pager.clientWidth, behavior: 'smooth'});
   setTimeout(camUpdateIndicator, 350);
 }
 (function() {
