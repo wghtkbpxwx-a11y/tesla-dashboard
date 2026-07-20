@@ -94,6 +94,35 @@
       .hero-metrics{background:rgba(12,16,22,.04)}
     }
 
+  
+    /* DESIGN DEPTH (2026-07-20) — Wallet moment: one number, then proof */
+    .hero{padding-top:28px;gap:18px}
+    .hero-copy h1{font-weight:500;letter-spacing:-.04em}
+    .hero-copy p{max-width:36rem;font-size:14px;line-height:1.5;font-weight:500}
+    .hero-metrics{
+      margin-top:4px;
+      -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent);
+              mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent);
+    }
+    .hero-metric{padding:16px 18px}
+    .hero-metric:first-child b{color:var(--accent)}
+    .section-head{margin-top:40px}
+    .card{padding:20px}
+    .metric-value{margin:14px 0 8px}
+    .row{padding:15px 14px 15px 18px;min-height:56px;transition:background .15s}
+    .row:active{background:rgba(255,255,255,.03)}
+    .amount{font-weight:600;letter-spacing:-.02em}
+    .empty{justify-content:center;align-items:flex-start;padding-top:clamp(48px,12vh,120px)}
+    .empty h2{max-width:16ch}
+    .empty p{font-size:15px;line-height:1.5;max-width:34rem}
+    .empty-actions .primary{min-width:min(100%,260px);font-size:15px;font-weight:650;letter-spacing:0;text-transform:none}
+    .action-inner .primary{font-weight:700}
+    .toast{bottom:calc(92px + env(safe-area-inset-bottom))}
+    @media(max-width:719px){
+      .hero-copy h1{font-size:clamp(42px,13vw,64px)}
+      .bar-actions .button{min-width:48px}
+    }
+
   </style>
 </head>
 <body>
