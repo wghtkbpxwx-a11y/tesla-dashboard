@@ -10,14 +10,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ================================================================
-   HOT-ROD COCKPIT — Wave 1 design system (matches Homebase /ai/).
-   Syne display + Plus Jakarta UI + JetBrains Mono, mint on night-
-   black, hairline instrument borders, sharp 10–14px radii.
+   CALM COCKPIT — Apple/Tesla-smooth typography (2026-07-20).
+   System UI stack (SF Pro / San Francisco / Segoe UI), mint accent
+   #2af5c4 on night-black, hairline chrome, softened 12–18px radii.
+   No web fonts — pure system for instant paint and offline in car.
    ================================================================ */
 :root {
   --bg: #05070a; --bg2: #0a0e14;
@@ -38,12 +36,12 @@
   --accent-glow: rgba(42,245,196,0.22);
   --red: #ff5a4f; --red-bg: rgba(255,90,79,0.12);
   --green: #2af5c4; --amber: #ffd166;
-  --r: 14px;
-  --r-sm: 10px;
-  --r-xs: 6px;
-  --f: 'Plus Jakarta Sans',ui-sans-serif,-apple-system,BlinkMacSystemFont,sans-serif;
-  --fd: 'Syne','Plus Jakarta Sans',ui-sans-serif,-apple-system,BlinkMacSystemFont,sans-serif;
-  --mono: 'JetBrains Mono',ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+  --r: 16px;
+  --r-sm: 12px;
+  --r-xs: 8px;
+  --f: -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",system-ui,"Helvetica Neue",sans-serif;
+  --fd: -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",system-ui,"Helvetica Neue",sans-serif;
+  --mono: ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
 }
 html.light{
   --bg:#f2f4f7; --bg2:#f9fafc;
@@ -74,7 +72,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0}
 
-/* HEADER — thin instrument strip, hairline chrome, Syne wordmark */
+/* HEADER — thin instrument strip, hairline chrome, system wordmark */
 #header{position:sticky;top:0;z-index:150;display:flex;justify-content:space-between;align-items:center;padding:10px 28px;height:auto;min-height:56px;background:linear-gradient(180deg,rgba(5,7,10,.94),rgba(5,7,10,.82));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(255,255,255,.03),0 20px 40px -30px rgba(0,0,0,.6);transition:all .3s cubic-bezier(.34,.69,.66,1)}
 html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.85))}
 #header::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,var(--accent-soft2),transparent);opacity:.55;pointer-events:none}
@@ -203,7 +201,7 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .btn-voice svg{width:19px;height:19px;display:block;flex-shrink:0}
 
 
-/* COMPONENTS — Syne section titles, hairline cardgroups with mint top accent */
+/* COMPONENTS — system-font section titles, hairline cardgroups with mint top accent */
 .sec-title{font-family:var(--fd);font-size:12px;text-transform:uppercase;letter-spacing:2px;font-weight:800;color:var(--t2);margin:0 0 12px 2px;display:flex;align-items:center;gap:10px}
 .cardgroup{position:relative;background:var(--glass2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:24px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--shadow-sm);transition:border-color .2s,box-shadow .2s}
 .cardgroup::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-soft2) 50%,transparent);pointer-events:none;opacity:.7}
@@ -258,7 +256,10 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .feed-src{color:var(--accent);font-weight:800}
 /* Segmented control (news tabs) */
 .news-tabs{margin-left:auto;display:flex;gap:2px;padding:3px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-sm)}
-.ntab{padding:9px 14px;min-height:38px;border-radius:var(--r-xs);font-family:var(--fd);font-size:11px;font-weight:800;color:var(--t3);background:transparent;border:none;text-transform:uppercase;letter-spacing:1.3px;transition:background .15s,color .15s;cursor:pointer}
+.ntab{padding:12px 14px;min-height:48px;border-radius:var(--r-xs);font-family:var(--fd);font-size:11px;font-weight:800;color:var(--t3);background:transparent;border:none;text-transform:uppercase;letter-spacing:1.3px;transition:background .15s,color .15s;cursor:pointer}
+.cam-nav-btn{min-height:48px;min-width:64px;padding:12px 18px;border-radius:var(--r-xs);font-family:var(--fd);font-size:12px;font-weight:800;color:var(--t2);background:var(--surface);border:1px solid var(--line);text-transform:uppercase;letter-spacing:1.3px;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.cam-nav-btn:hover{background:var(--surface2);color:var(--t1);border-color:var(--line2)}
+.cam-nav-btn:active{transform:scale(.97)}
 .ntab:hover{color:var(--t1);background:var(--surface2)}
 .ntab.on{background:var(--accent);color:#05070a}
 .ntab:not(.on):active{background:var(--surface2)}
@@ -269,14 +270,14 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .capbox:focus{border-color:var(--accent);background:var(--surface2);box-shadow:0 0 0 2px var(--accent-soft)}
 .capbox::placeholder{color:var(--t3);opacity:.5}
 .capbtns{display:flex;gap:10px;margin-top:12px}
-.btn{padding:12px 22px;min-height:44px;border-radius:var(--r-sm);font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;transition:background .15s,transform .1s,border-color .15s;border:1px solid transparent;cursor:pointer;user-select:none}
+.btn{padding:12px 22px;min-height:48px;border-radius:var(--r-sm);font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;transition:background .15s,transform .1s,border-color .15s;border:1px solid transparent;cursor:pointer;user-select:none}
 .btn-pri{background:var(--accent);color:#05070a}
 .btn-pri:hover{background:var(--accent2)}
 .btn-pri:active{transform:scale(.98)}
 .btn-pri:disabled{opacity:.5;cursor:not-allowed}
 .btn-gh{background:var(--surface);color:var(--t1);border-color:var(--line)}
 .btn-gh:hover{background:var(--surface2);border-color:var(--line2)}
-.btn-voice{margin-left:auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line);color:var(--t1);background:var(--surface);padding:10px 16px;min-height:44px;border-radius:var(--r-sm);font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;transition:border-color .15s,background .15s}
+.btn-voice{margin-left:auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line);color:var(--t1);background:var(--surface);padding:10px 16px;min-height:48px;border-radius:var(--r-sm);font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;transition:border-color .15s,background .15s}
 .btn-voice:hover{background:var(--surface2);border-color:var(--line2)}
 .btn-voice.rec{background:var(--red-bg);color:var(--red);border-color:var(--red);animation:rec-pulse 1.5s infinite}
 @keyframes rec-pulse{0%,100%{opacity:1}50%{opacity:.6}}
@@ -286,7 +287,7 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .noterow:last-child{border-bottom:none}
 .n-time{font-size:11px;color:var(--t3);font-weight:600;white-space:nowrap;padding-top:2px;text-transform:uppercase;letter-spacing:.2px}
 .n-txt{font-size:14px;color:var(--t1);line-height:1.6;flex:1}
-.n-del{font-size:20px;color:var(--t3);padding:10px 14px;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);border-radius:8px}
+.n-del{font-size:20px;color:var(--t3);padding:10px 14px;min-height:48px;min-width:48px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s cubic-bezier(.34,.69,.66,1);border-radius:8px}
 .n-del:hover{background:rgba(255,69,58,.12);color:var(--red)}
 .n-del:active{transform:scale(.95)}
 
@@ -336,7 +337,7 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .menu-seg-btn.active{background:var(--accent);color:#05070a}
 .set-menu-head{padding-top:12px;padding-bottom:8px}
 .theme-presets{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;width:100%}
-.theme-preset{padding:10px 10px;border:1px solid var(--line);border-radius:var(--r-sm);text-align:center;font-family:var(--fd);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:border-color .15s,background .15s;background:var(--surface);color:var(--t1)}
+.theme-preset{padding:12px 10px;min-height:48px;border:1px solid var(--line);border-radius:var(--r-sm);text-align:center;font-family:var(--fd);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:border-color .15s,background .15s;background:var(--surface);color:var(--t1)}
 .theme-preset:hover{border-color:var(--accent);background:var(--surface2)}
 .theme-preset.on{border-color:var(--accent);background:var(--accent);color:#05070a}
 .color-picker-wrap{display:flex;align-items:center;gap:12px;width:100%}
@@ -345,7 +346,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 
 /* THEME MODE SELECTOR (segmented) */
 .theme-mode-selector{display:flex;gap:2px;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--surface);width:fit-content;padding:3px}
-.theme-mode-btn{flex:1;padding:8px 14px;font-family:var(--fd);font-size:11px;font-weight:800;cursor:pointer;color:var(--t2);background:transparent;border:none;border-radius:var(--r-xs);transition:background .15s,color .15s;min-width:55px;text-align:center;text-transform:uppercase;letter-spacing:1.3px}
+.theme-mode-btn{flex:1;padding:12px 14px;min-height:48px;font-family:var(--fd);font-size:11px;font-weight:800;cursor:pointer;color:var(--t2);background:transparent;border:none;border-radius:var(--r-xs);transition:background .15s,color .15s;min-width:55px;text-align:center;text-transform:uppercase;letter-spacing:1.3px}
 .theme-mode-btn:hover{color:var(--t1);background:var(--surface2)}
 .theme-mode-btn.active{background:var(--accent);color:#05070a}
 
@@ -372,7 +373,7 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 .stock-chg{font-weight:700;min-width:45px;text-align:right;font-size:13px}
 .stock-chg.up{color:var(--green)}
 .stock-chg.down{color:var(--red)}
-.stock-remove{background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--t3);font-size:18px;padding:0;cursor:pointer;transition:all .2s ease;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stock-remove{background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--t3);font-size:18px;padding:0;cursor:pointer;transition:all .2s ease;width:48px;height:48px;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .stock-remove:hover{color:var(--red);background:var(--red-bg);border-color:var(--red)}
 .stock-qty{width:76px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--t1);font-size:13px;text-align:right;flex-shrink:0}
 .stock-qty::placeholder{color:var(--t3);font-size:11px}
@@ -426,7 +427,7 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 .cam-offline .cam-off-sub{font-size:11px;color:rgba(255,255,255,.72);font-weight:500;max-width:220px}
 .cam-name{padding:12px 16px;font-size:16px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:10px}
 .cam-name .cam-src{margin-left:auto;font-size:11px;color:var(--t3);font-weight:500}
-.cam-star{font-size:24px;line-height:1;color:var(--t3);padding:6px 8px;border-radius:8px;cursor:pointer;transition:all .2s;flex-shrink:0}
+.cam-star{font-size:24px;line-height:1;color:var(--t3);padding:6px 8px;min-width:48px;min-height:48px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;transition:all .2s;flex-shrink:0}
 .cam-star:hover{background:var(--surface)}
 .cam-star.fav{color:#ffd60a}
 .cam-events{border-top:1px solid var(--line);padding:4px 0}
@@ -547,7 +548,7 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 .command-mode{display:flex;align-items:center;gap:12px;justify-content:space-between}
 .command-mode > .command-eyebrow{white-space:nowrap;flex-shrink:0}
 .mode-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:3px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);flex:1}
-.mode-btn{min-height:44px;padding:10px 14px;border-radius:var(--r-xs);color:var(--t2);font-family:var(--fd);font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;background:transparent;border:none;transition:background .15s,color .15s;cursor:pointer}
+.mode-btn{min-height:48px;padding:12px 14px;border-radius:var(--r-xs);color:var(--t2);font-family:var(--fd);font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;background:transparent;border:none;transition:background .15s,color .15s;cursor:pointer}
 .mode-btn:hover{color:var(--t1);background:var(--surface2)}
 .mode-btn.active{background:var(--accent);color:#05070a;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
 /* "Now" status strip — horizontal, left mint accent bar */
@@ -574,10 +575,10 @@ body[data-mode="charging"] .charge-session{display:grid}
 .charge-time strong{font-family:var(--fd);font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:0;color:var(--t1)}
 .charge-time span:last-child{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .charge-presets{display:flex;align-items:center;gap:6px}
-.charge-preset{min-height:44px;padding:10px 14px;border:1px solid var(--accent-soft2);border-radius:var(--r-sm);background:var(--surface);color:var(--accent);font-family:var(--fd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;transition:background .15s}
+.charge-preset{min-height:48px;padding:12px 14px;border:1px solid var(--accent-soft2);border-radius:var(--r-sm);background:var(--surface);color:var(--accent);font-family:var(--fd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;cursor:pointer;transition:background .15s}
 .charge-preset:hover{background:var(--accent-soft2);color:#05070a}
 .charge-presets .command-action{min-height:38px}
-body[data-mode="drive"] #stock-widget,body[data-mode="drive"] .live-stocks-row,body[data-mode="drive"] .live-indices,body[data-mode="drive"] .live-digest,body[data-mode="drive"] .live-quote,body[data-mode="drive"] .split{display:none!important}
+body[data-mode="drive"] #p-live #stock-widget,body[data-mode="drive"] #p-live .live-stocks-row,body[data-mode="drive"] #p-live .live-indices,body[data-mode="drive"] #p-live .live-digest,body[data-mode="drive"] #p-live .live-quote,body[data-mode="drive"] #p-live .split{display:none!important}
 body[data-mode="drive"] .live-hero{gap:18px;padding:22px}
 body[data-mode="drive"] .live-hero-time{gap:20px 28px}
 @media(max-width:760px){.command-mode{flex-direction:column;align-items:stretch;gap:6px}.mode-picker{width:100%}.cockpit-status{grid-template-columns:1fr}.command-actions{min-height:42px}.command-action{flex:1;min-width:0}.charge-session{grid-template-columns:1fr}.charge-presets{flex-wrap:wrap}.live-hero-time{grid-template-columns:1fr;grid-template-areas:'clock' 'weather' 'chips';gap:14px}.now-copy span{white-space:normal}.charge-time{flex-wrap:wrap}}
@@ -604,6 +605,69 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
 @media(max-width:760px){.app-panel .split{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 12px}.app-panel .row{min-height:156px}.app-panel .appicon{width:84px;height:84px;border-radius:22px}.app-panel .appicon svg{width:48px;height:48px}}
 @media(max-width:460px){.app-panel .split{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}.app-panel .row{min-height:150px}.app-panel .appicon{width:80px;height:80px;border-radius:21px}.app-panel .appicon svg{width:46px;height:46px}}
 @media(prefers-reduced-motion:reduce){.app-panel .row,.app-panel .appicon{transition:none}}
+
+/* ================================================================
+   CALM TYPE PASS (2026-07-20) — Apple/Tesla-smooth overrides.
+   Ex-Syne ultra-wide tracking pulled back on uppercase micro-labels
+   (max ~0.08em); display weights softened from 800 to 600/700;
+   negative tracking on big clock numbers relaxed to -1 to -2px.
+   Placed at end of stylesheet so source order beats earlier rules
+   of equal specificity without needing !important.
+   ================================================================ */
+.tesla-word{font-weight:700;letter-spacing:.14em}
+.brand-sub{font-weight:600;letter-spacing:.08em}
+.live-hero-clock{font-weight:600;letter-spacing:-1.5px}
+.live-hero-date{font-weight:600;letter-spacing:.08em}
+.live-hero-greet{font-weight:600;letter-spacing:.08em}
+.live-hero-desc{font-weight:500;letter-spacing:.06em}
+.live-hero-temp{font-weight:600;letter-spacing:-1px}
+.gl-clock{font-weight:600;letter-spacing:-2px}
+.gl-date{font-weight:600;letter-spacing:.08em}
+.gl-wx .gl-temp{font-weight:600;letter-spacing:-1px}
+.gl-wx .gl-desc{font-weight:500;letter-spacing:.04em}
+.gl-tag{font-weight:600;letter-spacing:.08em}
+.gl-hint{font-weight:500;letter-spacing:.06em}
+.glance-btn{font-weight:600;letter-spacing:.06em}
+.fresh-chip{font-weight:600;letter-spacing:.06em}
+.stock-chip-sym{font-weight:600;letter-spacing:.02em}
+.wx-meta .wm-l{font-weight:600;letter-spacing:.06em}
+.fc-mini .fc-day{font-weight:600;letter-spacing:.06em}
+.dock-btn{font-weight:600;letter-spacing:.05em}
+.dock-submenu-item{font-weight:500;letter-spacing:.02em;text-transform:none}
+.sec-title{font-weight:600;letter-spacing:.08em}
+.rl-t{font-weight:600;letter-spacing:-.1px}
+.feed-m{font-weight:500;letter-spacing:.06em}
+.ntab{font-weight:600;letter-spacing:.06em}
+.cam-nav-btn{font-weight:600;letter-spacing:.05em}
+.btn{font-weight:600;letter-spacing:.04em}
+.btn-voice{font-weight:600;letter-spacing:.04em}
+.calc-val{font-weight:500;letter-spacing:-.5px}
+.calc-key{font-weight:500}
+.score-row{font-weight:600}
+.score-status{font-weight:600;letter-spacing:.06em}
+.set-t{font-weight:600;letter-spacing:0}
+.menu-seg-btn{font-weight:600;letter-spacing:.05em}
+.theme-preset{font-weight:600;letter-spacing:.04em}
+.theme-mode-btn{font-weight:600;letter-spacing:.05em}
+.stocks-dropdown-header button{font-weight:600;letter-spacing:.05em}
+.ld-title{font-weight:600;letter-spacing:.08em}
+.live-quote .lq-author{font-weight:500;letter-spacing:.06em}
+.idx-item .idx-l{font-weight:600;letter-spacing:.05em}
+.timer-display{font-weight:600;letter-spacing:-1.5px}
+.timer-preset{font-weight:600;letter-spacing:.05em}
+.conv-out{font-weight:600;letter-spacing:-.2px}
+.command-eyebrow{font-weight:600;letter-spacing:.08em}
+.now-copy strong{font-weight:600;letter-spacing:-.1px}
+.command-action{font-weight:600;letter-spacing:.05em}
+.charge-time strong{font-weight:600;letter-spacing:-.5px}
+.charge-preset{font-weight:600;letter-spacing:.05em}
+.app-panel .rl-t{font-weight:600;letter-spacing:.02em;text-transform:none;font-size:14.5px}
+#stock-widget .stk-label{font-weight:600;letter-spacing:.06em}
+#s-date{font-weight:600;letter-spacing:.04em;text-transform:none}
+.cdex-title{font-weight:700;letter-spacing:.1em}
+/* Mode picker (Drive|Parked|Charging): fit "Charging" without overflow */
+.mode-btn{font-weight:600;font-size:12px;letter-spacing:.04em;padding:12px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:520px){.mode-btn{font-size:11.5px;letter-spacing:.02em;padding:12px 6px}}
 
 </style>
 </head>
@@ -694,7 +758,7 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
           <div class="live-hero-icon" id="live-icon">🌤</div>
         </div>
         <div class="live-hero-chiprow">
-          <button class="fresh-chip" id="fresh-chip" onclick="location.reload()" title="Data refreshes automatically every hour — tap to reload now">
+          <button class="fresh-chip" id="fresh-chip" onclick="location.href = location.pathname + '?v=' + Date.now() + (location.hash || '')" title="Data refreshes automatically every hour — tap to reload now">
             <span class="fresh-dot"></span><span id="fresh-chip-txt">Checking data…</span><span style="font-size:13px">⟳</span>
           </button>
           <button class="glance-btn" onclick="glanceOpen()" title="Big, at-a-glance view">⛶ Glance</button>
@@ -1125,9 +1189,9 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
     <div class="sec-title"><div class="live-dot"></div> Traffic Cameras
       <span id="cam-page-ind" style="margin-left:12px;font-weight:700"></span>
       <div class="news-tabs">
-        <button class="ntab" onclick="camPage(-1)">‹ Prev</button>
-        <button class="ntab" onclick="camPage(1)">Next ›</button>
-        <button class="ntab" onclick="renderCameras(true)">Refresh</button>
+        <button class="cam-nav-btn ntab" onclick="camPage(-1)">‹ Prev</button>
+        <button class="cam-nav-btn ntab" onclick="camPage(1)">Next ›</button>
+        <button class="cam-nav-btn ntab" onclick="renderCameras(true)">Refresh</button>
       </div>
     </div>
     <div class="cam-pager" id="cam-pager"><div class="muted">Loading cameras…</div></div>
@@ -1357,6 +1421,56 @@ function dashboardWeatherText() {
   if (desc && desc.textContent && desc.textContent !== '—') bits.push(desc.textContent.trim());
   return bits.join(' · ');
 }
+// Contextual "now" detail: pick the freshest useful fact for the mode.
+// Falls back to weather text when nothing else is usable.
+function dashboardContextDetail(mode) {
+  try {
+    var C = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE) || {};
+    // Traffic incidents near cached cameras (highest signal for drive)
+    var incidents = 0;
+    try {
+      (C.cameras || []).forEach(function(c) {
+        (c.events || []).forEach(function(ev) {
+          if (ev && (ev.type === 'Incident' || ev.severity === 'MAJOR')) incidents++;
+        });
+      });
+    } catch(e) {}
+    if (mode === 'drive' && incidents > 0) {
+      return incidents + ' incident' + (incidents === 1 ? '' : 's') + ' on your routes';
+    }
+    // Live game (score + status) from My Teams
+    try {
+      var scores = C.scores || [];
+      for (var i = 0; i < scores.length; i++) {
+        var s = scores[i];
+        if (!s || !s.home || !s.away) continue;
+        var st = (s.status || '').toLowerCase();
+        var live = st && st.indexOf('final') < 0 && (st.indexOf('q') >= 0 || st.indexOf('p') >= 0
+          || st.indexOf(':') >= 0 || st.indexOf('half') >= 0 || st.indexOf('ot') >= 0);
+        if (live) {
+          return s.away.name + ' ' + s.away.score + ' @ ' + s.home.name + ' ' + s.home.score
+            + (s.status ? ' · ' + s.status : '');
+        }
+      }
+    } catch(e) {}
+    // High precip chance today
+    try {
+      var d = C.forecast && C.forecast.daily;
+      var pp = d && d.precipitation_probability_max && d.precipitation_probability_max[0];
+      if (pp != null && pp >= 40) return pp + '% chance of rain today';
+    } catch(e) {}
+    // Any incident (even in parked/charging) is more useful than a bland line
+    if (incidents > 0) return incidents + ' traffic incident' + (incidents === 1 ? '' : 's') + ' nearby';
+    // Top My Teams matchup as a fallback fact
+    try {
+      var s0 = (C.scores || [])[0];
+      if (s0 && s0.home && s0.away) {
+        return s0.away.name + ' @ ' + s0.home.name + (s0.status ? ' · ' + s0.status : '');
+      }
+    } catch(e) {}
+  } catch(e) {}
+  return dashboardWeatherText();
+}
 function formatModeDuration(ms) {
   var total = Math.max(0, Math.floor(ms / 1000));
   var hours = Math.floor(total / 3600);
@@ -1388,16 +1502,18 @@ function renderDashboardMode() {
   if (status) status.textContent = 'Manual mode · ' + label;
   var title = document.getElementById('now-title');
   var detail = document.getElementById('now-detail');
+  var ctx = dashboardContextDetail(mode);
   var weather = dashboardWeatherText();
+  var pick = ctx || weather;
   if (mode === 'drive') {
     if (title) title.textContent = 'Keep it simple';
-    if (detail) detail.textContent = weather || 'Time, weather, and your essentials.';
+    if (detail) detail.textContent = pick || 'Time, weather, and your essentials.';
   } else if (mode === 'charging') {
     if (title) title.textContent = 'Make the wait count';
-    if (detail) detail.textContent = weather || 'Your charge-session timer is ready.';
+    if (detail) detail.textContent = pick || 'Your charge-session timer is ready.';
   } else {
     if (title) title.textContent = 'Ready when you are';
-    if (detail) detail.textContent = weather || 'A calm view of what matters next.';
+    if (detail) detail.textContent = pick || 'A calm view of what matters next.';
   }
   updateChargeSession();
 }
@@ -1491,7 +1607,7 @@ function renderLiveStocks() {
   var el = document.getElementById('live-stocks-row');
   if (!watchlist || !watchlist.length) { el.innerHTML = '<div class="muted" style="padding:8px;font-size:12px">Add stocks via More › Stocks</div>'; return; }
   Promise.all(watchlist.slice(0, 6).map(function(sym) {
-    return fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=1d', 'stk_live_' + sym, 5);
+    return fetchCached('https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=1d', 'stk_' + sym, 5);
   })).then(function(results) {
     var html = '';
     watchlist.slice(0, 6).forEach(function(sym, i) {
@@ -2420,9 +2536,17 @@ function saveBookmark(title, link, source) {
 }
 function deleteBookmark(idx) {
   if (idx >= 0 && idx < bookmarks.length) {
+    var removed = bookmarks[idx];
+    var pos = idx;
     bookmarks.splice(idx, 1);
     saveLS('bookmarks_v1', bookmarks);
     renderBookmarks();
+    showUndoToast('Bookmark removed', function() {
+      var insertAt = Math.min(pos, bookmarks.length);
+      bookmarks.splice(insertAt, 0, removed);
+      saveLS('bookmarks_v1', bookmarks);
+      renderBookmarks();
+    });
   }
 }
 // Renders any stored date (ISO from new saves, locale strings from old ones)
@@ -2471,9 +2595,18 @@ function toggleTask(idx) {
   renderTasks();
 }
 function deleteTask(idx) {
+  if (idx < 0 || idx >= tasks.length) return;
+  var removed = tasks[idx];
+  var pos = idx;
   tasks.splice(idx, 1);
   saveLS('tasks_v1', tasks);
   renderTasks();
+  showUndoToast('Task deleted', function() {
+    var insertAt = Math.min(pos, tasks.length);
+    tasks.splice(insertAt, 0, removed);
+    saveLS('tasks_v1', tasks);
+    renderTasks();
+  });
 }
 function clearCompletedTasks() {
   var done = tasks.filter(function(t) { return t.done; }).length;
@@ -2750,9 +2883,18 @@ function addLink() {
   renderLinks();
 }
 function deleteLink(idx) {
+  if (idx < 0 || idx >= quickLinks.length) return;
+  var removed = quickLinks[idx];
+  var pos = idx;
   quickLinks.splice(idx, 1);
   saveLS('quick_links_v1', quickLinks);
   renderLinks();
+  showUndoToast('Link removed', function() {
+    var insertAt = Math.min(pos, quickLinks.length);
+    quickLinks.splice(insertAt, 0, removed);
+    saveLS('quick_links_v1', quickLinks);
+    renderLinks();
+  });
 }
 function renderLinks() {
   var el = document.getElementById('links-list');
@@ -4863,7 +5005,9 @@ function fetchCached(url, key, ttlMin) {
   if (inflightFetches[key]) return inflightFetches[key];
   function tryRequest(requestUrl) {
     return httpGet(requestUrl).then(function(data) {
-      saveLS(key, {t: Date.now(), data: data});
+      var empty = (data == null) || (Array.isArray(data) && data.length === 0)
+        || (typeof data === 'object' && data && data.items && data.items.length === 0);
+      if (!empty) { saveLS(key, {t: Date.now(), data: data}); }
       return data;
     });
   }
@@ -5010,7 +5154,7 @@ function saveLS(key, val) {
       var toRemove = [];
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
-        if (k && /^(n_|s_|wx|stk_live)/.test(k)) toRemove.push(k);
+        if (k && /^(n_|s_|wx|stk_)/.test(k)) toRemove.push(k);
       }
       toRemove.forEach(function(k) { try { localStorage.removeItem(k); } catch(e2) {} });
       try { localStorage.setItem(key, JSON.stringify(val)); } catch(e3) {}
@@ -5023,6 +5167,47 @@ function saveLS(key, val) {
 // YouTube all send X-Frame-Options/CSP deny), leaving a blank page instead.
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+
+// ── UNDO TOAST ──
+// Big fixed-position bottom toast for delete actions. Tap Undo to restore.
+// 5-second timeout so a car miss-tap can be reversed.
+var _undoToastTimer = null;
+function showUndoToast(label, restoreFn) {
+  try {
+    var existing = document.getElementById('undo-toast');
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+    if (_undoToastTimer) { clearTimeout(_undoToastTimer); _undoToastTimer = null; }
+    var t = document.createElement('div');
+    t.id = 'undo-toast';
+    t.setAttribute('role', 'status');
+    t.style.cssText = 'position:fixed;left:50%;bottom:100px;transform:translateX(-50%);z-index:9999;'
+      + 'display:flex;align-items:center;gap:14px;padding:14px 18px;min-height:56px;'
+      + 'background:var(--surface2,#1a1a1a);color:var(--t1,#fff);border:1px solid var(--line,#333);'
+      + 'border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5);font-size:15px;font-weight:600;'
+      + 'max-width:calc(100vw - 40px)';
+    var text = document.createElement('span');
+    text.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    text.textContent = label || 'Deleted';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'UNDO';
+    btn.style.cssText = 'min-height:48px;min-width:88px;padding:0 18px;border-radius:10px;'
+      + 'background:var(--accent,#22d3ee);color:#05070a;border:none;font-family:var(--fd,inherit);'
+      + 'font-size:14px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer';
+    function cleanup() {
+      if (_undoToastTimer) { clearTimeout(_undoToastTimer); _undoToastTimer = null; }
+      if (t && t.parentNode) t.parentNode.removeChild(t);
+    }
+    btn.onclick = function() {
+      cleanup();
+      try { if (typeof restoreFn === 'function') restoreFn(); } catch(e) { console.warn('undo restore failed', e); }
+    };
+    t.appendChild(text);
+    t.appendChild(btn);
+    document.body.appendChild(t);
+    _undoToastTimer = setTimeout(cleanup, 5000);
+  } catch(e) { console.warn('showUndoToast failed', e); }
 }
 function isValidUrl(str) {
   try {
@@ -5292,9 +5477,18 @@ function saveNote() {
   el.value = ''; renderNotes();
 }
 function delNote(i) {
+  if (i < 0 || i >= notes.length) return;
+  var removed = notes[i];
+  var pos = i;
   notes.splice(i, 1);
   saveLS('notes_v4', notes);
   renderNotes();
+  showUndoToast('Note deleted', function() {
+    var insertAt = Math.min(pos, notes.length);
+    notes.splice(insertAt, 0, removed);
+    saveLS('notes_v4', notes);
+    renderNotes();
+  });
 }
 renderNotes();
 
@@ -5422,8 +5616,11 @@ function renderCameras(bust) {
       ? '<div class="cam-offline"><div class="cam-off-ico">📷</div><div class="cam-off-msg">Camera offline</div>'
         + '<div class="cam-off-sub">DriveBC’s feed for this camera is down' + (c.offSince ? ' since ' + escHtml(c.offSince) : '') + ' — it will return automatically.</div></div>'
       : '';
+    var imgHtml = c.offline
+      ? ''
+      : '<img src="' + escHtml(c.url) + '?t=' + t + '" alt="' + escHtml(c.name) + '" loading="lazy">';
     var h = '<div class="cam-card">'
-      + '<div class="cam-imgwrap"><img src="' + escHtml(c.url) + '?t=' + t + '" alt="' + escHtml(c.name) + '" loading="lazy">' + overlay + '</div>'
+      + '<div class="cam-imgwrap">' + imgHtml + overlay + '</div>'
       + '<div class="cam-name">'
       + '<button class="cam-star' + (isFav ? ' fav' : '') + '" onclick="toggleCamFav(' + c.id + ')" title="' + (isFav ? 'Remove favourite' : 'Pin to page 1') + '">' + (isFav ? '★' : '☆') + '</button>'
       + '<span>' + escHtml(c.name) + badge + '</span><span class="cam-src">DriveBC</span></div>';
@@ -5564,6 +5761,22 @@ function showGame(g) {
   if (g === 'mon') monLoopStart();
   if (g === 'shoot') shootLoopStart();
 }
+// Stop rAF loops when the tab is hidden; restart on return only if Games panel
+// is open (matches the existing on-demand loop policy — no idle CPU when panels
+// are closed).
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) return;
+  var panel = document.getElementById('p-games');
+  if (!panel || !panel.classList.contains('on')) return;
+  var shootPane = document.getElementById('game-shoot');
+  if (shootPane && shootPane.style.display !== 'none' && typeof shootLoopStart === 'function') shootLoopStart();
+  var monPane = document.getElementById('game-mon');
+  if (monPane && monPane.style.display !== 'none') {
+    var champView = document.getElementById('mon-champion-view');
+    if (champView && champView.style.display !== 'none' && typeof monChampStart === 'function') monChampStart();
+    else if (typeof monLoopStart === 'function') monLoopStart();
+  }
+});
 
 // Wordle — daily word by default, "New word" picks randomly
 var WORDLE_WORDS = ['about','above','abuse','actor','adapt','admit','adopt','after','again','agent','agree','ahead','alarm','album','alert','alike','alive','allow','alone','along','alter','anger','angle','angry','apart','apple','apply','arena','argue','arise','armor','array','arrow','aside','asset','audio','audit','avoid','awake','award','aware','badge','baker','basic','beach','beast','began','begin','being','below','bench','berry','birth','black','blade','blame','blank','blast','blaze','blend','bless','blind','block','blood','bloom','board','boast','bonus','boost','booth','bound','brain','brake','brand','brave','bread','break','breed','brick','bride','brief','bring','broad','brown','brush','build','bunch','burst','buyer','cabin','cable','candy','cargo','carry','catch','cause','chain','chair','chaos','charm','chart','chase','cheap','check','chess','chest','chief','child','chill','choir','chose','civic','civil','claim','clash','class','clean','clear','clerk','click','cliff','climb','clock','close','cloth','cloud','coach','coast','color','couch','could','count','court','cover','crack','craft','crane','crash','crazy','cream','crime','crisp','cross','crowd','crown','curve','cycle','daily','dairy','dance','death','debut','decay','delay','dense','depth','devil','diary','dirty','dodge','doubt','dozen','draft','drain','drama','dream','dress','drink','drive','eager','eagle','early','earth','eight','elbow','elder','elect','elite','empty','enemy','enjoy','enter','entry','equal','error','event','every','exact','exist','extra','faith','false','fancy','fatal','fault','favor','feast','fence','fever','fiber','field','fifth','fifty','fight','final','first','flame','flash','fleet','flesh','float','flood','floor','flour','fluid','focus','force','forge','forth','forty','forum','found','frame','fraud','fresh','front','frost','fruit','fully','funny','ghost','giant','given','glass','globe','glory','glove','grace','grade','grain','grand','grant','grape','grasp','grass','grave','great','green','greet','grief','grill','gross','group','grove','guard','guess','guest','guide','habit','happy','harsh','haste','heart','heavy','hedge','hello','hence','honey','honor','horse','hotel','house','human','humor','hurry','ideal','image','imply','index','inner','input','issue','ivory','jeans','joint','judge','juice','knife','knock','known','label','labor','large','laser','later','laugh','layer','learn','lease','least','leave','legal','lemon','level','light','limit','local','logic','loose','lower','loyal','lucky','lunch','magic','major','maker','maple','march','match','maybe','mayor','medal','media','mercy','merge','merit','metal','meter','might','minor','mixed','model','money','month','moral','motor','mount','mouse','mouth','movie','music','naval','nerve','never','night','noble','noise','north','novel','nurse','ocean','offer','often','olive','onion','opera','orbit','order','organ','other','ought','ounce','outer','owner','paint','panel','paper','party','pasta','patch','pause','peace','pearl','phase','phone','photo','piano','piece','pilot','pitch','pizza','place','plain','plane','plant','plate','plaza','point','pound','power','press','price','pride','prime','print','prior','prize','proof','proud','prove','pulse','punch','pupil','queen','quick','quiet','quite','quote','radar','radio','raise','rally','ranch','range','rapid','ratio','reach','react','ready','realm','rebel','refer','relax','reply','rider','ridge','rifle','right','rigid','risky','rival','river','robot','rocky','roast','rough','round','route','royal','rural','salad','sauce','scale','scare','scene','scope','score','sense','serve','seven','shade','shake','shall','shame','shape','share','sharp','sheep','sheet','shelf','shell','shift','shine','shirt','shock','shoot','shore','short','shout','sight','silly','since','sixty','skill','skirt','sleep','slice','slide','slope','small','smart','smell','smile','smoke','snake','solar','solid','solve','sorry','sound','south','space','spare','spark','speak','speed','spell','spend','spice','spike','spine','spite','split','sport','spray','staff','stage','stain','stair','stake','stand','stare','start','state','steak','steal','steam','steel','steep','steer','stick','stiff','still','stock','stone','store','storm','story','stove','strip','study','stuff','style','sugar','suite','sunny','super','sweet','swift','swing','sword','table','taste','teach','thank','theme','there','these','thick','thing','think','third','those','three','throw','thumb','tiger','tight','title','toast','today','token','tooth','topic','torch','total','touch','tough','tower','trace','track','trade','trail','train','trait','trash','treat','trend','trial','tribe','trick','truck','truly','trunk','trust','truth','twice','uncle','under','union','unite','unity','until','upper','upset','urban','usage','usual','vague','valid','value','vapor','video','virus','visit','vital','vivid','vocal','voice','waste','watch','water','weird','whale','wheat','wheel','where','which','while','white','whole','width','witch','woman','world','worry','worse','worst','worth','would','wound','wrist','write','wrong','yield','young','youth'];
@@ -5770,7 +5983,7 @@ function shootNew() {
     shoot.t += 0.033;
     var W = cv.width, H = cv.height;
     var panel = document.getElementById('p-games');
-    var vis = panel && panel.classList.contains('on') && document.getElementById('game-shoot').style.display !== 'none';
+    var vis = panel && panel.classList.contains('on') && document.getElementById('game-shoot').style.display !== 'none' && !document.hidden;
     if (vis) {
       // Ice
       ctx.fillStyle = '#e8eef5'; ctx.fillRect(0, 0, W, H);
@@ -6420,7 +6633,12 @@ function monChampStart() {
 function monChampLoop() {
   var cv = document.getElementById('mon-champ-canvas');
   var view = document.getElementById('mon-champion-view');
-  if (!cv || !view || view.style.display === 'none') { monChampOn = false; return; }
+  var panel = document.getElementById('p-games');
+  if (!cv || !view || view.style.display === 'none'
+      || !panel || !panel.classList.contains('on')
+      || (typeof document !== 'undefined' && document.hidden)) {
+    monChampOn = false; return;
+  }
   var ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
   var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1a1030'); g.addColorStop(1, '#3a2060');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
@@ -6838,7 +7056,7 @@ function monLoopStart() { if (monLoopOn) return; monLoopOn = true; requestAnimat
 function monLoop() {
   var cv = document.getElementById('mon-battle-canvas');
   var panel = document.getElementById('p-games');
-  if (!cv || !monB || !monView || !panel || !panel.classList.contains('on') || document.getElementById('mon-battle-view').style.display === 'none') { monLoopOn = false; return; }
+  if (!cv || !monB || !monView || !panel || !panel.classList.contains('on') || document.getElementById('mon-battle-view').style.display === 'none' || document.hidden) { monLoopOn = false; return; }
   var ctx = cv.getContext('2d'), W = cv.width, H = cv.height, v = monView;
   v.bob += 0.06;
   v.ehpS += (monB.ehp - v.ehpS) * 0.16;
