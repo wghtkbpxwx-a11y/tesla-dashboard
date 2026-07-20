@@ -14,3 +14,6 @@ The full bundle is stored under `pederson_finance_webapp_bundle_v1` and the
 minimized Homebase card under `homebase_finance_glance_v1`. Because `/finance/`
 and `/ai/` share one origin on GitHub Pages, storage events and
 `homebase-sync-v1` keep both surfaces current without uploading financial data.
+
+Wave 0 visual polish aligns the finance shell with the main dashboard cockpit
+system: Plus Jakarta Sans, deep-teal night header, and teal accent tokens.
