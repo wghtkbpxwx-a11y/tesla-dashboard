@@ -1141,13 +1141,15 @@ a:hover{text-decoration:underline}
 .cf-modes{display:flex; gap:4px; flex-wrap:wrap; flex:1; min-width:0}
 .cf-modes .mode-pill{padding:5px 9px 5px 7px; font-size:11.5px}
 .cf-modes .mp-ico{width:18px;height:18px;border-radius:6px;font-size:10px}
-.cf-actions{display:flex; align-items:center; gap:2px; flex-wrap:wrap}
-.cf-actions .icon-btn{width:32px;height:32px;min-width:32px}
+.cf-actions{display:flex; align-items:center; gap:3px; flex-wrap:wrap}
+.cf-actions .icon-btn{width:34px;height:34px;min-width:34px}
+.cf-stash{display:none !important}
 .cf-actions #model-btn{
-  max-width:130px; padding:4px 8px; gap:5px; border-radius:999px;
+  max-width:132px; padding:5px 9px; gap:5px; border-radius:999px;
   background:var(--bg3); border:1px solid var(--border);
 }
 .cf-actions #model-btn .m-name{font-size:11.5px}
+#cf-more-menu{min-width:210px}
 
 .chat-float #chat-scroll{flex:1; min-height:0; overflow-y:auto}
 .chat-float #chat{max-width:none; padding:12px 12px 16px; gap:16px}
@@ -1265,10 +1267,9 @@ body.is-mobile .cf-brand{ grid-area: brand; min-width: 0; }
 body.is-mobile .cf-actions{
   grid-area: actions;
   flex-wrap: nowrap;
-  max-width: 58vw;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  gap: 2px;
 }
+body.is-mobile .cf-actions #model-btn{max-width:112px}
 body.is-mobile .cf-modes{
   grid-area: modes;
   display: flex !important;
@@ -1668,13 +1669,15 @@ body.is-desktop .chat-float[data-state="open"]{
             <span class="m-prov" id="model-prov" style="display:none">demo</span>
           </button>
           <button type="button" class="icon-btn" id="tools-btn" title="Agent tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></button>
-          <button type="button" class="icon-btn" id="council-btn" title="Model Council"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="2.5"/><circle cx="16" cy="9" r="2.5"/><circle cx="12" cy="15.5" r="2.5"/></svg></button>
-          <button type="button" class="icon-btn" id="voice-btn" title="Voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
-          <button type="button" class="icon-btn" id="memory-btn" title="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8zm6 0a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8z"/></svg></button>
-          <button type="button" class="icon-btn" id="tasks-btn" title="Tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/></svg></button>
           <button type="button" class="icon-btn" id="chat-new" title="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
-          <button type="button" class="icon-btn" id="chat-expand" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/></svg></button>
+          <button type="button" class="icon-btn" id="cf-more" title="More" aria-label="More actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></button>
           <button type="button" class="icon-btn" id="chat-min" title="Minimize"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h12"/></svg></button>
+          <!-- Voice & Council are reachable from the always-visible mode pills; these keep their handlers but are hidden to declutter. -->
+          <button type="button" class="icon-btn cf-stash" id="council-btn" title="Model Council"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="2.5"/><circle cx="16" cy="9" r="2.5"/><circle cx="12" cy="15.5" r="2.5"/></svg></button>
+          <button type="button" class="icon-btn cf-stash" id="voice-btn" title="Voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
+          <button type="button" class="icon-btn cf-stash" id="memory-btn" title="Memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8zm6 0a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8z"/></svg></button>
+          <button type="button" class="icon-btn cf-stash" id="tasks-btn" title="Tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/></svg></button>
+          <button type="button" class="icon-btn cf-stash" id="chat-expand" title="Expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/></svg></button>
         </div>
       </div>
       <div id="chat-scroll">
@@ -1727,6 +1730,13 @@ body.is-desktop .chat-float[data-state="open"]{
 <div class="pop attach-menu" id="attach-menu">
   <button class="menu-item" data-act="photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>Image or file</button>
   <button class="menu-item" data-act="camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Take photo</button>
+</div>
+
+<!-- chat "More" menu — forwards to the stashed buttons so every handler stays intact -->
+<div class="pop attach-menu" id="cf-more-menu">
+  <button class="menu-item" data-fwd="memory-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8zm6 0a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8z"/></svg>Memory</button>
+  <button class="menu-item" data-fwd="tasks-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/></svg>Scheduled tasks</button>
+  <button class="menu-item" data-fwd="chat-expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/></svg>Expand window</button>
 </div>
 
 <!-- Voice overlay -->
@@ -2776,6 +2786,38 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-chat-header-simplify',
+      date: '2026-07-20',
+      commit: 'recorded in the PR that ships this change',
+      branch: 'claude/multimodal-ai-chatbot-4r8s23',
+      pull_request: 'the chat-header simplification PR; number recorded in the PR itself',
+      title: 'Simplify the chat header — 9 buttons down to 5, capability preserved',
+      type: 'ux+simplification+mobile',
+      depends_on: ['2026-07-20-app-ui-polish'],
+      reported_by: 'David: "simplify and remove redundant buttons, maximize capability with minimum buttons, expand button size, cleaner/professional, optimize mobile + desktop."',
+      files_changed: ['ai/index.html'],
+      interfaces_changed: ['.cf-actions markup (5 visible: model, tools, new, cf-more, min)','#cf-more button + #cf-more-menu popover','.cf-stash (voice/council/memory/tasks/expand kept in DOM, decluttered)','mobile .cf-actions (no more horizontal scroll)'],
+      changes: [
+        'The chat float header dropped from 9 inline icon buttons to 5 (model, agent-tools, new chat, More, minimize). On mobile the toolbar no longer horizontally scrolls',
+        'Voice and Council icon buttons were removed from the header because they duplicate the always-visible mode pills (Chat/Voice/Agent/Research/Council) — one tap either way; their elements stay in the DOM (hidden) so every handler is untouched',
+        'Memory, Scheduled tasks, and Expand window moved into a single labeled "More" (⋯) popover that forwards clicks to the original buttons — zero handler changes, all capability preserved, and now with readable labels instead of guess-the-glyph',
+        'Slightly larger header targets (32->34px) and tidier spacing'
+      ],
+      safety_guards: [
+        'No handler logic changed: the stashed/relocated buttons keep their exact IDs and listeners; the More menu items just call the original button\'s .click()',
+        'No routing, budget, vault, voice, or repository behaviour touched; validate.py (incl. #82/#83 + voice harness), homebase.test.js 45/45, and 20 mobile + 21 desktop voice smokes all pass'
+      ],
+      verification: [
+        'Headless check: exactly [model-btn, tools-btn, chat-new, cf-more, chat-min] visible in .cf-actions; the More menu opens and lists Memory / Scheduled tasks / Expand window; no JS errors on desktop or mobile',
+        'node --check clean; python3 .github/scripts/validate.py green; screenshots on desktop + mobile confirm the cleaner header'
+      ],
+      known_limits: [
+        'This is the AI app (ai/index.html) only. The Tesla dashboard (index.html) redundant-audio-action consolidation (Listen / Voice / Briefing / Glance) and its touch-target pass are a separate, still-pending piece — the driving UI deserves its own careful verification via the dashboard extract-scripts + node --check recipe',
+        'Model selection still exists in two intentional places (header persistent model + composer Next-only selector) per the documented contract'
+      ],
+      next_model: 'Continue the whole-program UX pass on the Tesla dashboard (index.html): bigger touch targets for news tabs/forecast/stock chips + dock, align its palette with the calmer AI-app tokens, and consolidate the overlapping audio actions after confirming what each does. Verify with the dashboard recipe in CLAUDE.md.'
+    },
     {
       id: '2026-07-20-app-ui-polish',
       date: '2026-07-20',
@@ -9978,6 +10020,19 @@ function initComposer(){
       else $('file-input').click();
     });
   });
+  /* chat header "More" menu — forwards to the stashed buttons so their
+     original handlers stay wired; keeps the header to five clean controls. */
+  if ($('cf-more')) $('cf-more').addEventListener('click', function(e){
+    e.stopPropagation();
+    openPop('cf-more-menu', $('cf-more'), 'down');
+  });
+  qsa('#cf-more-menu .menu-item').forEach(function(b){
+    b.addEventListener('click', function(){
+      closePops();
+      var t = $(b.dataset.fwd);
+      if (t) t.click();
+    });
+  });
   $('file-input').addEventListener('change', function(){ addFiles(this.files); this.value = ''; });
   $('camera-input').addEventListener('change', function(){ addFiles(this.files); this.value = ''; });
   /* drag & drop */
@@ -11689,7 +11744,7 @@ function closePops(except){
   qsa('.pop').forEach(function(p){ if (p.id !== except) p.classList.remove('open'); });
 }
 document.addEventListener('click', function(e){
-  if (!e.target.closest('.pop') && !e.target.closest('#model-btn') && !e.target.closest('#attach-btn')) closePops();
+  if (!e.target.closest('.pop') && !e.target.closest('#model-btn') && !e.target.closest('#attach-btn') && !e.target.closest('#cf-more')) closePops();
 });
 
 /* ============================ model picker ============================ */
