@@ -111,15 +111,30 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 #dash-orb-cap.show{opacity:1;transform:none}
 @media(max-width:760px){.dash-orb{width:40px;height:40px}#dash-orb-cap{top:60px;right:12px;max-width:74vw;font-size:13px}}
 @media(prefers-reduced-motion:reduce){.dash-orb,.dash-orb::before{animation:none}}
-/* Embedded Homebase voice overlay (same-origin iframe, no navigation) */
+/* Embedded Homebase voice — two modes:
+   .window  = contained card (Homebase button)
+   .ambient = dashboard stays fully visible; tiny audio host + corner chip;
+              the header #dash-orb mirrors listening/speaking via postMessage */
 .hb-embed{position:fixed;inset:0;z-index:800;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(3,5,8,.46);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:hbFade .22s ease}
 .hb-embed.open{display:flex}
-/* A contained voice window floating on the dashboard — not a full-screen
-   takeover (the dashboard stays visible, dimmed, around it). */
 .hb-embed-card{position:relative;width:min(480px,94vw);height:min(720px,86vh);border-radius:24px;overflow:hidden;background:#05070a;box-shadow:0 30px 90px -18px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.1)}
 .hb-embed-close{position:absolute;top:10px;right:10px;z-index:2;width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(10,14,20,.72);color:#fff;font-size:17px;line-height:1;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);-webkit-tap-highlight-color:transparent;display:grid;place-items:center;transition:background .15s}
 .hb-embed-close:hover{background:rgba(30,36,48,.9)}
 #hb-frame{width:100%;height:100%;border:none;background:#05070a;display:block}
+.hb-embed.ambient{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;align-items:flex-end;justify-content:flex-end;padding:12px 14px max(14px,env(safe-area-inset-bottom));pointer-events:none;animation:none}
+.hb-embed.ambient .hb-embed-card{
+  pointer-events:auto;width:min(340px,86vw);height:min(420px,58vh);
+  border-radius:20px;opacity:.97;
+  box-shadow:0 18px 50px -12px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.12)
+}
+.hb-embed.ambient.hb-minimized .hb-embed-card{
+  /* Audio keeps playing in a near-invisible host; the header orb is the UI */
+  position:fixed;width:2px;height:2px;opacity:0;overflow:hidden;pointer-events:none;left:-20px;bottom:-20px
+}
+.hb-embed.ambient .hb-embed-close{top:8px;right:8px;width:40px;height:40px}
+.hb-ambient-chip{display:none;position:fixed;right:14px;bottom:max(88px,calc(72px + env(safe-area-inset-bottom)));z-index:801;max-width:min(70vw,320px);padding:10px 14px;border-radius:14px;background:var(--glass2);border:1px solid var(--line);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--shadow);color:var(--t1);font-size:13px;font-weight:600;line-height:1.35;pointer-events:auto;cursor:pointer;text-align:right}
+.hb-embed.ambient.hb-minimized ~ .hb-ambient-chip,
+.hb-ambient-chip.show{display:block}
 @keyframes hbFade{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.hb-embed{animation:none}}
 
@@ -1095,22 +1110,22 @@ body[data-mode="charging"] .charge-session{
       <span class="w-temp">--°C</span>
       <span class="w-icon"></span>
     </div>
-    <button id="dash-orb" class="dash-orb" type="button" aria-pressed="false" aria-label="Voice mode — tap to talk, hold for your briefing" title="Voice — tap to talk, hold for your briefing">
+    <button id="dash-orb" class="dash-orb" type="button" aria-pressed="false" aria-label="Homebase Voice — tap to talk without leaving the dashboard" title="Homebase Voice — tap to talk · hold for daily briefing">
       <canvas id="dash-orb-cv" width="88" height="88" aria-hidden="true"></canvas>
       <span class="dash-orb-core" aria-hidden="true"></span>
     </button>
   </div>
 </header>
 <div id="dash-orb-cap" role="status" aria-live="polite"></div>
-<!-- Homebase voice, embedded on the dashboard (same-origin iframe → no page
-     navigation, so you never leave the dashboard). ai/ is same-origin, so the
-     "no iframes for external sites" rule does not apply; mic needs allow=microphone. -->
+<!-- Homebase voice embedded on the dashboard (same-origin iframe — no navigation).
+     Ambient mode keeps the Live panel fully visible; the header orb mirrors state. -->
 <div id="hb-embed" class="hb-embed" role="dialog" aria-modal="true" aria-label="Homebase voice" onclick="hbBackdrop(event)">
   <div class="hb-embed-card">
     <button type="button" class="hb-embed-close" onclick="closeHomebase()" aria-label="Close Homebase" title="Close">✕</button>
     <iframe id="hb-frame" title="Homebase" allow="microphone; autoplay; clipboard-write"></iframe>
   </div>
 </div>
+<button type="button" id="hb-ambient-chip" class="hb-ambient-chip" onclick="hbExpandAmbient()" title="Show Homebase Voice panel">Voice active · tap to expand</button>
 
 <main id="main">
 
@@ -1150,8 +1165,8 @@ body[data-mode="charging"] .charge-session{
 
       <!-- Three equal reach targets — Voice is the filled primary -->
       <div class="command-actions" aria-label="Quick actions">
-        <button class="command-action" type="button" onclick="openHomebase('ai/?voice=1&amp;brief=1')" title="Homebase AI reads your briefing aloud — right here on the dashboard">Briefing</button>
-        <button class="command-action voice" type="button" onclick="openHomebase('ai/?voice=1')" title="Open Homebase voice — right here on the dashboard">Homebase</button>
+        <button class="command-action briefing-btn" type="button" onclick="briefingToggle()" title="Read today’s digest aloud on the car speakers">Briefing</button>
+        <button class="command-action voice" type="button" onclick="openHomebase('ai/?voice=1',{mode:'window'})" title="Open Homebase Voice in a contained window">Homebase</button>
         <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Full-screen glance view">Glance</button>
       </div>
 
@@ -7735,40 +7750,104 @@ try {
   requestAnimationFrame(syncDockPill);
 } catch(_) {}
 
-// ── EMBEDDED HOMEBASE ── open Homebase voice mode in a same-origin iframe
-// overlay so you never leave the dashboard (no page navigation). Passing a
-// path like 'ai/?voice=1&brief=1' lets Homebase's AI read the briefing after
-// its one-tap gate. Closing blanks the frame to release the mic and stop audio.
-function openHomebase(path) {
+// ── EMBEDDED HOMEBASE ──
+// Orb / ambient: dashboard stays fully visible; iframe hosts Homebase Voice audio.
+// Window mode: contained card (Homebase button). postMessage keeps #dash-orb in sync.
+var HB_EMBED = { mode: 'ambient', open: false };
+
+function openHomebase(path, opts) {
+  opts = opts || {};
   var ov = document.getElementById('hb-embed');
   var f = document.getElementById('hb-frame');
-  if (!ov || !f) { location.href = path; return; } // graceful fallback
+  var chip = document.getElementById('hb-ambient-chip');
+  if (!ov || !f) { location.href = path; return; }
   try { if (typeof briefingStop === 'function') briefingStop(); } catch (e) {}
-  // Load the explicit index.html in the frame so it resolves without relying on
-  // directory-index behavior (identical result on GitHub Pages; also works locally).
-  f.src = String(path).replace(/^ai\/\?/, 'ai/index.html?');
+  try { if (window.__dashOrb && typeof window.__dashOrb.prepareForHomebase === 'function') window.__dashOrb.prepareForHomebase(); } catch (e) {}
+
+  var mode = opts.mode || 'ambient';
+  HB_EMBED.mode = mode;
+  HB_EMBED.open = true;
+  ov.classList.toggle('ambient', mode === 'ambient');
+  ov.classList.remove('hb-minimized');
   ov.classList.add('open');
-  document.documentElement.style.overflow = 'hidden'; // freeze dashboard scroll behind
+
+  var src = String(path || 'ai/?voice=1');
+  if (src.indexOf('embed=') < 0) src += (src.indexOf('?') >= 0 ? '&' : '?') + 'embed=1';
+  if (mode === 'ambient' && src.indexOf('ambient=') < 0) src += '&ambient=1';
+  f.src = src.replace(/^ai\/\?/, 'ai/index.html?');
+
+  if (mode === 'window') {
+    document.documentElement.style.overflow = 'hidden';
+    if (chip) chip.classList.remove('show');
+  } else {
+    document.documentElement.style.overflow = ''; // keep dashboard scrollable
+    if (chip) {
+      chip.classList.add('show');
+      chip.textContent = 'Homebase Voice · tap orb to end · tap here to expand';
+    }
+    try { if (window.__dashOrb) window.__dashOrb.setExternal('listening', 'Homebase Voice — tap once in the panel to enable mic + sound'); } catch (e) {}
+    // Do NOT auto-minimize until the user has unlocked audio (first real voice-state).
+    // A minimized iframe cannot receive the one-tap Safari/Tesla media gesture.
+  }
 }
 function closeHomebase() {
   var ov = document.getElementById('hb-embed');
   var f = document.getElementById('hb-frame');
-  if (ov) ov.classList.remove('open');
-  if (f) { try { f.src = 'about:blank'; } catch (e) {} } // stop Homebase, free mic/audio
+  var chip = document.getElementById('hb-ambient-chip');
+  HB_EMBED.open = false;
+  if (ov) { ov.classList.remove('open', 'ambient', 'hb-minimized'); }
+  if (f) { try { f.src = 'about:blank'; } catch (e) {} }
+  if (chip) chip.classList.remove('show');
   document.documentElement.style.overflow = '';
+  try { if (window.__dashOrb) window.__dashOrb.setExternal('idle', ''); } catch (e) {}
 }
-// Tap the dimmed dashboard around the window to close (not the window itself).
-function hbBackdrop(e) { if (e && e.target === document.getElementById('hb-embed')) closeHomebase(); }
+function hbBackdrop(e) {
+  if (!e || e.target !== document.getElementById('hb-embed')) return;
+  if (HB_EMBED.mode === 'ambient') return; // ambient backdrop is pass-through / invisible
+  closeHomebase();
+}
+function hbExpandAmbient() {
+  var ov = document.getElementById('hb-embed');
+  if (!ov || !ov.classList.contains('open')) return;
+  ov.classList.remove('hb-minimized');
+  HB_EMBED.mode = 'ambient';
+  ov.classList.add('ambient');
+}
+function hbMinimizeAmbient() {
+  var ov = document.getElementById('hb-embed');
+  if (ov && ov.classList.contains('open') && ov.classList.contains('ambient')) ov.classList.add('hb-minimized');
+}
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { var ov = document.getElementById('hb-embed'); if (ov && ov.classList.contains('open')) closeHomebase(); }
+  if (e.key === 'Escape') {
+    var ov = document.getElementById('hb-embed');
+    if (ov && ov.classList.contains('open')) closeHomebase();
+  }
+});
+window.addEventListener('message', function(e) {
+  var d = e && e.data;
+  if (!d || d.source !== 'homebase-voice') return;
+  if (d.type === 'voice-state') {
+    try { if (window.__dashOrb) window.__dashOrb.setExternal(d.state || 'idle', d.caption || ''); } catch (err) {}
+    var chip = document.getElementById('hb-ambient-chip');
+    if (chip && HB_EMBED.open && HB_EMBED.mode === 'ambient') {
+      chip.classList.add('show');
+      var label = d.state === 'speaking' ? 'Speaking…' : d.state === 'listening' ? 'Listening…' : d.state === 'thinking' ? 'Thinking…' : 'Voice active';
+      chip.textContent = label + ' · tap to expand · orb to end';
+    }
+    // After the one-tap gate (real listening/speaking), tuck the panel so the
+    // dashboard is the hero again; audio keeps playing in the hidden iframe.
+    if (HB_EMBED.open && HB_EMBED.mode === 'ambient' && (d.state === 'listening' || d.state === 'speaking' || d.state === 'thinking')) {
+      hbMinimizeAmbient();
+    }
+  } else if (d.type === 'voice-ended' || d.type === 'close') {
+    closeHomebase();
+  }
 });
 
-// ── VOICE ORB (top-right; tap = talk hands-free, hold = full briefing) ──
-// Self-contained: answers from the embedded DASHBOARD_CACHE (no live API).
-// Speech input is best-effort — SpeechRecognition where a mic exists (a phone);
-// where there is no mic (the Tesla browser) a tap plays the audible MP3 briefing
-// instead. The orb lives in the sticky header so it stays pinned in the corner
-// while the page scrolls and never overlaps the dashboard modules.
+// ── VOICE ORB (top-right) ──
+// Tap = Homebase Voice ambient (dashboard stays). Hold = local daily briefing
+// on the car speakers (cache digest — works offline in the Tesla browser).
+// The orb canvas mirrors Homebase listening/speaking via postMessage when embedded.
 (function() {
   var orb = document.getElementById('dash-orb');
   var cv  = document.getElementById('dash-orb-cv');
@@ -7777,11 +7856,10 @@ document.addEventListener('keydown', function(e) {
   var ctx = cv.getContext('2d');
   var reduce = false;
   try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-  var active = false, mode = 'idle', recWantOn = false, recActive = false, dorbRec = null;
-  var raf = null, t0 = 0, level = 0.16, warmed = false, capTimer = null, briefWatch = null;
-  var accentHue = 165; // derived from the live --accent so the orb matches every theme
+  var active = false, mode = 'idle', raf = null, t0 = 0, level = 0.16, capTimer = null;
+  var accentHue = 165;
+  var external = false; // driven by Homebase postMessage
 
-  // ── theme cohesion: paint the orb from the app's --accent (any preset, light/dark) ──
   function orbToRGB(str) {
     str = (str || '').trim();
     if (str.charAt(0) === '#') { var h = str.slice(1); if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; }
@@ -7815,14 +7893,10 @@ document.addEventListener('keydown', function(e) {
     } catch (e) {}
   }
 
-  function hasSR() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
-  function ttsOK() { try { return typeof briefingSupported === 'function' ? briefingSupported() : (typeof speechSynthesis !== 'undefined'); } catch (e) { return false; } }
-  function CC() { return (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE) || {}; }
-
   function orbClass() {
     orb.classList.toggle('active', active);
     orb.classList.toggle('listening', active && mode === 'listening');
-    orb.classList.toggle('speaking', active && mode === 'speaking');
+    orb.classList.toggle('speaking', active && (mode === 'speaking' || mode === 'thinking'));
     orb.setAttribute('aria-pressed', active ? 'true' : 'false');
     if (reduce && active) renderOnce();
   }
@@ -7833,7 +7907,6 @@ document.addEventListener('keydown', function(e) {
     cap.classList.toggle('show', !!show);
   }
 
-  // ── canvas energy orb ──
   function sizeCanvas() {
     var s = orb.clientWidth || 44, dpr = Math.min(window.devicePixelRatio || 1, 2);
     cv.width = Math.round(s * dpr); cv.height = Math.round(s * dpr);
@@ -7843,13 +7916,13 @@ document.addEventListener('keydown', function(e) {
     if (!w || !h) { sizeCanvas(); w = cv.width; h = cv.height; if (!w) return; }
     var cx = w / 2, cy = h / 2, R = Math.min(cx, cy), t = anim ? (performance.now() - t0) / 1000 : 0.6;
     var target = mode === 'listening' ? 0.34 + 0.42 * (0.5 + 0.5 * Math.sin(t * 4.6)) * (0.6 + 0.4 * Math.sin(t * 2.2 + 1))
-               : mode === 'speaking'  ? 0.46 + 0.44 * Math.abs(Math.sin(t * 6.4))
+               : mode === 'speaking' || mode === 'thinking' ? 0.46 + 0.44 * Math.abs(Math.sin(t * 6.4))
                :                        0.16 + 0.06 * Math.sin(t * 1.4);
     level += (target - level) * (anim ? 0.18 : 1);
     ctx.clearRect(0, 0, w, h);
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    var hue = mode === 'speaking' ? accentHue + 40 : mode === 'listening' ? accentHue : accentHue + 12;
+    var hue = mode === 'speaking' || mode === 'thinking' ? accentHue + 40 : mode === 'listening' ? accentHue : accentHue + 12;
     var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
     g.addColorStop(0, 'hsla(' + hue + ',95%,74%,' + (0.5 + 0.35 * level) + ')');
     g.addColorStop(0.55, 'hsla(' + (hue + 16) + ',90%,60%,' + (0.18 + 0.22 * level) + ')');
@@ -7882,154 +7955,80 @@ document.addEventListener('keydown', function(e) {
   function startDraw() { sizeCanvas(); cv.style.opacity = 1; if (reduce) { renderOnce(); return; } if (raf) return; t0 = performance.now(); loop(); }
   function stopDraw() { if (raf) { cancelAnimationFrame(raf); raf = null; } cv.style.opacity = 0; try { ctx.clearRect(0, 0, cv.width, cv.height); } catch (e) {} }
 
-  // ── speech output ──
-  function unlock() { if (warmed) return; warmed = true; try { var s = window.speechSynthesis; if (s) { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; s.speak(u); } } catch (e) {} }
-  function stopSpeaking() { try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {} }
-  function afterSpeak() { if (!active) return; if (hasSR() && recWantOn) { mode = 'listening'; orbClass(); setTimeout(listenOnce, 140); } else { mode = 'idle'; orbClass(); } }
-  function speak(text) {
-    stopRec(); mode = 'speaking'; orbClass(); setCap(text, true);
-    if (!ttsOK()) { capTimer = setTimeout(afterSpeak, Math.min(7000, 1400 + text.length * 45)); return; }
-    var synth = window.speechSynthesis;
-    try { synth.cancel(); } catch (e) {}
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-CA'; u.rate = 1.03; u.pitch = 1.0; u.volume = 1;
-    u.onend = afterSpeak; u.onerror = afterSpeak;
-    try { synth.resume(); } catch (e) {}
-    synth.speak(u);
-  }
-
-  // ── speech input (best-effort; a phone has a mic, the Tesla browser does not) ──
-  function stopRec() { if (dorbRec) { try { dorbRec.onend = dorbRec.onerror = dorbRec.onresult = null; dorbRec.abort(); } catch (e) {} dorbRec = null; } recActive = false; }
-  function listenOnce() {
-    if (!active || !recWantOn || recActive) return;
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
-    var finalTxt = '';
-    try {
-      dorbRec = new SR();
-      dorbRec.lang = 'en-CA'; dorbRec.continuous = false; dorbRec.interimResults = true; dorbRec.maxAlternatives = 1;
-      dorbRec.onstart = function() { recActive = true; if (mode !== 'speaking') { mode = 'listening'; orbClass(); } };
-      dorbRec.onresult = function(e) {
-        var f = '', it = '';
-        for (var j = e.resultIndex; j < e.results.length; j++) { if (e.results[j].isFinal) f += e.results[j][0].transcript; else it += e.results[j][0].transcript; }
-        if (it) setCap('“' + it.trim() + '”', true);
-        if (f) finalTxt = f;
-      };
-      dorbRec.onerror = function(ev) { recActive = false; var er = ev && ev.error; if (er === 'not-allowed' || er === 'service-not-allowed' || er === 'audio-capture') { recWantOn = false; noMic(); } };
-      dorbRec.onend = function() {
-        recActive = false;
-        if (!active || !recWantOn) return;
-        if (finalTxt) handle(finalTxt.trim());
-        else setTimeout(function() { if (active && recWantOn && mode === 'listening') listenOnce(); }, 250);
-      };
-      dorbRec.start();
-    } catch (e) { recActive = false; recWantOn = false; noMic(); }
-  }
-  function noMic() { setCap('No microphone here — playing your briefing.', true); runBriefing(); }
-
-  // ── spoken answers from the embedded cache ──
-  function takeSentences(txt, n) {
-    var out = [], cur = '', toks = String(txt || '').split(/\s+/);
-    for (var i = 0; i < toks.length; i++) {
-      cur += (cur ? ' ' : '') + toks[i];
-      if (/[.!?]$/.test(toks[i]) && !/^[A-Z]\.$/.test(toks[i])) { out.push(cur); cur = ''; if (out.length >= n) break; }
+  function setExternal(state, caption) {
+    external = true;
+    if (state === 'idle' && !HB_EMBED.open) {
+      active = false; mode = 'idle'; orbClass(); stopDraw(); setCap('', false); external = false; return;
     }
-    if (cur && out.length < n) out.push(cur);
-    return out.join(' ');
+    active = true; mode = state || 'listening';
+    startDraw(); orbClass();
+    if (caption) setCap(caption, true);
+    else if (state === 'listening') setCap('Listening…', true);
+    else if (state === 'speaking') setCap('Speaking…', true);
+    else if (state === 'thinking') setCap('Thinking…', true);
   }
-  function topTitles(cat, n) {
-    var c = CC(), o = [];
-    try { Object.keys(c[cat] || {}).forEach(function(k) { var it = c[cat][k].items; if (it && it[0] && typeof isRealHeadline === 'function' && isRealHeadline(it[0].title) && o.length < n) o.push(it[0].title); }); } catch (e) {}
-    return o;
-  }
-  function weatherLine() {
-    var c = CC(), s = '';
-    try { var cur = c.weather.current; s = 'It’s ' + Math.round(cur.temperature_2m) + ' degrees and ' + getWeatherDescription(cur.weather_code).toLowerCase() + (cur.apparent_temperature != null ? ', feels like ' + Math.round(cur.apparent_temperature) + '.' : '.'); } catch (e) {}
-    try { var f = c.forecast.daily; s += ' High ' + Math.round(f.temperature_2m_max[0]) + ', low ' + Math.round(f.temperature_2m_min[0]) + (f.precipitation_probability_max && f.precipitation_probability_max[0] >= 30 ? ', ' + f.precipitation_probability_max[0] + ' percent chance of rain.' : '.'); } catch (e) {}
-    return s || 'I don’t have the weather cached yet — it updates hourly.';
-  }
-  function newsLine() { var d = CC().digest || {}; if (d.news) return 'Top stories. ' + takeSentences(d.news, 3); var t = topTitles('news', 3); return t.length ? 'Top headlines. ' + t.join('. ') + '.' : 'No headlines cached yet — they update hourly.'; }
-  function sportsLine() { var d = CC().digest || {}; if (d.sports) return 'In sports. ' + takeSentences(d.sports, 3); var t = topTitles('sports', 2); return t.length ? 'In sports. ' + t.join('. ') + '.' : 'No sports cached yet — they update hourly.'; }
-  function pharmaLine() { var d = CC().digest || {}; if (d.pharmacy) return 'In pharmacy and medicine. ' + takeSentences(d.pharmacy, 2); var t = topTitles('pharmacy', 2); return t.length ? 'In pharmacy and medicine. ' + t.join('. ') + '.' : 'Nothing new cached in pharmacy yet.'; }
-  function stockOne(sym, label) { var c = CC(); try { var m = c.stocks[sym].chart.result[0].meta; var px = +m.regularMarketPrice, pv = +m.chartPreviousClose; if (!isFinite(px) || !isFinite(pv)) return ''; var pct = Math.abs((px - pv) / pv * 100).toFixed(1); return label + ' is ' + px.toFixed(2) + ', ' + (px >= pv ? 'up' : 'down') + ' ' + pct + ' percent.'; } catch (e) { return ''; } }
-  function stocksLine() { var a = [], x = stockOne('XEQT.TO', 'X E Q T'), t = stockOne('^GSPTSE', 'The T S X'); if (x) a.push(x); if (t) a.push(t); return a.length ? a.join(' ') : 'I don’t have stock prices cached yet — they update hourly.'; }
-  function timeLine() { var n = new Date(); return 'It’s ' + n.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' }) + ', ' + n.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }) + '.'; }
-
-  // David's briefing hands off to Homebase — its AI reads a spoken briefing
-  // (ai/?voice=1&brief=1). runBriefing below stays as the in-car no-mic fallback:
-  // the Tesla browser blocks Homebase's live API calls, so there the local cache
-  // briefing plays instead (see noMic()).
-  function openHomebaseBrief() {
-    try { deactivate(); } catch (e) {}          // stop the orb's own mic/speech first
-    if (typeof openHomebase === 'function') openHomebase('ai/?voice=1&brief=1');
-    else location.href = 'ai/?voice=1&brief=1'; // graceful fallback
-  }
-
-  // ── full briefing (audible MP3 path; works in the car) ──
-  function runBriefing() {
-    recWantOn = false; stopRec(); stopSpeaking();
-    mode = 'speaking'; orbClass(); setCap('Reading your briefing…', true);
-    try { if (!briefingOn && typeof briefingToggle === 'function') briefingToggle(); } catch (e) {}
-    watchBriefing();
-  }
-  function watchBriefing() {
-    clearInterval(briefWatch);
-    briefWatch = setInterval(function() {
-      if (!active) { clearInterval(briefWatch); return; }
-      var on = false; try { on = briefingOn; } catch (e) {}
-      if (!on) { clearInterval(briefWatch); if (hasSR()) { recWantOn = true; afterSpeak(); } else deactivate(); }
-    }, 500);
-  }
-
-  // ── command routing (keyword grammar over the cache + existing actions) ──
-  function kw(t) { for (var i = 1; i < arguments.length; i++) { if (t.indexOf(arguments[i]) >= 0) return true; } return false; }
-  function handle(raw) {
-    var t = (raw || '').toLowerCase();
-    setCap('“' + raw + '”', true);
-    if (kw(t, 'never mind', 'nevermind', 'that’s all', 'thats all', 'goodbye', 'good bye', 'turn off', 'stop listening', 'exit voice')) { setCap('Voice off.', true); setTimeout(deactivate, 350); return; }
-    if (kw(t, 'stop', 'cancel', 'quiet', 'shush', 'be quiet', 'shut up')) { stopSpeaking(); try { if (briefingOn) briefingStop(); } catch (e) {} setCap('Okay.', true); afterSpeak(); return; }
-    if (kw(t, 'homebase', 'open ai', 'open chat', 'talk to ai', 'full assistant', 'chatgpt', 'chat gpt')) { setCap('Opening Homebase Voice…', true); try { deactivate(); } catch (e) {} if (typeof openHomebase === 'function') openHomebase('ai/?voice=1'); else location.href = 'ai/?voice=1'; return; }
-    if (kw(t, 'traffic', 'camera', 'road condition', 'roads')) { try { goPanel('traffic'); } catch (e) {} speak('Opening your traffic cameras.'); return; }
-    if (kw(t, 'game')) { try { goPanel('games'); } catch (e) {} speak('Opening games.'); return; }
-    if (kw(t, 'open weather', 'weather page', 'full forecast', 'forecast page', 'weather panel')) { try { goPanel('weather'); } catch (e) {} speak(weatherLine()); return; }
-    if (kw(t, 'home', 'dashboard', 'main screen', 'go live', 'live view')) { try { goPanel('live'); } catch (e) {} speak('Here’s your dashboard.'); return; }
-    if (kw(t, 'briefing', 'brief me', 'catch me up', 'rundown', 'read me everything', 'my day')) { openHomebaseBrief(); return; }
-    if (kw(t, 'weather', 'temperature', 'how cold', 'how warm', 'how hot', 'degrees', 'raining', 'snow')) { speak(weatherLine()); return; }
-    if (kw(t, 'news', 'headline', 'happening', 'stories', 'story')) { speak(newsLine()); return; }
-    if (kw(t, 'pharmacy', 'medicine', 'medical', 'drug', 'health')) { speak(pharmaLine()); return; }
-    if (kw(t, 'sport', 'score', 'canuck', 'blue jay', 'jays', 'raptor', 'whitecaps', 'lions', 'hockey', 'baseball')) { speak(sportsLine()); return; }
-    if (kw(t, 'stock', 'market', 'portfolio', 'xeqt', 'invest', 'tsx', 's and p', 's&p', 'nasdaq', 'shares')) { speak(stocksLine()); return; }
-    if (kw(t, 'time', 'clock', 'what day', 'date', 'today')) { speak(timeLine()); return; }
-    if (kw(t, 'hello', 'hi ', 'hey', 'good morning', 'good afternoon', 'good evening', 'what can you')) { speak('Hi David. Ask me for your briefing, the weather, news, sports, or stocks — or say “open Homebase” to chat.'); return; }
-    speak('I can read your briefing, weather, news, sports, or stocks, and open panels. For anything else, say “open Homebase.”');
-  }
-
-  // ── activate / deactivate ──
-  function ensureActive() { if (!active) { active = true; startDraw(); } orbClass(); }
-  function activate() {
-    applyOrbTheme();
-    active = true; startDraw(); orbClass();
-    if (hasSR()) { recWantOn = true; mode = 'listening'; orbClass(); setCap('Listening… try “briefing”, “weather”, “scores”, or “stocks”.', true); listenOnce(); }
-    else runBriefing();
+  function prepareForHomebase() {
+    try { if (typeof briefingStop === 'function') briefingStop(); } catch (e) {}
   }
   function deactivate() {
-    active = false; recWantOn = false; stopRec(); stopSpeaking(); clearInterval(briefWatch);
-    try { if (briefingOn) briefingStop(); } catch (e) {}
-    mode = 'idle'; orbClass(); stopDraw(); setCap('', false);
+    if (HB_EMBED.open) { closeHomebase(); return; }
+    active = false; external = false; mode = 'idle'; orbClass(); stopDraw(); setCap('', false);
   }
-  function toggle() { if (active) deactivate(); else activate(); }
-  function playBriefingDirect() { openHomebaseBrief(); }
+  function openAmbientVoice() {
+    applyOrbTheme();
+    prepareForHomebase();
+    active = true; mode = 'listening'; external = true;
+    startDraw(); orbClass();
+    setCap('Opening Homebase Voice… dashboard stays here.', true);
+    if (typeof openHomebase === 'function') openHomebase('ai/?voice=1', { mode: 'ambient' });
+    else location.href = 'ai/?voice=1';
+  }
+  function playLocalBriefing() {
+    // Daily briefing on car speakers from DASHBOARD_CACHE / digest — works in Tesla.
+    try { if (HB_EMBED.open) closeHomebase(); } catch (e) {}
+    applyOrbTheme();
+    active = true; mode = 'speaking'; external = false;
+    startDraw(); orbClass();
+    setCap('Reading your daily briefing…', true);
+    try {
+      if (!briefingOn && typeof briefingToggle === 'function') briefingToggle();
+      else if (typeof briefingToggle === 'function' && !briefingOn) briefingToggle();
+    } catch (e) {}
+    var watch = setInterval(function() {
+      var on = false; try { on = briefingOn; } catch (e) {}
+      if (!on) {
+        clearInterval(watch);
+        if (!HB_EMBED.open) { active = false; mode = 'idle'; orbClass(); stopDraw(); setCap('', false); }
+      }
+    }, 400);
+  }
+  function toggle() {
+    if (HB_EMBED.open || active) deactivate();
+    else openAmbientVoice();
+  }
 
-  // ── input: tap = toggle, hold (>=550ms) = briefing (a gesture beyond a button) ──
+  window.__dashOrb = {
+    setExternal: setExternal,
+    prepareForHomebase: prepareForHomebase,
+    deactivate: deactivate,
+    playLocalBriefing: playLocalBriefing
+  };
+
   var pressStart = 0, longFired = false;
   orb.addEventListener('pointerdown', function() { pressStart = Date.now(); longFired = false; });
-  orb.addEventListener('pointerup', function() { var held = pressStart ? Date.now() - pressStart : 0; pressStart = 0; if (held >= 550) { longFired = true; unlock(); playBriefingDirect(); } });
+  orb.addEventListener('pointerup', function() {
+    var held = pressStart ? Date.now() - pressStart : 0;
+    pressStart = 0;
+    if (held >= 550) { longFired = true; playLocalBriefing(); }
+  });
   orb.addEventListener('pointercancel', function() { pressStart = 0; });
-  orb.addEventListener('click', function() { if (longFired) { longFired = false; return; } unlock(); toggle(); });
+  orb.addEventListener('click', function() {
+    if (longFired) { longFired = false; return; }
+    toggle();
+  });
   window.addEventListener('resize', function() { if (active) sizeCanvas(); });
   applyOrbTheme();
   try {
-    // Re-tint when the theme (html.light) or accent preset (root --accent) changes.
     new MutationObserver(applyOrbTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] });
   } catch (e) {}
   try { sizeCanvas(); } catch (e) {}
