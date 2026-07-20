@@ -85,7 +85,8 @@ input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .gl-tag{font-size:12px;font-weight:800;letter-spacing:2.5px;padding:6px 14px;border-radius:100px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
 .gl-txt{font-size:min(4.6vw,34px);font-weight:700;line-height:1.35}
 .gl-hint{position:absolute;bottom:26px;left:0;right:0;font-size:13px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.5px}
-.glance-btn{display:flex;align-items:center;gap:7px;padding:12px 18px;background:var(--surface);border:1px solid var(--line);border-radius:100px;font-size:12px;font-weight:700;color:var(--t2);cursor:pointer;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
+.glance-btn{display:flex;align-items:center;gap:7px;min-height:48px;padding:13px 22px;background:var(--surface);border:1px solid var(--line);border-radius:100px;font-size:12.5px;font-weight:700;color:var(--t2);cursor:pointer;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
+.glance-btn:active{transform:scale(.97)}
 .glance-btn:hover{background:var(--surface2);color:var(--t1);border-color:var(--line2)}
 .briefing-btn.speaking{background:var(--accent);color:#fff;border-color:var(--accent)}
 #glance .briefing-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#fff;font-size:15px;padding:14px 26px}
@@ -477,7 +478,7 @@ input[type="color"]:hover{border-color:var(--line2)}
 .command-mode{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:4px 6px}
 .command-eyebrow{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px}
 .mode-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
-.mode-btn{min-height:42px;padding:8px 10px;border-radius:7px;color:var(--t3);font-size:12px;font-weight:700;letter-spacing:.1px;transition:background .2s,color .2s,box-shadow .2s}
+.mode-btn{min-height:48px;padding:10px 14px;border-radius:10px;color:var(--t3);font-size:13px;font-weight:700;letter-spacing:.1px;transition:background .2s,color .2s,box-shadow .2s}
 .mode-btn:hover{color:var(--t1);background:var(--surface2)}
 .mode-btn.active{background:var(--accent);color:#fff;box-shadow:0 4px 14px var(--accent-soft)}
 .now-focus{display:flex;align-items:center;gap:13px;min-width:0;padding:12px 15px;border-left:2px solid var(--accent);background:var(--surface);border-radius:8px}
@@ -486,7 +487,10 @@ input[type="color"]:hover{border-color:var(--line2)}
 .now-copy strong{font-size:17px;line-height:1.2;letter-spacing:0;color:var(--t1)}
 .now-copy span{font-size:12px;line-height:1.35;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .command-actions{display:flex;align-items:stretch;gap:7px}
-.command-action{display:flex;align-items:center;justify-content:center;min-width:76px;padding:10px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--t2);font-size:12px;font-weight:700;transition:background .2s,color .2s,transform .2s}
+.command-action{display:flex;align-items:center;justify-content:center;gap:6px;min-width:96px;min-height:48px;padding:12px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--t1);font-size:13.5px;font-weight:700;transition:background .2s,color .2s,transform .2s,border-color .2s}
+.command-action:active{transform:scale(.97)}
+.command-action.voice{background:var(--accent);color:#fff;border-color:transparent}
+.command-action.briefing-btn.speaking{background:var(--accent);color:#fff;border-color:transparent}
 .command-action:hover{background:var(--surface2);color:var(--t1);transform:translateY(-1px)}
 .command-action.voice{background:linear-gradient(135deg,#7c3aed,#0284c7);border-color:#6366f1;color:#fff}
 .command-action.voice:hover{background:linear-gradient(135deg,#6d28d9,#0369a1);color:#fff}
@@ -496,7 +500,7 @@ body[data-mode="charging"] .charge-session{display:grid}
 .charge-time strong{font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:0}
 .charge-time span:last-child{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .charge-presets{display:flex;align-items:center;gap:6px}
-.charge-preset{min-height:38px;padding:8px 11px;border:1px solid rgba(52,199,89,.3);border-radius:7px;background:rgba(52,199,89,.12);color:var(--green);font-size:11px;font-weight:700}
+.charge-preset{min-height:46px;padding:11px 15px;border:1px solid rgba(52,199,89,.3);border-radius:10px;background:rgba(52,199,89,.12);color:var(--green);font-size:12.5px;font-weight:700}
 .charge-preset:hover{background:rgba(52,199,89,.2)}
 .charge-presets .command-action{min-height:38px}
 body[data-mode="drive"] #stock-widget,body[data-mode="drive"] .live-stocks-row,body[data-mode="drive"] .live-indices,body[data-mode="drive"] .live-digest,body[data-mode="drive"] .live-quote,body[data-mode="drive"] .split{display:none!important}
@@ -577,8 +581,8 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
           </div>
         </div>
         <div class="command-actions">
-          <button class="command-action" type="button" onclick="briefingToggle()" title="Listen to your briefing">Listen</button>
-          <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
+          <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read the weather, headlines and scores aloud">🔊 Briefing</button>
+          <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">🎙 Voice</a>
         </div>
       </div>
       <div class="charge-session" id="charge-session" aria-live="polite">
@@ -591,7 +595,7 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
           <button class="charge-preset" type="button" onclick="startChargeTimer(15)">15 min</button>
           <button class="charge-preset" type="button" onclick="startChargeTimer(30)">30 min</button>
           <button class="charge-preset" type="button" onclick="startChargeTimer(60)">60 min</button>
-          <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
+          <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">🎙 Voice</a>
         </div>
       </div>
 
@@ -612,7 +616,6 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
           <span class="fresh-dot"></span><span id="fresh-chip-txt">Checking data…</span><span style="font-size:13px">⟳</span>
         </button>
         <button class="glance-btn" onclick="glanceOpen()" title="Big, at-a-glance view">⛶ Glance</button>
-        <button class="glance-btn briefing-btn" data-label="Briefing" onclick="briefingToggle()" title="Read the weather, headlines and scores aloud">🔊 Briefing</button>
       </div>
       <!-- Glanceable 5-day forecast strip (no tap needed) -->
       <div class="live-forecast-row" id="live-forecast-row"></div>
@@ -629,7 +632,6 @@ body[data-mode="drive"] .live-hero-time{gap:32px}
       <div class="ld-head">
         <span class="ld-title">Today's digest</span>
         <span class="ld-stamp" id="ld-stamp"></span>
-        <button class="glance-btn briefing-btn" data-label="Listen" onclick="briefingToggle()" style="margin-left:auto">🔊 Listen</button>
       </div>
       <div class="ld-text" id="ld-news"></div>
       <div class="ld-text ld-rx" id="ld-rx"></div>
