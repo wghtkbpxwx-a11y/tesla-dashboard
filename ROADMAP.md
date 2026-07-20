@@ -9,12 +9,13 @@ copy work that pairs well with a Fable model) · **🧪 needs a spike/verify-on-
 
 ## Excellence plan (2026-07-20)
 
-Full inventory + sequencing lives in
-[`DASHBOARD_EXCELLENCE_PLAN.md`](DASHBOARD_EXCELLENCE_PLAN.md) (Tesla dashboard) and
-[`HOMEBASE_FINANCE_EXCELLENCE_PLAN.md`](HOMEBASE_FINANCE_EXCELLENCE_PLAN.md)
-(Homebase AI + Pederson Finances). **Wave 0 shipped** on all three surfaces:
-shared cockpit type/accent/brand language. Next highest leverage on the car
-dashboard remains `#4` `cache.json`; on Homebase, error beacon + vault conflict UX.
+Full inventory + sequencing:
+[`DASHBOARD_EXCELLENCE_PLAN.md`](DASHBOARD_EXCELLENCE_PLAN.md),
+[`HOMEBASE_FINANCE_EXCELLENCE_PLAN.md`](HOMEBASE_FINANCE_EXCELLENCE_PLAN.md).
+
+**Wave 1 HOT-ROD COCKPIT** (Syne + mint instrument chrome) ships across all three
+surfaces. Next highest leverage on the car dashboard remains `#4` `cache.json`;
+on Homebase, error beacon + vault conflict UX.
 
 ## Next full audit
 

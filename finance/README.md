@@ -15,5 +15,7 @@ minimized Homebase card under `homebase_finance_glance_v1`. Because `/finance/`
 and `/ai/` share one origin on GitHub Pages, storage events and
 `homebase-sync-v1` keep both surfaces current without uploading financial data.
 
-Wave 0 visual polish aligns the finance shell with the main dashboard cockpit
-system: Plus Jakarta Sans, deep-teal night header, and teal accent tokens.
+Wave 1 gives the public shell a HOT-ROD instrument-cluster treatment matching
+Homebase: Syne display type, Plus Jakarta Sans UI, JetBrains Mono labels, mint
+signals on a near-black cockpit, horizontal meters, dense rows, and sharp
+segmented controls, with all private-data and browser-local sync boundaries unchanged.
