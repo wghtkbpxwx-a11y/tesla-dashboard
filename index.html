@@ -92,6 +92,25 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 #stock-widget .stk-label{color:var(--t3);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;font-family:var(--fd)}
 #stock-widget a{color:var(--t1)}
 #stock-widget #stk-chg.up{color:var(--accent)} #stock-widget #stk-chg.down{color:var(--red)}
+/* ── Voice orb (top-right of the sticky header: stays in the corner on scroll,
+   never overlaps the modules). Tap = talk hands-free, hold = full briefing. ── */
+.dash-orb{position:relative;flex:0 0 auto;width:44px;height:44px;border:none;padding:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:grid;place-items:center;overflow:visible;background:conic-gradient(from 210deg,#6366f1,#22d3ee,#a855f7,#818cf8,#6366f1);box-shadow:0 3px 12px rgba(56,189,248,.30),0 0 0 1px rgba(255,255,255,.16) inset,0 0 16px rgba(129,140,248,.28);transition:transform .3s cubic-bezier(.34,1.5,.5,1),box-shadow .35s ease;animation:orbIdle 5.5s ease-in-out infinite}
+.dash-orb::before{content:"";position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(from 0deg,transparent,rgba(255,255,255,.55),transparent 32%);opacity:.32;pointer-events:none;animation:orbSpin 3.4s linear infinite}
+.dash-orb:hover{transform:scale(1.06)}
+.dash-orb:active{transform:scale(.93)}
+.dash-orb-core{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(120% 120% at 34% 28%,rgba(255,255,255,.68),rgba(255,255,255,0) 46%)}
+#dash-orb-cv{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.dash-orb.active{animation:none;transform:scale(1.08);box-shadow:0 4px 16px rgba(56,189,248,.45),0 0 0 1px rgba(255,255,255,.22) inset,0 0 26px rgba(129,140,248,.55),0 0 46px rgba(34,211,238,.32)}
+.dash-orb.active::before{opacity:.85}
+.dash-orb.active #dash-orb-cv{opacity:1}
+.dash-orb.listening{box-shadow:0 4px 16px rgba(34,211,238,.5),0 0 0 1px rgba(255,255,255,.24) inset,0 0 30px rgba(34,211,238,.6),0 0 52px rgba(56,189,248,.38)}
+.dash-orb.speaking{box-shadow:0 4px 16px rgba(168,85,247,.5),0 0 0 1px rgba(255,255,255,.24) inset,0 0 30px rgba(168,85,247,.55),0 0 52px rgba(129,140,248,.4)}
+@keyframes orbIdle{0%,100%{box-shadow:0 3px 12px rgba(56,189,248,.30),0 0 0 1px rgba(255,255,255,.16) inset,0 0 14px rgba(129,140,248,.26)}50%{box-shadow:0 4px 15px rgba(56,189,248,.40),0 0 0 1px rgba(255,255,255,.20) inset,0 0 26px rgba(129,140,248,.46)}}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+#dash-orb-cap{position:fixed;top:64px;right:16px;z-index:169;max-width:min(56vw,360px);padding:9px 14px;border-radius:14px;background:var(--glass2);border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--shadow);color:var(--t1);font-size:14px;line-height:1.35;font-weight:500;text-align:right;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+#dash-orb-cap.show{opacity:1;transform:none}
+@media(max-width:760px){.dash-orb{width:40px;height:40px}#dash-orb-cap{top:60px;right:12px;max-width:74vw;font-size:13px}}
+@media(prefers-reduced-motion:reduce){.dash-orb,.dash-orb::before{animation:none}}
 
 /* MAIN */
 #main{flex:1;padding:24px 32px max(140px,calc(120px + env(safe-area-inset-bottom)));overflow:visible;-webkit-user-select:text;user-select:text}
@@ -536,7 +555,7 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 @media (max-width:760px){
   #header{padding:8px 14px;height:auto;gap:10px;min-height:52px}
   #s-left,#s-right{gap:10px}
-  #s-date{font-size:10px;padding:6px 10px}
+  #s-date{display:none} /* redundant with the hero date; reclaim header width for the voice orb */
   #stock-widget{font-size:12px;padding:6px 10px;gap:6px}#stock-widget .stk-label{display:none}
   #header{flex-wrap:wrap;row-gap:6px}
   #s-left{flex:1 1 auto;min-width:0}#s-right{flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
@@ -1053,8 +1072,13 @@ body[data-mode="charging"] .charge-session{
       <span class="w-temp">--°C</span>
       <span class="w-icon"></span>
     </div>
+    <button id="dash-orb" class="dash-orb" type="button" aria-pressed="false" aria-label="Voice mode — tap to talk, hold for your briefing" title="Voice — tap to talk, hold for your briefing">
+      <canvas id="dash-orb-cv" width="88" height="88" aria-hidden="true"></canvas>
+      <span class="dash-orb-core" aria-hidden="true"></span>
+    </button>
   </div>
 </header>
+<div id="dash-orb-cap" role="status" aria-live="polite"></div>
 
 <main id="main">
 
@@ -7656,6 +7680,227 @@ try {
   window.addEventListener('resize', function(){ requestAnimationFrame(syncDockPill); });
   requestAnimationFrame(syncDockPill);
 } catch(_) {}
+
+// ── VOICE ORB (top-right; tap = talk hands-free, hold = full briefing) ──
+// Self-contained: answers from the embedded DASHBOARD_CACHE (no live API).
+// Speech input is best-effort — SpeechRecognition where a mic exists (a phone);
+// where there is no mic (the Tesla browser) a tap plays the audible MP3 briefing
+// instead. The orb lives in the sticky header so it stays pinned in the corner
+// while the page scrolls and never overlaps the dashboard modules.
+(function() {
+  var orb = document.getElementById('dash-orb');
+  var cv  = document.getElementById('dash-orb-cv');
+  var cap = document.getElementById('dash-orb-cap');
+  if (!orb || !cv) return;
+  var ctx = cv.getContext('2d');
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var active = false, mode = 'idle', recWantOn = false, recActive = false, dorbRec = null;
+  var raf = null, t0 = 0, level = 0.16, warmed = false, capTimer = null, briefWatch = null;
+
+  function hasSR() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+  function ttsOK() { try { return typeof briefingSupported === 'function' ? briefingSupported() : (typeof speechSynthesis !== 'undefined'); } catch (e) { return false; } }
+  function CC() { return (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE) || {}; }
+
+  function orbClass() {
+    orb.classList.toggle('active', active);
+    orb.classList.toggle('listening', active && mode === 'listening');
+    orb.classList.toggle('speaking', active && mode === 'speaking');
+    orb.setAttribute('aria-pressed', active ? 'true' : 'false');
+    if (reduce && active) renderOnce();
+  }
+  function setCap(txt, show) {
+    if (!cap) return;
+    clearTimeout(capTimer);
+    if (txt != null) cap.textContent = txt;
+    cap.classList.toggle('show', !!show);
+  }
+
+  // ── canvas energy orb ──
+  function sizeCanvas() {
+    var s = orb.clientWidth || 44, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(s * dpr); cv.height = Math.round(s * dpr);
+  }
+  function frame(anim) {
+    var w = cv.width, h = cv.height;
+    if (!w || !h) { sizeCanvas(); w = cv.width; h = cv.height; if (!w) return; }
+    var cx = w / 2, cy = h / 2, R = Math.min(cx, cy), t = anim ? (performance.now() - t0) / 1000 : 0.6;
+    var target = mode === 'listening' ? 0.34 + 0.42 * (0.5 + 0.5 * Math.sin(t * 4.6)) * (0.6 + 0.4 * Math.sin(t * 2.2 + 1))
+               : mode === 'speaking'  ? 0.46 + 0.44 * Math.abs(Math.sin(t * 6.4))
+               :                        0.16 + 0.06 * Math.sin(t * 1.4);
+    level += (target - level) * (anim ? 0.18 : 1);
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    var hue = mode === 'speaking' ? 268 : mode === 'listening' ? 190 : 222;
+    var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+    g.addColorStop(0, 'hsla(' + hue + ',95%,74%,' + (0.5 + 0.35 * level) + ')');
+    g.addColorStop(0.55, 'hsla(' + (hue + 16) + ',90%,60%,' + (0.18 + 0.22 * level) + ')');
+    g.addColorStop(1, 'hsla(' + hue + ',90%,55%,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+    var pts = 46, baseR = R * 0.5;
+    ctx.beginPath();
+    for (var i = 0; i <= pts; i++) {
+      var a = i / pts * Math.PI * 2;
+      var def = 1 + level * 0.5 * Math.sin(a * 3 + t * 3.1) + level * 0.3 * Math.sin(a * 5 - t * 2.0) + 0.05 * Math.sin(a * 2 + t * 0.7);
+      var r = baseR * def, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+      if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+    }
+    ctx.closePath();
+    ctx.lineWidth = Math.max(1.3, R * 0.05);
+    ctx.strokeStyle = 'hsla(' + (hue + 8) + ',96%,' + (72 + 8 * level) + '%,' + (0.5 + 0.4 * level) + ')';
+    ctx.shadowColor = 'hsla(' + hue + ',96%,66%,0.85)'; ctx.shadowBlur = R * 0.5 * (0.5 + level);
+    ctx.stroke();
+    var sparks = mode === 'idle' ? 2 : 4;
+    for (var s = 0; s < sparks; s++) {
+      var sa = t * (1.05 + s * 0.33) + s * 1.9, sr = baseR * (1.06 + 0.26 * Math.sin(t * 1.9 + s));
+      var sx = cx + Math.cos(sa) * sr, sy = cy + Math.sin(sa) * sr;
+      ctx.beginPath(); ctx.arc(sx, sy, Math.max(1, R * 0.05 * (0.7 + level)), 0, Math.PI * 2);
+      ctx.fillStyle = 'hsla(' + (hue + 30) + ',98%,82%,' + (0.45 + 0.4 * level) + ')'; ctx.fill();
+    }
+    ctx.restore();
+  }
+  function renderOnce() { sizeCanvas(); frame(false); }
+  function loop() { raf = requestAnimationFrame(loop); frame(true); }
+  function startDraw() { sizeCanvas(); cv.style.opacity = 1; if (reduce) { renderOnce(); return; } if (raf) return; t0 = performance.now(); loop(); }
+  function stopDraw() { if (raf) { cancelAnimationFrame(raf); raf = null; } cv.style.opacity = 0; try { ctx.clearRect(0, 0, cv.width, cv.height); } catch (e) {} }
+
+  // ── speech output ──
+  function unlock() { if (warmed) return; warmed = true; try { var s = window.speechSynthesis; if (s) { var u = new SpeechSynthesisUtterance(' '); u.volume = 0; s.speak(u); } } catch (e) {} }
+  function stopSpeaking() { try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {} }
+  function afterSpeak() { if (!active) return; if (hasSR() && recWantOn) { mode = 'listening'; orbClass(); setTimeout(listenOnce, 140); } else { mode = 'idle'; orbClass(); } }
+  function speak(text) {
+    stopRec(); mode = 'speaking'; orbClass(); setCap(text, true);
+    if (!ttsOK()) { capTimer = setTimeout(afterSpeak, Math.min(7000, 1400 + text.length * 45)); return; }
+    var synth = window.speechSynthesis;
+    try { synth.cancel(); } catch (e) {}
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-CA'; u.rate = 1.03; u.pitch = 1.0; u.volume = 1;
+    u.onend = afterSpeak; u.onerror = afterSpeak;
+    try { synth.resume(); } catch (e) {}
+    synth.speak(u);
+  }
+
+  // ── speech input (best-effort; a phone has a mic, the Tesla browser does not) ──
+  function stopRec() { if (dorbRec) { try { dorbRec.onend = dorbRec.onerror = dorbRec.onresult = null; dorbRec.abort(); } catch (e) {} dorbRec = null; } recActive = false; }
+  function listenOnce() {
+    if (!active || !recWantOn || recActive) return;
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    var finalTxt = '';
+    try {
+      dorbRec = new SR();
+      dorbRec.lang = 'en-CA'; dorbRec.continuous = false; dorbRec.interimResults = true; dorbRec.maxAlternatives = 1;
+      dorbRec.onstart = function() { recActive = true; if (mode !== 'speaking') { mode = 'listening'; orbClass(); } };
+      dorbRec.onresult = function(e) {
+        var f = '', it = '';
+        for (var j = e.resultIndex; j < e.results.length; j++) { if (e.results[j].isFinal) f += e.results[j][0].transcript; else it += e.results[j][0].transcript; }
+        if (it) setCap('“' + it.trim() + '”', true);
+        if (f) finalTxt = f;
+      };
+      dorbRec.onerror = function(ev) { recActive = false; var er = ev && ev.error; if (er === 'not-allowed' || er === 'service-not-allowed' || er === 'audio-capture') { recWantOn = false; noMic(); } };
+      dorbRec.onend = function() {
+        recActive = false;
+        if (!active || !recWantOn) return;
+        if (finalTxt) handle(finalTxt.trim());
+        else setTimeout(function() { if (active && recWantOn && mode === 'listening') listenOnce(); }, 250);
+      };
+      dorbRec.start();
+    } catch (e) { recActive = false; recWantOn = false; noMic(); }
+  }
+  function noMic() { setCap('No microphone here — playing your briefing.', true); runBriefing(); }
+
+  // ── spoken answers from the embedded cache ──
+  function takeSentences(txt, n) {
+    var out = [], cur = '', toks = String(txt || '').split(/\s+/);
+    for (var i = 0; i < toks.length; i++) {
+      cur += (cur ? ' ' : '') + toks[i];
+      if (/[.!?]$/.test(toks[i]) && !/^[A-Z]\.$/.test(toks[i])) { out.push(cur); cur = ''; if (out.length >= n) break; }
+    }
+    if (cur && out.length < n) out.push(cur);
+    return out.join(' ');
+  }
+  function topTitles(cat, n) {
+    var c = CC(), o = [];
+    try { Object.keys(c[cat] || {}).forEach(function(k) { var it = c[cat][k].items; if (it && it[0] && typeof isRealHeadline === 'function' && isRealHeadline(it[0].title) && o.length < n) o.push(it[0].title); }); } catch (e) {}
+    return o;
+  }
+  function weatherLine() {
+    var c = CC(), s = '';
+    try { var cur = c.weather.current; s = 'It’s ' + Math.round(cur.temperature_2m) + ' degrees and ' + getWeatherDescription(cur.weather_code).toLowerCase() + (cur.apparent_temperature != null ? ', feels like ' + Math.round(cur.apparent_temperature) + '.' : '.'); } catch (e) {}
+    try { var f = c.forecast.daily; s += ' High ' + Math.round(f.temperature_2m_max[0]) + ', low ' + Math.round(f.temperature_2m_min[0]) + (f.precipitation_probability_max && f.precipitation_probability_max[0] >= 30 ? ', ' + f.precipitation_probability_max[0] + ' percent chance of rain.' : '.'); } catch (e) {}
+    return s || 'I don’t have the weather cached yet — it updates hourly.';
+  }
+  function newsLine() { var d = CC().digest || {}; if (d.news) return 'Top stories. ' + takeSentences(d.news, 3); var t = topTitles('news', 3); return t.length ? 'Top headlines. ' + t.join('. ') + '.' : 'No headlines cached yet — they update hourly.'; }
+  function sportsLine() { var d = CC().digest || {}; if (d.sports) return 'In sports. ' + takeSentences(d.sports, 3); var t = topTitles('sports', 2); return t.length ? 'In sports. ' + t.join('. ') + '.' : 'No sports cached yet — they update hourly.'; }
+  function pharmaLine() { var d = CC().digest || {}; if (d.pharmacy) return 'In pharmacy and medicine. ' + takeSentences(d.pharmacy, 2); var t = topTitles('pharmacy', 2); return t.length ? 'In pharmacy and medicine. ' + t.join('. ') + '.' : 'Nothing new cached in pharmacy yet.'; }
+  function stockOne(sym, label) { var c = CC(); try { var m = c.stocks[sym].chart.result[0].meta; var px = +m.regularMarketPrice, pv = +m.chartPreviousClose; if (!isFinite(px) || !isFinite(pv)) return ''; var pct = Math.abs((px - pv) / pv * 100).toFixed(1); return label + ' is ' + px.toFixed(2) + ', ' + (px >= pv ? 'up' : 'down') + ' ' + pct + ' percent.'; } catch (e) { return ''; } }
+  function stocksLine() { var a = [], x = stockOne('XEQT.TO', 'X E Q T'), t = stockOne('^GSPTSE', 'The T S X'); if (x) a.push(x); if (t) a.push(t); return a.length ? a.join(' ') : 'I don’t have stock prices cached yet — they update hourly.'; }
+  function timeLine() { var n = new Date(); return 'It’s ' + n.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' }) + ', ' + n.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }) + '.'; }
+
+  // ── full briefing (audible MP3 path; works in the car) ──
+  function runBriefing() {
+    recWantOn = false; stopRec(); stopSpeaking();
+    mode = 'speaking'; orbClass(); setCap('Reading your briefing…', true);
+    try { if (!briefingOn && typeof briefingToggle === 'function') briefingToggle(); } catch (e) {}
+    watchBriefing();
+  }
+  function watchBriefing() {
+    clearInterval(briefWatch);
+    briefWatch = setInterval(function() {
+      if (!active) { clearInterval(briefWatch); return; }
+      var on = false; try { on = briefingOn; } catch (e) {}
+      if (!on) { clearInterval(briefWatch); if (hasSR()) { recWantOn = true; afterSpeak(); } else deactivate(); }
+    }, 500);
+  }
+
+  // ── command routing (keyword grammar over the cache + existing actions) ──
+  function kw(t) { for (var i = 1; i < arguments.length; i++) { if (t.indexOf(arguments[i]) >= 0) return true; } return false; }
+  function handle(raw) {
+    var t = (raw || '').toLowerCase();
+    setCap('“' + raw + '”', true);
+    if (kw(t, 'never mind', 'nevermind', 'that’s all', 'thats all', 'goodbye', 'good bye', 'turn off', 'stop listening', 'exit voice')) { setCap('Voice off.', true); setTimeout(deactivate, 350); return; }
+    if (kw(t, 'stop', 'cancel', 'quiet', 'shush', 'be quiet', 'shut up')) { stopSpeaking(); try { if (briefingOn) briefingStop(); } catch (e) {} setCap('Okay.', true); afterSpeak(); return; }
+    if (kw(t, 'homebase', 'open ai', 'open chat', 'talk to ai', 'full assistant', 'chatgpt', 'chat gpt')) { setCap('Opening Homebase Voice…', true); location.href = 'ai/?voice=1'; return; }
+    if (kw(t, 'traffic', 'camera', 'road condition', 'roads')) { try { goPanel('traffic'); } catch (e) {} speak('Opening your traffic cameras.'); return; }
+    if (kw(t, 'game')) { try { goPanel('games'); } catch (e) {} speak('Opening games.'); return; }
+    if (kw(t, 'open weather', 'weather page', 'full forecast', 'forecast page', 'weather panel')) { try { goPanel('weather'); } catch (e) {} speak(weatherLine()); return; }
+    if (kw(t, 'home', 'dashboard', 'main screen', 'go live', 'live view')) { try { goPanel('live'); } catch (e) {} speak('Here’s your dashboard.'); return; }
+    if (kw(t, 'briefing', 'brief me', 'catch me up', 'rundown', 'read me everything', 'my day')) { runBriefing(); return; }
+    if (kw(t, 'weather', 'temperature', 'how cold', 'how warm', 'how hot', 'degrees', 'raining', 'snow')) { speak(weatherLine()); return; }
+    if (kw(t, 'news', 'headline', 'happening', 'stories', 'story')) { speak(newsLine()); return; }
+    if (kw(t, 'pharmacy', 'medicine', 'medical', 'drug', 'health')) { speak(pharmaLine()); return; }
+    if (kw(t, 'sport', 'score', 'canuck', 'blue jay', 'jays', 'raptor', 'whitecaps', 'lions', 'hockey', 'baseball')) { speak(sportsLine()); return; }
+    if (kw(t, 'stock', 'market', 'portfolio', 'xeqt', 'invest', 'tsx', 's and p', 's&p', 'nasdaq', 'shares')) { speak(stocksLine()); return; }
+    if (kw(t, 'time', 'clock', 'what day', 'date', 'today')) { speak(timeLine()); return; }
+    if (kw(t, 'hello', 'hi ', 'hey', 'good morning', 'good afternoon', 'good evening', 'what can you')) { speak('Hi David. Ask me for your briefing, the weather, news, sports, or stocks — or say “open Homebase” to chat.'); return; }
+    speak('I can read your briefing, weather, news, sports, or stocks, and open panels. For anything else, say “open Homebase.”');
+  }
+
+  // ── activate / deactivate ──
+  function ensureActive() { if (!active) { active = true; startDraw(); } orbClass(); }
+  function activate() {
+    active = true; startDraw(); orbClass();
+    if (hasSR()) { recWantOn = true; mode = 'listening'; orbClass(); setCap('Listening… try “briefing”, “weather”, “scores”, or “stocks”.', true); listenOnce(); }
+    else runBriefing();
+  }
+  function deactivate() {
+    active = false; recWantOn = false; stopRec(); stopSpeaking(); clearInterval(briefWatch);
+    try { if (briefingOn) briefingStop(); } catch (e) {}
+    mode = 'idle'; orbClass(); stopDraw(); setCap('', false);
+  }
+  function toggle() { if (active) deactivate(); else activate(); }
+  function playBriefingDirect() { ensureActive(); runBriefing(); }
+
+  // ── input: tap = toggle, hold (>=550ms) = briefing (a gesture beyond a button) ──
+  var pressStart = 0, longFired = false;
+  orb.addEventListener('pointerdown', function() { pressStart = Date.now(); longFired = false; });
+  orb.addEventListener('pointerup', function() { var held = pressStart ? Date.now() - pressStart : 0; pressStart = 0; if (held >= 550) { longFired = true; unlock(); playBriefingDirect(); } });
+  orb.addEventListener('pointercancel', function() { pressStart = 0; });
+  orb.addEventListener('click', function() { if (longFired) { longFired = false; return; } unlock(); toggle(); });
+  window.addEventListener('resize', function() { if (active) sizeCanvas(); });
+  try { sizeCanvas(); } catch (e) {}
+})();
 </script>
 </body>
 </html>
