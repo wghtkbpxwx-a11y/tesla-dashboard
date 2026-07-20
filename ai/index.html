@@ -2878,6 +2878,107 @@ body.has-net-banner #app{padding-top:0}
   .mode-pill,#mic-btn,#send-btn,.msg{transition:none!important}
 }
 
+
+/* ==========================================================================
+   UX EXPERIENCE PASS — journeys, not decoration.
+   Open → chat ready. One mode control. Less header noise. Setup honesty.
+   ========================================================================== */
+
+/* Compact mode control replaces five always-visible pills */
+#cf-modes{
+  flex:0 1 auto !important;
+  background:transparent !important;
+  padding:0 !important;
+  overflow:visible !important;
+  -webkit-mask-image:none !important;
+  mask-image:none !important;
+  display:flex !important;
+  max-width:none !important;
+}
+.mode-compact{
+  display:inline-flex; align-items:center; gap:6px;
+  min-height:36px; padding:8px 12px;
+  border-radius:999px;
+  background:color-mix(in srgb, var(--text) 8%, transparent);
+  color:var(--text); font:inherit; font-size:14px; font-weight:650;
+  letter-spacing:-.01em; border:none; cursor:pointer;
+  transition:transform .15s var(--ios-spring, ease), background .15s;
+}
+.mode-compact:active{transform:scale(.97)}
+.mode-compact .mc-chev{opacity:.45; font-size:11px}
+#mode-menu{
+  min-width:min(300px, calc(100vw - 24px));
+  max-width:340px;
+  padding:6px;
+  border-radius:14px;
+}
+#mode-menu .mode-opt{
+  display:flex; flex-direction:column; align-items:flex-start; gap:2px;
+  width:100%; text-align:left;
+  padding:12px 12px; border-radius:10px;
+  border:none; background:transparent; color:var(--text);
+  font:inherit; cursor:pointer;
+}
+#mode-menu .mode-opt:hover{background:color-mix(in srgb, var(--text) 6%, transparent)}
+#mode-menu .mode-opt.on{background:var(--acc-soft)}
+#mode-menu .mode-opt .mo-t{font-size:15px; font-weight:650; letter-spacing:-.015em}
+#mode-menu .mode-opt .mo-d{font-size:12.5px; color:var(--text2); font-weight:500; line-height:1.35}
+
+/* Chat header: one calm row — brand | mode | essentials */
+.cf-head{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  grid-template-areas:"brand modes actions";
+  align-items:center;
+  gap:8px 10px;
+  padding:10px 12px !important;
+}
+.cf-brand{grid-area:brand; min-width:0}
+.cf-modes{grid-area:modes}
+.cf-actions{grid-area:actions; gap:2px !important}
+body.is-mobile .cf-head{
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"brand actions" "modes modes";
+}
+body.is-mobile .cf-modes{justify-content:stretch}
+body.is-mobile .mode-compact{width:100%; justify-content:center}
+
+/* Power-user composer row: collapsed unless needed */
+#comp-hint{
+  max-height:0; opacity:0; overflow:hidden; padding-top:0 !important; padding-bottom:0 !important;
+  pointer-events:none; transition:max-height .2s, opacity .2s, padding .2s;
+}
+#comp-hint.open, #composer-wrap.show-hints #comp-hint,
+#comp-hint:has(#query-model-control:not([hidden])),
+#comp-hint:has(#query-model-toggle[aria-expanded="true"]){
+  max-height:64px; opacity:1; pointer-events:auto;
+  padding-top:8px !important;
+}
+/* Always allow the Next-model toggle as a single quiet chip */
+#composer-wrap .hint-peek{
+  display:flex; justify-content:flex-end; padding:4px 4px 0;
+}
+#hint-peek-btn{
+  border:none; background:transparent; color:var(--text3);
+  font:inherit; font-size:12px; font-weight:600; padding:6px 8px;
+  border-radius:8px; cursor:pointer;
+}
+#hint-peek-btn:hover{color:var(--text2); background:color-mix(in srgb, var(--text) 5%, transparent)}
+
+/* Setup honesty on model chip */
+#model-btn.needs-setup .m-name{color:var(--warn)}
+#model-btn.needs-setup .m-dot{background:var(--warn) !important}
+
+/* When chatting on mobile, topbar is irrelevant noise under full-bleed chat */
+body.is-mobile.chat-open #topbar,
+body.is-mobile.chat-open #dash-scroll{
+  visibility:hidden; pointer-events:none;
+}
+
+@media(max-width:900px){
+  .cf-modes{display:flex !important} /* undo earlier hide — we need the compact control */
+}
+
 </style>
 </head>
 <body>
@@ -2889,7 +2990,7 @@ body.has-net-banner #app{padding-top:0}
       <div class="brand"><span class="logo" id="brand-logo"></span><span class="brand-lockup"><span class="nm">Homebase</span><span class="sub">Home</span></span></div>
       <button class="icon-btn" id="sb-close" title="Close sidebar" aria-label="Close sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
     </div>
-    <button type="button" class="new-chat" id="home-nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/></svg>Home dashboard</button>
+    <button type="button" class="new-chat" id="home-nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/></svg>Home</button>
     <div id="hub-nav" class="hub-nav" aria-label="Modules & links"></div>
     <div class="sb-chats-head">
       <div class="sb-sec">Chats</div>
@@ -2923,7 +3024,7 @@ body.has-net-banner #app{padding-top:0}
       </div>
       <span class="tb-spacer"></span>
       <button type="button" class="icon-btn" id="dash-refresh" title="Refresh dashboard data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 3v6h-6"/></svg></button>
-      <button type="button" id="sync-pill" title="Encrypted Google Drive vault">Drive vault</button>
+      <button type="button" id="sync-pill" title="Encrypted Google Drive vault sync">Sync</button>
       <button class="icon-btn" id="connectors-btn" title="Connectors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
       <button class="icon-btn" id="settings-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
     </header>
@@ -2944,7 +3045,7 @@ body.has-net-banner #app{padding-top:0}
         <div class="cf-brand">
           <span class="cf-orb" id="cf-orb"></span>
           <div>
-            <div class="cf-title">Homebase AI</div>
+            <div class="cf-title">Homebase</div>
             <div class="cf-meta" id="cf-meta">Assistant</div>
           </div>
         </div>
@@ -2955,7 +3056,7 @@ body.has-net-banner #app{padding-top:0}
             <span class="m-name" id="model-name">Demo</span>
             <span class="m-prov" id="model-prov" style="display:none">demo</span>
           </button>
-          <button type="button" class="icon-btn" id="tools-btn" title="Agent tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></button>
+          <button type="button" class="icon-btn cf-stash" id="tools-btn" title="Agent tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></button>
           <button type="button" class="icon-btn" id="chat-new" title="New chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
           <button type="button" class="icon-btn" id="cf-more" title="More" aria-label="More actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></button>
           <button type="button" class="icon-btn" id="chat-min" title="Minimize"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h12"/></svg></button>
@@ -2976,9 +3077,10 @@ body.has-net-banner #app{padding-top:0}
         <div id="composer">
           <button class="icon-btn" id="attach-btn" title="Attach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
           <textarea id="input" rows="1" placeholder="Ask anything"></textarea>
-          <button class="icon-btn" id="mic-btn" title="Dictate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
+          <button class="icon-btn" id="mic-btn" title="Dictate into this message — for hands-free talk, choose Voice mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg></button>
           <button id="send-btn" title="Send" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
         </div>
+        <div class="hint-peek"><button type="button" id="hint-peek-btn" title="Show model details for this chat">Details</button></div>
         <div id="comp-hint">
           <button type="button" id="query-model-toggle" aria-expanded="false" aria-controls="query-model-control" title="Pick a model for just the next message">Next model</button>
           <label id="query-model-control" title="Choose a model for only the next message" hidden>
@@ -2993,9 +3095,9 @@ body.has-net-banner #app{padding-top:0}
         </div>
       </div>
     </div>
-    <button type="button" id="chat-fab" title="Open Homebase AI" aria-label="Open AI chat">
+    <button type="button" id="chat-fab" title="Open chat" aria-label="Open chat">
       <span class="fab-orb" id="fab-orb"></span>
-      <span class="fab-lab">AI</span>
+      <span class="fab-lab">Chat</span>
     </button>
   </div>
 
@@ -3003,6 +3105,9 @@ body.has-net-banner #app{padding-top:0}
 <input type="file" id="finance-file" accept="application/json,.json" style="display:none">
 <input type="file" id="file-input" multiple accept="image/*,.pdf,.txt,.md,.csv,.json,.js,.ts,.py,.html,.css,.xml,.yaml,.yml,.log,.sh,.c,.cpp,.java,.rs,.go,.rb,.sql,.toml,.ini" style="display:none">
 <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none">
+
+<!-- mode picker (one control → all modes) -->
+<div class="pop" id="mode-menu" role="menu" aria-label="Choose mode"></div>
 
 <!-- model picker -->
 <div class="pop" id="model-menu">
@@ -3022,6 +3127,8 @@ body.has-net-banner #app{padding-top:0}
 
 <!-- chat "More" menu — forwards to the stashed buttons so every handler stays intact -->
 <div class="pop attach-menu" id="cf-more-menu">
+  <button class="menu-item" data-fwd="tools-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Agent tools</button>
+  <button class="menu-item" data-fwd="voice-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>Talk with Homebase</button>
   <button class="menu-item" data-fwd="memory-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8zm6 0a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0V8z"/></svg>Memory</button>
   <button class="menu-item" data-fwd="tasks-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/></svg>Scheduled tasks</button>
   <button class="menu-item" data-fwd="chat-expand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/></svg>Expand window</button>
@@ -3664,29 +3771,54 @@ function renderModeRail(){
   var rail = $('cf-modes') || $('mode-rail');
   if (!rail) return;
   var cur = S.settings.uiMode || 'chat';
+  var mode = modeById(cur);
   rail.innerHTML = '';
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.id = 'mode-btn';
+  btn.className = 'mode-compact';
+  btn.setAttribute('aria-haspopup', 'menu');
+  btn.setAttribute('aria-expanded', 'false');
+  btn.title = (mode.desc || 'Choose how Homebase should help');
+  btn.innerHTML = '<span class="mc-label"></span><span class="mc-chev" aria-hidden="true">▾</span>';
+  qs('.mc-label', btn).textContent = mode.title || 'Chat';
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var menu = $('mode-menu');
+    if (!menu) return;
+    if (menu.classList.contains('open')){ closePops(); btn.setAttribute('aria-expanded', 'false'); return; }
+    populateModeMenu();
+    openPop('mode-menu', btn);
+    btn.setAttribute('aria-expanded', 'true');
+  });
+  rail.appendChild(btn);
+  if ($('cf-meta')){
+    $('cf-meta').textContent = mode.desc || (mode.title ? mode.title : 'Assistant');
+  }
+}
+function populateModeMenu(){
+  var menu = $('mode-menu');
+  if (!menu) return;
+  var cur = S.settings.uiMode || 'chat';
   var railModes = UI_MODES.filter(function(m){ return ['chat','voice','agent','research','council'].indexOf(m.id) >= 0; });
+  menu.innerHTML = '';
   railModes.forEach(function(m){
     var b = document.createElement('button');
     b.type = 'button';
-    b.className = 'mode-pill' + (m.id === cur ? ' active' : '');
-    b.style.setProperty('--pill-c', m.color);
-    b.style.setProperty('--pill-grad', m.grad);
-    b.innerHTML = '<span class="mp-ico"></span><span class="mp-label"></span>';
-    qs('.mp-ico', b).innerHTML = iconSvg(m.icon || 'spark', 13, {strokeWidth: 2});
-    qs('.mp-label', b).textContent = m.title;
-    b.title = m.desc;
+    b.setAttribute('role', 'menuitem');
+    b.className = 'mode-opt' + (m.id === cur ? ' on' : '');
+    b.innerHTML = '<span class="mo-t"></span><span class="mo-d"></span>';
+    qs('.mo-t', b).textContent = m.title;
+    qs('.mo-d', b).textContent = m.desc || '';
     b.addEventListener('click', function(){
+      closePops();
       openChatFloat($('chat-float') && $('chat-float').dataset.state === 'expanded');
       if (m.id === 'voice') setUiMode('voice');
       else setUiMode(m.id, {silent: m.id === cur});
+      try { softHaptic(8); } catch(e){}
     });
-    rail.appendChild(b);
+    menu.appendChild(b);
   });
-  if ($('cf-meta')){
-    var mode = modeById(cur);
-    $('cf-meta').textContent = (mode && mode.title ? mode.title + ' mode' : 'Assistant');
-  }
 }
 function updateModeChrome(){
   var mode = modeById(S.settings.uiMode || 'chat');
@@ -6872,9 +7004,10 @@ function setChatState(state){
     setTimeout(function(){ try { $('input').focus(); } catch(e){} }, 200);
   }
   if ($('tb-sub')){
-    $('tb-sub').textContent = state === 'fab' ? 'Home' : 'AI at your side';
+    $('tb-sub').textContent = state === 'fab' ? 'Home' : 'Chat';
   }
   if ($('home-btn')) $('home-btn').classList.toggle('on', state === 'fab');
+  try { localStorage.setItem('nova_chat_state_v1', state); } catch(e){}
 }
 function openChatFloat(expanded){
   setChatState(expanded ? 'expanded' : 'open');
@@ -11368,6 +11501,17 @@ function scrollBottom(force){
   var sc = $('chat-scroll');
   sc.scrollTop = sc.scrollHeight;
 }
+
+function initHintPeek(){
+  var peek = $('hint-peek-btn');
+  var wrap = $('composer-wrap');
+  if (!peek || !wrap) return;
+  peek.addEventListener('click', function(){
+    wrap.classList.toggle('show-hints');
+    peek.textContent = wrap.classList.contains('show-hints') ? 'Hide details' : 'Details';
+  });
+}
+
 function initScroll(){
   var sc = $('chat-scroll');
   var head = document.querySelector('.cf-head');
@@ -13718,7 +13862,7 @@ function closePops(except){
   qsa('.pop').forEach(function(p){ if (p.id !== except) p.classList.remove('open'); });
 }
 document.addEventListener('click', function(e){
-  if (!e.target.closest('.pop') && !e.target.closest('#model-btn') && !e.target.closest('#attach-btn') && !e.target.closest('#cf-more')) closePops();
+  if (!e.target.closest('.pop') && !e.target.closest('#model-btn') && !e.target.closest('#mode-btn') && !e.target.closest('#attach-btn') && !e.target.closest('#cf-more')) closePops();
 });
 
 /* ============================ model picker ============================ */
@@ -13726,11 +13870,27 @@ function updateModelBtn(){
   var c = activeConvo();
   var p = c ? c.provider : S.settings.provider;
   var m = c ? c.model : S.settings.model;
-  if (S.settings.autoRoute){
-    $('model-name').textContent = 'Auto · best value';
+  var btn = $('model-btn');
+  var anyReady = false;
+  try {
+    Object.keys(PROVIDERS || {}).forEach(function(pid){
+      if (pid === 'demo') return;
+      if (providerReady(pid)) anyReady = true;
+    });
+  } catch(e){}
+  var demoOnly = !anyReady && (!S.settings.autoRoute || p === 'demo');
+  if (btn) btn.classList.toggle('needs-setup', !!demoOnly && !S.settings.autoRoute);
+  if (demoOnly && !S.settings.autoRoute){
+    $('model-name').textContent = 'Set up AI';
+    $('model-dot').style.background = 'var(--warn)';
+    if ($('model-prov')) $('model-prov').textContent = '';
+  } else if (S.settings.autoRoute){
+    if (btn) btn.classList.remove('needs-setup');
+    $('model-name').textContent = 'Automatic';
     $('model-dot').style.background = 'var(--ok)';
     updateBudgetDisplays();
   } else {
+    if (btn) btn.classList.remove('needs-setup');
     $('model-name').textContent = modelInfo(p, m).label || m;
     $('model-prov').textContent = PROVIDERS[p] ? PROVIDERS[p].name : p;
     $('model-dot').style.background = providerReady(p) ? 'var(--ok)' : 'var(--warn)';
@@ -13847,7 +14007,12 @@ function openModelMenu(){
   var advanced = $('mm-advanced');
   advanced.hidden = !!S.settings.autoRoute;
   $('mm-advanced-toggle').setAttribute('aria-expanded', String(!advanced.hidden));
-  openPop('model-menu', $('model-btn'));
+  if ($('model-btn') && $('model-btn').classList.contains('needs-setup')){
+    try { openSettings(); if (typeof switchSetTab === 'function') switchSetTab('providers'); } catch(e){}
+    toast('Add an API key or turn on Automatic to leave Demo', 'warn', 3200);
+  } else {
+    openPop('model-menu', $('model-btn'));
+  }
   $('mm-filter').value = '';
   setTimeout(function(){ if (!advanced.hidden && window.innerWidth > 900) $('mm-filter').focus(); }, 50);
 }
@@ -14822,6 +14987,7 @@ async function boot(){
   initComposer();
   initScroll();
   try { initNetBanner(); } catch (e) {}
+  try { initHintPeek(); } catch (e) {}
   initVoice();
   initMemory();
   initConnectors();
@@ -14867,11 +15033,17 @@ async function boot(){
   document.addEventListener('visibilitychange', function(){
     if (document.visibilityState === 'visible') bootVaultSync();
   });
-  // deep link ?chat=1 or ?voice=1 opens float
+  // deep link ?chat=1 or ?voice=1 opens float; otherwise restore last place
+  // Mobile defaults to chat (Messages-like). Desktop restores last state or stays on Home.
   try {
     var q = new URLSearchParams(location.search);
+    var lastChat = '';
+    try { lastChat = localStorage.getItem('nova_chat_state_v1') || ''; } catch(e2){}
     if (q.get('voice') === '1'){ openChatFloat(false); maybeAutoVoice(); }
+    else if (q.get('home') === '1'){ setChatState('fab'); if (!maybeAutoVoice()) initWelcome(); }
     else if (q.get('chat') === '1') openChatFloat(false);
+    else if (lastChat === 'open' || lastChat === 'expanded') openChatFloat(lastChat === 'expanded');
+    else if (document.body.classList.contains('is-mobile')) openChatFloat(false);
     else if (!maybeAutoVoice()) initWelcome();
   } catch(e){ if (!maybeAutoVoice()) initWelcome(); }
   /* delegate code-copy buttons */
