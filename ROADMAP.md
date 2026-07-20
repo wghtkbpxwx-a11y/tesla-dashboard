@@ -7,6 +7,13 @@ single-file `index.html`, GitHub Pages, cross-origin blocked, cache refreshed ho
 Tags: **[S/M/L]** effort · **⭐ impact** · **🎨 Fable-session candidate** (creative/design/
 copy work that pairs well with a Fable model) · **🧪 needs a spike/verify-on-car**.
 
+## Excellence plan (2026-07-20)
+
+Full inventory + sequencing lives in
+[`DASHBOARD_EXCELLENCE_PLAN.md`](DASHBOARD_EXCELLENCE_PLAN.md). **Wave 0 shipped:**
+cockpit visual system (Plus Jakarta Sans, teal accent, hero/dock/header polish)
++ watchlist `escHtml` hardening. Next highest leverage remains `#4` `cache.json`.
+
 ## Next full audit
 
 The canonical audit queue is [`FABLE_AUDIT_BRIEF.md`](FABLE_AUDIT_BRIEF.md).
