@@ -155,7 +155,15 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 #glance .briefing-btn.speaking{background:var(--accent);border-color:var(--accent);color:#05070a}
 .live-hero-desc{font-size:13px;color:var(--t2);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;font-family:var(--fd)}
 .live-hero-greet{font-family:var(--fd);font-size:12px;font-weight:800;color:var(--accent);margin-bottom:6px;letter-spacing:2.5px;text-transform:uppercase}
-.wx-meta-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 24px 20px}
+/* Weather "Current Conditions": full-width card — big temp on the left, detail
+   chips (feels-like/humidity/wind/AQI/UV) + sunrise/sunset filling the right,
+   so the wide car screen reads balanced instead of a narrow left-hugging card. */
+.wx-now-card{display:grid;grid-template-columns:minmax(210px,290px) 1fr;gap:22px;align-items:center;padding:22px 24px}
+.wx-now-head{display:flex;align-items:center;gap:18px;min-width:0}
+.wx-now-details{display:flex;flex-direction:column;gap:8px;min-width:0}
+.wx-meta-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}
+.wx-sun{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.wx-now-card{grid-template-columns:1fr;gap:16px;padding:20px}}
 .wx-meta{display:flex;flex-direction:column;gap:2px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);min-width:86px}
 .wx-meta .wm-l{font-family:var(--fd);font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px}
 .wx-meta .wm-v{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--t1);font-variant-numeric:tabular-nums}
@@ -168,6 +176,10 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 .fc-mini .fc-day{font-family:var(--fd);text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);font-size:10px;font-weight:800}
 .fc-mini .fc-ico{font-size:18px;color:var(--t1);display:flex}
 .fc-mini .fc-temps{color:var(--t1)}
+/* Wide screens (the car display): spread the 5-day strip across the full width
+   instead of a left-hugging scroll, so the Live panel reads as one balanced
+   composition. Mobile keeps the horizontal scroll (base rule above). */
+@media(min-width:761px){.live-forecast-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:10px;overflow:visible}.live-forecast-row .fc-mini{flex-shrink:1}}
 /* Weather instrument panel — sits in the right column of the hero grid */
 .live-hero-weather{grid-area:weather;display:flex;align-items:center;gap:14px;cursor:pointer;padding:14px 18px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);min-height:96px;min-width:200px;transition:background .18s,border-color .18s,transform .18s;position:relative;overflow:hidden}
 .live-hero-weather::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:.55}
@@ -1119,7 +1131,7 @@ body[data-mode="charging"] .charge-session{
       <!-- Three equal reach targets — Voice is the filled primary -->
       <div class="command-actions" aria-label="Quick actions">
         <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read weather, headlines and scores aloud">Briefing</button>
-        <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
+        <a class="command-action voice" href="ai/?voice=1" title="Open Homebase — your full AI assistant (the corner orb handles quick voice)">Homebase</a>
         <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Full-screen glance view">Glance</button>
       </div>
 
@@ -1538,21 +1550,23 @@ body[data-mode="charging"] .charge-session{
   <!-- WEATHER FORECAST PANEL -->
   <section class="panel" id="p-weather">
     <div class="sec-title">Current Conditions</div>
-    <div class="cardgroup" style="max-width:560px">
-      <div style="display:flex;align-items:center;gap:20px;padding:22px 24px 16px">
-        <div id="wx-now-icon" style="font-size:44px;color:var(--t1);display:flex">—</div>
+    <div class="cardgroup wx-now-card">
+      <div class="wx-now-head">
+        <div id="wx-now-icon" style="font-size:52px;color:var(--t1);display:flex">—</div>
         <div style="flex:1">
-          <div id="wx-now-temp" style="font-size:34px;font-weight:700;line-height:1">--°C</div>
-          <div id="wx-now-desc" style="font-size:14px;color:var(--t2);margin-top:5px">Loading…</div>
+          <div id="wx-now-temp" style="font-size:40px;font-weight:800;line-height:1">--°C</div>
+          <div id="wx-now-desc" style="font-size:14px;color:var(--t2);margin-top:6px">Loading…</div>
         </div>
       </div>
-      <div class="wx-meta-row" id="wx-meta-row"></div>
+      <div class="wx-now-details">
+        <div class="wx-meta-row" id="wx-meta-row"></div>
+        <div class="wx-meta-row wx-sun" id="wx-sun-row"></div>
+      </div>
     </div>
     <div class="sec-title">7-Day Forecast</div>
     <div id="forecast-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
       <div class="muted">Loading forecast...</div>
     </div>
-    <div id="wx-sun-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"></div>
     <div id="wx-updated" style="margin-top:16px;font-size:12px;color:var(--t3)"></div>
   </section>
 
