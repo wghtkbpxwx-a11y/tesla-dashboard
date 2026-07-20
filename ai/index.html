@@ -2384,6 +2384,108 @@ body.is-mobile #sync-pill{
 /* --- Ensure the Next-model chip aligns tidily inside the hint row -------- */
 #comp-hint{ flex-wrap:wrap; }
 #comp-hint > .grow{ min-width:8px; }
+
+/* ==========================================================================
+   APPLE SIMPLICITY PASS (2026-07-20) — quiet, feature-rich chat.
+   Soft segmented modes, spring press, iMessage-like bubbles,
+   frosted topbar, one clear send CTA. No capability removed.
+   ========================================================================== */
+:root{
+  --spring:cubic-bezier(.32,.72,0,1);
+  --ease:cubic-bezier(.25,.1,.25,1);
+  --r:18px;
+  --r-sm:14px;
+  --composer-r:22px;
+}
+#topbar{
+  backdrop-filter:saturate(1.4) blur(28px);
+  -webkit-backdrop-filter:saturate(1.4) blur(28px);
+  border-bottom-color:transparent;
+  box-shadow:0 1px 0 var(--hair);
+}
+.brand .sub{text-transform:none;letter-spacing:0;opacity:.75}
+.tb-sub{text-transform:none;letter-spacing:0;font-weight:500}
+.cf-modes{
+  gap:0;padding:3px;border-radius:12px;
+  background:color-mix(in srgb,var(--text) 6%,transparent);
+  border:none;
+}
+.mode-pill{
+  text-transform:none;letter-spacing:0;font-weight:600;font-size:12.5px;
+  border:none;border-radius:10px;min-height:34px;
+  background:transparent;color:var(--text2);
+  transition:background .2s var(--ease),color .2s var(--ease),transform .18s var(--spring);
+}
+.mode-pill:hover{background:transparent;color:var(--text);border:none}
+.mode-pill.active{
+  background:var(--bg2);color:var(--text);
+  box-shadow:0 1px 3px rgba(0,0,0,.12);
+  border:none;
+}
+[data-theme="dark"] .mode-pill.active{background:rgba(255,255,255,.92);color:#0f1319}
+.mode-pill:active{transform:scale(.97)}
+#composer{
+  border-radius:var(--composer-r);
+  border:1px solid var(--border);
+  box-shadow:0 8px 28px rgba(0,0,0,.12);
+  transition:box-shadow .22s var(--ease),border-color .22s var(--ease);
+}
+#composer:focus-within{
+  border-color:color-mix(in srgb,var(--acc) 45%,var(--border));
+  box-shadow:0 10px 32px rgba(0,0,0,.14),0 0 0 3px var(--acc-soft);
+}
+#send-btn{
+  border-radius:14px;
+  transition:transform .18s var(--spring),background .15s,opacity .15s;
+}
+#send-btn:active{transform:scale(.94)}
+.msg{animation:msgIn .36s var(--spring)}
+.msg.user .bubble{
+  border-radius:18px 18px 6px 18px;
+  box-shadow:none;
+}
+.msg.assistant .bubble{
+  border-radius:18px 18px 18px 6px;
+  background:transparent;border:none;padding-left:0;
+}
+.chat-float{
+  border-radius:22px;
+  border:1px solid var(--border);
+  box-shadow:0 20px 50px rgba(0,0,0,.28);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+}
+#chat-fab{
+  border-radius:20px;
+  box-shadow:0 10px 28px rgba(0,0,0,.28);
+  transition:transform .22s var(--spring),box-shadow .22s;
+}
+#chat-fab:active{transform:scale(.96)}
+.icon-btn,.home-btn,.new-chat{
+  transition:transform .18s var(--spring),background .15s,color .15s;
+}
+.icon-btn:active,.home-btn:active,.new-chat:active{transform:scale(.96)}
+.modal{
+  border-radius:20px;
+  box-shadow:0 24px 60px rgba(0,0,0,.35);
+}
+body.is-mobile .modal{border-radius:18px 18px 0 0}
+body.is-mobile .modal::before{
+  content:"";display:block;width:36px;height:4px;border-radius:2px;
+  background:var(--border2);margin:8px auto 4px;opacity:.7;
+}
+.d-card{
+  border-radius:16px;border:1px solid var(--border);box-shadow:none;
+  transition:transform .18s var(--spring),background .15s;
+}
+.d-card:active{transform:scale(.99)}
+#query-model-toggle{
+  border-style:solid;border-color:var(--border);color:var(--text2);
+}
+@media(prefers-reduced-motion:reduce){
+  .msg,#chat-fab,.mode-pill,#send-btn{animation:none!important;transition:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -2391,7 +2493,7 @@ body.is-mobile #sync-pill{
   <!-- ================= Sidebar ================= -->
   <aside id="sidebar">
     <div class="sb-head">
-      <div class="brand"><span class="logo" id="brand-logo"></span><span class="brand-lockup"><span class="nm">Homebase</span><span class="sub">Cockpit</span></span></div>
+      <div class="brand"><span class="logo" id="brand-logo"></span><span class="brand-lockup"><span class="nm">Homebase</span><span class="sub">Home</span></span></div>
       <button class="icon-btn" id="sb-close" title="Close sidebar" aria-label="Close sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
     </div>
     <button type="button" class="new-chat" id="home-nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/></svg>Home dashboard</button>
@@ -3566,7 +3668,8 @@ var HOMEBASE_CHANGELOG = {
   ],
   current_handoff: {
     to: 'next model',
-    objective: 'UX optimization pass on branch cursor/ux-optimization-de9b (uncommitted per instruction). Reduces redundant controls and improves touch/scroll on mobile / desktop / Tesla browser without removing any capability — progressive disclosure and relocation only. (1) Composer "Next" model selector: new compact `#query-model-toggle` ("Next model") chip replaces the always-visible `#query-model-control`; the control is `hidden` by default and re-appears whenever S.queryModelOverride is set (chosen state, shows "Next: <label>") OR the user taps the toggle (aria-expanded=true → focuses the select, calls showPicker if available). Blur-with-no-pick collapses back after 180ms. `#query-model-control` and `#query-model-select` IDs and handlers preserved so the per-message failover test path stays intact. (2) `#hint-tools` and `#hint-council` marked `hidden` + `display:none !important` because the mode pills already communicate 🔧/⚖️. JS still updates their state via `dataset.on` so a future disclosure or a11y consumer can read it. `#hint-model` and `#hint-tokens` retained. (3) Mobile mode rail (`body.is-mobile .cf-modes`): 44 px min-height pills, `scroll-snap-type:x mandatory`, `scroll-snap-align:center`, 6/12 px thumb padding, and a mask-image linear-gradient edge fade so the horizontal overflow reads as scrollable — the mode row stays on its own grid row so the header does not force horizontal scroll of everything. (4) `#chat-scroll` remains the only scroll region inside the float, `#composer-wrap` is `flex:none` with `env(safe-area-inset-bottom)` padding, and `#jump-btn` is now min 44×44 and vertically bumped to `bottom:calc(96/108px + safe-area)` so it never overlaps the send button. (5) Topbar mobile: `#sync-pill` un-hidden (was `display:none !important`) as a compact 36 px chip with `max-width:96px` ellipsis, collapsing to 64 px under 380 px width so Vault status stays visible without crowding the icon buttons; refresh/connectors/settings icon buttons remain 44×44. (6) Desktop composer: `#composer` gap raised to 10 px inside a 901 px+ media query with a 2 px left margin on `#send-btn` so attach / mic / send have more slop between them. Constraint list preserved: no routing/budget/vault/voice weakening; validate.py passes; node --check clean on the extracted inline JS. Do NOT: reintroduce the always-visible Next selector, remove `#query-model-toggle`, unhide hint-tools/hint-council, weaken the vault push guard, drop the safe-area padding, or bring back `body.is-mobile #sync-pill{display:none}`.',
+    objective: 'Apple simplicity UI pass on branch cursor/apple-tesla-ui-de9b across /, /ai/, /finance/. Quiet instrument language: iOS segmented selection (elevated light pill, not solid mint brick), one solid primary CTA (Voice / Sync), sentence-case chrome, spring press, frosted header/dock, flattened nested boxes, Large-Title section heads. No capabilities removed — pure CSS + quiet copy. Preserve query-model progressive disclosure, vault/budget/routing/voice contracts, DASHBOARD_CACHE marker, TESLA wordmark.',
+    apple_simplicity_2026_07_20: 'THIS PASS. CSS-first quiet instrument UI across /, /ai/, /finance/ on branch cursor/apple-tesla-ui-de9b. Dashboard: frosted header island for date/weather/stocks; iOS segmented Drive|Parked|Charging + news tabs; soft dock selected state (accent-soft fill, not mint brick); Voice remains sole solid CTA; Briefing/Glance quiet; flattened cockpit-command nesting; Large Title sec-titles; spring press; cam-dot ::before-only (44px hit targets preserved). Homebase: frosted topbar, segmented mode pills with elevated active, spring FAB/send, iMessage bubble radii, mobile sheet grabber, composer focus ring. Finance: quiet labels (no shouty uppercase), thinner budget tracks, pill action bar with soft Sync primary, Wallet-like hero numbers. Copy: dashboard brand-sub Home; Homebase brand.sub Home. Verified: extract+node --check; cache JSON; voice entry points ≥4.',
     ux_optimization_2026_07_20: 'THIS PASS. ai/index.html only. HTML: added `<button id="query-model-toggle" aria-controls="query-model-control" aria-expanded="false">Next model</button>` before `#query-model-control` inside `#comp-hint`, added `hidden` to `#query-model-control`, and swapped `style="display:none"` on `#hint-tools`/`#hint-council` for the `hidden` attribute + aria-hidden. JS: new `applyQueryModelDisclosure()` helper (progressive disclosure — show when override OR select currently focused, override state renders "Next: <label>"), refreshQueryModelSelect() now calls it, initQueryModelSelect() wires the toggle click (unhide → focus → showPicker) and a delayed 180 ms select-blur collapse; updateHints() no longer touches hint-tools/hint-council `style.display` but keeps state accurate via `dataset.on`. CSS: one appended UX OPTIMIZATION block at the end of `<style>` — `#query-model-toggle` chip (dashed border, 30/36 px min-height, hidden when open), `#hint-tools/#hint-council{display:none !important}`, mobile `.cf-modes` scroll-snap + mask-image edge fade + 44 px snap pills, `#chat-scroll` flex:1 + `#composer-wrap` flex:none with safe-area padding, `#jump-btn` 44×44 bumped clear of the composer, mobile `#sync-pill` un-hidden as compact 36 px ellipsis chip with a <380 px narrower fallback, and a desktop-only `@media (min-width:901px)` composer gap bump (10 px + 2 px left margin on send). Preserved IDs: query-model-control, query-model-select, hint-tools, hint-council, hint-model, hint-tokens, chat-scroll, jump-btn, composer, composer-wrap, cf-modes, sync-pill, mic-btn, send-btn, attach-btn, voice-btn (stashed), council-btn (stashed). Retains: every prior 2026-07-20 fix (calm typography, functional excellence, hot-rod cockpit) untouched. Verified: python3 extract-scripts + node --check clean; python3 .github/scripts/validate.py green.',
     type_smooth_2026_07_20: 'THIS PASS. Purely visual: Syne + JetBrains Mono removed from all three apps; --f/--fd/--font/--font-display/--display/--ui now point at the system stack; --mono is ui-monospace/SFMono. Google Fonts <link> tags removed in index.html, ai/index.html, and finance/index.html. Radii: dashboard --r 14->16, --r-sm 10->12, --r-xs 6->8; ai/ mirror; finance --radius 12->14. Calm-type override blocks appended at the tail of each stylesheet so source-order wins without !important (dashboard covers .tesla-word, .live-hero-clock/-date/-greet/-desc/-temp, .gl-* hero, .fresh-chip, .dock-btn, .sec-title, .rl-t, .ntab, .cam-nav-btn, .btn/-voice, .command-eyebrow/-action, .now-copy strong, .charge-*, .app-panel .rl-t, .mode-btn overflow fix incl. sub-520 media; ai/ covers .brand .nm/.sub, .sb-sec/.sb-dash-link, .tb-app/-sub, .d-head h3, .d-metric/.cf-metric/.hb-display, .cf-title/-meta, .mode-pill, .d-badge, .mo-tab, .mm-group, #query-model-control>span, .hcr-grip/#hint-tools/#hint-council, #v-badge letter-spacing 0.28em->0.08em + weight 800->700 with !important preserved; finance covers .brand strong/small, .mark, .top .ghost, .status, .hero-copy h1, .hero-metric small/b, .privacy, .section-head h2/span, .card-label, .metric-value, .health small/b, .budget/.row small, .amount, .pill, .alert small, .empty::before/h2, .action-inner button, details.card summary, button/.button). h1-h4 in ai/ dropped -0.025em/700 -> -0.02em/600. Copy: brand.sub "Command Cockpit" -> "Cockpit"; #tb-sub "Command deck" -> "Home" (fab-state JS string synced at line ~6052); finance "Private cockpit" -> "Private". Comment "Syne section titles" -> "system-font section titles" in dashboard. Zero functional contracts touched: DASHBOARD_CACHE marker intact, no handlers moved, no JS logic edited outside the tb-sub string, all IDs preserved. Verified: python3 extract-scripts + node --check clean on all three files; python3 .github/scripts/validate.py green. Historical HOMEBASE_CHANGELOG prose still mentions Syne for provenance — no CSS font stack still names Syne or JetBrains Mono.',
     functional_excellence_2026_07_20: 'PRIOR SAME-DAY PASS retained in this branch. All fixes are in ai/index.html only. Beacon: #err-beacon in <body>, CSS in <style>, listeners at top of first <script>; DOMContentLoaded wrapped so a boot throw still surfaces the chip; last error saved to nova_last_error_v1 (distinct from dashboard last_error_v1). sendMessage now has a finally block that always clears S.sending, S.abort, and repaints (each cleanup step try-guarded); AbortError inside a live Council also marks any state==="run" members as "stopped" so their spinner cards resolve. runTask mirrors the finally contract for t.running. runSubagentMember now checks S.abort.signal.aborted before each execTool and after the loop so Stop is honored mid-tool-loop. bootVaultSync distinguishes need-pass (amber pill, "Vault locked") vs decrypt-fail vs network vs other, toasts once per session (latches reset on a healthy ok status), and never weakens the vaultPushToDrive "Sync stopped to protect the existing Drive vault" abort. voiceVizKick renders every other frame when VOICE.state==="idle" and VMETER.level<0.08 (halves idle canvas cost). loadState hardens S.convos = [] up front. Mobile CSS: #send-btn 44x44 (radius 10), #mic-btn 44x44, body.is-mobile .icon-btn 44x44, body.is-mobile .cf-modes .mode-pill min-height 38px + 13px font. New sync-pill "needs-pass" amber style added. Nothing else in CSS/JS moved.',
@@ -3579,8 +3682,8 @@ var HOMEBASE_CHANGELOG = {
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
     voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
     app_ui_polish_2026_07_20: 'Earlier same-day token polish (indigo aurora calm-down). Superseded for palette by cockpit_wave0_2026_07_20 teal system; elevation/type lessons still apply.',
-    state: 'Homebase UX optimization pass on branch cursor/ux-optimization-de9b (uncommitted per instruction). Prior 2026-07-20 passes (calm typography, functional-excellence, Wave 1 hot-rod cockpit) all retained. FABLE_AUDIT_BRIEF.md remains the security/routing audit entrypoint.',
-    latest_fix: 'UX optimization — composer "Next model" selector collapsed behind a progressive-disclosure toggle, redundant hint-tools/hint-council chips hidden, mobile mode rail gets 44 px scroll-snap pills with a mask-image edge fade, jump-btn resized to 44×44 and repositioned clear of the send button, composer stays pinned with safe-area padding, mobile sync-pill un-hidden as a compact ellipsis chip, and desktop composer gains extra breathing room between attach/mic/send.',
+    state: 'Apple simplicity UI pass on branch cursor/apple-tesla-ui-de9b (CSS + quiet copy). Prior UX optimization / type-smooth / functional excellence retained. FABLE_AUDIT_BRIEF.md remains the security entrypoint.',
+    latest_fix: 'Apple simplicity — quiet instrument UI (iOS segmented selection, soft dock, one solid Voice CTA, frosted chrome, spring press) across dashboard + Homebase + Finance without removing capabilities.',
     start_here: [
       'HOMEBASE_FINANCE_EXCELLENCE_PLAN.md — Wave inventory for /ai/ and /finance/',
       'DASHBOARD_EXCELLENCE_PLAN.md — Tesla dashboard waves (cache.json still highest leverage)',
@@ -3593,7 +3696,8 @@ var HOMEBASE_CHANGELOG = {
       'DONE Homebase Wave 1 hot-rod refresh (branch cursor/complete-ui-refresh-de9b, uncommitted)',
       'DONE Pederson Finances Wave 1 hot-rod refresh (branch cursor/complete-ui-refresh-de9b, uncommitted)',
       'DONE Homebase functional excellence pass (branch cursor/functional-excellence-de9b, uncommitted) — see 2026-07-20-functional-excellence entry',
-      'DONE Homebase UX optimization pass (branch cursor/ux-optimization-de9b, uncommitted) — see 2026-07-20-ux-optimization entry',
+      'DONE Homebase UX optimization pass (branch cursor/ux-optimization-de9b) — see 2026-07-20-ux-optimization entry',
+      'DONE Apple simplicity UI pass (branch cursor/apple-tesla-ui-de9b) — see 2026-07-20-apple-simplicity entry',
       'P1 next: bring the Tesla dashboard shell forward to match Wave 1 hot-rod (Syne headers, mint accent, sharper radii) if David likes the direction',
       'P1: extend the /ai/ error beacon into an on-device "last error" viewer in Settings → Data (currently only stashes to nova_last_error_v1)',
       'P1: team cancel/timeout stuck-UI; scheduler architecture spike (finally-cleanup now guarantees t.running clears — timeouts still pending)',
@@ -3634,6 +3738,43 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-apple-simplicity',
+      date: '2026-07-20',
+      commit: 'pending',
+      branch: 'cursor/apple-tesla-ui-de9b',
+      pull_request: 'pending',
+      title: 'Apple simplicity — quiet instrument UI across dashboard, Homebase, and Finance',
+      type: 'ui+ux',
+      depends_on: ['2026-07-20-ux-optimization','2026-07-20-type-smooth'],
+      reported_by: 'David: be more creative like Apple lead / Tesla software; smooth, functional, simplistic yet feature-rich.',
+      summary: 'CSS-first redesign toward iOS Control Center + Tesla glance hierarchy: soft elevated segmented controls, one solid primary action, frosted chrome, spring press feedback, quieter type, flattened nesting. All capabilities retained.',
+      files_changed: ['index.html','ai/index.html','finance/index.html'],
+      interfaces_changed: ['HOMEBASE_CHANGELOG.current_handoff'],
+      behaviour: [
+        'Dashboard: soft dock .on (accent-soft), iOS mode/news segments, Voice-only solid CTA, frosted header instrument island, Large Title sections, spring transitions',
+        'Homebase: segmented mode pills, frosted topbar, quieter bubbles, sheet grabber on mobile modals, spring FAB/send',
+        'Finance: sentence-case chrome, soft action bar, thinner meters, Wallet-like numbers'
+      ],
+      guards: [
+        'No routing/budget/vault/voice/repo-write weakening',
+        'DASHBOARD_CACHE marker untouched; cam-dot 44px hit targets preserved via ::before styling',
+        'query-model-toggle progressive disclosure retained; hint-tools/hint-council stay visually hidden',
+        'TESLA wordmark retained; ≥4 ai/?voice=1 entry points'
+      ],
+      verification: [
+        'python3 extract + node --check on index.html, ai/index.html, finance/index.html',
+        'DASHBOARD_CACHE JSON parse',
+        'python3 .github/scripts/validate.py'
+      ],
+      setup: [],
+      known_limits: [
+        'Tesla browser may soft-fail backdrop-filter; solid fallbacks remain readable',
+        'Visual pass only — no new features'
+      ],
+      dependencies: ['Prior UX optimization and type-smooth passes'],
+      next_model: 'If David likes the quiet direction, ship/merge and hard-reload; otherwise tune selected-state contrast for sun glare in the car. Do not re-audit FABLE_AUDIT_BRIEF without evidence.'
+    },
     {
       id: '2026-07-20-ux-optimization',
       date: '2026-07-20',
