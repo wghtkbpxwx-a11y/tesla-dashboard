@@ -112,9 +112,11 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 @media(max-width:760px){.dash-orb{width:40px;height:40px}#dash-orb-cap{top:60px;right:12px;max-width:74vw;font-size:13px}}
 @media(prefers-reduced-motion:reduce){.dash-orb,.dash-orb::before{animation:none}}
 /* Embedded Homebase voice overlay (same-origin iframe, no navigation) */
-.hb-embed{position:fixed;inset:0;z-index:800;display:none;align-items:center;justify-content:center;padding:2.2vh 2.2vw;background:rgba(3,5,8,.66);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);animation:hbFade .22s ease}
+.hb-embed{position:fixed;inset:0;z-index:800;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(3,5,8,.46);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:hbFade .22s ease}
 .hb-embed.open{display:flex}
-.hb-embed-card{position:relative;width:100%;height:100%;max-width:1120px;border-radius:20px;overflow:hidden;background:#05070a;box-shadow:0 30px 90px -22px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.09)}
+/* A contained voice window floating on the dashboard — not a full-screen
+   takeover (the dashboard stays visible, dimmed, around it). */
+.hb-embed-card{position:relative;width:min(480px,94vw);height:min(720px,86vh);border-radius:24px;overflow:hidden;background:#05070a;box-shadow:0 30px 90px -18px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.1)}
 .hb-embed-close{position:absolute;top:10px;right:10px;z-index:2;width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(10,14,20,.72);color:#fff;font-size:17px;line-height:1;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);-webkit-tap-highlight-color:transparent;display:grid;place-items:center;transition:background .15s}
 .hb-embed-close:hover{background:rgba(30,36,48,.9)}
 #hb-frame{width:100%;height:100%;border:none;background:#05070a;display:block}
@@ -1103,7 +1105,7 @@ body[data-mode="charging"] .charge-session{
 <!-- Homebase voice, embedded on the dashboard (same-origin iframe → no page
      navigation, so you never leave the dashboard). ai/ is same-origin, so the
      "no iframes for external sites" rule does not apply; mic needs allow=microphone. -->
-<div id="hb-embed" class="hb-embed" role="dialog" aria-modal="true" aria-label="Homebase voice">
+<div id="hb-embed" class="hb-embed" role="dialog" aria-modal="true" aria-label="Homebase voice" onclick="hbBackdrop(event)">
   <div class="hb-embed-card">
     <button type="button" class="hb-embed-close" onclick="closeHomebase()" aria-label="Close Homebase" title="Close">✕</button>
     <iframe id="hb-frame" title="Homebase" allow="microphone; autoplay; clipboard-write"></iframe>
@@ -7755,6 +7757,8 @@ function closeHomebase() {
   if (f) { try { f.src = 'about:blank'; } catch (e) {} } // stop Homebase, free mic/audio
   document.documentElement.style.overflow = '';
 }
+// Tap the dimmed dashboard around the window to close (not the window itself).
+function hbBackdrop(e) { if (e && e.target === document.getElementById('hb-embed')) closeHomebase(); }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { var ov = document.getElementById('hb-embed'); if (ov && ov.classList.contains('open')) closeHomebase(); }
 });
