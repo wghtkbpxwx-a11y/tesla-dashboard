@@ -1928,7 +1928,6 @@ function updateClock() {
     greetEl.textContent = hr24 < 5 ? 'Good night' : hr24 < 12 ? 'Good morning' : hr24 < 17 ? 'Good afternoon' : 'Good evening';
   }
   renderFreshness();
-try { window.addEventListener('resize', function(){ requestAnimationFrame(syncDockPill); }); requestAnimationFrame(syncDockPill); } catch(_) {}
   renderDashboardMode();
   if (settings.themeMode === 'auto') applyAutoTheme();
 }
@@ -7632,6 +7631,10 @@ document.getElementById('link-url').addEventListener('keydown', function(e) {
 // DASHBOARD_CACHE wasn't defined yet when the first clock tick ran — paint the
 // freshness chip now that the whole script (cache included) has executed.
 renderFreshness();
+try {
+  window.addEventListener('resize', function(){ requestAnimationFrame(syncDockPill); });
+  requestAnimationFrame(syncDockPill);
+} catch(_) {}
 </script>
 </body>
 </html>
