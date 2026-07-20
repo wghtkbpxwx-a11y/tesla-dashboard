@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Updated: 2026-07-20 Apple simplicity — quiet instrument UI -->
+<!-- Updated: 2026-07-20 Design depth — clock-first, user-moment UI -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -909,6 +909,117 @@ html.light .cardgroup{background:rgba(255,255,255,.7)}
   #dock{border-radius:20px}
 }
 
+
+/* ================================================================
+   DESIGN DEPTH (2026-07-20) — nuanced, user-first.
+   Car glance → clock gravity. Phone thumb → dock + Voice.
+   Desktop → hover affordances without clutter.
+   ================================================================ */
+
+/* Floating header island — sits in the content, not a website chrome bar */
+#header{
+  top:max(8px, env(safe-area-inset-top));
+  margin:0 12px;
+  width:auto;
+  left:0;right:0;
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:rgba(8,11,16,.78);
+  box-shadow:0 10px 36px rgba(0,0,0,.28);
+}
+html.light #header{background:rgba(255,255,255,.82)}
+#main{padding-top:18px}
+
+/* Now as a breath under the clock — not a competing card */
+.now-line{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px;
+  margin:12px 0 0;max-width:42rem;
+  font-size:14px;line-height:1.35;color:var(--t2);font-weight:500;
+}
+.now-line .now-kicker{
+  font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.now-line strong{color:var(--t1);font-weight:600;letter-spacing:-.01em}
+.now-line .now-sep{opacity:.35}
+.now-focus{display:none!important} /* legacy card retired */
+
+/* Actions sit under the clock — thumb-reachable in parked, huge in Drive */
+.live-hero > .command-actions{margin-top:4px}
+.fresh-reload{opacity:0;transition:opacity .18s;font-size:13px;margin-left:2px}
+.fresh-chip:hover .fresh-reload,
+.fresh-chip:focus-visible .fresh-reload{opacity:.7}
+@media(hover:none){.fresh-reload{opacity:.45}}
+
+/* Mode strip: quiet, last in hero */
+.cockpit-command{margin-top:4px;opacity:.92}
+.command-mode{gap:10px}
+.command-eyebrow{font-size:12px;color:var(--t3)}
+.mode-btn{min-height:42px;font-size:13px}
+
+/* Edge-fade scroll rails — teach “more this way” without labels */
+.live-stocks-row,.live-forecast-row,.live-indices{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);
+  scroll-snap-type:x proximity;
+  padding-bottom:6px;
+}
+.stock-chip,.fc-mini{scroll-snap-align:start}
+
+/* Dock sliding pill — keep x-scroll; pill paints under buttons */
+#dock{isolation:isolate}
+#dock-pill{
+  position:absolute;left:0;top:0;z-index:0;
+  border-radius:16px;background:var(--accent-soft);
+  pointer-events:none;opacity:0;
+  transition:transform .34s var(--spring),width .34s var(--spring),height .34s var(--spring),opacity .2s;
+}
+.dock-btn{position:relative;z-index:1;background:transparent}
+.dock-btn.on{background:transparent;color:var(--accent)}
+@media(prefers-reduced-motion:reduce){#dock-pill{transition:none}}
+
+/* Drive: bigger type, bigger primary, hide noise */
+body[data-mode="drive"] .live-hero-clock{font-size:clamp(64px,12vw,120px)}
+body[data-mode="drive"] .command-action{min-height:56px;font-size:16px}
+body[data-mode="drive"] .command-action.voice{flex:1.35}
+body[data-mode="drive"] .live-forecast-row,
+body[data-mode="drive"] .cockpit-command{display:none!important}
+body[data-mode="drive"] .now-line{font-size:15px}
+body[data-mode="drive"] .fresh-chip{display:none}
+body[data-mode="charging"] .live-hero{display:flex;flex-direction:column}
+body[data-mode="charging"] .charge-session{
+  order:-1;margin-bottom:8px;
+  animation:fadeUp .4s var(--spring);
+}
+
+/* Feed: lead story slightly louder; meta quieter; bookmark until needed */
+#news-feed .feed-item:first-child .feed-t{font-size:17px;letter-spacing:-.02em;font-weight:650;-webkit-line-clamp:3;line-clamp:3}
+#news-feed .feed-m,#sports-feed .feed-m{opacity:.72;text-transform:none;letter-spacing:0;font-size:12px;font-weight:500}
+.feed-item .bm-btn,.row .bm-btn{opacity:.35;transition:opacity .15s}
+.feed-item:hover .bm-btn,.feed-item:focus-within .bm-btn,
+.row:hover .bm-btn,.row:focus-within .bm-btn{opacity:1}
+@media(hover:none){.feed-item .bm-btn,.row .bm-btn{opacity:.7}}
+.feed-box{border-radius:20px;box-shadow:none}
+
+/* Section titles breathe from content */
+.sec-title{margin:28px 0 12px 2px}
+#p-live > .sec-title:first-of-type{margin-top:8px}
+
+/* Submenu heads — whisper */
+.dock-submenu-head{
+  font-size:11px;font-weight:600;color:var(--t3);letter-spacing:0;
+  text-transform:none;padding:10px 12px 4px;
+}
+
+@media(max-width:760px){
+  #header{margin:0 8px;padding:8px 12px;border-radius:18px}
+  .now-line{font-size:13px}
+  .live-hero > .command-actions{gap:6px}
+  .command-action{font-size:14px;padding:12px 8px}
+  /* Keep dock scrollable; pill still tracks via syncDockPill */
+  #dock{overflow-x:auto;overflow-y:visible}
+}
+
 </style>
 </head>
 <body data-mode="parked">
@@ -947,33 +1058,45 @@ html.light .cardgroup{background:rgba(255,255,255,.7)}
     <!-- Hero: Time + Weather -->
     <div class="live-hero">
 
-      <div class="cockpit-command" aria-label="Manual dashboard mode">
-        <div class="command-mode">
-          <span class="command-eyebrow" id="mode-status">Manual mode · Parked</span>
-          <div class="mode-picker" role="group" aria-label="Dashboard mode">
-            <button class="mode-btn" type="button" data-mode-btn="drive" aria-pressed="false" onclick="setDashboardMode('drive')">Drive</button>
-            <button class="mode-btn active" type="button" data-mode-btn="parked" aria-pressed="true" onclick="setDashboardMode('parked')">Parked</button>
-            <button class="mode-btn" type="button" data-mode-btn="charging" aria-pressed="false" onclick="setDashboardMode('charging')">Charging</button>
-          </div>
+      <!-- Gravity: time + weather first (what you glance at in the car) -->
+      <div class="live-hero-time">
+        <div class="live-hero-clockwrap">
+          <div class="live-hero-greet" id="live-greet"></div>
+          <div class="live-hero-clock" id="live-clock">--:--</div>
+          <div class="live-hero-date" id="live-date">—</div>
+          <p class="now-line" id="now-line" aria-live="polite">
+            <span class="now-kicker">Now</span>
+            <strong id="now-title">Ready when you are</strong>
+            <span class="now-sep" aria-hidden="true">·</span>
+            <span id="now-detail">A calm view of what matters next.</span>
+          </p>
         </div>
-        <div class="cockpit-status">
-          <div class="now-focus">
-            <span class="command-eyebrow">Now</span>
-            <div class="now-copy">
-              <strong id="now-title">Ready when you are</strong>
-              <span id="now-detail">A calm view of what matters next.</span>
-            </div>
+        <div class="live-hero-weather" onclick="goPanel('weather')" title="View full forecast" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPanel('weather')}">
+          <div>
+            <div class="live-hero-temp" id="live-temp">--°C</div>
+            <div class="live-hero-desc" id="live-weather-desc">—</div>
           </div>
-          <div class="command-actions">
-            <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read the weather, headlines and scores aloud">Briefing</button>
-            <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
-            <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Big, at-a-glance view">Glance</button>
-          </div>
+          <div class="live-hero-icon" id="live-icon">🌤</div>
+        </div>
+        <div class="live-hero-chiprow" aria-label="Data status">
+          <button class="fresh-chip" id="fresh-chip" type="button" onclick="location.href = location.pathname + '?v=' + Date.now() + (location.hash || '')" title="Data refreshes every hour — tap to reload">
+            <span class="fresh-dot" aria-hidden="true"></span>
+            <span id="fresh-chip-txt">Updated …</span>
+            <span class="fresh-reload" aria-hidden="true">↻</span>
+          </button>
         </div>
       </div>
+
+      <!-- Three equal reach targets — Voice is the filled primary -->
+      <div class="command-actions" aria-label="Quick actions">
+        <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read weather, headlines and scores aloud">Briefing</button>
+        <a class="command-action voice" href="ai/?voice=1" title="Open Homebase Voice">Voice</a>
+        <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Full-screen glance view">Glance</button>
+      </div>
+
       <div class="charge-session" id="charge-session" aria-live="polite">
         <div class="charge-time">
-          <span class="command-eyebrow">Charge session</span>
+          <span class="command-eyebrow">Charging</span>
           <strong id="charge-elapsed">00:00</strong>
           <span id="charge-reminder">No reminder set</span>
         </div>
@@ -984,23 +1107,15 @@ html.light .cardgroup{background:rgba(255,255,255,.7)}
         </div>
       </div>
 
-      <div class="live-hero-time">
-        <div class="live-hero-clockwrap">
-          <div class="live-hero-greet" id="live-greet"></div>
-          <div class="live-hero-clock" id="live-clock">--:--</div>
-          <div class="live-hero-date" id="live-date">—</div>
-        </div>
-        <div class="live-hero-weather" onclick="goPanel('weather')" title="View full forecast">
-          <div>
-            <div class="live-hero-temp" id="live-temp">--°C</div>
-            <div class="live-hero-desc" id="live-weather-desc">—</div>
+      <!-- Mode last: ambient, not competing with the clock -->
+      <div class="cockpit-command" aria-label="Dashboard mode">
+        <div class="command-mode">
+          <span class="command-eyebrow" id="mode-status">Parked</span>
+          <div class="mode-picker" role="group" aria-label="Dashboard mode">
+            <button class="mode-btn" type="button" data-mode-btn="drive" aria-pressed="false" onclick="setDashboardMode('drive')">Drive</button>
+            <button class="mode-btn active" type="button" data-mode-btn="parked" aria-pressed="true" onclick="setDashboardMode('parked')">Parked</button>
+            <button class="mode-btn" type="button" data-mode-btn="charging" aria-pressed="false" onclick="setDashboardMode('charging')">Charging</button>
           </div>
-          <div class="live-hero-icon" id="live-icon">🌤</div>
-        </div>
-        <div class="live-hero-chiprow" aria-label="Data status">
-          <button class="fresh-chip" id="fresh-chip" onclick="location.href = location.pathname + '?v=' + Date.now() + (location.hash || '')" title="Data refreshes automatically every hour — tap to reload now">
-            <span class="fresh-dot"></span><span id="fresh-chip-txt">Checking data…</span><span style="font-size:13px">⟳</span>
-          </button>
         </div>
       </div>
       <!-- Glanceable 5-day forecast strip (no tap needed) -->
@@ -1557,6 +1672,7 @@ html.light .cardgroup{background:rgba(255,255,255,.7)}
 </div>
 
 <nav id="dock">
+  <span id="dock-pill" aria-hidden="true"></span>
   <button class="dock-btn on" data-p="live" draggable="true">Live</button>
   <button class="dock-btn" data-p="msg" draggable="true">Messages</button>
   <button class="dock-btn dock-submenu-trigger" id="dock-more-btn" aria-label="More menu" aria-expanded="false">More</button>
@@ -1743,7 +1859,7 @@ function renderDashboardMode() {
   });
   var label = dashboardModeLabel(mode);
   var status = document.getElementById('mode-status');
-  if (status) status.textContent = 'Manual mode · ' + label;
+  if (status) status.textContent = label;
   var title = document.getElementById('now-title');
   var detail = document.getElementById('now-detail');
   var ctx = dashboardContextDetail(mode);
@@ -2237,6 +2353,19 @@ function briefingToggle() {
 }
 
 // ── DOCK ──
+function syncDockPill() {
+  var dock = document.getElementById('dock');
+  var pill = document.getElementById('dock-pill');
+  if (!dock || !pill) return;
+  var on = dock.querySelector('.dock-btn.on');
+  if (!on) { pill.style.opacity = '0'; return; }
+  var dr = dock.getBoundingClientRect();
+  var br = on.getBoundingClientRect();
+  pill.style.opacity = '1';
+  pill.style.width = br.width + 'px';
+  pill.style.height = br.height + 'px';
+  pill.style.transform = 'translate(' + (br.left - dr.left - dock.clientLeft) + 'px, ' + (br.top - dr.top - dock.clientTop) + 'px)';
+}
 function goPanel(p) {
   // A panel id with no matching section (e.g. 'stocks', which is a dropdown)
   // must never blank the page — land on Live instead.
@@ -2250,6 +2379,7 @@ function goPanel(p) {
   if (submenuItem) submenuItem.classList.add('on');
   var panel = document.getElementById('p-' + p);
   if (panel) panel.classList.add('on');
+  try { syncDockPill(); } catch (e) {}
   try {
     window.scrollTo({top: 0, behavior: 'smooth'});
   } catch (e) {
@@ -2540,6 +2670,7 @@ function applyDockOrder() {
     if (more) dock.appendChild(more);
     if (setb) dock.appendChild(setb);
   } catch(e) { console.warn('applyDockOrder error:', e); }
+  try { requestAnimationFrame(syncDockPill); } catch(_) {}
 }
 function promoteToDock(p) {
   if (!isPromotable(p)) return false;
@@ -7500,6 +7631,10 @@ document.getElementById('link-url').addEventListener('keydown', function(e) {
 // DASHBOARD_CACHE wasn't defined yet when the first clock tick ran — paint the
 // freshness chip now that the whole script (cache included) has executed.
 renderFreshness();
+try {
+  window.addEventListener('resize', function(){ requestAnimationFrame(syncDockPill); });
+  requestAnimationFrame(syncDockPill);
+} catch(_) {}
 </script>
 </body>
 </html>
