@@ -15,10 +15,11 @@
 <title>Homebase</title>
 <!-- HOMEBASE_CHANGELOG: machine-readable history for AI agents — also #homebase-changelog + JS HOMEBASE_CHANGELOG -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233dd6c6'/%3E%3Cstop offset='1' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ============================= Design tokens ============================= */
-/* Wave 1 — HOT-ROD COCKPIT: Syne + Plus Jakarta, mint accent, night command deck */
+/* 2026-07-20 CALM: system UI stack (SF Pro / San Francisco / Segoe UI),
+   mint accent #2af5c4, hairline chrome. No web fonts — pure system for
+   instant paint on Tesla browser and mobile Safari. */
 :root{
   --bg:#f2f4f7;
   --bg2:#ffffff;
@@ -42,12 +43,12 @@
   --glow:0 0 48px rgba(42,245,196,.14);
   --shadow:0 1px 2px rgba(12,16,22,.05), 0 10px 32px rgba(12,20,26,.10);
   --shadow-sm:0 1px 2px rgba(12,16,22,.05), 0 4px 12px rgba(12,20,26,.07);
-  --r:14px;
-  --r-sm:10px;
-  --r-xs:6px;
-  --font-display:"Syne","Plus Jakarta Sans",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --font:"Plus Jakarta Sans",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --r:16px;
+  --r-sm:12px;
+  --r-xs:8px;
+  --font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",system-ui,"Helvetica Neue",sans-serif;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",system-ui,"Helvetica Neue",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   --fs:16px;
   --sidebar-w:244px;
   --chat-w:48rem;
@@ -1614,9 +1615,9 @@ body.is-desktop .chat-float[data-state="open"]{
    voice-ov/settings-ov etc. — this is chrome + type + rhythm only.
    ========================================================================== */
 
-/* ---- Type: Syne display headers, JetBrains Mono for micro labels --------- */
-html body{ font-family:var(--font); letter-spacing:-.008em; }
-h1,h2,h3,h4,.hb-display{ font-family:var(--font-display); letter-spacing:-.025em; font-weight:700; }
+/* ---- Type: system display + text, mono only for code ------------------ */
+html body{ font-family:var(--font); letter-spacing:-.005em; }
+h1,h2,h3,h4,.hb-display{ font-family:var(--font-display); letter-spacing:-.02em; font-weight:600; }
 .hb-mono, .tb-app, .cf-meta, .mm-group, .sb-sec, .mo-tab, .d-badge, .mode-pill,
 #comp-hint, .hcr-grip, #hint-tools, #hint-council, .cf-title,
 .tool-call .t-state, .council-member .cm-state{
@@ -2109,8 +2110,8 @@ body::before{
 
 /* ---- VOICE OVERLAY: keep intentional mode hue but sharpen chrome -------- */
 #v-badge{
-  font-family:var(--font-display) !important; letter-spacing:.28em !important; text-transform:uppercase;
-  font-weight:800;
+  font-family:var(--font-display) !important; letter-spacing:.08em !important; text-transform:uppercase;
+  font-weight:700;
 }
 #v-status{ font-family:var(--font); }
 
@@ -2192,6 +2193,74 @@ body.is-mobile #settings-ov .mo-mobile-nav select{
 ::-webkit-scrollbar-thumb{ background:rgba(139,149,168,.28); border-radius:3px; border:0; background-clip:padding-box; }
 [data-theme="dark"] ::-webkit-scrollbar-thumb{ background:rgba(139,149,168,.22); }
 
+/* ---- Functional Excellence pass (2026-07-20) -------------------------- */
+/* Global runtime-error beacon: fixed chip that appears when window.onerror or
+   an unhandledrejection fires. Same pattern as the Tesla dashboard freshness
+   chip. Tap = reload. Independent of the app boot so a white-screen throw
+   still surfaces a recovery path. */
+#err-beacon{
+  position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+  z-index:9999; display:none; align-items:center; gap:8px;
+  padding:10px 16px; border-radius:999px; cursor:pointer;
+  background:#b3122d; color:#fff; font:600 13.5px/1.2 var(--font, system-ui, sans-serif);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 10px 32px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.4);
+  letter-spacing:.01em;
+}
+#err-beacon.on{ display:inline-flex; }
+#err-beacon:hover{ filter:brightness(1.08); }
+#err-beacon::before{ content:'!'; display:inline-grid; place-items:center; width:18px; height:18px; border-radius:999px; background:rgba(255,255,255,.22); font-weight:800; font-size:11px; }
+body.is-mobile #err-beacon{ font-size:14px; padding:12px 18px; bottom:calc(18px + env(safe-area-inset-bottom,0px)); }
+
+/* Larger tap targets on mobile for one-handed car/phone use.
+   Desktop keeps the compact 36–40 px look, mobile bumps to Apple's 44px HIG. */
+#send-btn{ min-width:40px; min-height:40px; }
+body.is-mobile #send-btn{ width:44px !important; height:44px !important; min-width:44px !important; min-height:44px !important; border-radius:10px !important; }
+body.is-mobile #send-btn svg{ width:20px; height:20px; }
+body.is-mobile #mic-btn{ width:44px; height:44px; min-width:44px; min-height:44px; }
+body.is-mobile .icon-btn{ width:44px !important; height:44px !important; min-width:44px !important; }
+body.is-mobile #topbar > .icon-btn{ width:44px !important; height:44px !important; }
+body.is-mobile .cf-modes .mode-pill{
+  min-height:38px; padding:8px 12px !important; font-size:13px !important;
+  line-height:1.15;
+}
+body.is-mobile .cf-modes .mode-pill .mp-ico{ width:18px; height:18px; }
+
+/* Vault sync-pill: needs-passphrase amber state so users notice the block. */
+#sync-pill.needs-pass{
+  color:#c46a05;
+  border-color:color-mix(in srgb, #c46a05 40%, var(--border));
+  background:color-mix(in srgb, #c46a05 12%, var(--bg2));
+}
+[data-theme="dark"] #sync-pill.needs-pass{
+  color:#f0a54a;
+  border-color:rgba(240,165,74,.42);
+  background:rgba(240,165,74,.10);
+}
+
+/* ============================================================================
+   CALM TYPE PASS (2026-07-20) — Apple/Tesla-smooth overrides.
+   Reduce the ex-Syne ultra-wide tracking on uppercase micro-labels
+   (0.18–0.28em -> 0.06–0.08em max), pull display weights from 800 -> 600/700.
+   Placed at tail of stylesheet so source-order wins without !important.
+   ========================================================================== */
+.brand .nm{ font-weight:700; letter-spacing:-.015em; }
+.brand .sub{ font-weight:600; letter-spacing:.06em; }
+.sb-sec{ font-weight:600; letter-spacing:.08em; }
+.sb-dash-link{ font-weight:600; letter-spacing:.06em; }
+.tb-app,.tb-sub{ font-weight:600; letter-spacing:.06em; text-transform:none; }
+.d-head h3{ font-weight:600; letter-spacing:.08em; }
+.d-metric,.cf-metric,.hb-display{ letter-spacing:-.015em; font-weight:600; }
+.cf-title{ font-weight:600; letter-spacing:-.005em; }
+.cf-meta{ font-weight:500; letter-spacing:.06em; }
+.mode-pill{ font-weight:600; letter-spacing:.05em; }
+.d-badge{ font-weight:600; letter-spacing:.06em; }
+.mo-tab{ font-weight:600; letter-spacing:.02em; }
+.mm-group{ font-weight:600; letter-spacing:.08em; }
+#query-model-control>span{ letter-spacing:.06em; }
+.hcr-grip,#hint-tools,#hint-council{ font-weight:500; letter-spacing:.04em; }
+/* Any prompt-chip pill or FAB label that used ultra-wide tracking */
+[class*="mo-"][class*="head"], .prompt-chip-head{ letter-spacing:.06em; font-weight:600; }
 </style>
 </head>
 <body>
@@ -2199,7 +2268,7 @@ body.is-mobile #settings-ov .mo-mobile-nav select{
   <!-- ================= Sidebar ================= -->
   <aside id="sidebar">
     <div class="sb-head">
-      <div class="brand"><span class="logo" id="brand-logo"></span><span class="brand-lockup"><span class="nm">Homebase</span><span class="sub">Command Cockpit</span></span></div>
+      <div class="brand"><span class="logo" id="brand-logo"></span><span class="brand-lockup"><span class="nm">Homebase</span><span class="sub">Cockpit</span></span></div>
       <button class="icon-btn" id="sb-close" title="Close sidebar" aria-label="Close sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
     </div>
     <button type="button" class="new-chat" id="home-nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/></svg>Home dashboard</button>
@@ -2232,7 +2301,7 @@ body.is-mobile #settings-ov .mo-mobile-nav select{
       </button>
       <div class="tb-title">
         <span class="tb-app">Homebase</span>
-        <span class="tb-sub" id="tb-sub">Command deck</span>
+        <span class="tb-sub" id="tb-sub">Home</span>
       </div>
       <span class="tb-spacer"></span>
       <button type="button" class="icon-btn" id="dash-refresh" title="Refresh dashboard data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 3v6h-6"/></svg></button>
@@ -2568,6 +2637,7 @@ body.is-mobile #settings-ov .mo-mobile-nav select{
 
 <div id="lightbox"><img alt="attachment preview"></div>
 <div id="toasts"></div>
+<button type="button" id="err-beacon" aria-live="assertive" title="Reload Homebase">Something glitched — tap to reload</button>
 <script>
 'use strict';
 /* =====================================================================
@@ -2577,6 +2647,48 @@ body.is-mobile #settings-ov .mo-mobile-nav select{
    + IndexedDB (conversations). Keys are only ever sent to the provider
    you select.
    ===================================================================== */
+
+/* ============================ Global error beacon ============================
+   Mirrors the Tesla dashboard freshness-chip recovery pattern: even if the
+   boot path throws before the sidebar can render, a fixed chip is shown so the
+   user has a one-tap reload. Last error stashed in nova_last_error_v1 for
+   later triage — distinct from the dashboard's own last_error_v1 key. */
+var NOVA_LAST_ERROR_KEY = 'nova_last_error_v1';
+function novaShowErrorBeacon(kind, err){
+  try {
+    var b = document.getElementById('err-beacon');
+    if (!b){
+      b = document.createElement('button');
+      b.id = 'err-beacon';
+      b.type = 'button';
+      b.textContent = 'Something glitched — tap to reload';
+      b.setAttribute('aria-live','assertive');
+      b.title = 'Reload Homebase';
+      (document.body || document.documentElement).appendChild(b);
+    }
+    if (!b.dataset.wired){
+      b.dataset.wired = '1';
+      b.addEventListener('click', function(){ try { location.reload(); } catch(e){} });
+    }
+    b.classList.add('on');
+  } catch(e){}
+  try {
+    var msg = err && (err.message || err.reason || err.toString && err.toString()) || String(err);
+    var stack = '';
+    try {
+      var real = (err && err.error) || (err && err.reason) || err;
+      if (real && real.stack) stack = String(real.stack).slice(0, 2000);
+    } catch(e2){}
+    var payload = { kind: kind || 'error', msg: String(msg).slice(0, 500), stack: stack, at: Date.now(), url: (location && location.href) || '' };
+    localStorage.setItem(NOVA_LAST_ERROR_KEY, JSON.stringify(payload));
+  } catch(e){}
+}
+window.addEventListener('error', function(ev){
+  novaShowErrorBeacon('error', ev && (ev.error || ev.message || ev));
+});
+window.addEventListener('unhandledrejection', function(ev){
+  novaShowErrorBeacon('rejection', ev && (ev.reason || ev));
+});
 
 /* ============================ tiny utils ============================ */
 function $(id){ return document.getElementById(id); }
@@ -3330,7 +3442,9 @@ var HOMEBASE_CHANGELOG = {
   ],
   current_handoff: {
     to: 'next model',
-    objective: 'Wave 1 HOT-ROD COCKPIT across all three surfaces: Tesla dashboard, Homebase, and Pederson Finances. Syne + Plus Jakarta + JetBrains Mono, mint #2af5c4 on #05070a night, instrument chrome, segmented controls. Structural CSS/HTML only — no routing/budget/vault/voice/finance logic changes. validate.py must stay green. Next: error beacon on /ai/, vault conflict UX, self-host fonts.',
+    objective: 'Calm typography pass on all three surfaces on branch cursor/functional-excellence-de9b (uncommitted). David rejected the Wave 1 Syne "gaming/tacky" display face and asked for Apple/Tesla-smooth type. All three apps (index.html, ai/index.html, finance/index.html) now use a pure system UI stack (-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", system-ui, "Helvetica Neue", sans-serif) for both text and display, and ui-monospace/SFMono-Regular/SF Mono/Menlo/Consolas ONLY on code — no web fonts loaded (Google Fonts <link> tags removed entirely). Ultra-wide 0.18-0.28em uppercase tracking on ex-Syne micro-labels pulled back to <=0.08em; display font-weights dropped from 800 to 600/700; big-number negative letter-spacing relaxed from -3/-4px to -1 to -2px with tabular-nums preserved. Card radius tokens softened to 16px, small radius 12px, XS radius 8px for Apple feel; finance --radius 12->14. Mode picker (Drive|Parked|Charging) letter-spacing dropped 1.6px -> 0.04em with white-space:nowrap so "Charging" no longer clips in light mode. Copy softened: brand.sub "Command Cockpit" -> "Cockpit"; #tb-sub "Command deck" -> "Home" (JS FAB-state string synced); Pederson brand small "Private cockpit" -> "Private". Mint #2af5c4 accent + every functional-excellence fix retained. Retains: functional_excellence_2026_07_20 error beacon, sendMessage/runTask finally cleanup, sub-agent abort, vault plain-language surface, voice-viz throttle, mobile 44 px touch targets, fetchCached fallbacks, Drive-mode scope. Next: verify on the real car and iterate spacing/weight if David still sees anything shouty; consider self-hosting a licensed Apple-alike (e.g. Inter) as a fallback for Android/Tesla if system stack renders inconsistently.',
+    type_smooth_2026_07_20: 'THIS PASS. Purely visual: Syne + JetBrains Mono removed from all three apps; --f/--fd/--font/--font-display/--display/--ui now point at the system stack; --mono is ui-monospace/SFMono. Google Fonts <link> tags removed in index.html, ai/index.html, and finance/index.html. Radii: dashboard --r 14->16, --r-sm 10->12, --r-xs 6->8; ai/ mirror; finance --radius 12->14. Calm-type override blocks appended at the tail of each stylesheet so source-order wins without !important (dashboard covers .tesla-word, .live-hero-clock/-date/-greet/-desc/-temp, .gl-* hero, .fresh-chip, .dock-btn, .sec-title, .rl-t, .ntab, .cam-nav-btn, .btn/-voice, .command-eyebrow/-action, .now-copy strong, .charge-*, .app-panel .rl-t, .mode-btn overflow fix incl. sub-520 media; ai/ covers .brand .nm/.sub, .sb-sec/.sb-dash-link, .tb-app/-sub, .d-head h3, .d-metric/.cf-metric/.hb-display, .cf-title/-meta, .mode-pill, .d-badge, .mo-tab, .mm-group, #query-model-control>span, .hcr-grip/#hint-tools/#hint-council, #v-badge letter-spacing 0.28em->0.08em + weight 800->700 with !important preserved; finance covers .brand strong/small, .mark, .top .ghost, .status, .hero-copy h1, .hero-metric small/b, .privacy, .section-head h2/span, .card-label, .metric-value, .health small/b, .budget/.row small, .amount, .pill, .alert small, .empty::before/h2, .action-inner button, details.card summary, button/.button). h1-h4 in ai/ dropped -0.025em/700 -> -0.02em/600. Copy: brand.sub "Command Cockpit" -> "Cockpit"; #tb-sub "Command deck" -> "Home" (fab-state JS string synced at line ~6052); finance "Private cockpit" -> "Private". Comment "Syne section titles" -> "system-font section titles" in dashboard. Zero functional contracts touched: DASHBOARD_CACHE marker intact, no handlers moved, no JS logic edited outside the tb-sub string, all IDs preserved. Verified: python3 extract-scripts + node --check clean on all three files; python3 .github/scripts/validate.py green. Historical HOMEBASE_CHANGELOG prose still mentions Syne for provenance — no CSS font stack still names Syne or JetBrains Mono.',
+    functional_excellence_2026_07_20: 'PRIOR SAME-DAY PASS retained in this branch. All fixes are in ai/index.html only. Beacon: #err-beacon in <body>, CSS in <style>, listeners at top of first <script>; DOMContentLoaded wrapped so a boot throw still surfaces the chip; last error saved to nova_last_error_v1 (distinct from dashboard last_error_v1). sendMessage now has a finally block that always clears S.sending, S.abort, and repaints (each cleanup step try-guarded); AbortError inside a live Council also marks any state==="run" members as "stopped" so their spinner cards resolve. runTask mirrors the finally contract for t.running. runSubagentMember now checks S.abort.signal.aborted before each execTool and after the loop so Stop is honored mid-tool-loop. bootVaultSync distinguishes need-pass (amber pill, "Vault locked") vs decrypt-fail vs network vs other, toasts once per session (latches reset on a healthy ok status), and never weakens the vaultPushToDrive "Sync stopped to protect the existing Drive vault" abort. voiceVizKick renders every other frame when VOICE.state==="idle" and VMETER.level<0.08 (halves idle canvas cost). loadState hardens S.convos = [] up front. Mobile CSS: #send-btn 44x44 (radius 10), #mic-btn 44x44, body.is-mobile .icon-btn 44x44, body.is-mobile .cf-modes .mode-pill min-height 38px + 13px font. New sync-pill "needs-pass" amber style added. Nothing else in CSS/JS moved.',
     cockpit_hotrod_wave1_2026_07_20: 'Homebase-only unmistakable structural refresh (branch cursor/complete-ui-refresh-de9b). Fonts: Google Fonts Syne (display) + Plus Jakarta Sans (UI) + JetBrains Mono (mono). Palette: dark #05070a/#0a0e14/#12161d, light #f2f4f7 cool-gray; steel #8b95a8; hairline borders rgba(255,255,255,.08); accent mint #2af5c4 (dark) / #0d8f74 (light) with derived --acc-soft/--acc-glow. DEFAULT_SETTINGS.accent moved to #2af5c4; loadState migration extended to convert legacy indigo (#4f46e5/#6366f1/#818cf8) AND legacy Wave-0 teal (#0f9f94/#3dd6c6/#1fb8a8/#1ec8b8) to the new mint so returning users see the change. ACCENTS palette reordered with mint first. theme-color meta and applyTheme meta content aligned to #05070a/#f2f4f7. Structural chrome: brand.logo is a geometric mint diamond in a dark tile; brand.sub now "Command Cockpit"; topbar subtitle now "Command deck"; new-chat is an outlined button with a mint accent bar; hub tiles have a top mint hairline instead of rounded rainbow icons; chat float is flatter with a segmented mode-pill control; composer is a sharper 12px command bar with a mint square send button; FAB is a geometric mint diamond, not a rainbow orb; modals/popovers use denser rows and instrument section labels; scrollbars slimmed. Mode-specific voice/agent/research/council recognition hues intentionally preserved via the existing --pill-c / --hc CSS variables driving mode-pills and hub tiles. All key JS IDs preserved (sidebar, topbar, composer, chat-float, chat-fab, model-btn, send-btn, mic-btn, voice-ov, settings-ov, tab handlers, cf-modes, cf-actions, hub-nav, mo-tabs, model-menu, attach-menu, cf-more-menu, sync-pill, connectors-btn, settings-btn, hub-tile hooks). Only two small copy touches to HTML (brand subtitle and #tb-sub default) plus one JS string sync so the FAB-state topbar subtitle still matches; every handler stays bound to its existing selector. Verified: python3 extract-scripts + node --check clean.',
     finance_hotrod_wave1_2026_07_20: 'Pederson Finances Wave 1 structural refresh (branch cursor/complete-ui-refresh-de9b, uncommitted by explicit instruction). Google Fonts now loads Syne + Plus Jakarta Sans + JetBrains Mono. Dark default uses #05070a/#0a0e14, steel #8b95a8, mint #2af5c4, sharp 10–14px radii; prefers-color-scheme light uses cool gray + #0d8f74. Header is a full-bleed instrument bar with left brand, centred status, large Syne position value, one horizontal four-column metric rail, and private/local signal line. Empty state is a dramatic full-bleed import bay with oversized headline and primary/secondary actions. Loaded labels are uppercase mono; budget meters are 15px; account rows have mint left bars; alerts are compact left-border strips. Bottom actions are equal Import / Export / Sync segments with Sync mint-filled. All 29 IDs, three data-import hooks, inline JS, localStorage keys, import/export/sync hooks, and browser-only private-data boundary are unchanged. README updated. Verified extracted inline JS with node --check, no duplicate IDs, exact ID/hook parity against HEAD, exact inline-JS parity against HEAD, and git diff --check.',
     cockpit_wave0_2026_07_20: 'PRIOR wave. Shared Wave-0 design language across / (Tesla), /ai/ (Homebase), /finance/: Plus Jakarta Sans, teal accents (#3dd6c6 dark / #0f9f94 light), night bg #07090d/#0b0e14, brand lockups with teal subtitles. Homebase migrates legacy indigo accents (#4f46e5/#6366f1/#818cf8) to DEFAULT_SETTINGS.accent on load. Mode-specific hues (voice/agent/research/council) intentionally preserved. Full inventory: HOMEBASE_FINANCE_EXCELLENCE_PLAN.md + DASHBOARD_EXCELLENCE_PLAN.md. Homebase palette superseded by cockpit_hotrod_wave1 above; the Tesla dashboard and /finance/ remain on Wave 0.',
@@ -3340,8 +3454,8 @@ var HOMEBASE_CHANGELOG = {
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
     voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
     app_ui_polish_2026_07_20: 'Earlier same-day token polish (indigo aurora calm-down). Superseded for palette by cockpit_wave0_2026_07_20 teal system; elevation/type lessons still apply.',
-    state: 'Wave 1 hot-rod cockpit across Tesla dashboard, Homebase, and Finances on branch cursor/complete-ui-refresh-de9b. FABLE_AUDIT_BRIEF.md remains the security/routing audit entrypoint.',
-    latest_fix: 'Suite Wave 1 hot-rod cockpit — Tesla dashboard + Homebase + Finances (Syne, mint #2af5c4, instrument chrome).',
+    state: 'Homebase functional-excellence pass on branch cursor/functional-excellence-de9b (uncommitted). Wave 1 hot-rod cockpit already applied on cursor/complete-ui-refresh-de9b. FABLE_AUDIT_BRIEF.md remains the security/routing audit entrypoint.',
+    latest_fix: 'Calm typography — Syne + JetBrains Mono removed from all three apps for a pure system stack (Apple/Tesla-smooth); softer radii; mode-picker "Charging" overflow fixed; Command Cockpit / Command Deck / Private cockpit copy softened. Every functional-excellence fix retained.',
     start_here: [
       'HOMEBASE_FINANCE_EXCELLENCE_PLAN.md — Wave inventory for /ai/ and /finance/',
       'DASHBOARD_EXCELLENCE_PLAN.md — Tesla dashboard waves (cache.json still highest leverage)',
@@ -3351,11 +3465,12 @@ var HOMEBASE_CHANGELOG = {
     ],
     review_areas: [
       'DONE Wave 0 cockpit visuals on all three surfaces',
-      'DONE Homebase Wave 1 hot-rod refresh (this branch, uncommitted)',
-      'DONE Pederson Finances Wave 1 hot-rod refresh (this branch, uncommitted)',
+      'DONE Homebase Wave 1 hot-rod refresh (branch cursor/complete-ui-refresh-de9b, uncommitted)',
+      'DONE Pederson Finances Wave 1 hot-rod refresh (branch cursor/complete-ui-refresh-de9b, uncommitted)',
+      'DONE Homebase functional excellence pass (branch cursor/functional-excellence-de9b, uncommitted) — see 2026-07-20-functional-excellence entry',
       'P1 next: bring the Tesla dashboard shell forward to match Wave 1 hot-rod (Syne headers, mint accent, sharper radii) if David likes the direction',
-      'P1: /ai/ runtime error beacon, vault conflict UI, mobile sync indicator',
-      'P1: team cancel/timeout stuck-UI; scheduler architecture spike',
+      'P1: extend the /ai/ error beacon into an on-device "last error" viewer in Settings → Data (currently only stashes to nova_last_error_v1)',
+      'P1: team cancel/timeout stuck-UI; scheduler architecture spike (finally-cleanup now guarantees t.running clears — timeouts still pending)',
       'P1: Finance sync/schema plain-language recovery; self-host fonts (Syne + Plus Jakarta + JetBrains Mono woff2) for offline/car',
       'P2: route/cost comprehension outside voice; streaming TTS latency'
     ],
@@ -3393,6 +3508,112 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-type-smooth',
+      date: '2026-07-20',
+      commit: 'not yet committed — user instructed do-not-commit for this pass',
+      branch: 'cursor/functional-excellence-de9b',
+      pull_request: 'none opened by this session',
+      title: 'Calm typography — Syne + JetBrains Mono removed for a pure system UI stack (Apple/Tesla-smooth)',
+      type: 'visual+typography+chrome',
+      depends_on: ['2026-07-20-functional-excellence','2026-07-20-cockpit-hotrod-wave1-homebase','2026-07-20-cockpit-hotrod-wave1-finance'],
+      reported_by: 'David: the new UI typography looks tacky/gaming. Wants Tesla/Apple smoothness on all three apps.',
+      files_changed: ['index.html','ai/index.html','finance/index.html'],
+      interfaces_changed: [
+        'Removed Google Fonts <link> tag from index.html, ai/index.html, and finance/index.html (no web fonts loaded)',
+        'Dashboard --f/--fd now: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", system-ui, "Helvetica Neue", sans-serif; --mono now: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+        'Homebase --font/--font-display mirror the same system stack; --mono mirror',
+        'Finance --display/--ui/--mono mirror the same system stack; --radius 12->14',
+        'Dashboard radius tokens: --r 14->16, --r-sm 10->12, --r-xs 6->8; Homebase mirror',
+        'Appended CALM TYPE PASS override block to end of each stylesheet — reduces ex-Syne uppercase tracking from 0.14-0.28em down to <=0.08em, drops display weights 800->600/700, softens negative letter-spacing on big-number displays (clock, timer, hero temp) from -3/-4px to -1 to -2px, restores tabular-nums where present',
+        'Dashboard .mode-btn: letter-spacing 1.6px -> 0.04em, white-space:nowrap, ellipsis fallback, extra media-query at 520px so "Charging" fits in every locale/light-mode',
+        'Homebase #v-badge letter-spacing 0.28em!important -> 0.08em!important; font-weight 800 -> 700 (kept !important because the original used it)',
+        'Copy: dashboard brand-sub already "Cockpit"; Homebase brand.sub "Command Cockpit" -> "Cockpit"; #tb-sub default "Command deck" -> "Home" (JS FAB-state fallback string synced in lockstep at line ~6052); Finance brand small "Private cockpit" -> "Private"',
+        'Comment cleanup: "Syne section titles", "Syne + Plus Jakarta UI + JetBrains Mono", "Syne wordmark", and the Type: header comment all updated to reflect the system stack; historical HOMEBASE_CHANGELOG prose intentionally retains its Syne references for provenance'
+      ],
+      changes: [
+        'Big numbers (clock, timer, hero temp, metric values) render in system SF Pro / San Francisco / Segoe UI at weight 600 with tighter but not aggressive negative tracking; feel like Apple Music / Tesla UI, not an aftermarket HUD',
+        'Uppercase micro-labels (dock, section titles, chips, tabs, buttons, status pills) tracked to a calm ~0.05-0.08em with weight 600 instead of 800; a couple of overly-shouty items (dock submenu, app tile titles) drop text-transform entirely for sentence case',
+        'Cards and buttons pick up softer 16/12/8 px radii for the Apple feel; the accent mint stays as-is',
+        'Mode picker (Drive|Parked|Charging) no longer clips in light mode: reduced tracking, nowrap, ellipsis fallback, and a sub-520px media rule',
+        'All three apps now use a pure system font stack — no Google Fonts network dependency, so first paint is instant in the car and offline'
+      ],
+      safety_guards: [
+        'This is a visual-only pass: every functional-excellence fix (error beacon, sendMessage/runTask finally, sub-agent abort, vault plain-language, voice-viz throttle, mobile 44 px targets) is untouched and re-verified',
+        'Dashboard DASHBOARD_CACHE marker unchanged; update_cache.py regex still matches',
+        'No JS logic changed except the single #tb-sub FAB-state string sync so the topbar subtitle continues to match its element text',
+        'No IDs, no handlers, no routing/budget/vault/voice/finance contract modified',
+        'HOMEBASE_CHANGELOG history entries retain their Syne prose intentionally (append-only, provenance)'
+      ],
+      verification: [
+        'grep confirms Syne and JetBrains do not appear in any --font/--font-display/--f/--fd/--display/--ui/--mono CSS value in any of the three files',
+        'python3 extract-scripts one-liner + node --check clean on index.html and ai/index.html',
+        'python3 -c "import re,json; json.loads(re.search(...DASHBOARD_CACHE...))" — cache marker + JSON valid',
+        'python3 .github/scripts/validate.py — passes'
+      ],
+      setup: ['No secrets or environment variables. Users on iOS/macOS see San Francisco; Windows sees Segoe UI; Android sees Roboto via system-ui.'],
+      known_limits: [
+        'System stack renders slightly differently on Android/Tesla vs iOS/macOS — if David wants pixel-identical type across surfaces, a self-hosted licensed Apple-alike (e.g. Inter or SF Pro Text web-license) as a first-position family would achieve that',
+        'The mode-picker sub-520px rule uses 6px horizontal padding; if David\'s locale ever gets a longer word than "Charging" (e.g. localized), it will still ellipsize',
+        'Not committed or pushed because the user explicitly requested do-not-commit for this pass'
+      ],
+      next_model: 'Do NOT reintroduce Syne, JetBrains Mono, or any Google Fonts <link> to any of the three apps. Keep the system stack in every font token. If a follow-up wants a display-face contrast, self-host a licensed Apple-alike as a first-position family behind the system stack, not before it.'
+    },
+    {
+      id: '2026-07-20-functional-excellence',
+      date: '2026-07-20',
+      commit: 'not yet committed — user instructed do-not-commit for this pass',
+      branch: 'cursor/functional-excellence-de9b',
+      pull_request: 'none opened by this session',
+      title: 'Homebase functional excellence — highest-ROI reliability, recovery, and touch fixes',
+      type: 'reliability+ui+accessibility+observability',
+      depends_on: ['2026-07-20-cockpit-hotrod-wave1-homebase','fable_audit_2026_07_19','wave1_p0_concurrency_tests_2026_07_19'],
+      reported_by: 'David: focus on functional excellence, not another visual pass. Highest-ROI fixes for reliability, recovery, and one-handed use.',
+      files_changed: ['ai/index.html'],
+      interfaces_changed: [
+        'New #err-beacon DOM node (after #toasts) + CSS chip styles',
+        'New top-of-script listeners: window "error" + "unhandledrejection" -> novaShowErrorBeacon(kind, err)',
+        'New nova_last_error_v1 localStorage key (distinct from the Tesla dashboard last_error_v1)',
+        'DOMContentLoaded handler wraps boot() in try/catch + rejection handler so a boot throw still surfaces the beacon',
+        'sendMessage: try/catch/finally restructure — finally always clears S.sending, S.abort, updateSendBtn/paintMsg/touchConvo/updateHints (each try-guarded); AbortError branch marks am.council[*].state==="run" as "stopped"',
+        'runTask: try/catch/finally so t.running always clears, prevPlan restores, saveTasks/renderTasksIfOpen/touchConvo/renderChat try-guarded',
+        'runSubagentMember: S.abort.signal.aborted checked before each execTool and after the tool-call loop (throws domAbort())',
+        'VAULT state gains autosyncErrToasted + needPassToasted latches; vaultSetStatus recognizes st==="need-pass" and clears the latches on st==="ok"',
+        'bootVaultSync: distinguishes need-pass / decrypt-fail (Wrong passphrase / Sync stopped to protect) / network / other, updates #sync-pill state and toasts once per session with plain language',
+        '#sync-pill: new "needs-pass" amber style; textContent adds "Vault locked"; title attr mirrors the message so hover reveals detail',
+        'voiceVizKick: adds VIZ.frame counter and skips alternate frames when VOICE.state==="idle" && VMETER.level<0.08 (halves idle canvas cost)',
+        'loadState: defensive S.convos = [] before other bootstrap so pre-boot helpers cannot throw on null',
+        'CSS: #send-btn min 40x40 desktop, 44x44 mobile (radius 10, 20px svg); #mic-btn 44x44 mobile; body.is-mobile .icon-btn / #topbar > .icon-btn 44x44; body.is-mobile .cf-modes .mode-pill min-height 38 + 13px font'
+      ],
+      changes: [
+        'A single runtime throw (async or sync) now always leaves the send button clickable, the abort controller cleared, and — in the failure case — a persistent recovery chip visible with a one-tap reload path',
+        'Council/task-team specialists no longer visually hang after Stop: any specialist still marked run when the parent aborts is downgraded to stopped so its card renders as ended',
+        'Sub-agent tool execution honors Stop mid-loop: a slow chain of read-only repository/web tool calls no longer keeps running for tens of seconds after the user aborted the lead',
+        'Vault autosync failures are now user-visible: instead of a silent console warning every 5 minutes, the pill turns amber (need-pass) or red (err), and a single plain-language toast per session explains passphrase mismatch, offline retry, or generic error',
+        'Voice overlay idle: energy-field canvas runs at ~30 fps while idle and low-meter, restoring 60 fps as soon as VOICE.state changes or audio picks up',
+        'Mobile touch targets meet 44x44 on the send button, mic, all icon buttons, and the segmented chat-mode pills — no desktop layout change'
+      ],
+      safety_guards: [
+        'Every fix is an addition or a guard, not a weakening: the FABLE-verified vaultPushToDrive mergeRemote/decrypt path still aborts on failure ("Sync stopped to protect the existing Drive vault") — the new toast/pill reporting sits below that check',
+        'SUBAGENT_BLOCKED_TOOLS enforcement and the sub-agent read-only allowlist at execution time are unchanged; the new abort check only exits earlier',
+        'Cloud budget guard, central runChat reservation/settlement path, official-origin key pinning, sub-agent quality/cost selection, draft-PR-only repository writes, one-tap voice gate, and OAuth/passphrase-never-in-vault are unchanged',
+        'nova_last_error_v1 stores kind/msg/short-stack/at/url only — never keys, chat text, memory items, or account balances',
+        'The DOMContentLoaded try/catch surfaces the beacon; it does not swallow the underlying error (still logged to console + window.onerror path)'
+      ],
+      verification: [
+        'python3 extract-scripts one-liner from CLAUDE.md against /workspace/ai/index.html, then node --check on the extracted JS — clean',
+        'python3 .github/scripts/validate.py — passes',
+        'Manual reasoning: sendMessage/runTask cleanup runs from finally so any throw (including inside the catch handler itself) clears S.sending / t.running; sub-agent abort check runs before and after execTool; the vault sync toast latch is cleared on the next successful ok status'
+      ],
+      setup: ['No secrets or new environment variables. Existing users see the same look but a chip appears if a runtime error fires and #sync-pill amber-locks if the vault passphrase is missing.'],
+      known_limits: [
+        'The beacon shows a generic message; the stashed nova_last_error_v1 is not yet surfaced in a Settings pane (P1 follow-up)',
+        'Scheduler stuck-team timeout is still open: this pass guarantees runTask clears t.running but does not add a max-wall-clock cap around the inner runChat loop',
+        'The autosync toast latches per session — reloading the tab resets them, so a persistent problem will still nag once per reload (this is intentional; silent-drift regressed the point)',
+        'Not committed or pushed because the user explicitly requested do-not-commit for this pass'
+      ],
+      next_model: 'Preserve the try/finally contracts in sendMessage/runTask/runSubagentMember and the two once-per-session vault toast latches. If you extend the beacon, keep nova_last_error_v1 minimal (kind/msg/stack/at/url) and do not store chat text or keys.'
+    },
     {
       id: '2026-07-20-cockpit-hotrod-wave1-finance',
       date: '2026-07-20',
@@ -5904,7 +6125,7 @@ function setChatState(state){
     setTimeout(function(){ try { $('input').focus(); } catch(e){} }, 200);
   }
   if ($('tb-sub')){
-    $('tb-sub').textContent = state === 'fab' ? 'Command deck' : 'AI at your side';
+    $('tb-sub').textContent = state === 'fab' ? 'Home' : 'AI at your side';
   }
   if ($('home-btn')) $('home-btn').classList.toggle('on', state === 'fab');
 }
@@ -6750,8 +6971,10 @@ var VAULT = {
   lastSync: 0,
   lastPull: 0,
   applying: false,
-  status: 'idle', // idle|syncing|ok|err
-  message: ''
+  status: 'idle', // idle|syncing|ok|err|need-pass
+  message: '',
+  autosyncErrToasted: false,  // toast once per session, not on every 5-min retry
+  needPassToasted: false
 };
 
 function vaultSyncMeta(){
@@ -6815,10 +7038,22 @@ function vaultSetStatus(st, msg){
   var pill = $('sync-pill');
   if (pill){
     pill.dataset.st = st;
-    pill.textContent = st === 'syncing' ? 'Syncing…' : st === 'ok' ? 'Vault synced' : st === 'err' ? 'Sync error' : 'Drive vault';
+    pill.textContent = st === 'syncing' ? 'Syncing…'
+      : st === 'ok' ? 'Vault synced'
+      : st === 'err' ? 'Sync error'
+      : st === 'need-pass' ? 'Vault locked'
+      : 'Drive vault';
     pill.classList.toggle('on', st === 'ok');
     pill.classList.toggle('err', st === 'err');
+    pill.classList.toggle('needs-pass', st === 'need-pass');
     pill.style.display = (connectorOn('drive') && connectorCfg('drive').clientId) ? 'inline-flex' : 'none';
+    pill.title = msg || pill.textContent;
+  }
+  if (st === 'ok'){
+    /* A clean sync resets the once-per-session toast latches so a subsequent
+       failure/lock is surfaced again. */
+    VAULT.autosyncErrToasted = false;
+    VAULT.needPassToasted = false;
   }
 }
 
@@ -7480,16 +7715,48 @@ function memoryLooksUninitialized(){
   });
 }
 async function bootVaultSync(){
+  /* Autosync runs silently every 5 min + on tab focus. Previously ALL errors
+     were console-only, so a wrong passphrase or an expired Drive token could
+     leave the vault silently out of date. This surfaces two plain-language
+     states without weakening the mergeRemote-first abort-on-decrypt-fail
+     guard in vaultPushToDrive. */
+  if (!connectorOn('drive') || !connectorCfg('drive').clientId) return;
+  if (!connectorCfg('drive').autoSync) return;
+  if (!getVaultPassphrase()){
+    /* Drive is linked but no session passphrase — show a distinct locked
+       state so the user knows why phone/desktop drift is possible. */
+    vaultSetStatus('need-pass', 'Enter vault passphrase in Settings → Data to resume sync');
+    if (!VAULT.needPassToasted){
+      VAULT.needPassToasted = true;
+      try { toast('Vault sync is paused — enter your passphrase in Settings → Data to keep phone and desktop in sync.', 'err', 5200); } catch(e){}
+    }
+    return;
+  }
+  if (!driveAccessToken()) return;
   try {
-    if (!connectorOn('drive') || !connectorCfg('drive').clientId) return;
-    if (!connectorCfg('drive').autoSync) return;
-    if (!getVaultPassphrase()) return;
-    if (!driveAccessToken()) return;
     var m = vaultSyncMeta();
     if (m.dirtySince) await vaultPushToDrive({interactive:false, quiet:true});
     else await vaultPullFromDrive({interactive:false, quiet:true, onlyIfNewer:true});
   } catch(e){
-    console.info('[vault] boot pull skipped', e.message || e);
+    var msg = (e && e.message) || String(e);
+    /* Try to distinguish "wrong passphrase / decrypt failed" from a plain
+       network error so the toast tells the user the actionable thing. */
+    var friendly;
+    if (/Wrong passphrase|corrupted vault|Sync stopped to protect/i.test(msg)){
+      friendly = 'Vault passphrase does not match the Drive backup. Sync paused to protect your data — reopen Settings → Data and re-enter it.';
+      vaultSetStatus('err', 'Passphrase mismatch — sync paused');
+    } else if (/NetworkError|Failed to fetch|network|offline|timed out/i.test(msg)){
+      friendly = 'Homebase could not reach Google Drive — sync will retry on its own once you are back online.';
+      vaultSetStatus('err', 'Offline — sync retry pending');
+    } else {
+      friendly = 'Vault sync hit an error: ' + msg;
+      vaultSetStatus('err', 'Sync error');
+    }
+    if (!VAULT.autosyncErrToasted){
+      VAULT.autosyncErrToasted = true;
+      try { toast(friendly, 'err', 5200); } catch(e2){}
+    }
+    try { console.info('[vault] boot sync error', msg); } catch(e2){}
   }
 }
 
@@ -7585,6 +7852,10 @@ function normalizeSpeechSettings(speech){
   return speech;
 }
 function loadState(){
+  /* Defensive: pre-boot helpers (renderSidebar / activeConvo / etc.) may run
+     between loadState and idb.all resolving. Guarantee an array here so a
+     malformed prior state or vault-restore race can't leave S.convos null. */
+  if (!Array.isArray(S.convos)) S.convos = [];
   S.settings = Object.assign({}, DEFAULT_SETTINGS, lsGet(LS_SETTINGS, {}));
   S.settings.speech = normalizeSpeechSettings(S.settings.speech);
   S.settings.council = Object.assign({}, DEFAULT_SETTINGS.council, S.settings.council || {});
@@ -8416,6 +8687,11 @@ async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
     var allowedNames = canCall.map(function(t){ return t.name; });
     var results = [];
     for (var i = 0; i < res.toolCalls.length; i++){
+      /* Honor user Stop during a specialist's tool-execution loop — some
+         tools (repository search, web fetch) can each take several seconds,
+         and without this check the sub-agent would keep grinding through
+         them after the lead has already been aborted. */
+      if (S.abort && S.abort.signal && S.abort.signal.aborted) throw domAbort();
       var call = res.toolCalls[i];
       if (!subagentAllowedTool(call.name, allowedNames)){
         results.push({id:call.id, name:call.name,
@@ -8424,6 +8700,7 @@ async function runSubagentMember(cm, convo, msgs, userQuery, am, totalUsage){
       }
       results.push({id:call.id, name:call.name, text:await execTool(call.name, call.args)});
     }
+    if (S.abort && S.abort.signal && S.abort.signal.aborted) throw domAbort();
     history.push({role:'assistant', text:res.text || '', anthRaw:res.anthRaw, toolCalls:res.toolCalls});
     history.push({role:'tool', results:results});
     cm.text = '';
@@ -10480,6 +10757,17 @@ async function sendMessage(rawText, opts){
   } catch(err){
     if (err && (err.name === 'AbortError' || err.code === 20)){
       am.text = am.liveText; am.stopped = true;
+      /* When the user hits Stop mid-Council/task-team, mark any still-running
+         specialists as stopped so their spinner boxes settle instead of
+         hanging on 'run'. */
+      if (am.council && am.council.length){
+        for (var _ci = 0; _ci < am.council.length; _ci++){
+          if (am.council[_ci].state === 'run'){
+            am.council[_ci].state = 'stopped';
+            am.council[_ci].error = am.council[_ci].error || 'Stopped';
+          }
+        }
+      }
     } else {
       if (requiresRealAI && autoFailoverPolicyForError(err).eligible){
         am.recovery = 'model';
@@ -10488,16 +10776,21 @@ async function sendMessage(rawText, opts){
       am.text = am.liveText;
       console.error(err);
     }
+  } finally {
+    /* Contract: no matter how sendMessage exits, the send button must be
+       clickable again and the abort controller cleared. Otherwise a single
+       throw inside the try (or downstream painter) leaves the UI stuck in
+       "sending" and the Stop button dead. */
+    am.streaming = false;
+    am.liveText = '';
+    am.usage = totalUsage;
+    delete am.statusNote;
+    S.sending = false; S.abort = null;
+    try { updateSendBtn(); } catch(e){}
+    try { paintMsg(am, convo); } catch(e){}
+    try { touchConvo(convo); } catch(e){}
+    try { updateHints(); } catch(e){}
   }
-  am.streaming = false;
-  am.liveText = '';
-  am.usage = totalUsage;
-  delete am.statusNote;
-  S.sending = false; S.abort = null;
-  updateSendBtn();
-  paintMsg(am, convo);
-  touchConvo(convo);
-  updateHints();
   if (PIPE_HOOKS.onDone) PIPE_HOOKS.onDone(am);
   else if (S.settings.autoSpeak && am.text && !am.error) speakText(stripForSpeech(am.text));
   if (S.settings.autoMemory && am.text && !am.error) maybeAutoExtractMemory(convo, am);
@@ -11423,7 +11716,7 @@ function vmeterActiveAnalyser(){
   if (VOICE.state === 'speaking') return VMETER.ttsAn;
   return null;
 }
-var VIZ = { raf: 0, t0: 0, ring: null, sparks: null, arcs: null, reduce: false };
+var VIZ = { raf: 0, t0: 0, ring: null, sparks: null, arcs: null, reduce: false, frame: 0 };
 /* ---- futuristic "living energy orb" ----
    A canvas energy field around the CSS sphere: a deformed spectrum ring that
    morphs to the real voice (mirrored + smoothed), rotating elliptical HUD
@@ -11456,6 +11749,13 @@ function voiceVizKick(state){
   (function loop(now){
     var ov = $('voice-ov');
     if (!ov || !ov.classList.contains('open')){ VIZ.raf = 0; return; }
+    /* Idle efficiency: when the overlay is open but the user isn't listening,
+       thinking, or speaking AND the smoothed meter is near zero, render at
+       ~30 fps instead of 60 fps. Cuts idle canvas work roughly in half on
+       phones without changing the look when audio is active. */
+    VIZ.frame = (VIZ.frame + 1) | 0;
+    var _idle = (VOICE.state || 'idle') === 'idle' && (VMETER.level || 0) < 0.08;
+    if (_idle && (VIZ.frame & 1)){ VIZ.raf = requestAnimationFrame(loop); return; }
     var cw = cv.clientWidth || window.innerWidth, ch = cv.clientHeight || window.innerHeight;
     if (cv.width !== Math.round(cw * dpr) || cv.height !== Math.round(ch * dpr)){
       cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
@@ -12341,13 +12641,17 @@ async function runTask(t, manual){
       am.recovery = 'model';
       am.error = automaticModelUnavailableMessage(taskRoute.classification) + ' Last provider response: ' + ((err && err.message) || String(err));
     } else am.error = (err && err.message) || String(err);
+  } finally {
+    /* Same contract as sendMessage: no matter how this exits, clear t.running
+       so the scheduler can re-queue this task on its next tick. */
+    S.agentPlan = prevPlan;
+    am.usage = totalUsage;
+    t.running = false;
+    try { saveTasks(); } catch(e){}
+    try { renderTasksIfOpen(); } catch(e){}
+    try { touchConvo(convo); } catch(e){}
+    try { if (convo.id === S.activeId) renderChat(); } catch(e){}
   }
-  S.agentPlan = prevPlan;
-  am.usage = totalUsage;
-  t.running = false;
-  saveTasks(); renderTasksIfOpen();
-  touchConvo(convo);
-  if (convo.id === S.activeId) renderChat();
   var summary = (am.text || am.error || 'done').replace(/\s+/g, ' ').slice(0, 140);
   toast('⏰ ' + t.name + ': ' + summary, am.error ? 'err' : 'ok', 5000);
   if (t.notify && window.Notification && Notification.permission === 'granted' && (document.hidden || manual !== true)){
@@ -13699,7 +14003,23 @@ async function boot(){
     lsSet(LS_SETTINGS, S.settings || {});
   });
 }
-document.addEventListener('DOMContentLoaded', boot);
+document.addEventListener('DOMContentLoaded', function(){
+  /* Wrap the critical boot path so a single throw doesn't strand the user on
+     a white screen with no recovery. The global error beacon still fires via
+     window.onerror; this catch also surfaces async boot rejections. */
+  try {
+    var p = boot();
+    if (p && typeof p.catch === 'function'){
+      p.catch(function(err){
+        try { console.error('[Homebase] boot failed', err); } catch(e){}
+        novaShowErrorBeacon('boot', err);
+      });
+    }
+  } catch(err){
+    try { console.error('[Homebase] boot threw', err); } catch(e){}
+    novaShowErrorBeacon('boot', err);
+  }
+});
 </script>
 </body>
 </html>

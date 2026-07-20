@@ -19,3 +19,5 @@ Wave 1 gives the public shell a HOT-ROD instrument-cluster treatment matching
 Homebase: Syne display type, Plus Jakarta Sans UI, JetBrains Mono labels, mint
 signals on a near-black cockpit, horizontal meters, dense rows, and sharp
 segmented controls, with all private-data and browser-local sync boundaries unchanged.
+Wave 2 tightens touch targets (48px+ controls), import/sync toasts, and an
+aria-live status region without changing storage keys or the sync channel.
