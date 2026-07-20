@@ -982,10 +982,15 @@ html.light #header{background:rgba(255,255,255,.82)}
 body[data-mode="drive"] .live-hero-clock{font-size:clamp(64px,12vw,120px)}
 body[data-mode="drive"] .command-action{min-height:56px;font-size:16px}
 body[data-mode="drive"] .command-action.voice{flex:1.35}
-body[data-mode="drive"] .live-forecast-row,
-body[data-mode="drive"] .cockpit-command{display:none!important}
+/* Keep mode picker ALWAYS visible in Drive — hiding it trapped users with no way back */
+body[data-mode="drive"] .live-forecast-row{display:none!important}
+body[data-mode="drive"] .cockpit-command{display:flex!important;opacity:1;margin-top:10px}
+body[data-mode="drive"] .mode-btn{min-height:48px;font-size:15px}
 body[data-mode="drive"] .now-line{font-size:15px}
 body[data-mode="drive"] .fresh-chip{display:none}
+/* Backup exit: tap Now line → Parked (never leave Drive without an escape hatch) */
+.now-line{cursor:pointer}
+.now-line:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:8px}
 body[data-mode="charging"] .live-hero{display:flex;flex-direction:column}
 body[data-mode="charging"] .charge-session{
   order:-1;margin-bottom:8px;
@@ -1064,7 +1069,7 @@ body[data-mode="charging"] .charge-session{
           <div class="live-hero-greet" id="live-greet"></div>
           <div class="live-hero-clock" id="live-clock">--:--</div>
           <div class="live-hero-date" id="live-date">—</div>
-          <p class="now-line" id="now-line" aria-live="polite">
+      <p class="now-line" id="now-line" aria-live="polite" role="button" tabindex="0" title="">
             <span class="now-kicker">Now</span>
             <strong id="now-title">Ready when you are</strong>
             <span class="now-sep" aria-hidden="true">·</span>
@@ -1867,13 +1872,18 @@ function renderDashboardMode() {
   var pick = ctx || weather;
   if (mode === 'drive') {
     if (title) title.textContent = 'Keep it simple';
-    if (detail) detail.textContent = pick || 'Time, weather, and your essentials.';
+    if (detail) detail.textContent = pick || 'Time, weather, and your essentials. Tap here or choose Parked below to exit Drive.';
   } else if (mode === 'charging') {
     if (title) title.textContent = 'Make the wait count';
     if (detail) detail.textContent = pick || 'Your charge-session timer is ready.';
   } else {
     if (title) title.textContent = 'Ready when you are';
     if (detail) detail.textContent = pick || 'A calm view of what matters next.';
+  }
+  var nowLine = document.getElementById('now-line');
+  if (nowLine) {
+    nowLine.title = mode === 'drive' ? 'Tap to exit Drive and return to Parked' : '';
+    nowLine.setAttribute('aria-label', mode === 'drive' ? 'Exit Drive mode' : 'Current focus');
   }
   updateChargeSession();
 }
@@ -1891,6 +1901,17 @@ function startChargeTimer(minutes) {
 function initDashboardMode() {
   renderDashboardMode();
   setInterval(updateChargeSession, 1000);
+  var nowLine = document.getElementById('now-line');
+  if (nowLine && !nowLine.dataset.exitBound) {
+    nowLine.dataset.exitBound = '1';
+    function exitDriveIfNeeded() {
+      if (dashboardMode && dashboardMode.name === 'drive') setDashboardMode('parked');
+    }
+    nowLine.addEventListener('click', exitDriveIfNeeded);
+    nowLine.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); exitDriveIfNeeded(); }
+    });
+  }
 }
 
 
