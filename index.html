@@ -155,7 +155,15 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 #glance .briefing-btn.speaking{background:var(--accent);border-color:var(--accent);color:#05070a}
 .live-hero-desc{font-size:13px;color:var(--t2);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;font-family:var(--fd)}
 .live-hero-greet{font-family:var(--fd);font-size:12px;font-weight:800;color:var(--accent);margin-bottom:6px;letter-spacing:2.5px;text-transform:uppercase}
-.wx-meta-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 24px 20px}
+/* Weather "Current Conditions": full-width card — big temp on the left, detail
+   chips (feels-like/humidity/wind/AQI/UV) + sunrise/sunset filling the right,
+   so the wide car screen reads balanced instead of a narrow left-hugging card. */
+.wx-now-card{display:grid;grid-template-columns:minmax(210px,290px) 1fr;gap:22px;align-items:center;padding:22px 24px}
+.wx-now-head{display:flex;align-items:center;gap:18px;min-width:0}
+.wx-now-details{display:flex;flex-direction:column;gap:8px;min-width:0}
+.wx-meta-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}
+.wx-sun{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.wx-now-card{grid-template-columns:1fr;gap:16px;padding:20px}}
 .wx-meta{display:flex;flex-direction:column;gap:2px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);min-width:86px}
 .wx-meta .wm-l{font-family:var(--fd);font-size:10px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px}
 .wx-meta .wm-v{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--t1);font-variant-numeric:tabular-nums}
@@ -1542,21 +1550,23 @@ body[data-mode="charging"] .charge-session{
   <!-- WEATHER FORECAST PANEL -->
   <section class="panel" id="p-weather">
     <div class="sec-title">Current Conditions</div>
-    <div class="cardgroup" style="max-width:560px">
-      <div style="display:flex;align-items:center;gap:20px;padding:22px 24px 16px">
-        <div id="wx-now-icon" style="font-size:44px;color:var(--t1);display:flex">—</div>
+    <div class="cardgroup wx-now-card">
+      <div class="wx-now-head">
+        <div id="wx-now-icon" style="font-size:52px;color:var(--t1);display:flex">—</div>
         <div style="flex:1">
-          <div id="wx-now-temp" style="font-size:34px;font-weight:700;line-height:1">--°C</div>
-          <div id="wx-now-desc" style="font-size:14px;color:var(--t2);margin-top:5px">Loading…</div>
+          <div id="wx-now-temp" style="font-size:40px;font-weight:800;line-height:1">--°C</div>
+          <div id="wx-now-desc" style="font-size:14px;color:var(--t2);margin-top:6px">Loading…</div>
         </div>
       </div>
-      <div class="wx-meta-row" id="wx-meta-row"></div>
+      <div class="wx-now-details">
+        <div class="wx-meta-row" id="wx-meta-row"></div>
+        <div class="wx-meta-row wx-sun" id="wx-sun-row"></div>
+      </div>
     </div>
     <div class="sec-title">7-Day Forecast</div>
     <div id="forecast-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
       <div class="muted">Loading forecast...</div>
     </div>
-    <div id="wx-sun-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"></div>
     <div id="wx-updated" style="margin-top:16px;font-size:12px;color:var(--t3)"></div>
   </section>
 
