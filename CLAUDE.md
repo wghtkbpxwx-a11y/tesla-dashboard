@@ -104,6 +104,16 @@ camera list is reused and fresh events still attach via stored lat/lon.
   sports, pharmacy, stocks, time, panel nav, and "open Homebase" →
   `ai/?voice=1`. Guarded by `check_dashboard_orb()` in `validate.py` (must stay
   in the header, cache-driven, toggleable, with the briefing fallback).
+- **Embedded Homebase** (`openHomebase(path)`/`closeHomebase()`, `#hb-embed`
+  overlay + `#hb-frame` iframe): the command-bar **Briefing**/**Homebase**
+  buttons and the orb's "briefing"/"open Homebase" commands open Homebase voice
+  mode in a **same-origin iframe overlay** (`allow="microphone"`) so you never
+  leave the dashboard — Briefing loads `ai/?voice=1&brief=1` (David: "open voice
+  mode in Homebase without actually leaving the dashboard"). `openHomebase`
+  rewrites `ai/?…` → `ai/index.html?…` for the frame so it resolves without a
+  directory index. Close blanks the frame (releases mic/audio). Same-origin, so
+  the "no iframes for external sites" rule doesn't apply. The orb's own tap =
+  cache voice is unchanged; its no-mic fallback keeps the local MP3 briefing.
 - **Live panel**: greeting, clock/date, weather hero, freshness chip (green
   <6 h / yellow <24 h / red older, tap = reload), 5-day forecast strip,
   stock chips (watchlist, seeds 4 tickers), markets strip (^GSPTSE ^GSPC
