@@ -71,6 +71,38 @@ def check_cache(html):
         ok("cache has all expected top-level keys")
 
 
+def check_dashboard_orb(html):
+    """Corner voice orb: it must live in the sticky <header> (never a blocking
+    center panel — the bug David reported), toggle on/off, stay cache-driven with
+    no live fetch, and fall back to the audible briefing where there's no mic (the
+    Tesla browser). This is what makes it work in the car and never cover a module."""
+    if 'id="dash-orb"' not in html or 'id="dash-orb-cap"' not in html:
+        fail("voice orb (#dash-orb / #dash-orb-cap) missing from the dashboard")
+        return
+    head = html.split("</header>", 1)[0]
+    if 'id="dash-orb"' not in head:
+        fail("voice orb must live inside the sticky <header> so it stays in the "
+             "corner on scroll and never blocks the modules")
+        return
+    ok("voice orb present in the sticky header (corner, non-blocking)")
+    marker = "VOICE ORB (top-right"
+    ctrl = html.split(marker, 1)[1] if marker in html else ""
+    needles = {
+        "cache-driven answers (DASHBOARD_CACHE)": "DASHBOARD_CACHE",
+        "best-effort speech input (SpeechRecognition)": "SpeechRecognition",
+        "in-car briefing fallback (briefingToggle)": "briefingToggle",
+        "on/off toggle (deactivate)": "function deactivate(",
+    }
+    missing = [n for n, s in needles.items() if s not in ctrl]
+    if missing:
+        fail("voice orb controller missing: " + "; ".join(missing))
+    elif "fetchCached(" in ctrl or re.search(r"\bfetch\(", ctrl):
+        fail("voice orb must stay cache-driven (no live fetch) — the Tesla browser "
+             "blocks cross-origin calls")
+    else:
+        ok("voice orb is cache-driven, toggles on/off, and falls back to the in-car briefing")
+
+
 def check_python():
     """The hourly updater must compile."""
     target = ".github/scripts/update_cache.py"
@@ -183,6 +215,7 @@ def main():
     check_js_parses(html, "index.html")
     check_js_parses(ai_html, "ai/index.html")
     check_cache(html)
+    check_dashboard_orb(html)
     check_python()
     check_ai_failover()
     check_query_model_selector()

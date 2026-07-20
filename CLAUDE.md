@@ -85,6 +85,21 @@ camera list is reused and fresh events still attach via stored lat/lon.
 
 ## Feature map (all in index.html)
 
+- **Voice orb** (`#dash-orb`, last child of `#s-right` in the sticky header, so
+  it stays top-right on scroll and **never** covers a module — the earlier
+  "big red centre panel" was the bug David reported). Tap = hands-free voice
+  mode toggle; **hold ≥550 ms** = play the full audio briefing (a gesture, not a
+  new button). Fully cache-driven (no live API): where a mic exists (a phone)
+  `SpeechRecognition` routes keyword commands to spoken answers built from
+  `DASHBOARD_CACHE.digest`/weather/forecast/stocks via `speak()`
+  (speechSynthesis); where there's no mic (the Tesla browser) a tap falls back
+  to the audible MP3 `briefingToggle()`. Animated `<canvas id="dash-orb-cv">`
+  energy orb (idle = CSS conic glow, active = reactive ring; honours
+  reduced-motion); `#dash-orb-cap` is the fixed top-right transcript/state pill
+  (right-aligned, `pointer-events:none`). Commands: briefing, weather, news,
+  sports, pharmacy, stocks, time, panel nav, and "open Homebase" →
+  `ai/?voice=1`. Guarded by `check_dashboard_orb()` in `validate.py` (must stay
+  in the header, cache-driven, toggleable, with the briefing fallback).
 - **Live panel**: greeting, clock/date, weather hero, freshness chip (green
   <6 h / yellow <24 h / red older, tap = reload), 5-day forecast strip,
   stock chips (watchlist, seeds 4 tickers), markets strip (^GSPTSE ^GSPC
