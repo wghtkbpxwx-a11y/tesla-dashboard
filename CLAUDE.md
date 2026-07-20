@@ -95,7 +95,11 @@ camera list is reused and fresh events still attach via stored lat/lon.
   (speechSynthesis); where there's no mic (the Tesla browser) a tap falls back
   to the audible MP3 `briefingToggle()`. Animated `<canvas id="dash-orb-cv">`
   energy orb (idle = CSS conic glow, active = reactive ring; honours
-  reduced-motion); `#dash-orb-cap` is the fixed top-right transcript/state pill
+  reduced-motion). **Theme-cohesive**: `applyOrbTheme()` derives the orb's whole
+  palette (`--orb-1/2/3`, `--orb-rgb`, `--orb-rgb2`, canvas `accentHue`) from the
+  live `--accent`, re-tinting via a `MutationObserver` on `<html>` when the theme
+  or accent preset changes — so it matches teal/sunset/lavender/etc. in light or
+  dark. `#dash-orb-cap` is the fixed top-right transcript/state pill
   (right-aligned, `pointer-events:none`). Commands: briefing, weather, news,
   sports, pharmacy, stocks, time, panel nav, and "open Homebase" →
   `ai/?voice=1`. Guarded by `check_dashboard_orb()` in `validate.py` (must stay

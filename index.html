@@ -94,18 +94,18 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 #stock-widget #stk-chg.up{color:var(--accent)} #stock-widget #stk-chg.down{color:var(--red)}
 /* ── Voice orb (top-right of the sticky header: stays in the corner on scroll,
    never overlaps the modules). Tap = talk hands-free, hold = full briefing. ── */
-.dash-orb{position:relative;flex:0 0 auto;width:44px;height:44px;border:none;padding:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:grid;place-items:center;overflow:visible;background:conic-gradient(from 210deg,#6366f1,#22d3ee,#a855f7,#818cf8,#6366f1);box-shadow:0 3px 12px rgba(56,189,248,.30),0 0 0 1px rgba(255,255,255,.16) inset,0 0 16px rgba(129,140,248,.28);transition:transform .3s cubic-bezier(.34,1.5,.5,1),box-shadow .35s ease;animation:orbIdle 5.5s ease-in-out infinite}
+.dash-orb{position:relative;flex:0 0 auto;width:44px;height:44px;border:none;padding:0;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;display:grid;place-items:center;overflow:visible;background:conic-gradient(from 210deg,var(--orb-1,#22e0b8),var(--orb-2,#2af5c4),var(--orb-3,#38bdf8),var(--orb-1,#22e0b8));box-shadow:0 3px 12px rgba(var(--orb-rgb,42,245,196),.30),0 0 0 1px rgba(255,255,255,.16) inset,0 0 16px rgba(var(--orb-rgb2,56,189,248),.28);transition:transform .3s cubic-bezier(.34,1.5,.5,1),box-shadow .35s ease;animation:orbIdle 5.5s ease-in-out infinite}
 .dash-orb::before{content:"";position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(from 0deg,transparent,rgba(255,255,255,.55),transparent 32%);opacity:.32;pointer-events:none;animation:orbSpin 3.4s linear infinite}
 .dash-orb:hover{transform:scale(1.06)}
 .dash-orb:active{transform:scale(.93)}
 .dash-orb-core{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(120% 120% at 34% 28%,rgba(255,255,255,.68),rgba(255,255,255,0) 46%)}
 #dash-orb-cv{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;opacity:0;pointer-events:none;transition:opacity .3s ease}
-.dash-orb.active{animation:none;transform:scale(1.08);box-shadow:0 4px 16px rgba(56,189,248,.45),0 0 0 1px rgba(255,255,255,.22) inset,0 0 26px rgba(129,140,248,.55),0 0 46px rgba(34,211,238,.32)}
+.dash-orb.active{animation:none;transform:scale(1.08);box-shadow:0 4px 16px rgba(var(--orb-rgb,42,245,196),.45),0 0 0 1px rgba(255,255,255,.22) inset,0 0 26px rgba(var(--orb-rgb2,129,140,248),.55),0 0 46px rgba(var(--orb-rgb,34,211,238),.32)}
 .dash-orb.active::before{opacity:.85}
 .dash-orb.active #dash-orb-cv{opacity:1}
-.dash-orb.listening{box-shadow:0 4px 16px rgba(34,211,238,.5),0 0 0 1px rgba(255,255,255,.24) inset,0 0 30px rgba(34,211,238,.6),0 0 52px rgba(56,189,248,.38)}
-.dash-orb.speaking{box-shadow:0 4px 16px rgba(168,85,247,.5),0 0 0 1px rgba(255,255,255,.24) inset,0 0 30px rgba(168,85,247,.55),0 0 52px rgba(129,140,248,.4)}
-@keyframes orbIdle{0%,100%{box-shadow:0 3px 12px rgba(56,189,248,.30),0 0 0 1px rgba(255,255,255,.16) inset,0 0 14px rgba(129,140,248,.26)}50%{box-shadow:0 4px 15px rgba(56,189,248,.40),0 0 0 1px rgba(255,255,255,.20) inset,0 0 26px rgba(129,140,248,.46)}}
+.dash-orb.listening{box-shadow:0 4px 16px rgba(var(--orb-rgb2,34,211,238),.5),0 0 0 1px rgba(255,255,255,.24) inset,0 0 30px rgba(var(--orb-rgb2,34,211,238),.6),0 0 52px rgba(var(--orb-rgb,56,189,248),.38)}
+.dash-orb.speaking{box-shadow:0 4px 16px rgba(var(--orb-rgb2,168,85,247),.5),0 0 0 1px rgba(255,255,255,.24) inset,0 0 30px rgba(var(--orb-rgb2,168,85,247),.55),0 0 52px rgba(var(--orb-rgb,129,140,248),.4)}
+@keyframes orbIdle{0%,100%{box-shadow:0 3px 12px rgba(var(--orb-rgb,42,245,196),.30),0 0 0 1px rgba(255,255,255,.16) inset,0 0 14px rgba(var(--orb-rgb2,129,140,248),.26)}50%{box-shadow:0 4px 15px rgba(var(--orb-rgb,42,245,196),.40),0 0 0 1px rgba(255,255,255,.20) inset,0 0 26px rgba(var(--orb-rgb2,129,140,248),.46)}}
 @keyframes orbSpin{to{transform:rotate(360deg)}}
 #dash-orb-cap{position:fixed;top:64px;right:16px;z-index:169;max-width:min(56vw,360px);padding:9px 14px;border-radius:14px;background:var(--glass2);border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--shadow);color:var(--t1);font-size:14px;line-height:1.35;font-weight:500;text-align:right;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .25s ease,transform .25s ease}
 #dash-orb-cap.show{opacity:1;transform:none}
@@ -7697,6 +7697,41 @@ try {
   try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   var active = false, mode = 'idle', recWantOn = false, recActive = false, dorbRec = null;
   var raf = null, t0 = 0, level = 0.16, warmed = false, capTimer = null, briefWatch = null;
+  var accentHue = 165; // derived from the live --accent so the orb matches every theme
+
+  // ── theme cohesion: paint the orb from the app's --accent (any preset, light/dark) ──
+  function orbToRGB(str) {
+    str = (str || '').trim();
+    if (str.charAt(0) === '#') { var h = str.slice(1); if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; }
+    var m = str.match(/rgba?\(([^)]+)\)/); if (m) { var p = m[1].split(','); return [parseFloat(p[0]), parseFloat(p[1]), parseFloat(p[2])]; }
+    return [42, 245, 196];
+  }
+  function orbRGB2HSL(r, g, b) {
+    r/=255; g/=255; b/=255;
+    var mx = Math.max(r,g,b), mn = Math.min(r,g,b), h, s, l = (mx+mn)/2;
+    if (mx === mn) { h = s = 0; } else { var d = mx-mn; s = l>0.5 ? d/(2-mx-mn) : d/(mx+mn); h = mx===r ? (g-b)/d+(g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4; h/=6; }
+    return [h*360, s*100, l*100];
+  }
+  function orbHSL2RGB(h, s, l) {
+    h = ((h%360)+360)%360/360; s/=100; l/=100;
+    var q2 = function(p, q, t) { if (t<0) t+=1; if (t>1) t-=1; if (t<1/6) return p+(q-p)*6*t; if (t<1/2) return q; if (t<2/3) return p+(q-p)*(2/3-t)*6; return p; };
+    var r, g, b;
+    if (s === 0) { r = g = b = l; } else { var q = l<0.5 ? l*(1+s) : l+s-l*s, p = 2*l-q; r = q2(p,q,h+1/3); g = q2(p,q,h); b = q2(p,q,h-1/3); }
+    return Math.round(r*255)+','+Math.round(g*255)+','+Math.round(b*255);
+  }
+  function applyOrbTheme() {
+    try {
+      var rgb = orbToRGB(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+      var hsl = orbRGB2HSL(rgb[0], rgb[1], rgb[2]);
+      accentHue = hsl[0];
+      var H = accentHue, sat = Math.max(72, Math.min(94, hsl[1]));
+      orb.style.setProperty('--orb-1', 'hsl(' + (H%360) + ',' + sat + '%,58%)');
+      orb.style.setProperty('--orb-2', 'hsl(' + ((H+26)%360) + ',' + Math.min(94, sat+4) + '%,63%)');
+      orb.style.setProperty('--orb-3', 'hsl(' + ((H+58)%360) + ',' + Math.max(66, sat-8) + '%,64%)');
+      orb.style.setProperty('--orb-rgb', orbHSL2RGB(H, sat, 60));
+      orb.style.setProperty('--orb-rgb2', orbHSL2RGB(H+34, Math.min(94, sat+4), 64));
+    } catch (e) {}
+  }
 
   function hasSR() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
   function ttsOK() { try { return typeof briefingSupported === 'function' ? briefingSupported() : (typeof speechSynthesis !== 'undefined'); } catch (e) { return false; } }
@@ -7732,7 +7767,7 @@ try {
     ctx.clearRect(0, 0, w, h);
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    var hue = mode === 'speaking' ? 268 : mode === 'listening' ? 190 : 222;
+    var hue = mode === 'speaking' ? accentHue + 40 : mode === 'listening' ? accentHue : accentHue + 12;
     var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
     g.addColorStop(0, 'hsla(' + hue + ',95%,74%,' + (0.5 + 0.35 * level) + ')');
     g.addColorStop(0.55, 'hsla(' + (hue + 16) + ',90%,60%,' + (0.18 + 0.22 * level) + ')');
@@ -7880,6 +7915,7 @@ try {
   // ── activate / deactivate ──
   function ensureActive() { if (!active) { active = true; startDraw(); } orbClass(); }
   function activate() {
+    applyOrbTheme();
     active = true; startDraw(); orbClass();
     if (hasSR()) { recWantOn = true; mode = 'listening'; orbClass(); setCap('Listening… try “briefing”, “weather”, “scores”, or “stocks”.', true); listenOnce(); }
     else runBriefing();
@@ -7899,6 +7935,11 @@ try {
   orb.addEventListener('pointercancel', function() { pressStart = 0; });
   orb.addEventListener('click', function() { if (longFired) { longFired = false; return; } unlock(); toggle(); });
   window.addEventListener('resize', function() { if (active) sizeCanvas(); });
+  applyOrbTheme();
+  try {
+    // Re-tint when the theme (html.light) or accent preset (root --accent) changes.
+    new MutationObserver(applyOrbTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] });
+  } catch (e) {}
   try { sizeCanvas(); } catch (e) {}
 })();
 </script>
