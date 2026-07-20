@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#07090d">
+<meta name="theme-color" content="#05070a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,97 +15,108 @@
 <title>Homebase</title>
 <!-- HOMEBASE_CHANGELOG: machine-readable history for AI agents — also #homebase-changelog + JS HOMEBASE_CHANGELOG -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%233dd6c6'/%3E%3Cstop offset='1' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* ============================= Design tokens ============================= */
-/* Wave 0 — cockpit system aligned with Tesla dashboard (teal, Plus Jakarta) */
+/* Wave 1 — HOT-ROD COCKPIT: Syne + Plus Jakarta, mint accent, night command deck */
 :root{
-  --bg:#eef1f6;
+  --bg:#f2f4f7;
   --bg2:#ffffff;
-  --bg3:#e8eef2;
-  --bg4:#dde5ec;
-  --border:rgba(18,21,28,.10);
-  --border2:rgba(18,21,28,.16);
-  --text:#12151c;
-  --text2:#5b6475;
-  --text3:#7a8496;
-  --acc:#0f9f94;
-  --acc2:#1fb8a8;
-  --acc-soft:rgba(15,159,148,.14);
-  --acc-soft2:rgba(15,159,148,.24);
-  --ok:#059669;
-  --warn:#d97706;
-  --danger:#e11d48;
-  --glow:0 0 48px rgba(15,159,148,.14);
-  --shadow:0 1px 2px rgba(18,21,28,.04), 0 12px 38px rgba(18,40,36,.10);
-  --shadow-sm:0 1px 2px rgba(18,21,28,.05), 0 4px 14px rgba(18,40,36,.07);
-  --r:20px;
-  --r-sm:14px;
+  --bg3:#e6e9ee;
+  --bg4:#dadfe6;
+  --border:rgba(12,16,22,.09);
+  --border2:rgba(12,16,22,.17);
+  --hair:rgba(12,16,22,.08);
+  --text:#0f1319;
+  --text2:#4b5566;
+  --text3:#7a8494;
+  --steel:#8b95a8;
+  --acc:#0d8f74;
+  --acc2:#12b596;
+  --acc-soft:rgba(13,143,116,.14);
+  --acc-soft2:rgba(13,143,116,.26);
+  --acc-glow:rgba(42,245,196,.22);
+  --ok:#0f7d5e;
+  --warn:#c46a05;
+  --danger:#d92551;
+  --glow:0 0 48px rgba(42,245,196,.14);
+  --shadow:0 1px 2px rgba(12,16,22,.05), 0 10px 32px rgba(12,20,26,.10);
+  --shadow-sm:0 1px 2px rgba(12,16,22,.05), 0 4px 12px rgba(12,20,26,.07);
+  --r:14px;
+  --r-sm:10px;
+  --r-xs:6px;
+  --font-display:"Syne","Plus Jakarta Sans",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --font:"Plus Jakarta Sans",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   --fs:16px;
-  --sidebar-w:280px;
+  --sidebar-w:244px;
   --chat-w:48rem;
-  --composer-r:28px;
+  --composer-r:14px;
   --mesh:none;
-  --user-bubble:#d8f3ee;
+  --user-bubble:#dcf6ee;
   --asst-fg:var(--text);
-  --sidebar-bg:rgba(255,255,255,.82);
-  --topbar-h:58px;
-  --aurora-a:rgba(61,214,198,.18);
-  --aurora-b:rgba(80,120,255,.10);
-  --aurora-c:rgba(15,159,148,.08);
+  --sidebar-bg:rgba(255,255,255,.86);
+  --topbar-h:52px;
+  --aurora-a:rgba(42,245,196,.14);
+  --aurora-b:rgba(15,140,120,.08);
+  --aurora-c:rgba(42,245,196,.06);
   --surface-glass:rgba(255,255,255,.86);
 }
 [data-theme="dark"]{
-  --bg:#07090d;
-  --bg2:#0b0e14;
-  --bg3:#141922;
-  --bg4:#1c2430;
-  --border:rgba(255,255,255,.07);
-  --border2:rgba(255,255,255,.14);
-  --text:#f4f6fb;
-  --text2:#9aa3b5;
-  --text3:#6b7385;
-  --acc:#3dd6c6;
-  --acc2:#5eead4;
-  --acc-soft:rgba(61,214,198,.16);
-  --acc-soft2:rgba(61,214,198,.28);
-  --ok:#34d399;
+  --bg:#05070a;
+  --bg2:#0a0e14;
+  --bg3:#12161d;
+  --bg4:#1a1f2a;
+  --border:rgba(255,255,255,.08);
+  --border2:rgba(255,255,255,.16);
+  --hair:rgba(255,255,255,.06);
+  --text:#eef1f6;
+  --text2:#a8b1c1;
+  --text3:#7a8494;
+  --steel:#8b95a8;
+  --acc:#2af5c4;
+  --acc2:#6bffd9;
+  --acc-soft:rgba(42,245,196,.14);
+  --acc-soft2:rgba(42,245,196,.28);
+  --acc-glow:rgba(42,245,196,.35);
+  --ok:#3ee29a;
   --warn:#fbbf24;
-  --danger:#fb7185;
-  --glow:0 0 48px rgba(61,214,198,.18);
-  --shadow:0 1px 2px rgba(0,0,0,.28), 0 18px 50px rgba(0,0,0,.40);
-  --shadow-sm:0 1px 2px rgba(0,0,0,.28), 0 6px 20px rgba(0,0,0,.30);
-  --user-bubble:#14352c;
-  --sidebar-bg:rgba(10,12,18,.88);
-  --aurora-a:rgba(61,214,198,.16);
-  --aurora-b:rgba(80,120,255,.10);
-  --aurora-c:rgba(61,214,198,.08);
-  --surface-glass:rgba(14,17,24,.86);
+  --danger:#ff5c7a;
+  --glow:0 0 40px rgba(42,245,196,.22);
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.45);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.30), 0 4px 14px rgba(0,0,0,.32);
+  --user-bubble:#0f2a24;
+  --sidebar-bg:rgba(8,10,15,.92);
+  --aurora-a:rgba(42,245,196,.12);
+  --aurora-b:rgba(30,80,120,.10);
+  --aurora-c:rgba(42,245,196,.06);
+  --surface-glass:rgba(12,15,22,.88);
 }
 [data-theme="light"]{
-  --bg:#eef1f6;
+  --bg:#f2f4f7;
   --bg2:#ffffff;
-  --bg3:#e8eef2;
-  --bg4:#dde5ec;
-  --border:rgba(18,21,28,.10);
-  --border2:rgba(18,21,28,.16);
-  --text:#12151c;
-  --text2:#5b6475;
-  --text3:#7a8496;
-  --acc:#0f9f94;
-  --acc2:#1fb8a8;
-  --acc-soft:rgba(15,159,148,.14);
-  --acc-soft2:rgba(15,159,148,.24);
-  --shadow:0 1px 2px rgba(18,21,28,.04), 0 12px 38px rgba(18,40,36,.10);
-  --shadow-sm:0 1px 2px rgba(18,21,28,.05), 0 4px 14px rgba(18,40,36,.07);
-  --user-bubble:#d8f3ee;
-  --sidebar-bg:rgba(255,255,255,.82);
-  --aurora-a:rgba(61,214,198,.18);
-  --aurora-b:rgba(80,120,255,.10);
-  --aurora-c:rgba(15,159,148,.08);
-  --surface-glass:rgba(255,255,255,.86);
+  --bg3:#e6e9ee;
+  --bg4:#dadfe6;
+  --border:rgba(12,16,22,.09);
+  --border2:rgba(12,16,22,.17);
+  --hair:rgba(12,16,22,.08);
+  --text:#0f1319;
+  --text2:#4b5566;
+  --text3:#7a8494;
+  --steel:#8b95a8;
+  --acc:#0d8f74;
+  --acc2:#12b596;
+  --acc-soft:rgba(13,143,116,.14);
+  --acc-soft2:rgba(13,143,116,.26);
+  --acc-glow:rgba(42,245,196,.18);
+  --shadow:0 1px 2px rgba(12,16,22,.05), 0 10px 32px rgba(12,20,26,.10);
+  --shadow-sm:0 1px 2px rgba(12,16,22,.05), 0 4px 12px rgba(12,20,26,.07);
+  --user-bubble:#dcf6ee;
+  --sidebar-bg:rgba(255,255,255,.86);
+  --aurora-a:rgba(42,245,196,.14);
+  --aurora-b:rgba(15,140,120,.08);
+  --aurora-c:rgba(42,245,196,.06);
+  --surface-glass:rgba(255,255,255,.90);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
@@ -1595,6 +1606,592 @@ body.is-desktop .chat-float[data-state="open"]{
   #topbar{padding:6px 10px}
 }
 
+/* ============================================================================
+   HOT-ROD COCKPIT REFRESH — Wave 1 structural chrome (2026-07-20)
+   Sits at the tail of the stylesheet so it wins by source order without
+   touching earlier selectors or the IDs any JS/handler assumes.
+   All handlers/IDs preserved: sidebar/topbar/composer/chat-float/model-btn/
+   voice-ov/settings-ov etc. — this is chrome + type + rhythm only.
+   ========================================================================== */
+
+/* ---- Type: Syne display headers, JetBrains Mono for micro labels --------- */
+html body{ font-family:var(--font); letter-spacing:-.008em; }
+h1,h2,h3,h4,.hb-display{ font-family:var(--font-display); letter-spacing:-.025em; font-weight:700; }
+.hb-mono, .tb-app, .cf-meta, .mm-group, .sb-sec, .mo-tab, .d-badge, .mode-pill,
+#comp-hint, .hcr-grip, #hint-tools, #hint-council, .cf-title,
+.tool-call .t-state, .council-member .cm-state{
+  font-family:var(--font); font-feature-settings:"ss01","cv11";
+}
+
+/* ---- Ambient wash: calmer, cooler, no purple ---------------------------- */
+body::before{
+  background:
+    radial-gradient(1200px 700px at 8% -20%, var(--aurora-a), transparent 60%),
+    radial-gradient(900px 600px at 96% -8%, var(--aurora-b), transparent 58%),
+    radial-gradient(700px 480px at 50% 118%, var(--aurora-c), transparent 60%);
+  opacity:.8;
+}
+[data-theme="dark"] body::before{ opacity:.55; }
+
+/* ---- SIDEBAR: narrower instrument rail --------------------------------- */
+#sidebar{
+  box-shadow:1px 0 0 var(--hair);
+  border-right:1px solid var(--border);
+  backdrop-filter:blur(28px) saturate(1.4); -webkit-backdrop-filter:blur(28px) saturate(1.4);
+}
+.sb-head{ padding:14px 14px 10px; align-items:flex-start; gap:12px; }
+.brand{
+  gap:11px; align-items:center; font-weight:800;
+}
+.brand .logo{
+  width:34px; height:34px; border-radius:9px; flex:none; position:relative;
+  background:linear-gradient(150deg,#0a0e14 0%,#0a0e14 100%);
+  border:1px solid var(--acc);
+  box-shadow:inset 0 0 0 1px rgba(42,245,196,.18), 0 6px 18px rgba(42,245,196,.22);
+  color:transparent;
+}
+[data-theme="light"] .brand .logo{
+  background:linear-gradient(150deg,#0f1319,#1a1f2a);
+}
+.brand .logo::before{
+  content:""; position:absolute; inset:6px; border-radius:4px;
+  background:linear-gradient(135deg, var(--acc) 0%, var(--acc2) 100%);
+  clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  box-shadow:0 0 12px var(--acc-glow);
+}
+.brand .logo::after{
+  content:""; position:absolute; inset:0; border-radius:9px;
+  background:linear-gradient(180deg, rgba(255,255,255,.10), transparent 40%);
+  pointer-events:none;
+}
+.brand-lockup{ gap:2px; }
+.brand .nm{
+  font-family:var(--font-display); font-size:17px; font-weight:800;
+  letter-spacing:-.02em; line-height:1; color:var(--text);
+  background:none !important; -webkit-text-fill-color:currentColor !important;
+}
+.brand .sub{
+  font-size:9.5px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--acc); line-height:1;
+}
+
+/* Outlined "instrument" New chat + Home dashboard */
+.new-chat{
+  margin:6px 12px 10px; padding:11px 14px; min-height:44px; border-radius:10px;
+  background:transparent !important;
+  color:var(--text) !important;
+  border:1px solid var(--border2) !important;
+  box-shadow:none !important;
+  font-family:var(--font); font-weight:650; font-size:13.5px; letter-spacing:.01em;
+  gap:10px; justify-content:flex-start;
+  position:relative; overflow:hidden;
+}
+.new-chat::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--acc);
+  box-shadow:0 0 12px var(--acc-glow);
+}
+.new-chat:hover{
+  transform:none;
+  border-color:var(--acc) !important;
+  background:var(--acc-soft) !important;
+  color:var(--text) !important;
+  box-shadow:0 0 0 1px var(--acc-soft2) !important;
+}
+.new-chat svg{ stroke:var(--acc) !important; }
+
+/* Denser chat list */
+.sb-sec{
+  font-family:var(--font); font-size:9.5px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--text3); padding:14px 14px 4px; font-weight:700;
+}
+.sb-chats-head{ padding:0 6px; }
+.sb-chats-head .sb-sec{ padding:12px 12px 4px; }
+.sb-search{ margin:0 12px 8px; }
+.sb-search input{
+  padding:8px 12px 8px 30px; border-radius:8px; background:var(--bg3);
+  border:1px solid var(--hair); font-size:12.5px;
+}
+.sb-search .mag{ left:9px; width:13px; height:13px; }
+.convo{ padding:8px 11px; border-radius:8px; font-size:13px; margin-bottom:0; }
+.convo .c-title{ font-size:13px; font-weight:500; }
+#convo-list{ padding:2px 8px 10px; }
+
+/* Sidebar foot as icon strip */
+.sb-foot{
+  padding:8px 10px; gap:4px; border-top:1px solid var(--hair);
+  font-size:11px;
+}
+.sb-dash-link{
+  font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--text3); padding:6px 8px; border-radius:6px; border:1px solid var(--hair);
+}
+.sb-dash-link:hover{ color:var(--acc); border-color:var(--acc-soft2); background:transparent; }
+
+/* ---- TOPBAR: thin instrument strip -------------------------------------- */
+#topbar{
+  min-height:52px; padding:6px 14px; gap:6px;
+  border-bottom:1px solid var(--hair) !important;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 78%, transparent) 100%) !important;
+  backdrop-filter:blur(20px) saturate(1.2);
+}
+.tb-title{ margin-left:8px; gap:1px; }
+.tb-app{
+  font-family:var(--font-display); font-size:14px; font-weight:800; letter-spacing:.005em;
+  color:var(--text);
+}
+.tb-sub{
+  font-size:9.5px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--acc);
+}
+.home-btn{
+  border-radius:8px; padding:7px 12px; font-size:12.5px; font-weight:650;
+  background:transparent; border:1px solid var(--border);
+  box-shadow:none;
+}
+.home-btn:hover{ background:var(--bg3); border-color:var(--border2); box-shadow:none; }
+.home-btn.on{
+  background:var(--acc-soft); color:var(--text);
+  border-color:color-mix(in srgb, var(--acc) 45%, var(--border));
+  box-shadow:inset 0 0 0 1px var(--acc-soft2);
+}
+/* Right cluster of topbar buttons — grouped with hairline separators */
+#topbar > .icon-btn, #topbar > #sync-pill{ position:relative; }
+#topbar #dash-refresh{ margin-left:auto; }
+#topbar #dash-refresh::before,
+#topbar #sync-pill::before,
+#topbar #connectors-btn::before,
+#topbar #settings-btn::before{
+  content:""; position:absolute; left:-3px; top:9px; bottom:9px; width:1px; background:var(--hair);
+}
+#topbar #dash-refresh::before{ display:none; }
+#sync-pill{
+  height:32px; padding:0 12px; border-radius:8px; font-size:11px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text2); background:transparent; border:1px solid var(--border);
+}
+#sync-pill:hover{ color:var(--acc); border-color:var(--acc-soft2); }
+.icon-btn{
+  width:34px; height:34px; min-width:34px; border-radius:8px;
+}
+.icon-btn:hover{ background:var(--bg3); }
+.icon-btn.on{ background:var(--acc-soft); color:var(--acc); box-shadow:inset 0 0 0 1px var(--acc-soft2); }
+.icon-btn svg{ width:17px; height:17px; }
+
+/* ---- DASHBOARD HUB: instrument grid ------------------------------------- */
+.dashboard{ padding:22px 22px 44px; gap:18px; }
+.dash-hero{ padding:8px 2px 0; }
+.dash-hero h1{
+  font-family:var(--font-display);
+  font-size:clamp(32px, 4.5vw, 46px);
+  font-weight:800; letter-spacing:-.02em; line-height:1.02;
+  background:none !important;
+  -webkit-text-fill-color:var(--text) !important;
+  color:var(--text) !important;
+}
+[data-theme="dark"] .dash-hero h1{
+  color:var(--text) !important; -webkit-text-fill-color:var(--text) !important;
+}
+.dash-hero .dh-sub{
+  font-family:var(--font); color:var(--text2); font-size:13px; margin-top:6px;
+  letter-spacing:.005em;
+}
+.dash-hero .dh-stamp{
+  font-family:var(--font); font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+  font-weight:700; color:var(--text3);
+}
+
+/* Sharp cockpit cards with a top accent hairline */
+.d-card, #empty-state .mode-tile, .hub-tile{
+  border-radius:12px !important;
+  background:var(--bg2) !important;
+  border:1px solid var(--border) !important;
+  box-shadow:var(--shadow-sm) !important;
+  backdrop-filter:none;
+  position:relative;
+}
+.hub-tile{
+  padding:16px 14px 14px !important; min-height:96px; overflow:hidden;
+  transition:border-color .18s, transform .12s, box-shadow .18s !important;
+}
+.hub-tile::before{
+  content:""; position:absolute; left:0; right:0; top:0; height:2px;
+  background:linear-gradient(90deg, transparent 0%, var(--hc, var(--acc)) 20%, var(--hc, var(--acc)) 80%, transparent 100%);
+  opacity:.6; transition:opacity .18s;
+}
+.hub-tile:hover{
+  transform:translateY(-1px) !important;
+  border-color:color-mix(in srgb, var(--hc, var(--acc)) 55%, var(--border)) !important;
+  box-shadow:0 8px 24px rgba(0,0,0,.10), 0 0 0 1px color-mix(in srgb, var(--hc, var(--acc)) 22%, transparent) !important;
+}
+.hub-tile:hover::before{ opacity:1; }
+.hub-tile .ht-ico{
+  width:34px; height:34px; border-radius:8px;
+  background:transparent !important;
+  border:1px solid color-mix(in srgb, var(--hc, var(--acc)) 40%, var(--border)) !important;
+  color:var(--hc, var(--acc)) !important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--hc, var(--acc)) 12%, transparent);
+}
+.hub-tile .ht-title{ font-family:var(--font); font-size:13.5px; font-weight:700; letter-spacing:-.005em; }
+.hub-tile .ht-desc{ font-size:11.5px; color:var(--text2); line-height:1.4; }
+.hub-grid{ grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:12px; }
+
+/* Dashboard scroll cards */
+.d-card{ padding:16px 16px 14px !important; min-height:0; }
+.d-head h3{ font-family:var(--font); font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--text3); }
+.d-head .d-ico{ border-radius:7px; width:26px; height:26px; }
+.d-metric{ font-family:var(--font-display); font-size:30px; font-weight:800; letter-spacing:-.03em; }
+
+/* Empty-state hub hero */
+#empty-state h1{
+  font-family:var(--font-display); font-weight:800; letter-spacing:-.03em;
+  background:none !important;
+  -webkit-text-fill-color:var(--text) !important;
+  color:var(--text) !important;
+}
+#empty-state .hero-orb{ width:72px; height:72px; margin:0 auto 18px; }
+#empty-state .hero-orb .orb-core{
+  width:56px; height:56px; border-radius:10px;
+  background:linear-gradient(150deg, var(--acc) 0%, var(--acc2) 100%) !important;
+  color:#04120e; font-weight:800;
+  box-shadow:0 10px 30px var(--acc-glow), inset 0 1px 0 rgba(255,255,255,.30);
+}
+#empty-state .hero-orb .orb-core::after{ border-radius:9px; }
+#empty-state .hero-orb .orb-glow{
+  background:radial-gradient(circle, var(--acc-glow), transparent 60%) !important;
+  filter:blur(18px); opacity:.6;
+}
+#empty-state .subhead{
+  font-family:var(--font); color:var(--text2); font-size:14px; margin-bottom:22px;
+}
+
+/* Prompt chips — instrument style */
+.prompt-chip, #empty-state .prompt-chip{
+  border-radius:8px !important; padding:8px 12px !important;
+  font-family:var(--font); font-size:12px; font-weight:600; letter-spacing:.005em;
+  background:transparent !important;
+  border:1px solid var(--border) !important;
+  color:var(--text2);
+  backdrop-filter:none !important;
+}
+.prompt-chip:hover, #empty-state .prompt-chip:hover{
+  border-color:var(--acc) !important;
+  color:var(--acc) !important;
+  background:var(--acc-soft) !important;
+  transform:none !important;
+}
+
+/* ---- CHAT FLOAT: flatter, sharper, larger header ------------------------ */
+.chat-float{
+  border:1px solid var(--border2) !important;
+  border-radius:14px !important;
+  background:var(--bg2) !important;
+  box-shadow:0 24px 60px rgba(0,0,0,.30), 0 0 0 1px var(--hair) inset !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+[data-theme="dark"] .chat-float{
+  background:linear-gradient(180deg, #0d1119 0%, #0a0e14 100%) !important;
+  box-shadow:0 30px 80px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.04) inset, 0 0 40px rgba(42,245,196,.06) !important;
+}
+.chat-float[data-state="open"]{
+  width:min(440px, calc(100vw - 24px));
+  border-radius:14px !important;
+}
+.chat-float[data-state="expanded"]{ border-radius:16px !important; }
+.cf-head{
+  padding:12px 12px 12px !important;
+  border-bottom:1px solid var(--hair) !important;
+  background:transparent !important;
+  gap:10px;
+}
+.cf-brand{ gap:10px; }
+.cf-orb{
+  width:32px; height:32px; border-radius:8px !important;
+  background:linear-gradient(150deg, var(--acc) 0%, var(--acc2) 100%) !important;
+  color:#04120e !important; font-weight:800;
+  box-shadow:0 4px 14px var(--acc-glow) !important;
+  position:relative;
+}
+.cf-orb::after{
+  content:""; position:absolute; inset:0; border-radius:8px;
+  background:linear-gradient(180deg, rgba(255,255,255,.18), transparent 45%);
+}
+.cf-title{ font-family:var(--font-display); font-size:14px; font-weight:800; letter-spacing:-.005em; }
+.cf-meta{ font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--text3); font-weight:700; }
+
+/* Mode pills → segmented control */
+.cf-modes{ gap:0 !important; padding:2px; background:var(--bg3); border-radius:8px; flex:1; min-width:0; }
+.cf-modes .mode-pill{
+  padding:5px 10px !important;
+  font-size:11px !important; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  border-radius:6px !important;
+  border:1px solid transparent !important;
+  background:transparent !important;
+  color:var(--text2) !important;
+  backdrop-filter:none !important;
+}
+.cf-modes .mode-pill .mp-ico{ display:none !important; }
+.cf-modes .mode-pill:hover{ color:var(--text) !important; background:color-mix(in srgb, var(--bg2) 80%, transparent) !important; }
+.cf-modes .mode-pill.active{
+  color:var(--text) !important;
+  background:var(--bg2) !important;
+  border-color:color-mix(in srgb, var(--pill-c, var(--acc)) 40%, var(--border)) !important;
+  box-shadow:0 1px 4px rgba(0,0,0,.10), inset 0 0 0 1px color-mix(in srgb, var(--pill-c, var(--acc)) 20%, transparent) !important;
+}
+[data-theme="dark"] .cf-modes .mode-pill.active{
+  background:#12161d !important;
+}
+
+/* Chat float action buttons — hairline group */
+.cf-actions{ gap:4px !important; }
+.cf-actions .icon-btn{ width:32px; height:32px; min-width:32px; border-radius:7px; }
+.cf-actions #model-btn{
+  border-radius:8px !important; background:transparent !important;
+  border:1px solid var(--border) !important; padding:5px 10px !important;
+  max-width:150px;
+}
+.cf-actions #model-btn:hover{ border-color:var(--border2) !important; background:var(--bg3) !important; }
+.cf-actions #model-btn .m-name{ font-size:11.5px; font-weight:700; }
+.cf-actions #model-btn .m-dot{ box-shadow:0 0 6px var(--acc-glow); }
+
+/* Standalone mode rail (above composer, main view) */
+#mode-rail{ padding:0 2px 4px; margin-bottom:8px; }
+.mode-pill{
+  border-radius:8px; padding:7px 12px 7px 9px; font-size:11.5px; font-weight:700;
+  letter-spacing:.04em; text-transform:uppercase;
+  background:transparent !important;
+  border:1px solid var(--border) !important;
+  backdrop-filter:none !important;
+}
+.mode-pill .mp-ico{ width:20px; height:20px; border-radius:5px; font-size:10px; }
+.mode-pill:hover{ color:var(--text); border-color:var(--border2) !important; background:var(--bg2) !important; }
+.mode-pill.active{
+  background:color-mix(in srgb, var(--pill-c, var(--acc)) 10%, transparent) !important;
+  border-color:color-mix(in srgb, var(--pill-c, var(--acc)) 45%, var(--border)) !important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--pill-c, var(--acc)) 20%, transparent),
+             0 0 12px color-mix(in srgb, var(--pill-c, var(--acc)) 15%, transparent) !important;
+}
+
+/* ---- COMPOSER: bold bottom command bar ---------------------------------- */
+#composer-wrap{
+  padding:0 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  background:linear-gradient(180deg, transparent, var(--bg) 40%);
+}
+#composer{
+  border-radius:12px !important;
+  border:1px solid var(--border2) !important;
+  background:var(--bg2) !important;
+  box-shadow:0 8px 28px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.02) !important;
+  padding:8px 8px 8px 8px !important;
+  gap:6px;
+  backdrop-filter:none !important;
+}
+[data-theme="dark"] #composer{
+  background:#0d1119 !important;
+  box-shadow:0 10px 32px rgba(0,0,0,.5), inset 0 0 0 1px rgba(42,245,196,.06) !important;
+}
+#composer:focus-within{
+  border-color:var(--acc) !important;
+  box-shadow:0 0 0 1px var(--acc-soft2), 0 12px 32px rgba(0,0,0,.14), inset 0 0 0 1px var(--acc-soft) !important;
+}
+#input{ padding:10px 10px; font-size:15.5px; }
+#send-btn{
+  width:38px !important; height:38px !important; min-width:38px !important;
+  border-radius:9px !important;
+  background:linear-gradient(150deg, var(--acc) 0%, var(--acc2) 100%) !important;
+  color:#04120e !important;
+  box-shadow:0 6px 18px var(--acc-glow), inset 0 1px 0 rgba(255,255,255,.35) !important;
+  margin:0 !important;
+}
+#send-btn svg{ stroke:#04120e; width:18px; height:18px; }
+#send-btn:not(:disabled):hover{ transform:translateY(-1px) scale(1.02) !important; box-shadow:0 10px 24px var(--acc-glow) !important; }
+#send-btn:disabled{ opacity:.35; box-shadow:none !important; }
+#send-btn.stop{ background:var(--danger) !important; color:#fff !important; box-shadow:0 4px 14px rgba(217,37,81,.36) !important; }
+#send-btn.stop svg{ stroke:#fff; }
+#mic-btn{ border-radius:8px; }
+#mic-btn.rec{ border-radius:8px; }
+
+#comp-hint{ font-size:10.5px; letter-spacing:.05em; }
+#query-model-control{
+  border-radius:7px !important; padding:4px 20px 4px 8px !important;
+  border:1px solid var(--border) !important; background:transparent !important;
+  min-height:26px;
+}
+#query-model-control.chosen{ background:var(--acc-soft) !important; }
+#query-model-control>span{ font-size:9px; letter-spacing:.18em; }
+
+/* User bubbles */
+.msg.user .bubble{
+  background:var(--user-bubble) !important;
+  border:1px solid color-mix(in srgb, var(--acc) 22%, var(--border)) !important;
+  border-radius:14px 14px 4px 14px !important;
+  box-shadow:0 2px 10px rgba(0,0,0,.06) !important;
+  color:var(--text) !important;
+}
+[data-theme="dark"] .msg.user .bubble{
+  background:linear-gradient(160deg,#0f2a24,#12352c) !important;
+  border-color:rgba(42,245,196,.24) !important;
+}
+.msg.assistant .avatar{
+  background:linear-gradient(150deg, var(--acc) 0%, var(--acc2) 100%) !important;
+  color:#04120e !important; border-radius:8px;
+}
+
+/* ---- FAB: geometric mint mark ------------------------------------------ */
+#chat-fab{
+  padding:10px 14px 10px 10px !important;
+  border-radius:10px !important;
+  background:linear-gradient(150deg, var(--acc) 0%, var(--acc2) 100%) !important;
+  color:#04120e !important; font-family:var(--font-display); font-weight:800; letter-spacing:.02em; font-size:13px;
+  box-shadow:0 12px 32px var(--acc-glow), 0 0 0 1px rgba(255,255,255,.18) inset !important;
+  gap:9px;
+}
+#chat-fab:hover{ box-shadow:0 16px 40px var(--acc-glow) !important; transform:translateY(-1px) !important; }
+#chat-fab .fab-orb{
+  width:26px; height:26px; border-radius:6px !important;
+  background:rgba(0,0,0,.15) !important;
+  color:#04120e; font-weight:800; font-size:14px;
+  position:relative;
+}
+#chat-fab .fab-orb::before{
+  content:""; position:absolute; inset:5px;
+  background:currentColor;
+  clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+#chat-fab .fab-orb .hb-ico,
+#chat-fab .fab-orb .fab-emoji{ display:none !important; }
+#chat-fab .fab-lab{
+  font-family:var(--font-display); font-size:12px; font-weight:800; letter-spacing:.2em; text-transform:uppercase;
+}
+
+/* ---- MODALS: sharper instrument panels --------------------------------- */
+.modal{
+  border-radius:14px !important;
+  border:1px solid var(--border2) !important;
+  background:var(--bg2) !important;
+  box-shadow:0 30px 80px rgba(0,0,0,.32), 0 0 0 1px var(--hair) !important;
+}
+[data-theme="dark"] .modal{
+  background:#0b0f16 !important;
+  box-shadow:0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.05) !important;
+}
+.mo-head{
+  padding:14px 18px; border-bottom:1px solid var(--hair); gap:10px;
+}
+.mo-head h2{
+  font-family:var(--font-display); font-size:16px; font-weight:800; letter-spacing:-.005em;
+}
+.mo-tabs{
+  gap:0; padding:4px 14px 0; border-bottom:1px solid var(--hair);
+}
+.mo-tab{
+  font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  padding:11px 12px 10px; color:var(--text3);
+  border-bottom:2px solid transparent;
+}
+.mo-tab.on{ color:var(--text); border-bottom-color:var(--acc); }
+.mo-body{ padding:16px 20px 20px; }
+.set-row{
+  padding:11px 0; border-bottom:1px solid var(--hair) !important; gap:10px;
+}
+.set-row .lbl, .set-row>span:first-child{ font-weight:650; font-size:13.5px; letter-spacing:-.005em; }
+
+/* Popovers (model picker, attach) */
+.pop{
+  border-radius:12px !important; border:1px solid var(--border2) !important;
+  background:var(--bg2) !important;
+  box-shadow:0 24px 60px rgba(0,0,0,.22), 0 0 0 1px var(--hair) !important;
+}
+[data-theme="dark"] .pop{ background:#0d1119 !important; }
+.mm-group, .mm-quick-title{ font-family:var(--font); }
+.mm-group{ font-size:9.5px; letter-spacing:.22em; }
+.mm-item{ border-radius:7px; font-size:13px; }
+.menu-item{ border-radius:7px; font-size:13px; font-weight:600; }
+
+/* ---- VOICE OVERLAY: keep intentional mode hue but sharpen chrome -------- */
+#v-badge{
+  font-family:var(--font-display) !important; letter-spacing:.28em !important; text-transform:uppercase;
+  font-weight:800;
+}
+#v-status{ font-family:var(--font); }
+
+/* ---- HUB NAV items (sidebar module list) -------------------------------- */
+.hub-nav-item{
+  padding:9px 10px; border-radius:8px; font-size:13px; color:var(--text2);
+}
+.hub-nav-item:hover{ background:var(--bg3); color:var(--text); }
+.hub-nav-item .hni-ico{
+  width:28px; height:28px; border-radius:7px;
+  background:transparent !important;
+  border:1px solid color-mix(in srgb, var(--hc, var(--acc)) 40%, var(--border));
+  color:var(--hc, var(--acc));
+}
+
+/* ---- Council / Tool boxes: sharper ------------------------------------- */
+.council-box, .tool-box, .think-box, .plan-box{ border-radius:12px !important; }
+
+/* ---- Codeblocks: sharper corners --------------------------------------- */
+.codeblock{ border-radius:10px !important; }
+.codeblock .cb-head{ font-family:var(--mono); }
+.codeblock pre{ font-family:var(--mono); }
+
+/* ---- Kill any residual purple/indigo chrome on brand accents ----------- */
+[style*="4f46e5"],[style*="6366f1"],[style*="818cf8"]{}
+.brand .logo, .cf-orb, #chat-fab, .msg.assistant .avatar, #send-btn,
+#empty-state .hero-orb .orb-core, .new-chat{
+  /* Overrides above already cover these — keep this comment as intentional anchor */
+}
+
+/* ---- Mobile: keep progressive disclosure, match new chrome -------------- */
+body.is-mobile #topbar{
+  background:linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 92%, transparent) 100%) !important;
+  border-bottom:1px solid var(--hair) !important;
+  min-height:52px;
+}
+body.is-mobile .brand .logo{ width:32px; height:32px; }
+body.is-mobile .brand .nm{ font-size:16px; }
+body.is-mobile .chat-float[data-state="open"],
+body.is-mobile .chat-float[data-state="expanded"]{
+  border-radius:14px !important;
+}
+body.is-mobile #chat-fab{
+  padding:10px 12px 10px 10px !important;
+  border-radius:12px !important;
+  font-size:12px; letter-spacing:.18em;
+}
+body.is-mobile .cf-head{
+  padding:10px 10px 10px !important;
+}
+body.is-mobile .cf-modes{
+  padding:2px !important; overflow:auto;
+}
+body.is-mobile .cf-modes .mode-pill{
+  padding:5px 9px !important; font-size:10.5px !important;
+}
+body.is-mobile #composer{ border-radius:12px !important; padding:8px !important; }
+body.is-mobile #send-btn{ border-radius:8px !important; }
+body.is-mobile .hub-tile{ min-height:84px; padding:14px !important; }
+body.is-mobile .dash-hero h1{ font-size:26px; }
+body.is-mobile .new-chat{ font-size:13.5px; letter-spacing:.02em; }
+body.is-mobile #settings-ov .mo-mobile-nav{
+  border-bottom:1px solid var(--hair);
+}
+body.is-mobile #settings-ov .mo-mobile-nav select{
+  border-radius:8px; border:1px solid var(--border);
+}
+
+/* ---- Focus visible: mint outline --------------------------------------- */
+#chat-fab:focus-visible, .icon-btn:focus-visible, .d-chip:focus-visible,
+.home-btn:focus-visible, .new-chat:focus-visible, .hub-tile:focus-visible,
+.prompt-chip:focus-visible, .mode-pill:focus-visible, #send-btn:focus-visible{
+  outline:2px solid var(--acc) !important; outline-offset:2px !important;
+  box-shadow:0 0 0 4px var(--acc-soft) !important;
+}
+
+/* ---- Scrollbars: instrument thin --------------------------------------- */
+::-webkit-scrollbar{ width:6px; height:6px; }
+::-webkit-scrollbar-thumb{ background:rgba(139,149,168,.28); border-radius:3px; border:0; background-clip:padding-box; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb{ background:rgba(139,149,168,.22); }
+
 </style>
 </head>
 <body>
@@ -1602,7 +2199,7 @@ body.is-desktop .chat-float[data-state="open"]{
   <!-- ================= Sidebar ================= -->
   <aside id="sidebar">
     <div class="sb-head">
-      <div class="brand"><span class="logo" id="brand-logo"></span><span class="brand-lockup"><span class="nm">Homebase</span><span class="sub">AI Cockpit</span></span></div>
+      <div class="brand"><span class="logo" id="brand-logo"></span><span class="brand-lockup"><span class="nm">Homebase</span><span class="sub">Command Cockpit</span></span></div>
       <button class="icon-btn" id="sb-close" title="Close sidebar" aria-label="Close sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
     </div>
     <button type="button" class="new-chat" id="home-nav-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 10.5V19h12v-8.5"/></svg>Home dashboard</button>
@@ -1635,7 +2232,7 @@ body.is-desktop .chat-float[data-state="open"]{
       </button>
       <div class="tb-title">
         <span class="tb-app">Homebase</span>
-        <span class="tb-sub" id="tb-sub">Life dashboard</span>
+        <span class="tb-sub" id="tb-sub">Command deck</span>
       </div>
       <span class="tb-spacer"></span>
       <button type="button" class="icon-btn" id="dash-refresh" title="Refresh dashboard data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.3"/><path d="M21 3v6h-6"/></svg></button>
@@ -2124,7 +2721,7 @@ var idb = {
 /* ============================ state ============================ */
 var DEFAULT_SETTINGS = {
   theme: 'system',
-  accent: '#0f9f94',
+  accent: '#2af5c4',
   fontSize: 16,
   provider: 'demo',
   model: 'demo',
@@ -2733,16 +3330,18 @@ var HOMEBASE_CHANGELOG = {
   ],
   current_handoff: {
     to: 'next model',
-    objective: 'Wave 0 cockpit visual system is shipped for Tesla dashboard (PR #91), Homebase AI, and Pederson Finances. Keep validate.py green. Next highest value: Homebase error beacon + vault conflict UX; Finance sync/schema plain-language recovery; do not reopen verified P0 routing/budget/vault packages without new evidence (see FABLE_AUDIT_BRIEF.md).',
-    cockpit_wave0_2026_07_20: 'Shared design language across / (Tesla), /ai/ (Homebase), /finance/: Plus Jakarta Sans, teal accents (#3dd6c6 dark / #0f9f94 light), night bg #07090d/#0b0e14, brand lockups with teal subtitles. Homebase migrates legacy indigo accents (#4f46e5/#6366f1/#818cf8) to DEFAULT_SETTINGS.accent on load. Mode-specific hues (voice/agent/research/council) intentionally preserved. Full inventory: HOMEBASE_FINANCE_EXCELLENCE_PLAN.md + DASHBOARD_EXCELLENCE_PLAN.md.',
+    objective: 'Wave 1 HOT-ROD COCKPIT across all three surfaces: Tesla dashboard, Homebase, and Pederson Finances. Syne + Plus Jakarta + JetBrains Mono, mint #2af5c4 on #05070a night, instrument chrome, segmented controls. Structural CSS/HTML only — no routing/budget/vault/voice/finance logic changes. validate.py must stay green. Next: error beacon on /ai/, vault conflict UX, self-host fonts.',
+    cockpit_hotrod_wave1_2026_07_20: 'Homebase-only unmistakable structural refresh (branch cursor/complete-ui-refresh-de9b). Fonts: Google Fonts Syne (display) + Plus Jakarta Sans (UI) + JetBrains Mono (mono). Palette: dark #05070a/#0a0e14/#12161d, light #f2f4f7 cool-gray; steel #8b95a8; hairline borders rgba(255,255,255,.08); accent mint #2af5c4 (dark) / #0d8f74 (light) with derived --acc-soft/--acc-glow. DEFAULT_SETTINGS.accent moved to #2af5c4; loadState migration extended to convert legacy indigo (#4f46e5/#6366f1/#818cf8) AND legacy Wave-0 teal (#0f9f94/#3dd6c6/#1fb8a8/#1ec8b8) to the new mint so returning users see the change. ACCENTS palette reordered with mint first. theme-color meta and applyTheme meta content aligned to #05070a/#f2f4f7. Structural chrome: brand.logo is a geometric mint diamond in a dark tile; brand.sub now "Command Cockpit"; topbar subtitle now "Command deck"; new-chat is an outlined button with a mint accent bar; hub tiles have a top mint hairline instead of rounded rainbow icons; chat float is flatter with a segmented mode-pill control; composer is a sharper 12px command bar with a mint square send button; FAB is a geometric mint diamond, not a rainbow orb; modals/popovers use denser rows and instrument section labels; scrollbars slimmed. Mode-specific voice/agent/research/council recognition hues intentionally preserved via the existing --pill-c / --hc CSS variables driving mode-pills and hub tiles. All key JS IDs preserved (sidebar, topbar, composer, chat-float, chat-fab, model-btn, send-btn, mic-btn, voice-ov, settings-ov, tab handlers, cf-modes, cf-actions, hub-nav, mo-tabs, model-menu, attach-menu, cf-more-menu, sync-pill, connectors-btn, settings-btn, hub-tile hooks). Only two small copy touches to HTML (brand subtitle and #tb-sub default) plus one JS string sync so the FAB-state topbar subtitle still matches; every handler stays bound to its existing selector. Verified: python3 extract-scripts + node --check clean.',
+    finance_hotrod_wave1_2026_07_20: 'Pederson Finances Wave 1 structural refresh (branch cursor/complete-ui-refresh-de9b, uncommitted by explicit instruction). Google Fonts now loads Syne + Plus Jakarta Sans + JetBrains Mono. Dark default uses #05070a/#0a0e14, steel #8b95a8, mint #2af5c4, sharp 10–14px radii; prefers-color-scheme light uses cool gray + #0d8f74. Header is a full-bleed instrument bar with left brand, centred status, large Syne position value, one horizontal four-column metric rail, and private/local signal line. Empty state is a dramatic full-bleed import bay with oversized headline and primary/secondary actions. Loaded labels are uppercase mono; budget meters are 15px; account rows have mint left bars; alerts are compact left-border strips. Bottom actions are equal Import / Export / Sync segments with Sync mint-filled. All 29 IDs, three data-import hooks, inline JS, localStorage keys, import/export/sync hooks, and browser-only private-data boundary are unchanged. README updated. Verified extracted inline JS with node --check, no duplicate IDs, exact ID/hook parity against HEAD, exact inline-JS parity against HEAD, and git diff --check.',
+    cockpit_wave0_2026_07_20: 'PRIOR wave. Shared Wave-0 design language across / (Tesla), /ai/ (Homebase), /finance/: Plus Jakarta Sans, teal accents (#3dd6c6 dark / #0f9f94 light), night bg #07090d/#0b0e14, brand lockups with teal subtitles. Homebase migrates legacy indigo accents (#4f46e5/#6366f1/#818cf8) to DEFAULT_SETTINGS.accent on load. Mode-specific hues (voice/agent/research/council) intentionally preserved. Full inventory: HOMEBASE_FINANCE_EXCELLENCE_PLAN.md + DASHBOARD_EXCELLENCE_PLAN.md. Homebase palette superseded by cockpit_hotrod_wave1 above; the Tesla dashboard and /finance/ remain on Wave 0.',
     p0_security_hardening_2026_07_19: 'Agent 1B implemented Agent 1C\'s Wave 1 P0 review on branch homebase/ai-p0-security-harden (rebased onto main after PR #82). developerMode defaults false; sourceChangeAuthorized() requires explicit /dev or a pull-request phrase; proposeRepositoryChanges() ALWAYS confirms regardless of devConfirmWrites; run_js removed; vault passphrase minimum 12 chars. test_subagent_allowlist.js (17 checks) wired into validate.py. Do NOT reintroduce run_js, loosen sourceChangeAuthorized, or make the repo-write confirm optional.',
     wave1_p0_concurrency_tests_2026_07_19: 'Agent 1A shipped (merged as PR #82): test_cloud_budget_concurrency.js, test_vault_merge.js, test_specialist_team.js, plus ai/tests/homebase.test.js in validate.py.',
     fable_audit_2026_07_19: 'The Fable session executed FABLE_AUDIT_BRIEF P0/P1 on branch claude/multimodal-ai-chatbot-4r8s23 (PR #80): sub-agent tool boundary enforced at execution time, reservation settle/release idempotency on chat and fixed-cost paths, cross-device deletion tombstones through the encrypted vault, a 45-check deterministic safety suite extracting the real production functions (ai/tests/homebase.test.js — includes the PR #71 failover cooldowns), and a voice UX layer (audio-reactive orb/bars, local voice commands, split captions with per-reply route/cost, engine badge, repeat, opt-in echo-guarded barge-in) ported ON TOP of the PR #75 reliability engine with every #75 contract preserved and re-verified (one-tap gate, blocked-answer recovery, free-first plans, tap-to-finish).',
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
     voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
     app_ui_polish_2026_07_20: 'Earlier same-day token polish (indigo aurora calm-down). Superseded for palette by cockpit_wave0_2026_07_20 teal system; elevation/type lessons still apply.',
-    state: 'Dashboard Wave 0 live via PR #91. This branch ships Homebase + Finance Wave 0 cockpit alignment. FABLE_AUDIT_BRIEF.md remains the security/routing audit entrypoint. Google Drive consent/passphrase push-pull still requires the user on each device.',
-    latest_fix: 'Cockpit Wave 0 visual system across Tesla dashboard, Homebase, and Finances. Prior on main: advanced voice, Wave 1 P0 security, concurrency harnesses.',
+    state: 'Wave 1 hot-rod cockpit across Tesla dashboard, Homebase, and Finances on branch cursor/complete-ui-refresh-de9b. FABLE_AUDIT_BRIEF.md remains the security/routing audit entrypoint.',
+    latest_fix: 'Suite Wave 1 hot-rod cockpit — Tesla dashboard + Homebase + Finances (Syne, mint #2af5c4, instrument chrome).',
     start_here: [
       'HOMEBASE_FINANCE_EXCELLENCE_PLAN.md — Wave inventory for /ai/ and /finance/',
       'DASHBOARD_EXCELLENCE_PLAN.md — Tesla dashboard waves (cache.json still highest leverage)',
@@ -2752,9 +3351,12 @@ var HOMEBASE_CHANGELOG = {
     ],
     review_areas: [
       'DONE Wave 0 cockpit visuals on all three surfaces',
-      'P1 next: /ai/ runtime error beacon, vault conflict UI, mobile sync indicator',
+      'DONE Homebase Wave 1 hot-rod refresh (this branch, uncommitted)',
+      'DONE Pederson Finances Wave 1 hot-rod refresh (this branch, uncommitted)',
+      'P1 next: bring the Tesla dashboard shell forward to match Wave 1 hot-rod (Syne headers, mint accent, sharper radii) if David likes the direction',
+      'P1: /ai/ runtime error beacon, vault conflict UI, mobile sync indicator',
       'P1: team cancel/timeout stuck-UI; scheduler architecture spike',
-      'P1: Finance sync/schema plain-language recovery; self-host fonts',
+      'P1: Finance sync/schema plain-language recovery; self-host fonts (Syne + Plus Jakarta + JetBrains Mono woff2) for offline/car',
       'P2: route/cost comprehension outside voice; streaming TTS latency'
     ],
     preserve: [
@@ -2791,6 +3393,125 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-cockpit-hotrod-wave1-finance',
+      date: '2026-07-20',
+      commit: 'not yet committed — user instructed do-not-commit for this pass',
+      branch: 'cursor/complete-ui-refresh-de9b',
+      pull_request: 'none opened by this session',
+      title: 'Wave 1 HOT-ROD COCKPIT: complete structural UI refresh of Pederson Finances',
+      type: 'ui+design-system+chrome+docs',
+      depends_on: ['2026-07-20-cockpit-hotrod-wave1-homebase','2026-07-20-cockpit-wave0-homebase-finance'],
+      reported_by: 'David: make /finance/ unmistakably match Homebase Wave 1 with structural markup and CSS changes while preserving every data and behaviour contract.',
+      files_changed: ['finance/index.html','finance/README.md','ai/index.html (handoff/changelog only)'],
+      interfaces_changed: [
+        'Google Fonts link loads Syne display + Plus Jakarta Sans UI + JetBrains Mono labels',
+        'Finance CSS tokens use dark-first #05070a/#0a0e14, mint #2af5c4, steel #8b95a8, 10–14px radii, and a redesigned cool-gray prefers-color-scheme light variant',
+        'Header DOM moves #statusBadge into the three-part instrument bar; hero metrics remain the same four IDs in one horizontal rail',
+        '#emptyState drops the generic .card shell for a full-bleed import bay; import and Homebase actions retain their hooks',
+        'Bottom action layout becomes an equal three-segment Import / Export / Sync control with Sync mint-filled'
+      ],
+      changes: [
+        'Header now reads as one full-bleed instrument cluster: brand at left, live status in the centre, controls at right, large Syne position value, four horizontal metric cells, and a mono private/local signal line',
+        'Empty state is a large edge-to-edge dramatic panel with oversized Syne headline, primary bundle CTA, secondary Homebase link, geometric signal art, and no soft SaaS card treatment',
+        'Loaded dashboard uses uppercase mono instrument labels, denser sharp panels, 15px budget meters, account rows with mint left rails, and compact alerts with severity rails',
+        'Footer is exactly three equal segments at mobile and desktop widths; Import and Export are outlined/dark while Sync is filled mint',
+        'Light mode is intentionally redesigned in cool steel gray with dark instrument header and #0d8f74 signal colour'
+      ],
+      preserved_ids: 'Exact set parity against HEAD: all 29 IDs retained with no additions, removals, or duplicates.',
+      safety_guards: [
+        'Inline JavaScript is byte-for-byte unchanged against HEAD, preserving all localStorage keys and import/export/sync/service-worker/BroadcastChannel behaviour',
+        'All three data-import attributes remain present (two controls plus the selector reference), and every button/input ID remains unchanged',
+        'No financial snapshot, balance, transaction, statement, receipt, credential, or generated bundle was added'
+      ],
+      verification: [
+        'Extracted the single inline script from finance/index.html and node --check passed',
+        'Automated parity check found 29 unchanged unique IDs, three unchanged data-import hooks, and byte-identical inline JavaScript against HEAD',
+        'git diff --check passed for finance/index.html and finance/README.md'
+      ],
+      setup: ['No secrets, package install, migration, or environment setup required; Google Fonts remains the only visual CDN dependency.'],
+      known_limits: [
+        'Not committed or pushed because the user explicitly requested no commit',
+        'Google Fonts is not yet self-hosted, so the custom faces still depend on CDN availability',
+        'No private finance data was used for a populated visual smoke test; loaded-state structure is styled through preserved generated row classes'
+      ],
+      next_model: 'Preserve all finance IDs and the byte-unchanged behaviour block. Next finance work should prioritize plain-language schema/import recovery rather than another visual pass; do not add private financial fixtures to the repository.'
+    },
+    {
+      id: '2026-07-20-cockpit-hotrod-wave1-homebase',
+      date: '2026-07-20',
+      commit: 'not yet committed — user instructed do-not-commit for this pass',
+      branch: 'cursor/complete-ui-refresh-de9b',
+      pull_request: 'none opened by this session',
+      title: 'Wave 1 HOT-ROD COCKPIT: complete structural UI refresh of Homebase',
+      type: 'ui+design-system+chrome+type+docs',
+      depends_on: ['2026-07-20-cockpit-wave0-homebase-finance','2026-07-20-chat-header-simplify','2026-07-20-app-ui-polish'],
+      reported_by: 'David: previous teal token swaps looked the same — this must be an unmistakable hot-rod redesign while preserving ALL behaviour (routing, budget, vault, voice, settings IDs/handlers, mobile progressive disclosure).',
+      files_changed: ['ai/index.html'],
+      interfaces_changed: [
+        'Google Fonts link now loads Syne (display) + Plus Jakarta Sans (UI) + JetBrains Mono (mono)',
+        'CSS design tokens (:root / [data-theme]) — mint accent #2af5c4 (dark) / #0d8f74 (light) on #05070a/#f2f4f7; --font-display, --font, --mono; --r 14 / --r-sm 10 / --r-xs 6; --composer-r 12; --sidebar-w 244; --topbar-h 52; --steel; --hair; --acc-glow',
+        'DEFAULT_SETTINGS.accent moved to #2af5c4; loadState migration regex extended to include the legacy Wave-0 teal palette (#0f9f94/#3dd6c6/#1fb8a8/#1ec8b8) alongside the legacy indigo defaults so returning installs unmistakably see the new mint',
+        'ACCENTS palette swatches reordered with mint first',
+        'theme-color meta and applyTheme() theme-color value aligned to #05070a / #f2f4f7',
+        'HOT-ROD OVERRIDE CSS block appended at the end of <style> — restyles .brand/.brand .logo/.brand .nm/.brand .sub, .new-chat, #sidebar/.sb-head/.sb-search/.convo/.sb-sec/.sb-foot/.sb-dash-link, #topbar/.tb-app/.tb-sub/.home-btn/#sync-pill/.icon-btn, .dashboard/.dash-hero h1/.d-card/.d-head h3/.d-metric, .hub-tile/.hub-grid/.hub-nav-item, #empty-state h1/.hero-orb/.prompt-chip, .chat-float/.cf-head/.cf-orb/.cf-title/.cf-meta/.cf-modes (now segmented control)/.cf-actions, .mode-pill (main rail), #composer-wrap/#composer/#input/#send-btn/#mic-btn/#comp-hint/#query-model-control, .msg.user .bubble/.msg.assistant .avatar, #chat-fab/.fab-orb, .modal/.mo-head/.mo-tabs/.mo-tab/.mo-body/.set-row, .pop/.mm-group/.mm-item/.menu-item, #v-badge/#v-status, .council-box/.tool-box/.think-box/.plan-box/.codeblock, mobile body.is-mobile rules for the new chrome, focus-visible ring, thinner scrollbars',
+        'Copy: brand subtitle "AI Cockpit" -> "Command Cockpit"; #tb-sub default "Life dashboard" -> "Command deck" (JS FAB-state fallback string updated in lockstep so the topbar label stays in sync when the float is minimized)'
+      ],
+      changes: [
+        'Fonts: Syne is now the display face for the brand wordmark, dashboard hero, chat-float title, hub-tile titles, mode section labels, modal titles, and prompt-chip headers. Plus Jakarta Sans remains the UI face. JetBrains Mono is available on codeblocks and tool-call heads',
+        'Palette: night #05070a / #0a0e14 / #12161d / #1a1f2a; steel text; hairline borders; mint accent #2af5c4 with an --acc-glow token used by the FAB, send button, and focus ring. Light theme is redesigned to cool-gray + darker mint, not the old lavender-tinged mesh',
+        'Sidebar: narrower 244px rail with an outlined New-chat button (mint accent bar on the left instead of a purple gradient pill), denser 32–34px chat rows, thinner search field, instrument-uppercase section labels, and a foot with a tiny Dashboard link chip + icon strip',
+        'Topbar: thinner 52px strip; brand-mark-less title in Syne with a "COMMAND DECK" mint subtitle; right cluster of buttons (refresh / sync-pill / connectors / settings) grouped with hairline separators; sync-pill now an uppercase instrument chip',
+        'Dashboard hub: greeting/hero in Syne large type, no gradient text; hub tiles are square-ish cards with a mint top-accent hairline, sharp 12px corners, outlined mono icons, and instrument uppercase title/description; the dashboard cards inherit the same rhythm and Syne metric type',
+        'Chat float: flatter, sharper chrome with a Syne title, mono meta line, mode pills rendered as a segmented control on a dark-gray track (each pill still uses its intentional --pill-c hue so voice/agent/research/council recognition remains); the composer becomes a bold command bar with a mint SQUARE send button in a 12px radius',
+        'FAB: geometric mint mark — a solid mint tile whose orb slot shows a diamond glyph via CSS clip-path (no rainbow radial); label rendered in uppercase Syne',
+        'Settings + modals: sharper 14px panels with denser 44px rows; section labels are uppercase 10.5px letter-spaced; tabs sit on hairline borders; popovers/model picker match',
+        'Mobile: body.is-mobile rules updated to match the new chrome — smaller brand mark, tighter chat-float radius, 12px composer, iOS-safe 16px input, retained one-select settings section switcher and expandable disclosure rows'
+      ],
+      preserved_ids: [
+        'app / sidebar / sb-head / brand / brand-logo / brand-lockup',
+        'sb-close / home-nav-btn / hub-nav / sb-chats-head / new-chat-btn',
+        'convo-search / convo-list / sb-foot / theme-quick / sb-settings / sb-scrim',
+        'main / topbar / menu-btn / home-btn / tb-title / tb-app / tb-sub / tb-spacer',
+        'dash-refresh / sync-pill / connectors-btn / settings-btn',
+        'dash-scroll / dashboard / homebase-changelog / homebase-changelog-body',
+        'chat-float / cf-head / cf-brand / cf-orb / cf-title / cf-meta / cf-modes / cf-actions',
+        'model-btn / model-dot / model-name / model-prov / tools-btn / chat-new / cf-more / chat-min',
+        'council-btn / voice-btn / memory-btn / tasks-btn / chat-expand (cf-stash hidden)',
+        'chat-scroll / chat / jump-btn / composer-wrap / pending-atts / composer',
+        'attach-btn / input / mic-btn / send-btn / comp-hint / query-model-control / query-model-select / hint-model / hint-tools / hint-council / hint-tokens',
+        'chat-fab / fab-orb / fab-lab',
+        'finance-file / file-input / camera-input',
+        'model-menu / mm-quick / mm-advanced-toggle / mm-advanced / mm-filter / mm-list',
+        'attach-menu / cf-more-menu',
+        'voice-ov / v-canvas / v-stage / v-badge / v-rings / v-glow / v-orb / v-wave / v-status / v-you / v-line / v-route / v-audio-retry / v-ctl / v-mute / v-again / v-end / v-hint',
+        'settings-ov (+ .mo-tabs data-tab providers/chat/voice/toolsx/hub/council/dev/look/data) / settings-mobile-section'
+      ],
+      safety_guards: [
+        'Only CSS token values, appended CSS overrides, HTML copy strings (brand subtitle + #tb-sub), and the accent-migration regex changed — no chat-routing, cloud-budget, vault, voice engine, MCP, tool-scope, sub-agent, or repository-mutation logic touched',
+        'The chat-float #cf-modes segmented styling is CSS-only; the mode-pill hue (--pill-c) is still set per pill by existing JS so voice/agent/research/council each keep their intentional recognition color',
+        'The hub-tile top-accent line uses the existing --hc variable that already differentiates modules; nothing about hub layout, drag-order, or agent tools changed',
+        'Mode-pill / hub-tile / chat-float structure unchanged — this file adds NO new IDs and REMOVES none; JS querySelectors and event bindings still resolve exactly as before',
+        'body.is-mobile progressive disclosure preserved (settings mobile section picker, disclosure summaries, 44px touch targets, iOS 16px input, one-column set-row wrapping)'
+      ],
+      verification: [
+        'python3 extract-scripts one-liner from CLAUDE.md against /workspace/ai/index.html, then node --check on the extracted JS — clean',
+        'grep confirms Syne + Plus Jakarta Sans + JetBrains Mono loaded via one Google Fonts link',
+        'grep confirms DEFAULT_SETTINGS.accent = #2af5c4 and ACCENTS[0] = #2af5c4',
+        'grep confirms the loadState migration regex now matches the legacy Wave-0 teal defaults in addition to the legacy indigo defaults'
+      ],
+      setup: [
+        'No new secrets or environment variables required',
+        'Google Fonts is already a dependency from Wave 0; this pass adds Syne and JetBrains Mono weights to the same request'
+      ],
+      known_limits: [
+        'Not committed in this session — user instruction was do-not-commit. Next model or human will commit and open the PR',
+        'The Tesla dashboard (/) and /finance/ shells still use the Wave-0 teal cockpit; if David likes the Wave-1 direction they should be brought forward in a follow-up. Do not silently apply this palette to those files without an explicit go-ahead — the Tesla dashboard has cache-driven regex constraints (CLAUDE.md) and Pederson Finances has a data-free publishing rule',
+        'Google Fonts is still a shared CDN dependency — self-hosting woff2 for all three faces is a follow-up wave for offline/car use',
+        'Users who deliberately picked a non-default custom accent still keep it; only the default indigo AND default Wave-0 teal accents migrate'
+      ],
+      next_model: 'Read current_handoff and this entry first. If David approves the Wave 1 direction, propose a follow-up PR that (a) commits this refresh, (b) brings the Tesla dashboard and /finance/ shells forward with the same tokens, and (c) self-hosts the fonts. Do NOT re-audit FABLE_AUDIT_BRIEF verified P0/P1 packages without contradictory evidence — the refresh is chrome-only and does not touch those boundaries.'
+    },
     {
       id: '2026-07-20-cockpit-wave0-homebase-finance',
       date: '2026-07-20',
@@ -5183,7 +5904,7 @@ function setChatState(state){
     setTimeout(function(){ try { $('input').focus(); } catch(e){} }, 200);
   }
   if ($('tb-sub')){
-    $('tb-sub').textContent = state === 'fab' ? 'Life dashboard' : 'AI at your side';
+    $('tb-sub').textContent = state === 'fab' ? 'Command deck' : 'AI at your side';
   }
   if ($('home-btn')) $('home-btn').classList.toggle('on', state === 'fab');
 }
@@ -6875,7 +7596,9 @@ function loadState(){
   S.settings.providerHealth = S.settings.providerHealth || {};
   if (!Array.isArray(S.settings.council.members)) S.settings.council.members = [];
   // Wave 0 cockpit: migrate legacy indigo default accent so existing installs show teal
-  if (!S.settings.accent || /^#?(4f46e5|6366f1|818cf8)$/i.test(S.settings.accent)) {
+  // Wave 1 hot-rod: also migrate the prior Wave-0 teal defaults (#0f9f94, #3dd6c6, #1fb8a8)
+  // so returning users unmistakably see the new mint command-deck accent
+  if (!S.settings.accent || /^#?(4f46e5|6366f1|818cf8|0f9f94|3dd6c6|1fb8a8|1ec8b8)$/i.test(S.settings.accent)) {
     S.settings.accent = DEFAULT_SETTINGS.accent;
   }
   S.keys = lsGet(LS_KEYS, {});
@@ -12649,7 +13372,7 @@ function renderDevelopmentPane(){
   pane.appendChild(note);
 }
 
-var ACCENTS = ['#3dd6c6','#0f9f94','#0ea5e9','#3b82f6','#34a853','#fbbc04','#ea4335','#a78bfa'];
+var ACCENTS = ['#2af5c4','#0d8f74','#0ea5e9','#3b82f6','#f59e0b','#e11d48','#a78bfa','#34a853'];
 function renderLookPane(){
   var pane = $('pane-look');
   pane.innerHTML = '';
@@ -12765,7 +13488,7 @@ function applyTheme(){
   document.documentElement.style.setProperty('--acc-soft2', 'color-mix(in srgb, ' + S.settings.accent + ' 30%, transparent)');
   document.documentElement.style.setProperty('--fs', S.settings.fontSize + 'px');
   var meta = qs('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', t === 'light' ? '#eef1f6' : '#07090d');
+  if (meta) meta.setAttribute('content', t === 'light' ? '#f2f4f7' : '#05070a');
 }
 
 /* ============================ misc UI wiring ============================ */
