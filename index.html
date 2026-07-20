@@ -1130,7 +1130,7 @@ body[data-mode="charging"] .charge-session{
 
       <!-- Three equal reach targets — Voice is the filled primary -->
       <div class="command-actions" aria-label="Quick actions">
-        <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read weather, headlines and scores aloud">Briefing</button>
+        <a class="command-action" href="ai/?voice=1&amp;brief=1" title="Homebase AI reads your briefing aloud">Briefing</a>
         <a class="command-action voice" href="ai/?voice=1" title="Open Homebase — your full AI assistant (the corner orb handles quick voice)">Homebase</a>
         <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Full-screen glance view">Glance</button>
       </div>
@@ -7907,6 +7907,16 @@ try {
   function stocksLine() { var a = [], x = stockOne('XEQT.TO', 'X E Q T'), t = stockOne('^GSPTSE', 'The T S X'); if (x) a.push(x); if (t) a.push(t); return a.length ? a.join(' ') : 'I don’t have stock prices cached yet — they update hourly.'; }
   function timeLine() { var n = new Date(); return 'It’s ' + n.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' }) + ', ' + n.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }) + '.'; }
 
+  // David's briefing hands off to Homebase — its AI reads a spoken briefing
+  // (ai/?voice=1&brief=1). runBriefing below stays as the in-car no-mic fallback:
+  // the Tesla browser blocks Homebase's live API calls, so there the local cache
+  // briefing plays instead (see noMic()).
+  function openHomebaseBrief() {
+    setCap('Opening your Homebase briefing…', true);
+    try { stopSpeaking(); } catch (e) {}
+    location.href = 'ai/?voice=1&brief=1';
+  }
+
   // ── full briefing (audible MP3 path; works in the car) ──
   function runBriefing() {
     recWantOn = false; stopRec(); stopSpeaking();
@@ -7935,7 +7945,7 @@ try {
     if (kw(t, 'game')) { try { goPanel('games'); } catch (e) {} speak('Opening games.'); return; }
     if (kw(t, 'open weather', 'weather page', 'full forecast', 'forecast page', 'weather panel')) { try { goPanel('weather'); } catch (e) {} speak(weatherLine()); return; }
     if (kw(t, 'home', 'dashboard', 'main screen', 'go live', 'live view')) { try { goPanel('live'); } catch (e) {} speak('Here’s your dashboard.'); return; }
-    if (kw(t, 'briefing', 'brief me', 'catch me up', 'rundown', 'read me everything', 'my day')) { runBriefing(); return; }
+    if (kw(t, 'briefing', 'brief me', 'catch me up', 'rundown', 'read me everything', 'my day')) { openHomebaseBrief(); return; }
     if (kw(t, 'weather', 'temperature', 'how cold', 'how warm', 'how hot', 'degrees', 'raining', 'snow')) { speak(weatherLine()); return; }
     if (kw(t, 'news', 'headline', 'happening', 'stories', 'story')) { speak(newsLine()); return; }
     if (kw(t, 'pharmacy', 'medicine', 'medical', 'drug', 'health')) { speak(pharmaLine()); return; }
@@ -7960,7 +7970,7 @@ try {
     mode = 'idle'; orbClass(); stopDraw(); setCap('', false);
   }
   function toggle() { if (active) deactivate(); else activate(); }
-  function playBriefingDirect() { ensureActive(); runBriefing(); }
+  function playBriefingDirect() { openHomebaseBrief(); }
 
   // ── input: tap = toggle, hold (>=550ms) = briefing (a gesture beyond a button) ──
   var pressStart = 0, longFired = false;

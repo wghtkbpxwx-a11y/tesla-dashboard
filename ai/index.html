@@ -4208,8 +4208,9 @@ var HOMEBASE_CHANGELOG = {
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
     voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
     app_ui_polish_2026_07_20: 'Earlier same-day token polish (indigo aurora calm-down). Superseded for palette by cockpit_wave0_2026_07_20 teal system; elevation/type lessons still apply.',
-    state: 'Design-depth UI on branch cursor/design-depth-de9b. Prior apple-simplicity + UX optimization retained.',
-    latest_fix: 'Design depth — clock-first Live, sliding dock pill, Drive/Charging behaviour, Messages-like Homebase, Wallet Finance hierarchy.',
+    dashboard_ai_briefing_2026_07_20: 'FABLE pass (branch claude/multimodal-ai-chatbot-4r8s23), ai/index.html only, ADDITIVE + flag-gated. David: "make it so the homebase AI reads my briefing instead." New deep link ai/?voice=1&brief=1: maybeAutoVoice() detects &brief and sets VOICE.pendingBrief AFTER startVoiceMode (which now resets VOICE.pendingBrief=false with the other VOICE fields, so it can never go stale); the existing #v-orb idle one-tap gate, after unlockAudio(), consumes the flag once and calls new runVoiceBrief() instead of voiceListen(); runVoiceBrief() calls the unchanged voiceUtterance(briefPrompt) so the reply streams + is spoken through the normal voice pipeline, then listening resumes as usual. Ordinary voice is byte-for-byte unchanged (flag defaults false; only the &brief deep link sets it). One-tap gate, free-device-first, blocked-answer recovery, budget guard all preserved. Interfaces: maybeAutoVoice, startVoiceMode reset, #v-orb idle handler, new runVoiceBrief. Dashboard side (index.html): the command-bar Briefing button + the voice orb\'s "briefing" command/long-press now open ai/?voice=1&brief=1; the orb\'s no-mic (in-car) fallback keeps the local audible MP3 briefing so the Tesla still works offline. ai/?voice=1 guardrail (>=4) preserved (brief link still contains it). Verified: extract+node --check on both files; validate.py; ai/tests/homebase.test.js.',
+    state: 'Design-depth UI on branch cursor/design-depth-de9b (Cursor). Independently, FABLE branch claude/multimodal-ai-chatbot-4r8s23 shipped the dashboard voice orb + theme-cohesion + Live/Weather balance + Glance opacity, and now routes the dashboard Briefing to Homebase AI (ai/?voice=1&brief=1).',
+    latest_fix: 'Dashboard Briefing now hands off to Homebase AI, which reads a spoken briefing after the one-tap voice gate (ai/?voice=1&brief=1).',
     start_here: [
       'HOMEBASE_FINANCE_EXCELLENCE_PLAN.md — Wave inventory for /ai/ and /finance/',
       'DASHBOARD_EXCELLENCE_PLAN.md — Tesla dashboard waves (cache.json still highest leverage)',
@@ -4265,6 +4266,34 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-dashboard-ai-briefing',
+      date: '2026-07-20',
+      commit: 'pending',
+      branch: 'claude/multimodal-ai-chatbot-4r8s23',
+      pull_request: 'pending',
+      title: 'Dashboard Briefing → Homebase AI reads it aloud (ai/?voice=1&brief=1)',
+      type: 'feature',
+      reported_by: 'David: "Can you make it so the homebase AI reads my briefing instead?"',
+      summary: 'The Tesla dashboard Briefing now hands off to Homebase, whose AI speaks a personalized briefing through the existing voice pipeline after the one-tap gate. Additive + flag-gated; ordinary voice unchanged.',
+      files_changed: ['ai/index.html', 'index.html'],
+      interfaces_changed: ['maybeAutoVoice (&brief detect)', 'startVoiceMode (VOICE.pendingBrief reset)', '#v-orb idle handler', 'new runVoiceBrief()'],
+      behaviour: [
+        'ai/?voice=1&brief=1 → one-tap gate → AI reads a spoken briefing (weather, local/national news, teams, markets), then listening resumes',
+        'Dashboard command-bar Briefing + orb "briefing" command/long-press deep-link here',
+        'Orb no-mic (in-car) fallback keeps the local audible MP3 briefing so the Tesla still works offline'
+      ],
+      guards: [
+        'Flag-gated: VOICE.pendingBrief defaults false and is reset in startVoiceMode, so normal voice is byte-for-byte unchanged',
+        'One-tap deep-link gate, free-device-first, blocked-answer recovery, and the $50 budget guard all preserved',
+        '≥4 ai/?voice=1 entry points preserved (the &brief link still contains ai/?voice=1)'
+      ],
+      verification: ['extract+node --check (both files)', 'validate.py', 'ai/tests/homebase.test.js'],
+      setup: [],
+      known_limits: ['In the Tesla browser Homebase live API calls are blocked, so the AI briefing is a phone/desktop feature; the orb keeps the local cache briefing in-car'],
+      dependencies: ['PR #75 voice engine', 'dashboard voice orb (PR #100)'],
+      next_model: 'If David wants the briefing spoken in-car too, it must use the dashboard cache path (no live API in the Tesla), not Homebase.'
+    },
     {
       id: '2026-07-20-design-depth',
       date: '2026-07-20',
@@ -12948,7 +12977,7 @@ function startVoiceMode(opts){
   ensureConvo();
   VOICE.active = true; VOICE.muted = false; VOICE.failCount = 0;
   VOICE.forceCloudCapture = false; VOICE.lastInterim = ''; VOICE.lastTranscript = ''; VOICE.lastError = '';
-  VOICE.lastReply = ''; VOICE.lastSpoken = '';
+  VOICE.lastReply = ''; VOICE.lastSpoken = ''; VOICE.pendingBrief = false;
   TTSQ.blockedText = ''; TTSQ.lastError = '';
   $('voice-ov').classList.remove('audio-blocked');
   if (!opts.deferListen) unlockAudio();
@@ -13252,6 +13281,15 @@ function voiceUtterance(txt){
   VOICE.replying = true;
   sendMessage(txt);
 }
+/* Deep-linked spoken briefing (ai/?voice=1&brief=1 from the Tesla dashboard):
+   after the one-tap audio gate, ask the AI for a briefing through the normal
+   voice pipeline so the reply streams and is read aloud, then listening resumes
+   as usual. No change to ordinary voice — only runs when VOICE.pendingBrief was
+   set by the &brief deep link. */
+function runVoiceBrief(){
+  if ($('v-hint')) $('v-hint').textContent = 'Reading your briefing · tap the orb or say “stop” to interrupt';
+  voiceUtterance('Give me my morning briefing out loud: a concise, natural spoken rundown of the current weather for Surrey and Vancouver BC, the top few local and national headlines, how my sports teams (Canucks, Blue Jays, Raptors, Whitecaps, BC Lions) are doing, and a quick markets pulse. Keep it brief and conversational for listening — no markdown, no lists.');
+}
 function voiceDelta(t){
   if (!VOICE.active) return;
   VOICE.buffer += t;
@@ -13411,6 +13449,7 @@ function initVoice(){
     } else if (VOICE.state === 'idle'){
       unlockAudio();
       VOICE.muted = false; voiceMuteIcon();
+      if (VOICE.pendingBrief){ VOICE.pendingBrief = false; runVoiceBrief(); return; }
       if ($('v-hint')) $('v-hint').textContent = 'Tap the orb to interrupt · say “stop”, “repeat that” or “new chat” · saved to the chat';
       voiceListen();
     }
@@ -14955,9 +14994,19 @@ function maybeAutoVoice(){
     wantVoice = /[?&#]voice/.test(location.search + location.hash);
   }
   if (!wantVoice) return false;
+  var wantBrief = false;
+  try { wantBrief = new URLSearchParams(location.search).get('brief') !== null; }
+  catch(e){ wantBrief = /[?&]brief/.test(location.search); }
   try { openChatFloat(false); } catch(e){}
   lsSet(LS_BOOT, true); /* skip the welcome tour when deep-linked */
   startVoiceMode({deferListen:true});
+  if (wantBrief && VOICE.active){
+    /* Tesla dashboard "Briefing" → let Homebase's AI read it aloud after the
+       same one-tap gate (mic + spoken replies stay authorized together). */
+    VOICE.pendingBrief = true;
+    vStatus('Tap once — then I’ll read your briefing');
+    if ($('v-hint')) $('v-hint').textContent = 'One tap enables sound, then your AI briefing plays';
+  }
   return true;
 }
 function initWelcome(){
