@@ -1534,6 +1534,15 @@ body.is-desktop .chat-float[data-state="open"]{
   #v-line{font-size:15px;min-height:44px;-webkit-line-clamp:3}
   #v-hint{max-width:320px;line-height:1.4}
 }
+/* Embedded in the Tesla dashboard iframe — quieter chrome, voice-first */
+body.hb-embedded #sidebar,
+body.hb-embedded #chat-fab,
+body.hb-embedded .sb-dash-link{display:none !important}
+body.hb-embedded #app{grid-template-columns:1fr}
+body.hb-ambient #dashboard,
+body.hb-ambient #dash-scroll{display:none !important}
+body.hb-ambient #chat-float{inset:0;width:100%;height:100%;max-width:none;border-radius:0;border:none}
+body.hb-ambient #voice-ov{border-radius:0}
 @media(max-height:620px) and (orientation:landscape){
   #voice-ov{justify-content:flex-start;overflow-y:auto;padding-top:max(16px,env(safe-area-inset-top))}
   .v-stage{gap:10px}
@@ -4210,7 +4219,7 @@ var HOMEBASE_CHANGELOG = {
     app_ui_polish_2026_07_20: 'Earlier same-day token polish (indigo aurora calm-down). Superseded for palette by cockpit_wave0_2026_07_20 teal system; elevation/type lessons still apply.',
     dashboard_ai_briefing_2026_07_20: 'FABLE pass (branch claude/multimodal-ai-chatbot-4r8s23), ai/index.html only, ADDITIVE + flag-gated. David: "make it so the homebase AI reads my briefing instead." New deep link ai/?voice=1&brief=1: maybeAutoVoice() detects &brief and sets VOICE.pendingBrief AFTER startVoiceMode (which now resets VOICE.pendingBrief=false with the other VOICE fields, so it can never go stale); the existing #v-orb idle one-tap gate, after unlockAudio(), consumes the flag once and calls new runVoiceBrief() instead of voiceListen(); runVoiceBrief() calls the unchanged voiceUtterance(briefPrompt) so the reply streams + is spoken through the normal voice pipeline, then listening resumes as usual. Ordinary voice is byte-for-byte unchanged (flag defaults false; only the &brief deep link sets it). One-tap gate, free-device-first, blocked-answer recovery, budget guard all preserved. Interfaces: maybeAutoVoice, startVoiceMode reset, #v-orb idle handler, new runVoiceBrief. Dashboard side (index.html): the command-bar Briefing button + the voice orb\'s "briefing" command/long-press now open ai/?voice=1&brief=1; the orb\'s no-mic (in-car) fallback keeps the local audible MP3 briefing so the Tesla still works offline. ai/?voice=1 guardrail (>=4) preserved (brief link still contains it). Verified: extract+node --check on both files; validate.py; ai/tests/homebase.test.js.',
     state: 'Design-depth UI on branch cursor/design-depth-de9b (Cursor). Independently, FABLE branch claude/multimodal-ai-chatbot-4r8s23 shipped the dashboard voice orb + theme-cohesion + Live/Weather balance + Glance opacity, and now routes the dashboard Briefing to Homebase AI (ai/?voice=1&brief=1).',
-    latest_fix: 'Dashboard Briefing now hands off to Homebase AI, which reads a spoken briefing after the one-tap voice gate (ai/?voice=1&brief=1).',
+    latest_fix: 'Dashboard orb → ambient Homebase Voice; Briefing button = local cache TTS on car speakers.',
     start_here: [
       'HOMEBASE_FINANCE_EXCELLENCE_PLAN.md — Wave inventory for /ai/ and /finance/',
       'DASHBOARD_EXCELLENCE_PLAN.md — Tesla dashboard waves (cache.json still highest leverage)',
@@ -4266,6 +4275,29 @@ var HOMEBASE_CHANGELOG = {
     'Preserve the central runChat cloud reservation path, direct-first/OpenRouter-fallback ordering, autoRoute/cloudBudget APIs, bounded sub-agent tool allowlists, and draft-PR-only repository write guards'
   ],
   entries: [
+    {
+      id: '2026-07-20-dash-ambient-voice',
+      date: '2026-07-20',
+      commit: 'pending',
+      branch: 'cursor/dashboard-inline-voice-de9b',
+      pull_request: 'pending',
+      title: 'Dashboard orb → ambient Homebase Voice; Briefing = local TTS',
+      type: 'feat+ux',
+      summary: 'Tesla dashboard header orb opens Homebase Voice in ambient embed (dashboard stays visible; orb mirrors listening/speaking via postMessage). Briefing button reads the cache digest aloud on car speakers. Hold-orb also plays local briefing. Phone mic + Bluetooth to Tesla speakers is the recommended duplex setup.',
+      files_changed: ['index.html','ai/index.html','.github/scripts/validate.py'],
+      interfaces_changed: ['openHomebase ambient','homebaseNotifyParent','setVState postMessage','maybeAutoVoice embed/ambient','#dash-orb openAmbientVoice','briefingToggle on Briefing button'],
+      behaviour: [
+        'Orb tap → ambient Homebase Voice (not auto-briefing)',
+        'Briefing button → briefingToggle() local digest TTS',
+        'Ambient panel stays tappable until first listening/speaking, then minimizes; chip expands',
+        'Homebase posts homebase-voice state to parent for orb animation'
+      ],
+      guards: ['DASHBOARD_CACHE marker untouched','no live fetch in orb controller','iframe allow=microphone kept'],
+      verification: ['node --check','validate.py'],
+      setup: ['Hard-reload dashboard after merge','For AI chat: open Voice on phone with Bluetooth to car, or tap once in ambient panel'],
+      known_limits: ['Tesla browser has no mic — use phone for listening; car speakers play TTS from dashboard/phone BT','Homebase live APIs may be blocked in-car; local Briefing always works from cache'],
+      next_model: 'If David wants true cross-device mic sync (phone mic driving Tesla-visible orb without opening phone UI), that needs a pairing channel beyond same-origin iframe.'
+    },
     {
       id: '2026-07-20-dashboard-ai-briefing',
       date: '2026-07-20',
@@ -12703,6 +12735,21 @@ function vStatus(t){ $('v-status').textContent = t; }
 function vLine(t){ $('v-line').textContent = t || ''; }
 function vYou(t){ var el = $('v-you'); if (el) el.textContent = t ? '“' + t + '”' : ''; }
 function vRoute(t){ var el = $('v-route'); if (el) el.textContent = t || ''; }
+/* When Homebase Voice is embedded in the Tesla dashboard iframe, mirror
+   listening/speaking state to the parent so #dash-orb stays dynamic while the
+   Live panel remains visible. */
+function homebaseNotifyParent(payload){
+  try {
+    if (!window.parent || window.parent === window) return;
+    window.parent.postMessage(Object.assign({ source: 'homebase-voice' }, payload || {}), '*');
+  } catch(e){}
+}
+function homebaseIsEmbedded(){
+  try {
+    if (window.parent && window.parent !== window) return true;
+    return new URLSearchParams(location.search).get('embed') !== null;
+  } catch(e){ return /[?&]embed=/.test(location.search); }
+}
 function setVState(state){
   VOICE.state = state;
   var ov = $('voice-ov');
@@ -12714,6 +12761,11 @@ function setVState(state){
   else vStatus(VOICE.muted ? 'Paused — tap the orb to talk' : 'Voice mode');
   if (state === 'speaking') voiceBargeStart(); else voiceBargeStop();
   voiceVizKick(state);
+  homebaseNotifyParent({
+    type: 'voice-state',
+    state: state || 'idle',
+    caption: ($('v-line') && $('v-line').textContent) || ($('v-status') && $('v-status').textContent) || ''
+  });
 }
 function ensureVoiceWave(){
   var w = $('v-wave'); if (!w || w.childNodes.length) return;
@@ -13021,6 +13073,7 @@ function endVoiceMode(){
   $('voice-ov').classList.remove('open');
   if (VIZ.raf){ cancelAnimationFrame(VIZ.raf); VIZ.raf = 0; }
   setVState('idle');
+  homebaseNotifyParent({ type: 'voice-ended' });
 }
 function stopVoiceRec(discard){
   if (VOICE.rec){ try { VOICE.rec.abort ? VOICE.rec.abort() : VOICE.rec.stop(); } catch(e){} VOICE.rec = null; }
@@ -14997,15 +15050,26 @@ function maybeAutoVoice(){
   var wantBrief = false;
   try { wantBrief = new URLSearchParams(location.search).get('brief') !== null; }
   catch(e){ wantBrief = /[?&]brief/.test(location.search); }
+  var wantAmbient = false;
+  try { wantAmbient = new URLSearchParams(location.search).get('ambient') !== null; }
+  catch(e){ wantAmbient = /[?&]ambient/.test(location.search); }
   try { openChatFloat(false); } catch(e){}
   lsSet(LS_BOOT, true); /* skip the welcome tour when deep-linked */
+  if (homebaseIsEmbedded()){
+    try { document.body.classList.add('hb-embedded'); } catch(e){}
+    if (wantAmbient) try { document.body.classList.add('hb-ambient'); } catch(e){}
+  }
   startVoiceMode({deferListen:true});
+  homebaseNotifyParent({ type: 'voice-ready', state: 'idle' });
   if (wantBrief && VOICE.active){
-    /* Tesla dashboard "Briefing" → let Homebase's AI read it aloud after the
-       same one-tap gate (mic + spoken replies stay authorized together). */
+    /* Tesla dashboard legacy &brief deep link — AI reads briefing after one-tap.
+       Primary dashboard Briefing button now uses local cache TTS instead. */
     VOICE.pendingBrief = true;
     vStatus('Tap once — then I’ll read your briefing');
     if ($('v-hint')) $('v-hint').textContent = 'One tap enables sound, then your AI briefing plays';
+  } else if (wantAmbient && VOICE.active){
+    vStatus('Tap once to start Homebase Voice');
+    if ($('v-hint')) $('v-hint').textContent = 'Dashboard stays behind this panel · phone mic + car Bluetooth speakers work best';
   }
   return true;
 }

@@ -72,10 +72,9 @@ def check_cache(html):
 
 
 def check_dashboard_orb(html):
-    """Corner voice orb: it must live in the sticky <header> (never a blocking
-    center panel — the bug David reported), toggle on/off, stay cache-driven with
-    no live fetch, and fall back to the audible briefing where there's no mic (the
-    Tesla browser). This is what makes it work in the car and never cover a module."""
+    """Corner voice orb: lives in the sticky <header>, opens ambient Homebase
+    Voice without leaving the dashboard, and keeps a local cache briefing on
+    long-press / Briefing button for the Tesla (no mic / offline)."""
     if 'id="dash-orb"' not in html or 'id="dash-orb-cap"' not in html:
         fail("voice orb (#dash-orb / #dash-orb-cap) missing from the dashboard")
         return
@@ -87,20 +86,34 @@ def check_dashboard_orb(html):
     ok("voice orb present in the sticky header (corner, non-blocking)")
     marker = "VOICE ORB (top-right"
     ctrl = html.split(marker, 1)[1] if marker in html else ""
-    needles = {
-        "cache-driven answers (DASHBOARD_CACHE)": "DASHBOARD_CACHE",
-        "best-effort speech input (SpeechRecognition)": "SpeechRecognition",
-        "in-car briefing fallback (briefingToggle)": "briefingToggle",
-        "on/off toggle (deactivate)": "function deactivate(",
-    }
-    missing = [n for n, s in needles.items() if s not in ctrl]
-    if missing:
-        fail("voice orb controller missing: " + "; ".join(missing))
-    elif "fetchCached(" in ctrl or re.search(r"\bfetch\(", ctrl):
+    missing = []
+    if "openAmbientVoice" not in ctrl:
+        missing.append("openAmbientVoice")
+    if "playLocalBriefing" not in ctrl:
+        missing.append("playLocalBriefing")
+    if "function deactivate(" not in ctrl:
+        missing.append("deactivate")
+    if "homebase-voice" not in html:
+        missing.append("homebase-voice postMessage")
+    if "fetchCached(" in ctrl or re.search(r"\bfetch\(", ctrl):
         fail("voice orb must stay cache-driven (no live fetch) — the Tesla browser "
              "blocks cross-origin calls")
+    elif missing:
+        fail("voice orb controller missing: " + "; ".join(missing))
     else:
-        ok("voice orb is cache-driven, toggles on/off, and falls back to the in-car briefing")
+        ok("voice orb opens ambient Homebase Voice; Briefing stays local cache TTS")
+
+    if 'id="hb-embed"' not in html or "function openHomebase" not in html:
+        fail("embedded Homebase host (#hb-embed / openHomebase) missing")
+    elif "ambient" not in html:
+        fail("openHomebase ambient mode missing — dashboard must stay visible")
+    else:
+        ok("embedded Homebase ambient host present")
+
+    if 'onclick="briefingToggle()"' not in html:
+        fail("Briefing button must call briefingToggle() for in-car speakers")
+    else:
+        ok("Briefing button uses local briefingToggle()")
 
 
 def check_python():
