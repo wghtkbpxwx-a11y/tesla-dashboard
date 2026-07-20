@@ -4227,7 +4227,7 @@ var HOMEBASE_CHANGELOG = {
     voice_mobile_hotfix_2026_07_19: 'FOLLOW-UP after David reported no sound + slowness on the mobile app. Root cause: the PR #80 audio-reactive meter tapped the TTS playback element via createMediaElementSource(TTSQ.sharedAudio), which reroutes the <audio> into Web Audio and silences it on mobile Safari (suspended context + WebKit blob-source bug). Fix REMOVES the playback tap entirely. Latency: first spoken chunk fast-flushes on the opening clause, record->transcribe endpointing 1800->1200ms, silent device-voice fails over to cloud in 1600ms. Superseded/extended by the voice upgrade below.',
     voice_upgrade_2026_07_19: 'THIRD voice pass after David: "too quiet on my phone; make it advanced like GPT/Gemini; the Tesla mic is dead so the phone (on the charging plate) does the voice; it looks like Sesame Street." The phone is now the real voice device. (1) LOUDNESS/QUALITY: new playTTSBuffer plays cloud TTS through decodeAudioData -> AudioBufferSourceNode -> GainNode(S.settings.speech.volume, default 2.0x) -> DynamicsCompressor limiter -> AnalyserNode -> destination. This exceeds the <audio> 100% ceiling, is loud+clean, and is SAFE on iOS because it is a buffer source, not a createMediaElementSource tap. Element path (playTTSBlob) stays as fallback; browser speechSynthesis volume set to 1. (2) MOBILE-FIRST: ttsPump on is-mobile + "auto" + speech.mobileCloudVoice(default true) prefers a ready cloud voice (louder/more reliable than iOS speechSynthesis) inside the $50 guard; Device-only stays the no-spend choice. (3) UI: overlay redesigned to a premium luminous sphere, then a fully dynamic canvas energy orb (see 2026-07-20 entry). CI guards in .github/scripts/test_voice_mode.js forbid any createMediaElementSource playback tap and lock in the buffer/gain path.',
     app_ui_polish_2026_07_20: 'Earlier same-day token polish (indigo aurora calm-down). Superseded for palette by cockpit_wave0_2026_07_20 teal system; elevation/type lessons still apply.',
-    state: 'Implemented on branch cursor/connectors-voice-rw-de9b — verify/commit/PR this session.',
+    state: 'PR #104 open (draft) on cursor/connectors-voice-rw-de9b — awaiting review/merge + Gmail API setup.',
     latest_fix: 'Connectors + Voice read/write (Gmail OAuth, dashboard brief/traffic, voice chips).',
     start_here: [
       'HOMEBASE_CHANGELOG entry 2026-07-20-connectors-voice-rw',
@@ -4292,7 +4292,7 @@ var HOMEBASE_CHANGELOG = {
       date: '2026-07-20',
       commit: '561a97b',
       branch: 'cursor/connectors-voice-rw-de9b',
-      pull_request: 'pending',
+      pull_request: 'https://github.com/wghtkbpxwx-a11y/tesla-dashboard/pull/104',
       title: 'Connectors + Voice read/write — Gmail OAuth, dashboard brief/traffic, voice chips',
       type: 'feat+connectors+voice',
       depends_on: ['2026-07-20-design-depth','2026-07-19-p0-security'],
