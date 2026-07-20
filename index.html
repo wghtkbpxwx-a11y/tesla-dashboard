@@ -1323,7 +1323,10 @@ body[data-mode="drive"] .live-hero-time{gap:20px 28px}
     <span class="gl-tag" id="gl-tag"></span>
     <span class="gl-txt" id="gl-txt"></span>
   </div>
-  <button class="glance-btn briefing-btn gl-keep" data-label="Read briefing" onclick="briefingToggle()">🔊 Read briefing</button>
+  <div class="gl-actions gl-keep" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <button class="glance-btn briefing-btn gl-keep" data-label="Read briefing" onclick="briefingToggle()">🔊 Read briefing</button>
+    <a class="glance-btn gl-keep" href="ai/?voice=1" title="Open Homebase Voice" onclick="event.stopPropagation()">🎙 Voice</a>
+  </div>
   <div class="gl-hint">Tap anywhere to exit</div>
 </div>
 
