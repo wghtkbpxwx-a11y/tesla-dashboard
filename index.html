@@ -133,7 +133,7 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 .fresh-chip.old .fresh-dot{background:var(--red);box-shadow:0 0 10px rgba(255,90,79,.45)}
 /* GLANCE MODE — full-screen, half-second-readable card. Deliberately near-black
    in both themes: max contrast in sun, glare-free at night. */
-#glance{position:fixed;inset:0;z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;gap:4vh;background:radial-gradient(120% 120% at 50% -10%,rgba(42,245,196,.06) 0%,#05070a 60%);color:#fff;cursor:pointer;text-align:center;padding:24px 24px 70px}
+#glance{position:fixed;inset:0;z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;gap:4vh;background:radial-gradient(120% 120% at 50% -10%,rgba(42,245,196,.12) 0%,transparent 55%),#05070a;color:#fff;cursor:pointer;text-align:center;padding:24px 24px 70px}
 #glance::before{content:'';position:absolute;left:8%;right:8%;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-soft2) 50%,transparent);pointer-events:none}
 #glance.on{display:flex}
 .gl-clock{font-family:var(--fd);font-size:min(21vw,170px);font-weight:800;line-height:1;letter-spacing:-4px;font-variant-numeric:tabular-nums;text-shadow:0 0 80px rgba(42,245,196,.14)}
