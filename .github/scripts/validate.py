@@ -205,6 +205,37 @@ def check_homebase_safety_suite():
     check_node_harness("ai/tests/homebase.test.js", "Homebase deterministic safety suite")
 
 
+def check_curio(html):
+    """Curio's lessons must stay in sync: the inline CURIO_LESSONS (what the car
+    renders offline) must equal curio_lessons.json (the server's source of truth,
+    which bakes the lesson-of-the-day + its audio). Also sanity-check the quizzes."""
+    m = re.search(r"var CURIO_LESSONS = (\[[\s\S]*?\n\]);", html)
+    if not m:
+        fail("Curio lessons (CURIO_LESSONS) missing from the dashboard")
+        return
+    try:
+        inline = json.loads(m.group(1))
+    except Exception as e:
+        fail(f"inline CURIO_LESSONS is not valid JSON ({e})")
+        return
+    path = ".github/scripts/curio_lessons.json"
+    if not os.path.exists(path):
+        fail("curio_lessons.json (Curio source of truth) is missing")
+        return
+    with open(path, encoding="utf-8") as f:
+        source = json.load(f)
+    if [x.get("id") for x in inline] != [x.get("id") for x in source]:
+        fail("inline CURIO_LESSONS is out of sync with curio_lessons.json — regenerate the inline block from the JSON")
+        return
+    bad = [x.get("id") for x in source
+           if not (x.get("quiz") and len(x["quiz"].get("options", [])) == 4 and 0 <= x["quiz"].get("answer", -1) <= 3
+                   and x.get("title") and x.get("hook") and x.get("take") and isinstance(x.get("body"), list))]
+    if bad:
+        fail("malformed Curio lessons: " + ", ".join(str(b) for b in bad))
+        return
+    ok(f"Curio: {len(source)} lessons, inline in sync with source, quizzes well-formed")
+
+
 def check_calendar_local(html):
     """David's Google Calendar is device-local by design: the secret iCal URL and
     the parsed events live only in localStorage — they must NEVER be baked into the
@@ -241,6 +272,7 @@ def main():
     check_cache(html)
     check_dashboard_orb(html)
     check_calendar_local(html)
+    check_curio(html)
     check_python()
     check_ai_failover()
     check_query_model_selector()

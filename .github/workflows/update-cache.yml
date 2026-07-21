@@ -34,6 +34,11 @@ jobs:
         continue-on-error: true
         run: python3 .github/scripts/generate_digest.py
 
+      # Bake Curio's lesson of the day into the cache (id only; audio below).
+      - name: Bake Curio lesson of the day
+        continue-on-error: true
+        run: python3 .github/scripts/generate_curio.py
+
       - name: Validate before commit
         run: python3 .github/scripts/validate.py
 
@@ -63,13 +68,21 @@ jobs:
           pip install --quiet piper-tts lameenc
           BRIEFING_VOICE="$HOME/.piper-voice/voice.onnx" python3 .github/scripts/generate_briefing.py
 
+      # Curio audio: read the baked lesson-of-the-day and synthesize curio.mp3
+      # so the in-car browser can play it (speechSynthesis is silent there).
+      - name: Generate Curio audio
+        continue-on-error: true
+        run: BRIEFING_VOICE="$HOME/.piper-voice/voice.onnx" python3 .github/scripts/generate_curio.py audio
+
       - name: Publish audio branch
         continue-on-error: true
         run: |
-          if [ -f briefing.mp3 ]; then
+          if [ -f briefing.mp3 ] || [ -f curio.mp3 ]; then
             mkdir -p /tmp/audio-pub
-            cp briefing.mp3 /tmp/audio-pub/
+            cp briefing.mp3 /tmp/audio-pub/ 2>/dev/null || true
             cp briefing.txt /tmp/audio-pub/ 2>/dev/null || true
+            cp curio.mp3 /tmp/audio-pub/ 2>/dev/null || true
+            cp curio.txt /tmp/audio-pub/ 2>/dev/null || true
             cd /tmp/audio-pub
             git init -q -b audio
             git config user.name  "github-actions[bot]"

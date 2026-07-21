@@ -209,18 +209,27 @@ camera list is reused and fresh events still attach via stored lat/lon.
   (original Pokémon-style catcher, 12 creatures, rarity weights,
   collection in `monsters_v1`). Boards sized for the car screen.
 - **Curio** (`#p-curio` panel, module `curio`, dock “✦ Curio” under Tools): a daily
-  learning engine — a static, curated `CURIO_LESSONS` library (~30 accurate
-  micro-lessons across Pharmacy 💊 / Money 💰 / Tech ⚡ / Science 🔬 / Crossover 🔀,
-  each `{id,cat,title,hook,body[],take,quiz{q,options[4],answer,why}}`). One
-  deterministic **lesson of the day** (`curioDailyIndex()`, day-of-year) with
-  category filter chips + **Next**. **Hands-free**: `curioListen()` reads the whole
-  lesson aloud reusing `pickBriefingVoice()` + `briefingSpeakable()` (own on/off,
-  independent of the briefing). Interactive **tap-quiz** (`curioAnswer()`) with
-  green/red feedback + explanation; **streak** (🔥, per-day in `curio_v1`) + learned
-  count + % correct. Cache-driven (no fetch — works offline in the car). Surfaced
-  in the **glance deck** (CURIO card) and the **briefing** (`briefingCurioLine()`).
-  Category tint via `--cu-rgb`. When adding lessons keep pharmacy facts textbook-
-  solid — David is a pharmacist and will catch errors.
+  learning engine. **Single source of truth = `.github/scripts/curio_lessons.json`**
+  (48 curated micro-lessons across Pharmacy 💊 / Money 💰 / Tech ⚡ / Science 🔬 /
+  Crossover 🔀 / Mind 🧠 / Space 🚀 / World 🌍, each
+  `{id,cat,title,hook,body[],take,quiz{q,options[4],answer,why}}`); the inline
+  `CURIO_LESSONS` is the *same* array (the car renders it offline) and
+  `check_curio()` in `validate.py` **fails CI if they drift** — regenerate the
+  inline block from the JSON when you edit lessons. **Audio that works in the car**:
+  `generate_curio.py` (in `update-cache.yml`) bakes the **lesson of the day** into
+  `DASHBOARD_CACHE.curio = {date,id}` (day-of-year index) and synthesizes
+  **`curio.mp3`** (Piper, published to the `audio` branch); `curioListen()` plays
+  that MP3 for today's lesson (media playback is audible in the Tesla, unlike
+  speechSynthesis) and **falls back to `speechSynthesis`** for other lessons / on
+  phone (`curioSpeakSynth()`, reusing `pickBriefingVoice()` + `briefingSpeakable()`).
+  Client opens on `cache.curio.id` (else a client-side daily pick). Interactive
+  **tap-quiz** (`curioAnswer()`) with green/red feedback + explanation; **streak**
+  (🔥, per-day in `curio_v1`) + learned count + % correct. Category filter chips +
+  **Next**; tint via `--cu-rgb`. Surfaced in the **glance deck** (CURIO card) and
+  the **briefing** (`briefingCurioLine()`). True daily *LLM-generated* lessons are
+  intentionally **not** shipped (small local models hallucinate — unsafe for the
+  pharmacy facts David trusts); the large rotating curated pool is the safe
+  “something new daily.” Keep pharmacy facts textbook-solid.
 - **Stocks dropdown** (top-anchored): substring search w/ prefix priority
   over `commonStocks` (includes XGRO/VGRO/XBAL/VBAL/ZSP/XIC + more);
   6 popular ETFs are in the hourly pre-fetch (`DEFAULT_STOCKS`); uncached
