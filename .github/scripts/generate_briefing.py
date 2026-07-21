@@ -41,6 +41,41 @@ def is_real_headline(t):
     return bool(t) and len(t) > 18 and not re.search(r"home ?page|^featured$", t, re.I)
 
 
+def speakable(s: str) -> str:
+    """Expand symbols / units / abbreviations to words so Piper pronounces them
+    naturally. Mirrors briefingSpeakable() in index.html so the MP3 and the
+    speechSynthesis fallback read the same way."""
+    s = s or ""
+    s = s.replace("&", " and ")
+    s = re.sub(r"(\d)\s*%", r"\1 percent", s).replace("%", " percent")
+
+    def _money(m):
+        n = m.group(1).replace(",", "")
+        sc = (m.group(2) or "").lower()
+        scale = {"m": " million", "b": " billion", "k": " thousand",
+                 "million": " million", "billion": " billion", "trillion": " trillion"}
+        return n + (scale.get(sc, "") if sc else "") + " dollars"
+
+    s = re.sub(r"\$\s?(\d[\d,]*(?:\.\d+)?)\s?(million|billion|trillion|M|B|K)?\b", _money, s, flags=re.I)
+    s = re.sub(r"°\s?[CF]?", " degrees", s)
+    s = re.sub(r"(\d)\s?km/h\b", r"\1 kilometres per hour", s, flags=re.I)
+    s = re.sub(r"\bkm/h\b", "kilometres per hour", s, flags=re.I)
+    s = re.sub(r"(\d)\s?km\b", r"\1 kilometres", s, flags=re.I)
+    s = re.sub(r"(\d)\s?kg\b", r"\1 kilograms", s, flags=re.I)
+    s = re.sub(r"(\d)\s?mg\b", r"\1 milligrams", s, flags=re.I)
+    s = re.sub(r"\bvs\.?\b", "versus", s, flags=re.I)
+    s = re.sub(r"\bB\.C\.?", "B C", s)
+    s = re.sub(r"\bU\.S\.(?:A\.)?", "U S", s)
+    s = re.sub(r"\bU\.K\.", "U K", s)
+    s = re.sub(r"\bAQI\b", "A Q I", s)
+    s = re.sub(r"\bUV\b", "U V", s)
+    s = re.sub(r"\bTSX\b", "T S X", s)
+    s = re.sub(r"\bXEQT\b", "X E Q T", s, flags=re.I)
+    s = re.sub(r"\bNo\.\s?(\d)", r"number \1", s)
+    s = re.sub(r"\s{2,}", " ", s).strip()
+    return s
+
+
 def build_text(cache: dict) -> str:
     """A warm, personable radio-style script — it addresses David by name,
     uses spoken transitions, and rotates its sign-off by weekday."""
@@ -110,7 +145,7 @@ def build_text(cache: dict) -> str:
                 "That's all I've got. Keep well, David.",
                 "And you're all caught up. Drive safe."]
     parts.append(signoffs[now.toordinal() % len(signoffs)])
-    return " ".join(parts)
+    return speakable(" ".join(parts))
 
 
 def main() -> int:

@@ -14,7 +14,9 @@ on live fetches. Instead:
 2. It runs `.github/scripts/update_cache.py`, which fetches news RSS, sports
    RSS, pharmacy/medicine RSS (NEJM, Lancet, JAMA, CBC Health — David is a
    pharmacist; BCPhA/PharmaCare have no RSS), weather/forecast/air-quality
-   (open-meteo), ESPN team scores, Yahoo stock quotes, DriveBC webcam metadata,
+   (open-meteo), ESPN team scores, ESPN division/conference **standings**
+   (`fetch_standings()`, `cache.standings` keyed by league), Yahoo stock quotes,
+   DriveBC webcam metadata,
    and Open511 traffic events, then rewrites the `var DASHBOARD_CACHE = {...};`
    block inside `index.html`
    (regex: `var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n` — **never break this
@@ -92,6 +94,14 @@ camera list is reused and fresh events still attach via stored lat/lon.
   `briefingTap()` → `runBriefing()` → `briefingToggle()` (server MP3 first, then
   speechSynthesis) with the orb animating in `speaking` mode; `watchBriefing()`
   returns it to idle when the briefing ends. Fully cache-driven (no live API).
+  **Voice/pronunciation**: the MP3 is Piper `en_US-ryan-high` (workflow, cached);
+  both the MP3 (`generate_briefing.py`) and the speechSynthesis fallback
+  (`briefingSpeakParts`) run the text through a shared `speakable()` /
+  `briefingSpeakable()` normalizer (expand `& % $ ° km km/h mg vs B.C. U.S. AQI
+  UV TSX XEQT No.` → words) so they pronounce identically — keep the two in sync.
+  The client also picks the most natural available en voice (`pickBriefingVoice()`
+  — Siri/enhanced/Google, en-CA→GB→US, local first; re-picks on `voiceschanged`)
+  and reads at `rate 0.97`.
   Animated `<canvas id="dash-orb-cv">` energy orb (idle = CSS conic glow, active
   = reactive ring; honours reduced-motion). **Theme-cohesive**: `applyOrbTheme()`
   derives the orb's whole palette (`--orb-1/2/3`, `--orb-rgb`, `--orb-rgb2`,
@@ -127,12 +137,26 @@ camera list is reused and fresh events still attach via stored lat/lon.
   to the Tesla over Bluetooth (briefing already plays through the car speakers)
   and configure a cloud STT+TTS key in Homebase.
 - **Glance widget** (`#glance-widget`, Live hero, replaces the old
-  Briefing/Homebase/Glance button row): an always-visible card cycling the same
-  cached "at a glance" facts as the full-screen glance (NEWS/WEATHER/SPORTS/
-  TRAFFIC/QUOTE via `glanceBuildFacts()`) + the time, ~8 s rotation
-  (`glanceWidgetStart()` in the init try-block; cache-driven, no fetch). Tap →
-  `glanceOpen()` full-screen ambient view (giant clock + weather + rotating fact,
-  "tap anywhere to exit"; its briefing/voice buttons were removed).
+  Briefing/Homebase/Glance button row): an always-visible card cycling the cached
+  "at a glance" cards + the time, ~8 s auto-advance (`glanceWidgetStart()` in the
+  init try-block; cache-driven, no fetch). **Swipeable** — pointer/touch swipe
+  (or ← →) moves prev/next through the cards and re-arms the timer; a thin
+  `#gw-bar-fill` accent progress bar shows position; a swipe suppresses the
+  tap→expand. `glanceBuildFacts()` now yields a richer, ordered deck: up to 6
+  deduped **headlines** and one card **per traffic incident** (road · type ·
+  MAJOR · desc · km, incidents/nearest first) interleaved up front (David asked
+  to "swipe through traffic and headlines"), then weather / My Teams scores /
+  sports / pharmacy / quote. Tap (no swipe) → `glanceOpen()` full-screen ambient
+  view (giant clock + weather + rotating fact, "tap anywhere to exit").
+- **Standings** (`renderStandings()` → `#standings-wrap` in the Sports panel,
+  above Sports News): division/conference tables baked hourly into
+  `DASHBOARD_CACHE.standings` by `fetch_standings()` (ESPN `?level=3`). One card
+  per league — NHL Pacific (GP/W/L/OTL/PTS), MLB AL East & NBA Atlantic
+  (W/L/PCT/GB), MLS Western Conf (GP/W/L/D/PTS) — David's team row highlighted in
+  the accent. Large groups (15-team MLS conf) are windowed to the top 8 + a gap +
+  your team. **CFL has no ESPN standings feed** (any level) → skipped gracefully
+  (BC Lions still appear in My Teams scores). Cache-driven, no live fetch;
+  per-league fallback to the previous table on a failed run.
 - **Live panel**: greeting, clock/date, weather hero, freshness chip (green
   <6 h / yellow <24 h / red older, tap = reload), 5-day forecast strip,
   stock chips (watchlist, seeds 4 tickers), markets strip (^GSPTSE ^GSPC
