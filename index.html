@@ -121,6 +121,10 @@ html.light #header{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(
 .hb-embed-close:hover{background:rgba(30,36,48,.9)}
 #hb-frame{width:100%;height:100%;border:none;background:#05070a;display:block}
 @keyframes hbFade{from{opacity:0}to{opacity:1}}
+/* Phones: a bottom sheet (full width, ~72vh) so the dashboard's clock/weather
+   stay visible above it — on a narrow screen a centered card would still read
+   as full-screen. */
+@media(max-width:760px){.hb-embed{align-items:flex-end;padding:0}.hb-embed-card{width:100%;height:72vh;max-width:none;border-radius:22px 22px 0 0}}
 @media(prefers-reduced-motion:reduce){.hb-embed{animation:none}}
 
 /* MAIN */
