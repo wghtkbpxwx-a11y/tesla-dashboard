@@ -208,6 +208,19 @@ camera list is reused and fresh events still attach via stored lat/lon.
   (canvas, tap-to-shoot, goalie speeds up per goal), Trail Monsters
   (original Pokémon-style catcher, 12 creatures, rarity weights,
   collection in `monsters_v1`). Boards sized for the car screen.
+- **Curio** (`#p-curio` panel, module `curio`, dock “✦ Curio” under Tools): a daily
+  learning engine — a static, curated `CURIO_LESSONS` library (~30 accurate
+  micro-lessons across Pharmacy 💊 / Money 💰 / Tech ⚡ / Science 🔬 / Crossover 🔀,
+  each `{id,cat,title,hook,body[],take,quiz{q,options[4],answer,why}}`). One
+  deterministic **lesson of the day** (`curioDailyIndex()`, day-of-year) with
+  category filter chips + **Next**. **Hands-free**: `curioListen()` reads the whole
+  lesson aloud reusing `pickBriefingVoice()` + `briefingSpeakable()` (own on/off,
+  independent of the briefing). Interactive **tap-quiz** (`curioAnswer()`) with
+  green/red feedback + explanation; **streak** (🔥, per-day in `curio_v1`) + learned
+  count + % correct. Cache-driven (no fetch — works offline in the car). Surfaced
+  in the **glance deck** (CURIO card) and the **briefing** (`briefingCurioLine()`).
+  Category tint via `--cu-rgb`. When adding lessons keep pharmacy facts textbook-
+  solid — David is a pharmacist and will catch errors.
 - **Stocks dropdown** (top-anchored): substring search w/ prefix priority
   over `commonStocks` (includes XGRO/VGRO/XBAL/VBAL/ZSP/XIC + more);
   6 popular ETFs are in the hourly pre-fetch (`DEFAULT_STOCKS`); uncached
@@ -226,7 +239,7 @@ camera list is reused and fresh events still attach via stored lat/lon.
 portfolio total), `cam_favs_v1`, `timer_end_v1`, `monsters_v1`,
 `geo_coords_v1`, `last_error_v1`, `cal_urls_v1` (JSON array of Google/Apple iCal
 links; legacy `cal_url_v1`) / `cal_events_v1` / `cal_synced_v1` (device-local
-calendars — never leave the device), plus
+calendars — never leave the device), `curio_v1` (Curio streak/progress), plus
 feed caches (`n_*`, `s_*`, `wx*`, `stk_*`). `dash_settings_v1` also holds
 `calShow` / `departShow` / `departBuffer`. `saveLS()` evicts feed caches on
 QuotaExceededError.
