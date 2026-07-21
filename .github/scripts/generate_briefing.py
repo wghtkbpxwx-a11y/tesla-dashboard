@@ -72,6 +72,7 @@ def speakable(s: str) -> str:
     s = re.sub(r"\bTSX\b", "T S X", s)
     s = re.sub(r"\bXEQT\b", "X E Q T", s, flags=re.I)
     s = re.sub(r"\bNo\.\s?(\d)", r"number \1", s)
+    s = re.sub(r"\.{2,}", ".", s)
     s = re.sub(r"\s{2,}", " ", s).strip()
     return s
 

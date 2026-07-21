@@ -658,6 +658,45 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 .glance-widget .gw-time{flex:0 0 auto;font-family:var(--fd);font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;color:var(--t2);letter-spacing:.5px}
 body[data-mode="drive"] .glance-widget{min-height:72px}
 body[data-mode="drive"] .glance-widget .gw-txt{font-size:16px}
+/* Departure Copilot card — next event × cached traffic × weather → leave-by */
+.departure-card{margin-top:8px;padding:14px 16px;border-radius:var(--r-sm);border:1px solid var(--accent-soft2);background:linear-gradient(135deg,var(--accent-soft) 0%,var(--surface) 70%)}
+.departure-card.urgent{border-color:var(--red);background:linear-gradient(135deg,rgba(255,69,58,.16) 0%,var(--surface) 72%)}
+.departure-card .dep-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.departure-card .dep-badge{font-family:var(--fd);font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+.departure-card .dep-leave{font-family:var(--fd);font-size:19px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.departure-card .dep-leave.urgent{color:var(--red)}
+.departure-card .dep-event{font-size:16px;font-weight:700;color:var(--t1);line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.departure-card .dep-meta{font-size:12.5px;color:var(--t3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.departure-card .dep-warn{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.departure-card .dep-warn span{font-size:11.5px;font-weight:600;color:var(--t2);background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:4px 9px}
+/* Today (calendar) card */
+.cal-card{margin-top:8px;padding:12px 4px 8px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface)}
+.cal-card .cal-head{display:flex;align-items:baseline;justify-content:space-between;padding:0 12px 8px;border-bottom:1px solid var(--line)}
+.cal-card .cal-h-title{font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:.4px;color:var(--t1)}
+.cal-card .cal-h-date{font-size:12px;color:var(--t3);font-weight:600}
+.cal-card .cal-row{display:flex;gap:12px;align-items:baseline;padding:9px 12px;border-top:1px solid var(--hair)}
+.cal-card .cal-row:first-of-type{border-top:none}
+.cal-card .cal-time{flex:0 0 66px;font-family:var(--fd);font-variant-numeric:tabular-nums;font-size:13px;font-weight:700;color:var(--t2)}
+.cal-card .cal-title{flex:1;font-size:14px;font-weight:600;color:var(--t1);line-height:1.3;min-width:0}
+.cal-card .cal-loc{display:block;font-size:11.5px;font-weight:500;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-card .cal-row.cal-next{background:var(--accent-soft)}
+.cal-card .cal-row.cal-next .cal-time,.cal-card .cal-row.cal-next .cal-title{color:var(--accent)}
+.cal-card .cal-row.cal-past{opacity:.5}
+.cal-card .cal-empty{padding:14px 12px;font-size:13px;color:var(--t3)}
+body[data-mode="drive"] .cal-card .cal-title,body[data-mode="drive"] .departure-card .dep-event{font-size:17px}
+/* Calendar settings controls */
+.cal-input{width:100%;margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface2);color:var(--t1);font-size:14px;font-family:inherit}
+.cal-input:focus{outline:none;border-color:var(--accent)}
+.cal-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-sm{padding:9px 16px;font-size:13px;min-height:40px}
+.cal-status{margin-top:10px;font-size:12.5px;color:var(--t3);min-height:16px}
+.cal-num{width:88px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface2);color:var(--t1);font-size:15px;text-align:center;font-family:var(--fd)}
+.switch{position:relative;display:inline-block;width:48px;height:28px;flex:0 0 auto;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .switch-track{position:absolute;inset:0;background:var(--surface2);border:1px solid var(--line);border-radius:999px;transition:background .18s,border-color .18s}
+.switch .switch-track::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--t3);transition:transform .18s,background .18s}
+.switch input:checked+.switch-track{background:var(--accent-soft);border-color:var(--accent)}
+.switch input:checked+.switch-track::after{transform:translateX(20px);background:var(--accent)}
 .charge-session{display:none;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:12px 14px;background:var(--accent-soft);border:1px solid var(--accent-soft2);border-radius:var(--r-sm)}
 body[data-mode="charging"] .charge-session{display:grid}
 .charge-time{display:flex;align-items:baseline;gap:10px;min-width:0}
@@ -1193,6 +1232,12 @@ body[data-mode="charging"] .charge-session{
         <span class="gw-bar" aria-hidden="true"><span class="gw-bar-fill" id="gw-bar-fill"></span></span>
       </button>
 
+      <!-- Departure Copilot: next event × cached traffic × weather → when to leave.
+           Today card: the day's calendar. Both populated by calRenderAll(); hidden
+           until there's something to show / a calendar is configured. -->
+      <div id="departure-card" class="departure-card" style="display:none"></div>
+      <div id="cal-card" class="cal-card" style="display:none"></div>
+
       <div class="charge-session" id="charge-session" aria-live="polite">
         <div class="charge-time">
           <span class="command-eyebrow">Charging</span>
@@ -1585,6 +1630,31 @@ body[data-mode="charging"] .charge-session{
         </div>
       </div>
     </div>
+    <div class="sec-title">Calendar &amp; Departures</div>
+    <div class="set-group">
+      <div class="set-row col-dir">
+        <div class="set-label" style="width:100%"><div class="set-t">Google Calendar</div><div class="set-s">Paste your Google Calendar <strong style="color:var(--t2)">secret address in iCal format</strong> (Google Calendar → Settings → your calendar → “Integrate calendar”). It stays on this device — never uploaded to the public site.</div></div>
+        <input type="url" id="cal-url-input" class="cal-input" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="cal-btns">
+          <button class="btn btn-sm" type="button" onclick="calSaveUrl()">Save &amp; sync</button>
+          <button class="btn btn-gh btn-sm" type="button" onclick="calSync(true)">Sync now</button>
+          <button class="btn btn-gh btn-sm" type="button" onclick="calClear()">Remove</button>
+        </div>
+        <div id="cal-status" class="cal-status">Add your calendar link above.</div>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Today card</div><div class="set-s">Show the day’s events on the Live screen</div></div>
+        <label class="switch"><input type="checkbox" id="set-cal-show" onchange="setCalToggle('calShow', this.checked)"><span class="switch-track"></span></label>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Departure Copilot</div><div class="set-s">“Leave by” for your next event, adjusted for traffic + weather</div></div>
+        <label class="switch"><input type="checkbox" id="set-depart-show" onchange="setCalToggle('departShow', this.checked)"><span class="switch-track"></span></label>
+      </div>
+      <div class="set-row">
+        <div class="set-label"><div class="set-t">Prep + travel buffer</div><div class="set-s">Minutes before an event to leave (Copilot adds more for traffic/weather)</div></div>
+        <input type="number" id="set-depart-buffer" class="cal-num" min="0" max="180" step="5" inputmode="numeric" onchange="setDepartBuffer(this.value)">
+      </div>
+    </div>
     <div class="sec-title">Menu Items</div>
     <div class="set-group">
       <div class="set-row set-menu-head">
@@ -1835,7 +1905,7 @@ body[data-mode="charging"] .charge-session{
 
 // ── VARIABLES (declared early to avoid undefined reference errors) ──
 var SETTINGS_KEY = 'dash_settings_v1';
-var defaultSettings = {theme:'dark', themeMode:'manual', modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, links:true, saved:true, traffic:true, games:true}};
+var defaultSettings = {theme:'dark', themeMode:'manual', calShow:true, departShow:true, departBuffer:25, modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, links:true, saved:true, traffic:true, games:true}};
 var settings;
 var themePresets = {default: {accent:'#2af5c4'}, cyberpunk: {accent:'#ff006e'}, sunset: {accent:'#ff6b35'}, forest: {accent:'#22c55e'}, lavender: {accent:'#a78bfa'}};
 var draggedBtn = null;
@@ -2175,7 +2245,16 @@ var glanceClockInt = null, glanceFactInt = null, glanceFactIdx = 0, glanceFactLi
 function isRealHeadline(t) { return t && t.length > 18 && !/home ?page|^featured$/i.test(t); }
 function glanceBuildFacts() {
   var C = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE) || {};
-  var newsCards = [], trafficCards = [], other = [];
+  var calCards = [], newsCards = [], trafficCards = [], other = [];
+  // Calendar: today's events first (David asked glance to show the day's events)
+  try {
+    var now0 = Date.now();
+    (typeof calToday === 'function' ? calToday() : []).forEach(function(e) {
+      if (e.end < now0 || calCards.length >= 5) return;   // upcoming/ongoing only
+      var time = e.allDay ? 'All day' : new Date(e.start).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+      calCards.push({ tag: 'CALENDAR', txt: time + ' · ' + e.title + (e.location ? ' @ ' + e.location : '') });
+    });
+  } catch (e) {}
   // Headlines: top story from up to 6 news sources (deduped) — swipe through them
   try {
     var news = C.news || {}, seen = {};
@@ -2244,8 +2323,8 @@ function glanceBuildFacts() {
   // headlines"), interleaved, then the rest.
   var woven = [], n = Math.max(newsCards.length, trafficCards.length);
   for (var w = 0; w < n; w++) { if (newsCards[w]) woven.push(newsCards[w]); if (trafficCards[w]) woven.push(trafficCards[w]); }
-  woven = woven.concat(other);
-  return woven.length ? woven : [{tag: 'GLANCE', txt: 'Your day at a glance — data refreshes hourly'}];
+  var deck = calCards.concat(woven, other);   // today's events first, then headlines/traffic, then the rest
+  return deck.length ? deck : [{tag: 'GLANCE', txt: 'Your day at a glance — data refreshes hourly'}];
 }
 function glanceTick() {
   var d = new Date();
@@ -2372,6 +2451,12 @@ function briefingScript() {
     parts.push('Today: a high of ' + Math.round(f.temperature_2m_max[0]) + ', low of ' + Math.round(f.temperature_2m_min[0])
       + (f.precipitation_probability_max && f.precipitation_probability_max[0] >= 30 ? ', with a ' + f.precipitation_probability_max[0] + ' percent chance of rain.' : '.'));
   } catch(e) {}
+  // Calendar (device-local) + Departure Copilot. These live only on this device,
+  // so the server MP3 can't include them — they're spoken here (and as an
+  // addendum after the MP3, see briefingCalendarParts()).
+  try {
+    briefingCalendarParts().forEach(function(p) { parts.push(p); });
+  } catch(e) {}
   // News: prefer the pre-built digest (deduped, spoken prose, generated by the
   // hourly job); fall back to raw headlines when no digest is cached
   // Split into utterance-sized sentences without breaking abbreviations like
@@ -2487,7 +2572,7 @@ function briefingSpeakable(s) {
   s = s.replace(/\bB\.C\.?/g, 'B C').replace(/\bU\.S\.(?:A\.)?/g, 'U S').replace(/\bU\.K\./g, 'U K');
   s = s.replace(/\bAQI\b/g, 'A Q I').replace(/\bUV\b/g, 'U V').replace(/\bTSX\b/g, 'T S X').replace(/\bXEQT\b/gi, 'X E Q T');
   s = s.replace(/\bNo\.\s?(\d)/g, 'number $1');
-  s = s.replace(/\s{2,}/g, ' ').trim();
+  s = s.replace(/\.{2,}/g, '.').replace(/\s{2,}/g, ' ').trim();
   return s;
 }
 // Pick the most natural available English voice (Siri/enhanced/Google, prefer
@@ -2514,6 +2599,38 @@ function pickBriefingVoice() {
 }
 function briefingVoiceReady() { briefingVoice = pickBriefingVoice(); }
 try { if (briefingSupported()) { window.speechSynthesis.onvoiceschanged = briefingVoiceReady; briefingVoiceReady(); } } catch (e) {}
+// Calendar + Departure spoken lines. Device-local, so the server MP3 can't
+// include them — briefingScript() speaks them inline (speechSynthesis path) and
+// briefingSpeakAddendum() speaks them live right after the MP3 finishes.
+function briefingCalendarParts() {
+  var out = [];
+  try {
+    var evs = (typeof calToday === 'function' ? calToday() : []).filter(function(e) { return e.end >= Date.now(); });
+    if (evs.length) {
+      out.push('On your calendar today, ' + (evs.length === 1 ? 'one event.' : evs.length + ' events.'));
+      evs.slice(0, 5).forEach(function(e) {
+        var when = e.allDay ? 'all day' : 'at ' + new Date(e.start).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+        out.push(e.title + ', ' + when + (e.location ? ', at ' + e.location : '') + '.');
+      });
+    }
+  } catch (e) {}
+  try {
+    var p = (typeof departurePlan === 'function') ? departurePlan() : null;
+    if (p) {
+      var lb = new Date(p.leaveBy).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+      var et = new Date(p.event.start).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+      var warn = p.warnings.length ? ' Heads up: ' + p.warnings.map(function(x) { return x.txt; }).join(', ') + '.' : '';
+      out.push('To make your ' + et + ' ' + p.event.title + ', plan to leave around ' + lb + '.' + warn);
+    }
+  } catch (e) {}
+  return out;
+}
+function briefingSpeakAddendum() {
+  var parts = [];
+  try { parts = briefingCalendarParts(); } catch (e) {}
+  if (parts.length && briefingSupported()) { briefingSpeakParts(parts); }   // briefingOn stays true; last utterance clears it
+  else { briefingOn = false; briefingSetBtns(false); }
+}
 function briefingSpeakParts(parts) {
   var synth = window.speechSynthesis;
   if (!briefingVoice) briefingVoice = pickBriefingVoice();
@@ -2563,7 +2680,7 @@ function briefingToggle() {
   try {
     var bucket = Math.floor(Date.now() / 900000); // 15-min cache buckets
     briefingAudio = new Audio(BRIEFING_MP3 + '?t=' + bucket);
-    briefingAudio.onended = function() { briefingOn = false; briefingAudio = null; briefingSetBtns(false); };
+    briefingAudio.onended = function() { briefingAudio = null; briefingSpeakAddendum(); };  // MP3 done → read device-local calendar/departure live
     briefingAudio.onerror = function() { briefingAudio = null; briefingSpeakFallback(); };
     var p = briefingAudio.play();
     if (p && p.catch) p.catch(function() { briefingAudio = null; briefingSpeakFallback(); });
@@ -3104,6 +3221,206 @@ function flashDockCap() {
   flashDockCap._t = setTimeout(function() { h.style.opacity = '0'; }, 2600);
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// GOOGLE CALENDAR (device-local secret iCal) + DEPARTURE COPILOT
+// David pastes his Google "secret address in iCal format" in Settings. It lives
+// only in localStorage (cal_url_v1) — never committed to the public site — and is
+// fetched client-side through a chain of CORS relays (Google's ICS sends no CORS
+// headers). Parsed events feed the Today card, the glance deck, the briefing, and
+// the Departure Copilot, which fuses the next event with cached DriveBC traffic
+// and the weather to tell David when to leave. Cache-driven once synced.
+// ══════════════════════════════════════════════════════════════════════════
+var CAL_URL_KEY = 'cal_url_v1', CAL_EVENTS_KEY = 'cal_events_v1', CAL_SYNC_KEY = 'cal_synced_v1';
+var calEvents = [], calSyncing = false;
+function calGetUrl() { try { return localStorage.getItem(CAL_URL_KEY) || ''; } catch (e) { return ''; } }
+function calLoadCache() { try { calEvents = JSON.parse(localStorage.getItem(CAL_EVENTS_KEY) || '[]') || []; } catch (e) { calEvents = []; } return calEvents; }
+
+// ── ICS parsing (RFC 5545 subset) ──
+function icsUnfold(t) { return String(t || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n[ \t]/g, ''); }
+function icsUnescape(s) { return String(s || '').replace(/\\n/gi, ' ').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\\\/g, '\\').trim(); }
+function icsDate(val, params) {
+  if (!val) return null;
+  var allDay = /VALUE=DATE(?!-TIME)/i.test(params || '') || /^\d{8}$/.test(val);
+  var m = val.match(/(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?/);
+  if (!m) return null;
+  var Y = +m[1], Mo = +m[2] - 1, D = +m[3], H = +(m[4] || 0), Mi = +(m[5] || 0), S = +(m[6] || 0), ms;
+  if (allDay) ms = new Date(Y, Mo, D).getTime();
+  else if (m[7] === 'Z') ms = Date.UTC(Y, Mo, D, H, Mi, S);
+  else ms = new Date(Y, Mo, D, H, Mi, S).getTime();   // floating / TZID → David's local TZ
+  return { ms: ms, allDay: allDay };
+}
+function parseICS(text) {
+  var out = [], blocks = icsUnfold(text).split('BEGIN:VEVENT');
+  for (var i = 1; i < blocks.length; i++) {
+    var b = blocks[i].split('END:VEVENT')[0], ev = { title: '', location: '', start: null, end: null, allDay: false, rrule: '', exdates: [] };
+    b.split('\n').forEach(function(line) {
+      var idx = line.indexOf(':'); if (idx < 0) return;
+      var left = line.slice(0, idx), val = line.slice(idx + 1), name = left.split(';')[0].toUpperCase();
+      if (name === 'SUMMARY') ev.title = icsUnescape(val);
+      else if (name === 'LOCATION') ev.location = icsUnescape(val);
+      else if (name === 'DTSTART') { var d = icsDate(val, left); if (d) { ev.start = d.ms; ev.allDay = d.allDay; } }
+      else if (name === 'DTEND') { var e = icsDate(val, left); if (e) ev.end = e.ms; }
+      else if (name === 'RRULE') ev.rrule = val;
+      else if (name === 'EXDATE') { var x = icsDate(val.split(',')[0], left); if (x) ev.exdates.push(x.ms); }
+    });
+    if (ev.start != null && ev.title) out.push(ev);
+  }
+  return out;
+}
+function calWeekFloor(ms) { var d = new Date(ms); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); }
+// Expand parsed events (incl. simple DAILY/WEEKLY recurrence) into concrete
+// occurrences within [from,to] ms. Personal calendars rarely need more.
+function calExpand(events, from, to) {
+  var out = [], DAY = 86400000, DOW = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+  events.forEach(function(ev) {
+    var dur = (ev.end != null && ev.end > ev.start) ? ev.end - ev.start : (ev.allDay ? DAY : 3600000);
+    var sd = new Date(ev.start), hh = sd.getHours(), mm = sd.getMinutes();
+    function emit(ms) { if (ms + dur < from || ms > to || ev.exdates.indexOf(ms) >= 0) return; out.push({ start: ms, end: ms + dur, allDay: ev.allDay, title: ev.title, location: ev.location }); }
+    if (!ev.rrule) { emit(ev.start); return; }
+    var r = {}; ev.rrule.split(';').forEach(function(kv) { var p = kv.split('='); r[(p[0] || '').toUpperCase()] = p[1] || ''; });
+    var freq = (r.FREQ || '').toUpperCase(), interval = Math.max(1, +(r.INTERVAL || 1));
+    var until = r.UNTIL ? (icsDate(r.UNTIL) || {}).ms : null;
+    var byday = (r.BYDAY || '').split(',').map(function(s) { return DOW[s.replace(/[^A-Z]/g, '').slice(-2)]; }).filter(function(x) { return x != null; });
+    if (freq !== 'DAILY' && freq !== 'WEEKLY') { emit(ev.start); return; }
+    var d0 = new Date(Math.max(from, ev.start)); d0.setHours(0, 0, 0, 0);
+    for (var d = d0.getTime(), g = 0; d <= to && g < 400; d += DAY, g++) {
+      var dt = new Date(d);
+      var occ = ev.allDay ? new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime()
+                          : new Date(dt.getFullYear(), dt.getMonth(), dt.getDate(), hh, mm).getTime();
+      if (occ < ev.start || (until && occ > until)) continue;
+      var match;
+      if (freq === 'DAILY') { match = Math.round((new Date(occ).setHours(0,0,0,0) - new Date(ev.start).setHours(0,0,0,0)) / DAY) % interval === 0; }
+      else { var inDay = byday.length ? byday.indexOf(dt.getDay()) >= 0 : dt.getDay() === sd.getDay(); match = inDay && Math.floor((calWeekFloor(occ) - calWeekFloor(ev.start)) / (7 * DAY)) % interval === 0; }
+      if (match) emit(occ);
+    }
+  });
+  out.sort(function(a, b) { return a.start - b.start; });
+  var seen = {}, dd = []; out.forEach(function(o) { var k = o.start + '|' + o.title; if (!seen[k]) { seen[k] = 1; dd.push(o); } });
+  return dd;
+}
+
+// ── sync (multi-relay; keeps events on-device) ──
+function calRelays(url) {
+  var e = encodeURIComponent(url);
+  return [url,
+    'https://api.allorigins.win/raw?url=' + e,
+    'https://corsproxy.io/?url=' + e,
+    'https://api.codetabs.com/v1/proxy/?quest=' + e,
+    'https://thingproxy.freeboard.io/fetch/' + url];
+}
+function calStatus(msg, isErr) {
+  var el = document.getElementById('cal-status'); if (!el) return;
+  el.textContent = msg || ''; el.style.color = isErr ? 'var(--red)' : 'var(--t3)';
+}
+function calSync(manual) {
+  var url = calGetUrl();
+  if (!url) { calStatus('Add your calendar link below.'); return; }
+  if (calSyncing) return;
+  calSyncing = true; calStatus('Syncing…');
+  var relays = calRelays(url), i = 0;
+  (function next() {
+    if (i >= relays.length) { calSyncing = false; calStatus('Couldn’t reach the calendar — the free relay may be busy. Tap Sync now to retry (works best on your phone).', true); return; }
+    var u = relays[i++];
+    fetch(u, { cache: 'no-store' }).then(function(r) { if (!r.ok) throw 0; return r.text(); }).then(function(txt) {
+      if (txt.indexOf('BEGIN:VCALENDAR') < 0 && txt.indexOf('BEGIN:VEVENT') < 0) throw 0;
+      var now = Date.now(), occ = calExpand(parseICS(txt), now - 2 * 3600000, now + 9 * DAY_MS());
+      calEvents = occ;
+      try { localStorage.setItem(CAL_EVENTS_KEY, JSON.stringify(occ)); localStorage.setItem(CAL_SYNC_KEY, String(now)); } catch (e) {}
+      calSyncing = false;
+      calStatus('Synced ' + occ.length + ' event' + (occ.length === 1 ? '' : 's') + ' · ' + new Date(now).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' }));
+      calRenderAll();
+    }).catch(function() { next(); });
+  })();
+}
+function DAY_MS() { return 86400000; }
+function calSaveUrl() {
+  var inp = document.getElementById('cal-url-input'); if (!inp) return;
+  var url = (inp.value || '').trim();
+  try { if (url) localStorage.setItem(CAL_URL_KEY, url); else localStorage.removeItem(CAL_URL_KEY); } catch (e) {}
+  if (url) { calStatus('Saved — syncing…'); calSync(true); } else { calEvents = []; try { localStorage.removeItem(CAL_EVENTS_KEY); } catch (e) {} calStatus('Calendar removed.'); calRenderAll(); }
+}
+function calClear() {
+  try { localStorage.removeItem(CAL_URL_KEY); localStorage.removeItem(CAL_EVENTS_KEY); localStorage.removeItem(CAL_SYNC_KEY); } catch (e) {}
+  calEvents = []; var inp = document.getElementById('cal-url-input'); if (inp) inp.value = '';
+  calStatus('Calendar removed.'); calRenderAll();
+}
+
+// ── query helpers ──
+function calDayBounds(off) { var d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + (off || 0)); return [d.getTime(), d.getTime() + 86400000]; }
+function calToday() { var b = calDayBounds(0); return (calEvents || []).filter(function(e) { return e.start < b[1] && e.end > b[0]; }).sort(function(a, b2) { return a.start - b2.start; }); }
+function calUpcomingTimed() { var now = Date.now(); return (calEvents || []).filter(function(e) { return !e.allDay && e.start > now - 60000; }).sort(function(a, b) { return a.start - b.start; }); }
+
+// ── Departure Copilot: next timed event × cached traffic × weather ──
+function departurePlan() {
+  var up = calUpcomingTimed(), next = null;
+  for (var i = 0; i < up.length; i++) { if (up[i].start > Date.now()) { next = up[i]; break; } }
+  if (!next || next.start - Date.now() > 4 * 3600000) return null;   // only surface within 4h
+  var buffer = ((settings && settings.departBuffer != null) ? settings.departBuffer : 25) * 60000, warnings = [];
+  try {
+    var inc = 0, worst = '';
+    ((typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE.cameras) || []).forEach(function(c) {
+      (c.events || []).forEach(function(ev) { if (ev.type === 'Incident' || ev.severity === 'MAJOR') { inc++; if (!worst && ev.road) worst = ev.road; } });
+    });
+    if (inc) { buffer += 12 * 60000; warnings.push({ icon: '⚠', txt: inc + ' incident' + (inc > 1 ? 's' : '') + ' on your routes' + (worst ? ' (' + worst + ')' : '') }); }
+  } catch (e) {}
+  try {
+    var wc = DASHBOARD_CACHE.weather.current.weather_code;
+    if ((wc >= 71 && wc <= 77) || wc === 85 || wc === 86) { buffer += 10 * 60000; warnings.push({ icon: '❄', txt: 'Snow — allow extra time' }); }
+    else if ((wc >= 61 && wc <= 67) || (wc >= 80 && wc <= 82) || wc >= 95) { buffer += 6 * 60000; warnings.push({ icon: '🌧', txt: 'Wet roads' }); }
+  } catch (e) {}
+  var leaveBy = next.start - buffer;
+  return { event: next, leaveBy: leaveBy, leaveInMin: Math.round((leaveBy - Date.now()) / 60000), warnings: warnings };
+}
+
+// ── render (Today card + Departure card; glance & briefing read calEvents) ──
+function renderCalCard() {
+  var card = document.getElementById('cal-card'); if (!card) return;
+  if (settings && settings.calShow === false) { card.style.display = 'none'; return; }
+  var url = calGetUrl(), today = calToday(), now = Date.now();
+  if (!url && !today.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  var rows = today.length ? today.map(function(e) {
+    var soon = !e.allDay && e.start > now && e.start < now + 2 * 3600000, past = e.end < now;
+    var time = e.allDay ? 'All day' : new Date(e.start).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+    return '<div class="cal-row' + (soon ? ' cal-next' : '') + (past ? ' cal-past' : '') + '"><span class="cal-time">' + escHtml(time) + '</span>'
+      + '<span class="cal-title">' + escHtml(e.title) + (e.location ? '<span class="cal-loc">' + escHtml(e.location) + '</span>' : '') + '</span></div>';
+  }).join('') : '<div class="cal-empty">Nothing on your calendar today.</div>';
+  card.innerHTML = '<div class="cal-head"><span class="cal-h-title">📅 Today</span><span class="cal-h-date">'
+    + new Date().toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' }) + '</span></div>' + rows;
+}
+function renderDeparture() {
+  var card = document.getElementById('departure-card'); if (!card) return;
+  var p = (settings && settings.departShow === false) ? null : departurePlan();
+  if (!p) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  var mins = p.leaveInMin, urgent = mins <= 10;
+  var lbStr = new Date(p.leaveBy).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+  var lead = mins <= 0 ? 'Leave now' : (mins < 60 ? 'Leave in ' + mins + ' min' : 'Leave by ' + lbStr);
+  var evTime = new Date(p.event.start).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+  card.className = 'departure-card' + (urgent ? ' urgent' : '');
+  card.innerHTML = '<div class="dep-head"><span class="dep-badge">🧭 Departure</span><span class="dep-leave' + (urgent ? ' urgent' : '') + '">' + escHtml(lead) + '</span></div>'
+    + '<div class="dep-event">' + escHtml(p.event.title) + '</div>'
+    + '<div class="dep-meta">' + evTime + (p.event.location ? ' · ' + escHtml(p.event.location) : '') + '</div>'
+    + (p.warnings.length ? '<div class="dep-warn">' + p.warnings.map(function(w) { return '<span>' + w.icon + ' ' + escHtml(w.txt) + '</span>'; }).join('') + '</div>' : '');
+}
+function calRenderAll() { try { renderCalCard(); } catch (e) {} try { renderDeparture(); } catch (e) {} }
+function calSyncSettingsInputs() {
+  var inp = document.getElementById('cal-url-input'); if (inp) inp.value = calGetUrl();
+  var cs = document.getElementById('set-cal-show'); if (cs) cs.checked = !(settings && settings.calShow === false);
+  var ds = document.getElementById('set-depart-show'); if (ds) ds.checked = !(settings && settings.departShow === false);
+  var db = document.getElementById('set-depart-buffer'); if (db) db.value = (settings && settings.departBuffer != null) ? settings.departBuffer : 25;
+}
+function setCalToggle(key, on) { settings[key] = !!on; saveSettings(); calRenderAll(); }
+function setDepartBuffer(v) { var n = parseInt(v, 10); settings.departBuffer = (isFinite(n) && n >= 0) ? Math.min(180, n) : 25; saveSettings(); calRenderAll(); }
+function calInit() {
+  calLoadCache();
+  calSyncSettingsInputs();
+  if (calGetUrl()) { var last = 0; try { last = +localStorage.getItem(CAL_SYNC_KEY) || 0; } catch (e) {} calStatus(last ? 'Last synced ' + new Date(last).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' }) : 'Not synced yet.'); }
+  calRenderAll();
+  if (calGetUrl()) { var l2 = 0; try { l2 = +localStorage.getItem(CAL_SYNC_KEY) || 0; } catch (e) {} if (Date.now() - l2 > 30 * 60000) calSync(false); }
+  clearInterval(window.__calTick); window.__calTick = setInterval(calRenderAll, 60000);   // countdown + Today freshness
+}
+
 try {
   applyTheme();
   applyModules();
@@ -3114,6 +3431,7 @@ try {
   renderMenuRows();
   initDashboardMode();
   glanceWidgetStart();
+  calInit();
 } catch(e) { console.error('Init error:', e.message); }
 
 // ── BOOKMARKS ──

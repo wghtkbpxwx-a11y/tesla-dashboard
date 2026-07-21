@@ -205,6 +205,30 @@ def check_homebase_safety_suite():
     check_node_harness("ai/tests/homebase.test.js", "Homebase deterministic safety suite")
 
 
+def check_calendar_local(html):
+    """David's Google Calendar is device-local by design: the secret iCal URL and
+    the parsed events live only in localStorage — they must NEVER be baked into the
+    public DASHBOARD_CACHE (the site is world-readable). Lock that invariant so a
+    future change can't silently start publishing his schedule."""
+    if "function parseICS" not in html or "cal_url_v1" not in html:
+        fail("calendar engine (parseICS / cal_url_v1) missing from the dashboard")
+        return
+    m = re.search(r"var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n", html)
+    if m:
+        try:
+            cache = json.loads(m.group(1))
+            leaked = [k for k in cache.keys() if "ical" in k.lower() or k.lower().startswith("cal")]
+            if leaked:
+                fail("calendar data must never be baked into the public cache: " + ", ".join(leaked))
+                return
+        except Exception:
+            pass
+    if "fetch_calendar" in open(".github/scripts/update_cache.py", encoding="utf-8").read():
+        fail("update_cache.py must not fetch the calendar server-side (keep it device-local)")
+        return
+    ok("calendar stays device-local (parseICS present; never in the public cache)")
+
+
 def main():
     if not os.path.exists("index.html"):
         print("index.html not found — run from the repo root", file=sys.stderr)
@@ -216,6 +240,7 @@ def main():
     check_js_parses(ai_html, "ai/index.html")
     check_cache(html)
     check_dashboard_orb(html)
+    check_calendar_local(html)
     check_python()
     check_ai_failover()
     check_query_model_selector()
