@@ -378,6 +378,51 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .stand-table tr.stand-gap td{color:var(--t3);padding:5px;font-size:12px;letter-spacing:3px}
 body[data-mode="drive"] .stand-table{font-size:16px}
 body[data-mode="drive"] .stand-table td{padding:12px 5px}
+/* Curio — daily learning engine (category-tinted via --cu-rgb) */
+.curio-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.curio-stats{display:flex;align-items:center;gap:10px}
+.curio-streak{font-family:var(--fd);font-weight:800;font-size:15px;color:#ff8a3d;background:rgba(255,138,61,.12);border:1px solid rgba(255,138,61,.28);border-radius:999px;padding:5px 12px}
+.curio-count{font-size:12.5px;color:var(--t3);font-weight:600}
+.curio-sub{margin:2px 0 14px;font-size:13px;color:var(--t3)}
+.cu-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.cu-chip{padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;transition:border-color .15s,color .15s,background .15s;-webkit-tap-highlight-color:transparent}
+.cu-chip:hover{border-color:var(--line2)}
+.cu-chip.on{background:var(--accent-soft);border-color:var(--accent-soft2);color:var(--accent)}
+.curio-card{--cu-rgb:42,245,196;position:relative;padding:22px;border:1px solid rgba(var(--cu-rgb),.32);border-radius:var(--r);background:linear-gradient(160deg,rgba(var(--cu-rgb),.10) 0%,var(--surface) 55%);box-shadow:0 18px 44px -24px rgba(var(--cu-rgb),.5);overflow:hidden;animation:cuIn .35s ease}
+.curio-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:rgb(var(--cu-rgb))}
+@keyframes cuIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.cu-pill{display:inline-block;font-family:var(--fd);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgb(var(--cu-rgb));background:rgba(var(--cu-rgb),.14);border:1px solid rgba(var(--cu-rgb),.3);border-radius:999px;padding:4px 12px}
+.cu-title{margin:12px 0 6px;font-size:26px;font-weight:800;line-height:1.15;color:var(--t1);letter-spacing:-.01em}
+.cu-hook{font-size:15px;font-weight:600;color:rgb(var(--cu-rgb));margin-bottom:14px;opacity:.95}
+.cu-body p{font-size:15px;line-height:1.6;color:var(--t2);margin:0 0 10px}
+.cu-body p:last-child{margin-bottom:0}
+.cu-take{display:flex;flex-direction:column;gap:3px;margin-top:14px;padding:13px 15px;border-radius:var(--r-sm);background:rgba(var(--cu-rgb),.08);border:1px solid rgba(var(--cu-rgb),.22);font-size:14px;line-height:1.5;color:var(--t1);font-weight:600}
+.cu-take-k{font-family:var(--fd);font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgb(var(--cu-rgb))}
+.cu-quiz{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.cu-q{font-size:16px;font-weight:700;color:var(--t1);margin-bottom:12px;line-height:1.35}
+.cu-opts{display:flex;flex-direction:column;gap:9px}
+.cu-opt{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:12px 14px;text-align:left;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface2);color:var(--t1);font-size:15px;font-weight:600;cursor:pointer;transition:border-color .15s,background .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.cu-opt:hover:not(:disabled){border-color:rgba(var(--cu-rgb),.5)}
+.cu-opt:active:not(:disabled){transform:scale(.99)}
+.cu-opt:disabled{cursor:default}
+.cu-opt-k{flex:0 0 26px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--surface);border:1px solid var(--line);font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t3)}
+.cu-opt.cu-correct{border-color:#34d399;background:rgba(52,211,153,.16);color:#5ee9b5}
+.cu-opt.cu-correct .cu-opt-k{background:#34d399;border-color:#34d399;color:#04120c}
+.cu-opt.cu-wrong{border-color:var(--red);background:rgba(255,69,58,.14)}
+.cu-opt.cu-wrong .cu-opt-k{background:var(--red);border-color:var(--red);color:#fff}
+.cu-why{max-height:0;overflow:hidden;opacity:0;transition:max-height .3s ease,opacity .3s ease,margin .3s ease;font-size:14px;line-height:1.55;color:var(--t2)}
+.cu-why.show{max-height:320px;opacity:1;margin-top:13px}
+.cu-why strong{color:var(--t1)}
+.cu-empty{padding:30px;text-align:center;color:var(--t3)}
+.curio-nav{display:flex;gap:10px;margin-top:16px}
+.cu-listen{flex:1;min-height:52px;border:none;border-radius:var(--r-sm);background:var(--accent);color:#05070a;font-family:var(--fd);font-size:15px;font-weight:800;letter-spacing:.5px;cursor:pointer;box-shadow:0 10px 26px -8px var(--accent-glow);transition:filter .15s,transform .1s}
+.cu-listen:active{transform:scale(.98)}
+.cu-next{flex:1;min-height:52px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--t1);font-family:var(--fd);font-size:15px;font-weight:700;cursor:pointer;transition:border-color .15s,background .15s}
+.cu-next:hover{background:var(--surface2);border-color:var(--line2)}
+body[data-mode="drive"] .cu-title{font-size:30px}
+body[data-mode="drive"] .cu-body p,body[data-mode="drive"] .cu-opt{font-size:17px}
+body[data-mode="drive"] .cu-opt{min-height:60px}
+@media(max-width:760px){.cu-title{font-size:23px}.curio-nav{flex-direction:column}}
 
 /* SETTINGS */
 .set-group{position:relative;background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:24px;max-width:580px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -1345,6 +1390,24 @@ body[data-mode="charging"] .charge-session{
     </div>
   </section>
 
+  <!-- CURIO PANEL: daily learning engine (pharmacy · money · tech · science) -->
+  <section class="panel" id="p-curio">
+    <div class="curio-top">
+      <div class="sec-title"><div class="live-dot"></div> Curio</div>
+      <div class="curio-stats">
+        <span class="curio-streak" id="curio-streak">🔥 0</span>
+        <span class="curio-count" id="curio-count">0 learned</span>
+      </div>
+    </div>
+    <div class="curio-sub">One curious thing a day — read it, or tap Listen and go hands-free.</div>
+    <div class="cu-chips" id="curio-cats"></div>
+    <div class="curio-card" id="curio-card"></div>
+    <div class="curio-nav">
+      <button class="cu-listen" type="button" id="curio-listen" onclick="curioListen()">▶ Listen</button>
+      <button class="cu-next" type="button" onclick="curioNext()">Next lesson →</button>
+    </div>
+  </section>
+
   <!-- MESSAGES PANEL -->
   <section class="panel app-panel" id="p-msg">
     <div class="sec-title">Messaging Hub</div>
@@ -1857,6 +1920,7 @@ body[data-mode="charging"] .charge-session{
   </div>
   <div class="dock-submenu-head">Tools</div>
   <div class="dock-submenu-grid">
+    <button class="dock-submenu-item" data-p="curio">✦ Curio</button>
     <button class="dock-submenu-item" data-p="cap">Productivity</button>
     <button class="dock-submenu-item" data-p="stocks">Stocks</button>
     <button class="dock-submenu-item" data-p="links">Links</button>
@@ -1905,7 +1969,7 @@ body[data-mode="charging"] .charge-session{
 
 // ── VARIABLES (declared early to avoid undefined reference errors) ──
 var SETTINGS_KEY = 'dash_settings_v1';
-var defaultSettings = {theme:'dark', themeMode:'manual', calShow:true, departShow:true, departBuffer:25, modules:{sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, links:true, saved:true, traffic:true, games:true}};
+var defaultSettings = {theme:'dark', themeMode:'manual', calShow:true, departShow:true, departBuffer:25, modules:{curio:true, sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, links:true, saved:true, traffic:true, games:true}};
 var settings;
 var themePresets = {default: {accent:'#2af5c4'}, cyberpunk: {accent:'#ff006e'}, sunset: {accent:'#ff6b35'}, forest: {accent:'#22c55e'}, lavender: {accent:'#a78bfa'}};
 var draggedBtn = null;
@@ -2323,7 +2387,10 @@ function glanceBuildFacts() {
   // headlines"), interleaved, then the rest.
   var woven = [], n = Math.max(newsCards.length, trafficCards.length);
   for (var w = 0; w < n; w++) { if (newsCards[w]) woven.push(newsCards[w]); if (trafficCards[w]) woven.push(trafficCards[w]); }
-  var deck = calCards.concat(woven, other);   // today's events first, then headlines/traffic, then the rest
+  // Curio: today's lesson, surfaced in the deck for discovery
+  var curioCard = [];
+  try { var ct = (typeof curioTodayTitle === 'function') ? curioTodayTitle() : ''; if (ct) curioCard.push({ tag: 'CURIO', txt: 'Today’s lesson · ' + ct }); } catch (e) {}
+  var deck = calCards.concat(curioCard, woven, other);   // events + today's lesson first, then headlines/traffic, then the rest
   return deck.length ? deck : [{tag: 'GLANCE', txt: 'Your day at a glance — data refreshes hourly'}];
 }
 function glanceTick() {
@@ -2457,6 +2524,7 @@ function briefingScript() {
   try {
     briefingCalendarParts().forEach(function(p) { parts.push(p); });
   } catch(e) {}
+  try { var cl = briefingCurioLine(); if (cl) parts.push(cl); } catch(e) {}
   // News: prefer the pre-built digest (deduped, spoken prose, generated by the
   // hourly job); fall back to raw headlines when no digest is cached
   // Split into utterance-sized sentences without breaking abbreviations like
@@ -2625,9 +2693,14 @@ function briefingCalendarParts() {
   } catch (e) {}
   return out;
 }
+function briefingCurioLine() {
+  try { var t = (typeof curioTodayTitle === 'function') ? curioTodayTitle() : ''; if (t) return 'Today’s Curio lesson: ' + t + '. Open Curio to learn something new.'; } catch (e) {}
+  return '';
+}
 function briefingSpeakAddendum() {
   var parts = [];
   try { parts = briefingCalendarParts(); } catch (e) {}
+  try { var cl = briefingCurioLine(); if (cl) parts.push(cl); } catch (e) {}
   if (parts.length && briefingSupported()) { briefingSpeakParts(parts); }   // briefingOn stays true; last utterance clears it
   else { briefingOn = false; briefingSetBtns(false); }
 }
@@ -3147,6 +3220,7 @@ function removeFromDock(panelId) { demoteFromDock(panelId); }
 // Settings "Dock Shortcuts" — render one toggle per pinnable panel
 // Merged Settings list: each panel gets a "Show" (module) and a "Dock" (pin) toggle
 var MENU_ITEMS = [
+  {p:'curio',   label:'Curio',           sub:'Daily learning — pharmacy, money, tech, science'},
   {p:'sports',  label:'Sports News',     sub:'Live sports headlines'},
   {p:'msg',     label:'Messages',        sub:'Messaging hub shortcuts'},
   {p:'weather', label:'Weather',         sub:'Forecast & conditions panel'},
@@ -3451,6 +3525,280 @@ function calInit() {
   clearInterval(window.__calTick); window.__calTick = setInterval(calRenderAll, 60000);   // countdown + Today freshness
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// CURIO — a daily curiosity engine. A curated library of bite-size lessons
+// across pharmacy, money, tech, science and crossovers between them; each is
+// read aloud hands-free (briefing voice) with an interactive tap-quiz, streaks
+// and progress. Fully cache-driven (static library) — works in the car offline.
+// ══════════════════════════════════════════════════════════════════════════
+var CURIO_CATS = [
+  { id: 'Pharmacy', emoji: '💊', rgb: '52,211,153' },
+  { id: 'Money',    emoji: '💰', rgb: '250,204,21' },
+  { id: 'Tech',     emoji: '⚡', rgb: '56,189,248' },
+  { id: 'Science',  emoji: '🔬', rgb: '167,139,250' },
+  { id: 'Crossover',emoji: '🔀', rgb: '244,114,182' }
+];
+var CURIO_LESSONS = [
+  { id: 'firstpass', cat: 'Pharmacy', title: 'The first-pass effect', hook: 'Why a swallowed pill can need ten times the dose of an injection.',
+    body: ['When you swallow a drug, it is absorbed from your gut and carried straight to the liver by the portal vein before it ever reaches the rest of your body.',
+      'The liver can metabolise a large chunk of it on this “first pass” — sometimes 70 to 90 percent. That is why drugs like propranolol or morphine need a much bigger oral dose than an intravenous one to reach the same blood level.'],
+    take: 'Route of administration is not just convenience — it can change the effective dose by an order of magnitude.',
+    quiz: { q: 'Why does an oral dose often need to be larger than an IV dose of the same drug?', options: ['The stomach acid destroys most of it', 'The liver metabolises much of it before it reaches circulation', 'Tablets are less pure than injections', 'The gut absorbs drugs very slowly'], answer: 1, why: 'Blood from the gut passes through the liver first, which can clear a large fraction of the dose before it reaches the systemic circulation.' } },
+  { id: 'grapefruit', cat: 'Pharmacy', title: 'Grapefruit vs your medicine cabinet', hook: 'One breakfast fruit quietly boosts dozens of drugs.',
+    body: ['Grapefruit contains furanocoumarins that block an enzyme called CYP3A4 in your gut wall — the same enzyme that normally breaks down many drugs before they are absorbed.',
+      'With the enzyme knocked out, more drug gets through. For some statins and calcium-channel blockers, a glass of grapefruit juice can raise blood levels enough to matter — and the effect can last a day.'],
+    take: 'A “food” can be a pharmacologically active enzyme inhibitor. Interactions are not only drug-on-drug.',
+    quiz: { q: 'How does grapefruit raise the levels of some drugs?', options: ['It makes the stomach more acidic', 'It speeds up the heart so drugs circulate faster', 'It blocks the gut enzyme (CYP3A4) that breaks them down', 'It binds the drug and carries it into the blood'], answer: 2, why: 'Grapefruit inhibits intestinal CYP3A4, so less drug is metabolised before absorption and more reaches the bloodstream.' } },
+  { id: 'steadystate', cat: 'Pharmacy', title: 'Why meds take days to “kick in”', hook: 'The magic number is about five.',
+    body: ['Start a regular dose and the drug builds up until the amount you take each interval equals the amount your body clears. That balance point is called steady state.',
+      'It takes roughly four to five half-lives to get there — no matter the dose. A drug with a 24-hour half-life needs about five days before it is doing its full, steady job.'],
+    take: 'Feeling “nothing yet” on day two can be normal pharmacokinetics, not a failed drug.',
+    quiz: { q: 'About how many half-lives does it take to reach steady state?', options: ['Half of one', 'One', 'Four to five', 'About twenty'], answer: 2, why: 'After ~5 half-lives a drug reaches ~97% of steady state, where intake and elimination balance.' } },
+  { id: 'tylenol', cat: 'Pharmacy', title: 'How Tylenol can hurt the liver', hook: 'A safe painkiller with a razor-thin overdose margin.',
+    body: ['Most acetaminophen is cleared harmlessly, but a small fraction becomes a toxic byproduct called NAPQI. Normally your liver’s glutathione neutralises it instantly.',
+      'In overdose, glutathione runs out, NAPQI builds up, and liver cells die. The antidote, N-acetylcysteine, works by restocking glutathione — which is why speed matters.'],
+    take: 'The dose makes the poison: the same molecule is safe and dangerous depending on how much depletes your defenses.',
+    quiz: { q: 'Why is N-acetylcysteine the antidote for acetaminophen overdose?', options: ['It absorbs the drug in the stomach', 'It replenishes glutathione so the toxic byproduct is neutralised', 'It speeds up the kidneys', 'It blocks pain receptors'], answer: 1, why: 'NAC restores glutathione, letting the liver detoxify the reactive metabolite NAPQI before it kills liver cells.' } },
+  { id: 'nti', cat: 'Pharmacy', title: 'Narrow therapeutic index', hook: 'Some drugs live on a knife-edge between “works” and “harm.”',
+    body: ['For most medicines the helpful dose and the harmful dose are far apart. For a few — warfarin, digoxin, lithium, phenytoin — the gap is tiny.',
+      'That is why these get blood-level monitoring, careful brand consistency, and cautious dose changes. A small percentage swing can flip a patient from therapeutic to toxic.'],
+    take: 'The “therapeutic index” — the ratio of toxic to effective dose — is why some drugs are routine and others are watched like hawks.',
+    quiz: { q: 'What defines a “narrow therapeutic index” drug?', options: ['It is expensive', 'The effective and toxic doses are very close together', 'It only comes as an injection', 'It has no side effects'], answer: 1, why: 'A small margin between the effective and toxic dose demands monitoring — e.g. warfarin, digoxin, lithium.' } },
+  { id: 'zeroorder', cat: 'Pharmacy', title: 'When the body clears a fixed amount, not a fixed fraction', hook: 'Why the last drink hits harder than the first.',
+    body: ['Most drugs are cleared by first-order kinetics — a constant fraction per hour. Alcohol and, at higher doses, phenytoin are different: the enzymes saturate and clear a fixed amount per hour instead.',
+      'That is zero-order kinetics. Once the system is maxed out, a small extra dose can send levels climbing far more than you would expect.'],
+    take: 'Saturable elimination is why some drugs go from “fine” to “toxic” with a deceptively small dose bump.',
+    quiz: { q: 'In zero-order (saturable) kinetics, the body clears…', options: ['A constant fraction of drug per hour', 'A constant amount of drug per hour', 'Nothing at all', 'More as the dose rises'], answer: 1, why: 'When clearing enzymes are saturated, a fixed amount is removed per unit time, so levels can rise sharply with small dose increases.' } },
+  { id: 'codeine', cat: 'Pharmacy', title: 'Codeine is a prodrug', hook: 'It does almost nothing until your genes convert it.',
+    body: ['Codeine itself is a weak painkiller. The enzyme CYP2D6 converts it into morphine — that is where most of the effect comes from.',
+      'People carry different CYP2D6 versions: “poor metabolisers” get little relief, while rare “ultra-rapid metabolisers” make morphine fast, which is why codeine is now avoided in some children and breastfeeding mothers.'],
+    take: 'Genetics can make the same pill a dud for one person and an overdose risk for another — the science of pharmacogenomics.',
+    quiz: { q: 'Why does codeine affect people so differently?', options: ['It expires quickly', 'Genetic differences in the CYP2D6 enzyme that converts it to morphine', 'It depends on stomach acidity', 'It is a placebo for most people'], answer: 1, why: 'CYP2D6 activation varies by genotype — poor metabolisers get little effect, ultra-rapid metabolisers form morphine dangerously fast.' } },
+  { id: 'chirality', cat: 'Pharmacy', title: 'Left-handed and right-handed drugs', hook: 'Two molecules, mirror images — one heals, one may not.',
+    body: ['Many drug molecules come in two mirror-image forms, like a left and right glove. Your receptors are handed too, so often only one form fits and works.',
+      'Drug makers sometimes isolate the active hand: esomeprazole is just the “left-handed” half of omeprazole. Same atoms, different geometry, different behaviour.'],
+    take: 'In biology, shape is destiny — mirror-image molecules can have completely different effects.',
+    quiz: { q: 'Why can two mirror-image forms of a drug behave differently?', options: ['One weighs more', 'Receptors are shape-specific, so often only one form fits', 'One is radioactive', 'They have different atoms'], answer: 1, why: 'Enantiomers share atoms but differ in 3-D shape; since receptors are chiral, they often bind only one form.' } },
+
+  { id: 'rule72', cat: 'Money', title: 'The Rule of 72', hook: 'Double your money in your head.',
+    body: ['Want to know how long an investment takes to double? Divide 72 by the annual return. At 7 percent, about ten years. At 9 percent, about eight.',
+      'It is a shortcut for exponential growth accurate enough for mental math — and a quick reality check on any “too good” return.'],
+    take: 'Compounding is exponential, and 72 is the pocket calculator for it.',
+    quiz: { q: 'At an 8% annual return, roughly how long to double your money?', options: ['About 3 years', 'About 9 years', 'About 18 years', 'About 40 years'], answer: 1, why: '72 ÷ 8 = 9 years. The Rule of 72 estimates doubling time from the growth rate.' } },
+  { id: 'xeqt', cat: 'Money', title: 'One ticker, thousands of companies', hook: 'What you actually own when you buy XEQT.',
+    body: ['An all-equity index fund like XEQT holds a slice of thousands of companies across Canada, the US, and the world — automatically weighted and rebalanced.',
+      'Instead of betting on a single winner, you own the whole market’s growth. Diversification is the rare “free lunch”: it lowers risk without necessarily lowering expected return.'],
+    take: 'Index investing turns “pick the winner” into “own them all” — and history has been kind to the whole market.',
+    quiz: { q: 'What is the main benefit of a broad index fund?', options: ['Guaranteed profit', 'Diversification — spreading risk across many holdings', 'It avoids all taxes', 'It beats the market every year'], answer: 1, why: 'Owning thousands of companies spreads out single-company risk while capturing the market’s overall return.' } },
+  { id: 'tfsarrsp', cat: 'Money', title: 'TFSA vs RRSP, the tax twist', hook: 'They can be mathematically identical — until your tax rate changes.',
+    body: ['An RRSP gives you a deduction now and is taxed when you withdraw. A TFSA is funded with after-tax money but grows and comes out tax-free.',
+      'If your tax rate is the same now and in retirement, they end up equal. The real edge comes from the difference: contribute to the RRSP when your rate is high, lean on the TFSA when it is low.'],
+    take: 'The best account depends on your tax rate today versus in retirement — not on which “feels” tax-free.',
+    quiz: { q: 'When does an RRSP tend to beat a TFSA?', options: ['When your tax rate is higher now than in retirement', 'When your tax rate is lower now than later', 'Always', 'Never'], answer: 0, why: 'You deduct at your high current rate and withdraw at a lower future rate, keeping the difference.' } },
+  { id: 'mer', cat: 'Money', title: 'The quiet cost of fees', hook: 'A 2% fee can eat a third of your retirement.',
+    body: ['Fund fees look tiny — one or two percent a year — but they compound against you for decades. Over 30 years, paying 2 percent instead of 0.2 percent can cost you a third or more of your ending wealth.',
+      'That is why low-cost index funds (XEQT’s fee is around 0.2 percent) quietly beat most expensive, actively managed ones.'],
+    take: 'Fees compound just like returns — small percentages become enormous sums over a lifetime.',
+    quiz: { q: 'Why do small annual fees matter so much?', options: ['They are charged twice', 'They compound against you for decades', 'They are taxed extra', 'They only apply to gains'], answer: 1, why: 'A fee drag compounds every year, so over decades even ~2% can erase a large share of your final balance.' } },
+  { id: 'dca', cat: 'Money', title: 'Dollar-cost averaging', hook: 'Boring, automatic, and hard to beat.',
+    body: ['Investing a fixed amount on a schedule means you buy more shares when prices are low and fewer when they are high — automatically.',
+      'It will not always beat lump-sum investing, but it removes the impossible job of timing the market and the emotion that wrecks most portfolios.'],
+    take: 'Automation beats willpower: a steady schedule sidesteps both bad timing and panic.',
+    quiz: { q: 'What does dollar-cost averaging protect you from most?', options: ['All losses', 'The need to time the market perfectly', 'Taxes', 'Inflation'], answer: 1, why: 'Buying on a fixed schedule spreads out your entry price and removes market-timing pressure.' } },
+  { id: 'realreturn', cat: 'Money', title: 'Real vs nominal returns', hook: 'A 7% gain in a 3% inflation year is really 4%.',
+    body: ['Nominal return is the number on the statement. Real return subtracts inflation — the loss of purchasing power.',
+      'Money in a “safe” account earning 2 percent while prices rise 3 percent is quietly shrinking in real terms. Inflation is the tax nobody sends you a bill for.'],
+    take: 'Always ask “return after inflation?” — real return is what actually grows your buying power.',
+    quiz: { q: 'If an investment returns 6% while inflation is 3%, the real return is about…', options: ['9%', '6%', '3%', '0%'], answer: 2, why: 'Real return ≈ nominal minus inflation, so 6% − 3% ≈ 3% of true purchasing-power growth.' } },
+
+  { id: 'liion', cat: 'Tech', title: 'How your Tesla battery works', hook: 'Charging is just moving lithium ions to one side.',
+    body: ['A lithium-ion cell shuttles lithium ions between two electrodes through a liquid electrolyte. Charging pushes them into the graphite anode; using power lets them flow back, releasing energy.',
+      'No metal is “burned” — it is a reversible dance of ions, which is why the same cell can cycle hundreds of times.'],
+    take: 'A battery does not store electricity — it stores a chemical arrangement that can release it on demand.',
+    quiz: { q: 'What actually moves inside a lithium-ion battery as it charges?', options: ['Electrons through the electrolyte', 'Lithium ions between the electrodes', 'Protons out of the cell', 'Water molecules'], answer: 1, why: 'Charging drives lithium ions into the anode; discharging lets them return, moving energy in and out reversibly.' } },
+  { id: 'evcold', cat: 'Tech', title: 'Why EV range drops in the cold', hook: 'Your BC winter costs you kilometres.',
+    body: ['Cold slows the chemical reactions inside the battery, so it delivers less energy — and heating the cabin draws power straight from the pack instead of from waste engine heat.',
+      'Together these can cut range 20 to 40 percent on a frosty morning. Preconditioning while plugged in warms the battery using grid power, not your range.'],
+    take: 'EV range is chemistry plus climate — and warming the pack before you unplug is nearly free.',
+    quiz: { q: 'Why does an EV lose range in the cold?', options: ['The tires get harder', 'Slower battery chemistry plus cabin heating draw from the pack', 'GPS uses more power', 'The motor freezes'], answer: 1, why: 'Cold reduces the battery’s deliverable energy, and cabin heat comes from the pack — unlike a gas car’s waste heat.' } },
+  { id: 'regen', cat: 'Tech', title: 'Regenerative braking', hook: 'Your motor moonlights as a generator.',
+    body: ['When you lift off the accelerator, the electric motor runs backwards as a generator, turning the car’s motion back into electricity and feeding it to the battery.',
+      'That is why EVs use “one-pedal driving” and why their brake pads can last far longer than a gas car’s.'],
+    take: 'Braking normally throws away energy as heat; regen recaptures a chunk of it instead.',
+    quiz: { q: 'How does regenerative braking recharge the battery?', options: ['Solar cells in the brakes', 'The motor acts as a generator, converting motion to electricity', 'Friction heat is stored', 'It does not — that is a myth'], answer: 1, why: 'Running the motor as a generator turns kinetic energy back into stored electrical energy.' } },
+  { id: 'heatpump', cat: 'Tech', title: 'How a heat pump beats 100% efficient', hook: 'Your Tesla’s heater cheats — legally.',
+    body: ['A resistive heater turns 1 unit of electricity into 1 unit of heat. A heat pump instead moves existing heat from outside to inside, delivering 2 to 4 units of warmth per unit of electricity.',
+      'It is not breaking physics — it is pumping heat, not making it. That “coefficient of performance” above 1 is why newer Teslas and home heating are switching to them.'],
+    take: 'Moving energy is far cheaper than creating it — the core trick behind modern efficient heating.',
+    quiz: { q: 'How can a heat pump deliver more heat energy than the electricity it uses?', options: ['It creates energy', 'It moves existing heat rather than generating it', 'It burns a little fuel', 'It runs on sunlight'], answer: 1, why: 'A heat pump transports ambient heat indoors, so output heat can be several times the electrical input.' } },
+  { id: 'llm', cat: 'Tech', title: 'What an AI is really doing', hook: 'It is an extremely good next-word guesser.',
+    body: ['A large language model turns your words into numbers, then predicts the most likely next chunk of text, over and over, one piece at a time.',
+      'It has no database it looks things up in — the “knowledge” is baked into billions of tuned weights. Fluent reasoning emerges from prediction at massive scale.'],
+    take: 'Today’s AI is pattern prediction taken to an extreme — powerful, but worth double-checking on facts.',
+    quiz: { q: 'At its core, a language model is…', options: ['Searching a database of answers', 'Predicting the next piece of text one step at a time', 'Copying its training text word-for-word', 'Following hand-written rules'], answer: 1, why: 'It generates text by repeatedly predicting the most probable next token from learned weights.' } },
+  { id: 'gps', cat: 'Tech', title: 'GPS runs on Einstein', hook: 'Your location would drift 10 km a day without relativity.',
+    body: ['GPS satellites carry atomic clocks. Their speed makes those clocks tick slightly slower (special relativity), while weaker gravity up high makes them tick faster (general relativity) — the second effect wins.',
+      'Net, they gain about 38 microseconds a day. Uncorrected, that error would push your position off by kilometres within hours. The fix is built in.'],
+    take: 'A 1915 theory about space and time is quietly running inside the phone in your pocket.',
+    quiz: { q: 'Why must GPS account for relativity?', options: ['Satellites move too fast to track', 'Time runs differently for the satellites, and uncorrected errors compound into kilometres', 'The Earth’s magnetic field bends the signal', 'Sunlight slows the signal'], answer: 1, why: 'Special and general relativity shift the satellite clocks ~38 µs/day; uncorrected, positions would drift kilometres daily.' } },
+  { id: 'pubkey', cat: 'Tech', title: 'The padlock that anyone can close', hook: 'How strangers share secrets safely.',
+    body: ['Public-key cryptography gives you two keys: a public one you hand out freely, and a private one you never share. Anything locked with your public key can only be opened by your private key.',
+      'So anyone can send you a secret by “snapping shut” your public padlock — but only you can open it. This is what secures the little lock in your browser.'],
+    take: 'You can publish a lock to the whole world and still be the only one who can open it — the foundation of online trust.',
+    quiz: { q: 'In public-key cryptography, what can the public key do?', options: ['Decrypt everything', 'Encrypt a message that only the private key can decrypt', 'Nothing useful', 'Reveal the private key'], answer: 1, why: 'The public key locks messages; only the matching private key can unlock them, enabling secure exchange with strangers.' } },
+
+  { id: 'rayleigh', cat: 'Science', title: 'Why the sky is blue', hook: 'And why sunsets are red — same reason.',
+    body: ['Air molecules scatter short blue wavelengths far more than long red ones. Overhead, that scattered blue light reaches your eyes from every direction, painting the sky.',
+      'At sunset, light travels through much more atmosphere, so the blue is scattered away entirely and the reds and oranges survive the trip.'],
+    take: 'Colour in the sky is not pigment — it is physics sorting light by wavelength.',
+    quiz: { q: 'Why is the daytime sky blue?', options: ['The ocean reflects onto it', 'Air scatters short blue wavelengths more than red', 'The sun emits mostly blue light', 'Ozone is blue'], answer: 1, why: 'Rayleigh scattering favours short wavelengths, so blue light is scattered across the sky.' } },
+  { id: 'caffeine', cat: 'Science', title: 'What caffeine actually blocks', hook: 'It does not add energy — it hides tiredness.',
+    body: ['As you stay awake, a molecule called adenosine builds up and makes you sleepy by binding its receptors. Caffeine is shaped just enough like adenosine to sit in those receptors without activating them.',
+      'So caffeine does not power you up — it blocks the “you are tired” signal. When it wears off, the backed-up adenosine floods in, and the crash hits.'],
+    take: 'Caffeine is a receptor blocker — a tidy example of how shape lets one molecule impersonate another.',
+    quiz: { q: 'How does caffeine keep you alert?', options: ['It adds energy to cells', 'It blocks adenosine receptors so you do not feel sleepy', 'It speeds up digestion', 'It releases stored sugar'], answer: 1, why: 'Caffeine competitively blocks adenosine receptors, masking the sleepiness signal rather than creating energy.' } },
+  { id: 'icefloats', cat: 'Science', title: 'Why ice floats', hook: 'A quirk of water that keeps lakes alive.',
+    body: ['Almost every substance gets denser when it freezes. Water is a rebel: its molecules lock into an open, hexagonal lattice that takes up more space, so ice is about 9 percent less dense than liquid water.',
+      'That is why ice floats — and why lakes freeze top-down, leaving fish a liquid world underneath all winter.'],
+    take: 'One odd property of water — solid being lighter than liquid — makes life in cold climates possible.',
+    quiz: { q: 'Why does ice float on water?', options: ['It is colder', 'Frozen water forms an open lattice that is less dense than liquid', 'Air bubbles get trapped', 'Salt lowers its weight'], answer: 1, why: 'Water expands into a hexagonal lattice when it freezes, making ice ~9% less dense than liquid water.' } },
+
+  { id: 'mrna', cat: 'Crossover', title: 'mRNA vaccines are software for cells', hook: 'Pharmacy meets programming.',
+    body: ['An mRNA vaccine is a set of instructions — code — telling your own cells to build one harmless piece of a virus so your immune system can learn it.',
+      'The cell’s ribosomes are the “hardware” that run the code; then the mRNA degrades within days, leaving no lasting change. Swap the instructions and you have a new vaccine — the platform stays the same.'],
+    take: 'Treating biology like a programmable platform is why mRNA shots could be designed in days, not years.',
+    quiz: { q: 'What does the mRNA in a vaccine actually do?', options: ['It kills the virus directly', 'It instructs your cells to build a harmless viral piece to train immunity', 'It permanently edits your DNA', 'It is an antibiotic'], answer: 1, why: 'mRNA is a temporary instruction; ribosomes build a viral antigen, the immune system learns it, then the mRNA breaks down.' } },
+  { id: 'accumulate', cat: 'Crossover', title: 'Your meds and your savings share a curve', hook: 'Pharmacology meets compound interest.',
+    body: ['Take a drug repeatedly and it climbs toward a plateau as intake balances elimination — that is steady state. Invest repeatedly and your balance climbs as contributions compound.',
+      'Both are governed by the same exponential mathematics of repeated inputs against a rate. Understand one and you already understand the other.'],
+    take: 'The same equation quietly runs your bloodstream and your brokerage account — exponential accumulation.',
+    quiz: { q: 'What do drug steady-state and compound investing have in common?', options: ['Both are instant', 'Both follow exponential accumulation from repeated inputs', 'Both are risk-free', 'Neither depends on time'], answer: 1, why: 'Repeated dosing and repeated investing are both exponential processes of inputs accumulating against a rate.' } },
+  { id: 'drugprice', cat: 'Crossover', title: 'Why new drugs cost so much', hook: 'Pharmacy meets economics.',
+    body: ['The pill is cheap to make; the knowledge is not. A new drug can cost over a billion dollars once you count the many failures for each success, and patents give ~20 years to recoup it.',
+      'When the patent expires, generic makers copy the recipe and prices can fall 80 percent or more — the “patent cliff.” You are mostly paying for the R&D bet, not the powder.'],
+    take: 'Drug prices are an economics story about sunk research costs and time-limited monopolies, not just chemistry.',
+    quiz: { q: 'Why do generic drugs cost so much less than the brand?', options: ['They are weaker', 'They skip the huge R&D cost the original had to recoup', 'They use cheaper atoms', 'They are subsidised'], answer: 1, why: 'Generics copy a proven recipe after patent expiry, avoiding the original’s enormous research and failure costs.' } },
+  { id: 'batterylife', cat: 'Crossover', title: 'Battery aging is a stability curve', hook: 'Tech meets pharmacy shelf-life.',
+    body: ['A pharmacist watches drugs degrade slowly by chemical reactions — faster in heat, tracked as an expiry date. A battery ages the same way: slow side-reactions from calendar time plus wear from each charge cycle.',
+      'Both are minimised by the same trick — keep them cool and avoid extremes. Storing a battery at 100 percent in the heat is like leaving medicine on a hot dashboard.'],
+    take: 'Degradation is chemistry over time; heat is the universal accelerant, whether it is a pill or a battery.',
+    quiz: { q: 'What most accelerates both drug degradation and battery aging?', options: ['Darkness', 'Heat', 'Low humidity', 'Motion'], answer: 1, why: 'Higher temperature speeds the chemical reactions behind both drug breakdown and battery capacity loss.' } },
+  { id: 'titration', cat: 'Crossover', title: 'A drug drip is a thermostat', hook: 'Pharmacy meets control engineering.',
+    body: ['Titrating a medication — nudging the dose up or down toward a target effect — is exactly what a thermostat does with temperature: measure, compare to a setpoint, adjust, repeat.',
+      'This feedback loop shows up everywhere: insulin pumps, cruise control, even how your body holds its own temperature. Same idea, different setpoint.'],
+    take: 'Feedback control is one idea wearing many coats — from an IV drip to your car’s cruise control.',
+    quiz: { q: 'What do titrating a drug and a thermostat share?', options: ['Both use electricity', 'Both are feedback loops: measure, compare to a target, adjust', 'Both are instant', 'Neither uses a target'], answer: 1, why: 'Both continually measure a value, compare it to a setpoint, and adjust to close the gap — classic feedback control.' } },
+  { id: 'resistance', cat: 'Crossover', title: 'Antibiotic resistance is evolution, sped up', hook: 'Pharmacy meets natural selection.',
+    body: ['Every antibiotic course is a selection pressure: the susceptible bacteria die, and any rare survivor with a resistance trait now has the field to itself and multiplies.',
+      'Because bacteria reproduce in minutes and swap resistance genes like trading cards, this is evolution you can watch in real time — and why using antibiotics only when needed protects the whole toolkit.'],
+    take: 'Overusing antibiotics breeds the very resistance that makes them fail — Darwin on fast-forward.',
+    quiz: { q: 'Why does antibiotic overuse drive resistance?', options: ['Drugs mutate the patient', 'It selects for rare resistant bacteria that then multiply', 'It weakens the immune system permanently', 'Bacteria learn to like the drug'], answer: 1, why: 'Antibiotics kill susceptible bacteria, leaving resistant survivors to reproduce — natural selection in fast motion.' } }
+];
+
+var CU = { streak: 0, lastDay: '', learned: {}, correct: 0, answered: 0, cat: 'All' };
+var curioIdx = 0, curioAnswered = false, curioSpeaking = false, curioKeepalive = null;
+function curioLoad() { try { var s = JSON.parse(localStorage.getItem('curio_v1') || 'null'); if (s) { CU = s; if (!CU.learned) CU.learned = {}; if (!CU.cat) CU.cat = 'All'; } } catch (e) {} }
+function curioSave() { try { localStorage.setItem('curio_v1', JSON.stringify(CU)); } catch (e) {} }
+function curioDayKey(d) { d = d || new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+function curioFiltered() { return CU.cat === 'All' ? CURIO_LESSONS : CURIO_LESSONS.filter(function(l) { return l.cat === CU.cat; }); }
+function curioCurrent() { var f = curioFiltered(); return f.length ? f[((curioIdx % f.length) + f.length) % f.length] : null; }
+function curioDailyIndex() { var n = new Date(); var day = Math.floor((n - new Date(n.getFullYear(), 0, 0)) / 86400000); var f = curioFiltered(); return f.length ? day % f.length : 0; }
+function curioCatMeta(id) { for (var i = 0; i < CURIO_CATS.length; i++) if (CURIO_CATS[i].id === id) return CURIO_CATS[i]; return { emoji: '✦', rgb: '42,245,196' }; }
+function curioTodayTitle() { var save = curioIdx, sc = CU.cat; CU.cat = 'All'; curioIdx = curioDailyIndex(); var L = curioCurrent(); curioIdx = save; CU.cat = sc; return L ? L.title : ''; }
+
+function curioRenderCats() {
+  var host = document.getElementById('curio-cats'); if (!host) return;
+  var cats = [{ id: 'All', emoji: '✦' }].concat(CURIO_CATS);
+  host.innerHTML = cats.map(function(c) {
+    var on = CU.cat === c.id, rgb = c.rgb || '';
+    return '<button class="cu-chip' + (on ? ' on' : '') + '" onclick="curioSetCat(\'' + c.id + '\')"' + (rgb && on ? ' style="border-color:rgba(' + rgb + ',.6);color:rgb(' + rgb + ')"' : '') + '>' + c.emoji + ' ' + c.id + '</button>';
+  }).join('');
+}
+function curioRenderStats() {
+  var s = document.getElementById('curio-streak'), c = document.getElementById('curio-count');
+  if (s) s.textContent = '🔥 ' + (CU.streak || 0);
+  if (c) { var n = Object.keys(CU.learned || {}).length, pct = CU.answered ? Math.round(CU.correct / CU.answered * 100) : 0; c.textContent = n + ' learned' + (CU.answered ? ' · ' + pct + '% correct' : ''); }
+}
+function curioRender() {
+  curioRenderCats(); curioRenderStats();
+  var card = document.getElementById('curio-card'); if (!card) return;
+  var L = curioCurrent();
+  if (!L) { card.innerHTML = '<div class="cu-empty">No lessons in this category.</div>'; return; }
+  var m = curioCatMeta(L.cat);
+  var body = (L.body || []).map(function(p) { return '<p>' + escHtml(p) + '</p>'; }).join('');
+  var opts = L.quiz.options.map(function(o, i) {
+    return '<button class="cu-opt" id="cu-opt-' + i + '" onclick="curioAnswer(' + i + ')"><span class="cu-opt-k">' + String.fromCharCode(65 + i) + '</span>' + escHtml(o) + '</button>';
+  }).join('');
+  card.style.setProperty('--cu-rgb', m.rgb);
+  card.innerHTML =
+    '<div class="cu-pill">' + m.emoji + ' ' + escHtml(L.cat) + '</div>'
+    + '<h2 class="cu-title">' + escHtml(L.title) + '</h2>'
+    + '<div class="cu-hook">' + escHtml(L.hook) + '</div>'
+    + '<div class="cu-body">' + body + '</div>'
+    + '<div class="cu-take"><span class="cu-take-k">Takeaway</span>' + escHtml(L.take) + '</div>'
+    + '<div class="cu-quiz"><div class="cu-q">' + escHtml(L.quiz.q) + '</div><div class="cu-opts">' + opts + '</div>'
+    + '<div class="cu-why" id="cu-why"></div></div>';
+  curioAnswered = false;
+}
+function curioAnswer(i) {
+  if (curioAnswered) return;
+  var L = curioCurrent(); if (!L) return;
+  curioAnswered = true;
+  var correct = (i === L.quiz.answer);
+  CU.answered = (CU.answered || 0) + 1; if (correct) CU.correct = (CU.correct || 0) + 1;
+  if (!CU.learned) CU.learned = {}; CU.learned[L.id] = 1;
+  curioSave();
+  for (var k = 0; k < L.quiz.options.length; k++) {
+    var b = document.getElementById('cu-opt-' + k); if (!b) continue;
+    b.disabled = true;
+    if (k === L.quiz.answer) b.classList.add('cu-correct');
+    else if (k === i) b.classList.add('cu-wrong');
+  }
+  var why = document.getElementById('cu-why');
+  if (why) { why.innerHTML = '<strong>' + (correct ? '✓ Correct.' : '✗ Not quite.') + '</strong> ' + escHtml(L.quiz.why); why.classList.add('show'); }
+  curioRenderStats();
+}
+function curioNext() { curioStopSpeak(); curioIdx++; curioRender(); try { document.getElementById('p-curio').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+function curioSetCat(cat) { curioStopSpeak(); CU.cat = cat; curioSave(); curioIdx = curioDailyIndex(); curioRender(); }
+
+// ── hands-free playback (reuses the briefing voice + speakable normalizer) ──
+function curioStopSpeak() { curioSpeaking = false; clearInterval(curioKeepalive); curioKeepalive = null; try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {} var b = document.getElementById('curio-listen'); if (b) b.innerHTML = '▶ Listen'; }
+function curioListen() {
+  if (curioSpeaking) { curioStopSpeak(); return; }
+  if (typeof briefingSupported === 'function' && !briefingSupported()) { curioStatus('Audio not available on this device.'); return; }
+  var L = curioCurrent(); if (!L) return;
+  var parts = [L.title + '.', L.hook];
+  (L.body || []).forEach(function(p) { parts.push(p); });
+  parts.push('The takeaway. ' + L.take);
+  parts.push('Here is a question. ' + L.quiz.q);
+  L.quiz.options.forEach(function(o, i) { parts.push(String.fromCharCode(65 + i) + '. ' + o + '.'); });
+  var voice = (typeof pickBriefingVoice === 'function') ? pickBriefingVoice() : null;
+  var synth = window.speechSynthesis;
+  try { synth.cancel(); } catch (e) {}
+  curioSpeaking = true; var btn = document.getElementById('curio-listen'); if (btn) btn.innerHTML = '◼ Stop';
+  parts.forEach(function(t, i) {
+    var u = new SpeechSynthesisUtterance(typeof briefingSpeakable === 'function' ? briefingSpeakable(t) : t);
+    if (voice) { u.voice = voice; u.lang = voice.lang || 'en-CA'; } else u.lang = 'en-CA';
+    u.rate = 0.97; u.pitch = 1.0;
+    if (i === parts.length - 1) u.onend = function() { curioStopSpeak(); };
+    synth.speak(u);
+  });
+  clearInterval(curioKeepalive);
+  curioKeepalive = setInterval(function() { if (!curioSpeaking) { clearInterval(curioKeepalive); return; } try { synth.resume(); } catch (e) {} }, 4000);
+}
+function curioStatus(msg) { var b = document.getElementById('curio-listen'); if (b && msg) { b.innerHTML = msg; setTimeout(function() { if (!curioSpeaking && document.getElementById('curio-listen')) document.getElementById('curio-listen').innerHTML = '▶ Listen'; }, 2500); } }
+function curioInit() {
+  curioLoad();
+  var today = curioDayKey();
+  if (CU.lastDay !== today) {
+    var y = new Date(); y.setDate(y.getDate() - 1);
+    CU.streak = (CU.lastDay === curioDayKey(y)) ? (CU.streak || 0) + 1 : 1;
+    CU.lastDay = today; curioSave();
+  }
+  curioIdx = curioDailyIndex();
+  curioRender();
+}
+
 try {
   applyTheme();
   applyModules();
@@ -3462,6 +3810,7 @@ try {
   initDashboardMode();
   glanceWidgetStart();
   calInit();
+  curioInit();
 } catch(e) { console.error('Init error:', e.message); }
 
 // ── BOOKMARKS ──
