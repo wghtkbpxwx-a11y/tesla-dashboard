@@ -1154,8 +1154,8 @@ body[data-mode="charging"] .charge-session{
 
       <!-- Three equal reach targets — Voice is the filled primary -->
       <div class="command-actions" aria-label="Quick actions">
-        <button class="command-action" type="button" onclick="openHomebase('ai/?voice=1&amp;brief=1')" title="Homebase AI reads your briefing aloud — right here on the dashboard">Briefing</button>
-        <button class="command-action voice" type="button" onclick="openHomebase('ai/?voice=1')" title="Open Homebase voice — right here on the dashboard">Homebase</button>
+        <button class="command-action briefing-btn" type="button" data-label="Briefing" onclick="briefingToggle()" title="Read your daily briefing aloud">Briefing</button>
+        <a class="command-action voice" href="ai/?voice=1" title="Talk to the full Homebase AI assistant">Homebase</a>
         <button class="command-action glance-cta" type="button" onclick="glanceOpen()" title="Full-screen glance view">Glance</button>
       </div>
 
@@ -7883,7 +7883,11 @@ document.addEventListener('keydown', function(e) {
       dorbRec.start();
     } catch (e) { recActive = false; recWantOn = false; noMic(); }
   }
-  function noMic() { setCap('No microphone here — playing your briefing.', true); runBriefing(); }
+  // David wants the orb to TALK to the AI. If the dashboard can't capture speech
+  // (iOS Safari often blocks it), open the full Homebase assistant, where the mic
+  // and spoken replies work (top-level page, not a frame). The Briefing button
+  // handles reading the update aloud on the dashboard.
+  function noMic() { setCap('Opening the voice assistant…', true); try { deactivate(); } catch (e) {} location.href = 'ai/?voice=1'; }
 
   // ── spoken answers from the embedded cache ──
   function takeSentences(txt, n) {
@@ -7918,9 +7922,8 @@ document.addEventListener('keydown', function(e) {
   // the Tesla browser blocks Homebase's live API calls, so there the local cache
   // briefing plays instead (see noMic()).
   function openHomebaseBrief() {
-    try { deactivate(); } catch (e) {}          // stop the orb's own mic/speech first
-    if (typeof openHomebase === 'function') openHomebase('ai/?voice=1&brief=1');
-    else location.href = 'ai/?voice=1&brief=1'; // graceful fallback
+    try { stopRec(); } catch (e) {}             // long-press / "briefing" = read the daily briefing aloud
+    if (typeof briefingToggle === 'function') briefingToggle();
   }
 
   // ── full briefing (audible MP3 path; works in the car) ──
@@ -7946,7 +7949,7 @@ document.addEventListener('keydown', function(e) {
     setCap('“' + raw + '”', true);
     if (kw(t, 'never mind', 'nevermind', 'that’s all', 'thats all', 'goodbye', 'good bye', 'turn off', 'stop listening', 'exit voice')) { setCap('Voice off.', true); setTimeout(deactivate, 350); return; }
     if (kw(t, 'stop', 'cancel', 'quiet', 'shush', 'be quiet', 'shut up')) { stopSpeaking(); try { if (briefingOn) briefingStop(); } catch (e) {} setCap('Okay.', true); afterSpeak(); return; }
-    if (kw(t, 'homebase', 'open ai', 'open chat', 'talk to ai', 'full assistant', 'chatgpt', 'chat gpt')) { setCap('Opening Homebase Voice…', true); try { deactivate(); } catch (e) {} if (typeof openHomebase === 'function') openHomebase('ai/?voice=1'); else location.href = 'ai/?voice=1'; return; }
+    if (kw(t, 'homebase', 'open ai', 'open chat', 'talk to ai', 'full assistant', 'chatgpt', 'chat gpt')) { setCap('Opening Homebase Voice…', true); try { deactivate(); } catch (e) {} location.href = 'ai/?voice=1'; return; }
     if (kw(t, 'traffic', 'camera', 'road condition', 'roads')) { try { goPanel('traffic'); } catch (e) {} speak('Opening your traffic cameras.'); return; }
     if (kw(t, 'game')) { try { goPanel('games'); } catch (e) {} speak('Opening games.'); return; }
     if (kw(t, 'open weather', 'weather page', 'full forecast', 'forecast page', 'weather panel')) { try { goPanel('weather'); } catch (e) {} speak(weatherLine()); return; }
@@ -7967,8 +7970,8 @@ document.addEventListener('keydown', function(e) {
   function activate() {
     applyOrbTheme();
     active = true; startDraw(); orbClass();
-    if (hasSR()) { recWantOn = true; mode = 'listening'; orbClass(); setCap('Listening… try “briefing”, “weather”, “scores”, or “stocks”.', true); listenOnce(); }
-    else runBriefing();
+    if (hasSR()) { recWantOn = true; mode = 'listening'; orbClass(); setCap('Listening… ask me anything, or say “briefing”.', true); listenOnce(); }
+    else { setCap('Opening the voice assistant…', true); location.href = 'ai/?voice=1'; }
   }
   function deactivate() {
     active = false; recWantOn = false; stopRec(); stopSpeaking(); clearInterval(briefWatch);

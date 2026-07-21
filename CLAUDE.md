@@ -104,16 +104,23 @@ camera list is reused and fresh events still attach via stored lat/lon.
   sports, pharmacy, stocks, time, panel nav, and "open Homebase" →
   `ai/?voice=1`. Guarded by `check_dashboard_orb()` in `validate.py` (must stay
   in the header, cache-driven, toggleable, with the briefing fallback).
-- **Embedded Homebase** (`openHomebase(path)`/`closeHomebase()`, `#hb-embed`
-  overlay + `#hb-frame` iframe): the command-bar **Briefing**/**Homebase**
-  buttons and the orb's "briefing"/"open Homebase" commands open Homebase voice
-  mode in a **same-origin iframe overlay** (`allow="microphone"`) so you never
-  leave the dashboard — Briefing loads `ai/?voice=1&brief=1` (David: "open voice
-  mode in Homebase without actually leaving the dashboard"). `openHomebase`
-  rewrites `ai/?…` → `ai/index.html?…` for the frame so it resolves without a
-  directory index. Close blanks the frame (releases mic/audio). Same-origin, so
-  the "no iframes for external sites" rule doesn't apply. The orb's own tap =
-  cache voice is unchanged; its no-mic fallback keeps the local MP3 briefing.
+- **Voice routing (learned the hard way — iOS blocks audio in iframes).** David
+  reported the embedded-iframe voice showing "your answer is ready, enable sound"
+  then nothing: **iOS Safari will not play audio inside an iframe**, and the
+  enable-sound gesture can't recover it. So voice no longer embeds Homebase.
+  Current mapping (David's choice: **orb = talk, Briefing = read**):
+  - **Briefing** button + orb **long-press** / "briefing" command →
+    `briefingToggle()` — reads the daily briefing on the **top-level** dashboard
+    page (audio works on iOS). No iframe, no navigation.
+  - **Orb tap** → talk: dashboard `SpeechRecognition` where it works
+    (Android/desktop, on-dashboard); where speech capture fails or is absent
+    (iOS Safari) it opens the **full Homebase assistant** `ai/?voice=1`
+    (top-level, where mic + spoken replies work). `noMic()` and the no-SR
+    `activate()` branch both navigate there.
+  - **Homebase** button + orb "open Homebase" command → `ai/?voice=1` full page.
+  The `#hb-embed`/`#hb-frame` overlay + `openHomebase()`/`closeHomebase()` remain
+  in the file but are **dormant/unused** (kept inert; do not re-wire voice
+  through the iframe — iOS audio will break again).
 - **Live panel**: greeting, clock/date, weather hero, freshness chip (green
   <6 h / yellow <24 h / red older, tap = reload), 5-day forecast strip,
   stock chips (watchlist, seeds 4 tickers), markets strip (^GSPTSE ^GSPC
