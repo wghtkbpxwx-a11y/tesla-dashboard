@@ -99,8 +99,17 @@ function main() {
 
   assert(!/chatgpt\.com/i.test(dashboard),
     'the Tesla dashboard must no longer launch ChatGPT');
-  assert((dashboard.match(/ai\/\?voice=1/g) || []).length >= 4 && /Homebase Voice/.test(dashboard),
-    'Tesla dashboard voice entry points must open Homebase Voice');
+  // David's choice (2026-07-21): the corner voice orb READS the daily briefing on
+  // the dashboard itself — top-level audio works on iOS, where the old Homebase-voice
+  // hand-off (embedded iframe / a separate voice page) silently failed on his iPhone
+  // ("enable sound → nothing happens"). The Homebase + Briefing link buttons and the
+  // More→Apps Homebase tiles were removed at his request. Guard the briefing wiring,
+  // not a Homebase link count.
+  assert(/function briefingTap\s*\(/.test(dashboard) && /briefingTap\(\)/.test(dashboard) &&
+    /function briefingToggle\s*\(/.test(dashboard),
+    'the corner voice orb must read the daily briefing (briefingTap → briefingToggle)');
+  assert(!/href="ai\/\?voice=1"/.test(dashboard) && !/data-href="ai\//.test(dashboard),
+    'the dashboard must not re-add the removed Homebase voice link buttons (iOS iframe/hand-off audio breaks)');
 
   // --- loud/high-quality voice + mobile-sound regression guards ---
   // The playback <audio> element must NEVER be tapped with a

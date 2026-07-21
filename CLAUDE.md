@@ -87,40 +87,52 @@ camera list is reused and fresh events still attach via stored lat/lon.
 
 - **Voice orb** (`#dash-orb`, last child of `#s-right` in the sticky header, so
   it stays top-right on scroll and **never** covers a module — the earlier
-  "big red centre panel" was the bug David reported). Tap = hands-free voice
-  mode toggle; **hold ≥550 ms** = play the full audio briefing (a gesture, not a
-  new button). Fully cache-driven (no live API): where a mic exists (a phone)
-  `SpeechRecognition` routes keyword commands to spoken answers built from
-  `DASHBOARD_CACHE.digest`/weather/forecast/stocks via `speak()`
-  (speechSynthesis); where there's no mic (the Tesla browser) a tap falls back
-  to the audible MP3 `briefingToggle()`. Animated `<canvas id="dash-orb-cv">`
-  energy orb (idle = CSS conic glow, active = reactive ring; honours
-  reduced-motion). **Theme-cohesive**: `applyOrbTheme()` derives the orb's whole
-  palette (`--orb-1/2/3`, `--orb-rgb`, `--orb-rgb2`, canvas `accentHue`) from the
-  live `--accent`, re-tinting via a `MutationObserver` on `<html>` when the theme
-  or accent preset changes — so it matches teal/sunset/lavender/etc. in light or
-  dark. `#dash-orb-cap` is the fixed top-right transcript/state pill
-  (right-aligned, `pointer-events:none`). Commands: briefing, weather, news,
-  sports, pharmacy, stocks, time, panel nav, and "open Homebase" →
-  `ai/?voice=1`. Guarded by `check_dashboard_orb()` in `validate.py` (must stay
-  in the header, cache-driven, toggleable, with the briefing fallback).
-- **Voice routing (learned the hard way — iOS blocks audio in iframes).** David
-  reported the embedded-iframe voice showing "your answer is ready, enable sound"
-  then nothing: **iOS Safari will not play audio inside an iframe**, and the
-  enable-sound gesture can't recover it. So voice no longer embeds Homebase.
-  Current mapping (David's choice: **orb = talk, Briefing = read**):
-  - **Briefing** button + orb **long-press** / "briefing" command →
-    `briefingToggle()` — reads the daily briefing on the **top-level** dashboard
-    page (audio works on iOS). No iframe, no navigation.
-  - **Orb tap** → talk: dashboard `SpeechRecognition` where it works
-    (Android/desktop, on-dashboard); where speech capture fails or is absent
-    (iOS Safari) it opens the **full Homebase assistant** `ai/?voice=1`
-    (top-level, where mic + spoken replies work). `noMic()` and the no-SR
-    `activate()` branch both navigate there.
-  - **Homebase** button + orb "open Homebase" command → `ai/?voice=1` full page.
-  The `#hb-embed`/`#hb-frame` overlay + `openHomebase()`/`closeHomebase()` remain
-  in the file but are **dormant/unused** (kept inert; do not re-wire voice
-  through the iframe — iOS audio will break again).
+  "big red centre panel" was the bug David reported). **Tap = read / stop the
+  daily briefing** (David's choice, 2026-07-21 — the orb IS his briefing button).
+  `briefingTap()` → `runBriefing()` → `briefingToggle()` (server MP3 first, then
+  speechSynthesis) with the orb animating in `speaking` mode; `watchBriefing()`
+  returns it to idle when the briefing ends. Fully cache-driven (no live API).
+  Animated `<canvas id="dash-orb-cv">` energy orb (idle = CSS conic glow, active
+  = reactive ring; honours reduced-motion). **Theme-cohesive**: `applyOrbTheme()`
+  derives the orb's whole palette (`--orb-1/2/3`, `--orb-rgb`, `--orb-rgb2`,
+  canvas `accentHue`) from the live `--accent`, re-tinting via a
+  `MutationObserver` on `<html>` when the theme or accent preset changes — so it
+  matches teal/sunset/lavender/etc. in light or dark. `#dash-orb-cap` is the
+  fixed top-right transcript/state pill (right-aligned, `pointer-events:none`).
+  The `SpeechRecognition` command engine (`handle()`, `activate()`, `listenOnce`,
+  keyword→`speak()` answers from `DASHBOARD_CACHE`) stays in the file — the
+  validator requires the token and it's the on-device voice-answer path where a
+  mic works — but **tap no longer routes to it**; it is dormant. Guarded by
+  `check_dashboard_orb()` in `validate.py` (orb must stay in the header,
+  cache-driven, toggleable, with the `briefingToggle` fallback).
+- **Voice routing (learned the hard way — iOS breaks Homebase-voice hand-off).**
+  Arc history: embedded-iframe voice failed because **iOS Safari won't play audio
+  inside an iframe** ("enable sound → nothing"); then a full-page `ai/?voice=1`
+  hand-off failed too because David's iPhone reports **speech input "not
+  compatible"** (Safari `webkitSpeechRecognition` is unreliable) and true two-way
+  voice would need cloud STT + a provider key **and** degrades the car's
+  Bluetooth audio (iOS drops to HFP call-quality when the mic is live). **Final
+  decision (2026-07-21): the orb reads the briefing; the dashboard no longer
+  links out to Homebase voice at all.** Removed entry points: command-bar
+  Briefing + Homebase buttons, the AI-&-Research "Homebase Voice" row, the
+  More→Apps "Homebase AI"/"Homebase Voice" tiles, and the glance overlay's
+  briefing/voice buttons. `noMic()`, the no-SR `activate()` branch, and
+  `openHomebaseBrief()` now read the briefing instead of navigating. The
+  `#hb-embed`/`#hb-frame` iframe overlay + `openHomebase()`/`closeHomebase()`
+  remain **dormant/unused** (inert; do not re-wire voice through the iframe or
+  re-add `ai/?voice=1` link buttons — the `test_voice_mode.js` guard now asserts
+  the briefing wiring and the *absence* of those links). Homebase itself still
+  lives at `ai/` (reachable by URL); only the dashboard's entry points were
+  pulled. If David later wants the car to *speak back* two-way, pair the iPhone
+  to the Tesla over Bluetooth (briefing already plays through the car speakers)
+  and configure a cloud STT+TTS key in Homebase.
+- **Glance widget** (`#glance-widget`, Live hero, replaces the old
+  Briefing/Homebase/Glance button row): an always-visible card cycling the same
+  cached "at a glance" facts as the full-screen glance (NEWS/WEATHER/SPORTS/
+  TRAFFIC/QUOTE via `glanceBuildFacts()`) + the time, ~8 s rotation
+  (`glanceWidgetStart()` in the init try-block; cache-driven, no fetch). Tap →
+  `glanceOpen()` full-screen ambient view (giant clock + weather + rotating fact,
+  "tap anywhere to exit"; its briefing/voice buttons were removed).
 - **Live panel**: greeting, clock/date, weather hero, freshness chip (green
   <6 h / yellow <24 h / red older, tap = reload), 5-day forecast strip,
   stock chips (watchlist, seeds 4 tickers), markets strip (^GSPTSE ^GSPC
@@ -318,10 +330,12 @@ Treat its “already verified” section as a context-saving index: do not repea
 those checks without contradictory evidence, but verify source before changing a
 boundary. Prioritize deterministic tests and P0/P1 risks over copy, formatting,
 provider expansion, framework migration, or another broad visual pass.
-Dashboard More→Apps has "✦ Homebase AI" / "🎙️ Homebase Voice" `data-href` submenu
-buttons (no `data-p` — the submenu click handler and drag-to-dock skip them).
-The Live/Charging ChatGPT actions and the AI & Research ChatGPT tile were also
-replaced with `ai/?voice=1`; do not reintroduce an external ChatGPT launcher.
+Dashboard More→Apps **no longer** has the "✦ Homebase AI" / "🎙️ Homebase Voice"
+`data-href` submenu buttons — they were removed 2026-07-21 with the rest of the
+dashboard's Homebase entry points (see Voice routing above). The `data-href`
+submenu-click / drag-to-dock skip logic still exists for any future non-`data-p`
+tile. Do not reintroduce an external ChatGPT launcher, and do not re-add
+`ai/?voice=1` link buttons (the `test_voice_mode.js` guard asserts their absence).
 Homebase retains legacy `nova_*` localStorage keys + IndexedDB `nova_chat` — do not collide.
 `nova_vault_sync_v2` tracks per-device sync metadata and per-section timestamps.
 The Google Drive vault is schema v2 and may contain memory, tasks, selected AI
