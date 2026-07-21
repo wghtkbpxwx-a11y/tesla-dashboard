@@ -157,6 +157,31 @@ camera list is reused and fresh events still attach via stored lat/lon.
   your team. **CFL has no ESPN standings feed** (any level) → skipped gracefully
   (BC Lions still appear in My Teams scores). Cache-driven, no live fetch;
   per-league fallback to the previous table on a failed run.
+- **Google Calendar (device-local)** — David pastes his Google *secret iCal
+  address* in Settings → “Calendar & Departures”. It lives **only** in
+  localStorage (`cal_url_v1`; parsed events in `cal_events_v1`, stamp
+  `cal_synced_v1`) and is **never** baked into the public cache — the site is
+  world-readable, so publishing his schedule is forbidden (guarded by
+  `check_calendar_local()` in `validate.py`). `calSync()` fetches the ICS
+  client-side through a chain of CORS relays (Google's ICS has no CORS headers;
+  allorigins/corsproxy/codetabs/thingproxy — best-effort in the car, reliable on
+  phone/Mac) and `parseICS()`/`calExpand()` parse it (VEVENT, all-day, TZID/Z,
+  folded lines, escapes, simple DAILY/WEEKLY RRULE). Renders a **Today card**
+  (`#cal-card`, next event highlighted), feeds **CALENDAR cards to the front of
+  the glance deck**, and is spoken in the briefing — inline on the
+  speechSynthesis path (`briefingCalendarParts()` in `briefingScript`) and as a
+  live **addendum after the MP3** (`briefingSpeakAddendum()` on `briefingAudio.onended`),
+  since the server MP3 can't see device-local data. `calInit()` auto-syncs if
+  stale (>30 min) and re-renders each minute.
+- **Departure Copilot** (`departurePlan()` → `#departure-card`, the flagship
+  fusion feature): takes the next timed event within 4 h and computes a **“leave
+  by / leave in N min”** from a prep buffer (`settings.departBuffer`, default 25)
+  **plus** live adjustments — +12 min & a warning chip if cached DriveBC
+  MAJOR/incidents sit on the routes, +10/+6 min for snow/rain from
+  `weather.current.weather_code`. Live per-minute countdown, turns red ≤10 min,
+  and is read in the briefing. Pure fusion of calendar × cached traffic ×
+  weather — no routing API (so it's a smart reminder, not a Maps ETA). Toggles +
+  buffer live in Settings (`calShow`/`departShow`/`departBuffer`).
 - **Live panel**: greeting, clock/date, weather hero, freshness chip (green
   <6 h / yellow <24 h / red older, tap = reload), 5-day forecast strip,
   stock chips (watchlist, seeds 4 tickers), markets strip (^GSPTSE ^GSPC
@@ -194,8 +219,11 @@ camera list is reused and fresh events still attach via stored lat/lon.
 `dash_settings_v1`, `dock_order_v1`, `bookmarks_v1`, `tasks_v1`, `notes_v4`,
 `quick_links_v1`, `stocks_watchlist_v1`, `stocks_shares_v1` (share counts →
 portfolio total), `cam_favs_v1`, `timer_end_v1`, `monsters_v1`,
-`geo_coords_v1`, `last_error_v1`, plus feed caches (`n_*`, `s_*`, `wx*`,
-`stk_*`). `saveLS()` evicts feed caches on QuotaExceededError.
+`geo_coords_v1`, `last_error_v1`, `cal_url_v1` / `cal_events_v1` /
+`cal_synced_v1` (device-local Google Calendar — never leaves the device), plus
+feed caches (`n_*`, `s_*`, `wx*`, `stk_*`). `dash_settings_v1` also holds
+`calShow` / `departShow` / `departBuffer`. `saveLS()` evicts feed caches on
+QuotaExceededError.
 
 ## Critterra (creature game) roadmap (for the next session)
 
