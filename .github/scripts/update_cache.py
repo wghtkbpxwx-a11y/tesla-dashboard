@@ -193,6 +193,81 @@ def fetch_scores():
     return out
 
 
+# Division/conference standings for each followed team's league. `abbr` is the
+# ESPN team abbreviation used to locate the right group. `cols` are the
+# normalized stat keys the dashboard shows for that league, in order.
+STANDINGS_TEAMS = [
+    {"league": "NHL", "path": "hockey/nhl",     "abbr": "van", "cols": ["gp", "w", "l", "otl", "pts"]},
+    {"league": "MLB", "path": "baseball/mlb",   "abbr": "tor", "cols": ["w", "l", "pct", "gb"]},
+    {"league": "NBA", "path": "basketball/nba", "abbr": "tor", "cols": ["w", "l", "pct", "gb"]},
+    {"league": "MLS", "path": "soccer/usa.1",   "abbr": "van", "cols": ["gp", "w", "l", "d", "pts"]},
+    {"league": "CFL", "path": "football/cfl",   "abbr": "bc",  "cols": ["gp", "w", "l", "pts"]},
+]
+
+
+def _stat(stats, *types):
+    """Pull a stat's displayValue by any of its ESPN `type` names (stable)."""
+    for s in stats or []:
+        if s.get("type") in types:
+            v = s.get("displayValue")
+            return "" if v is None else str(v)
+    return ""
+
+
+def _standings_groups(node, out):
+    """Collect every leaf group (name, entries) from the nested standings tree."""
+    ents = (node.get("standings") or {}).get("entries") or []
+    if ents:
+        out.append((node.get("name") or node.get("abbreviation") or "", ents))
+    for ch in node.get("children") or []:
+        _standings_groups(ch, out)
+
+
+def fetch_standings():
+    """Division (or smallest available) standings for each followed team's
+    league via ESPN's site API at level=3. Entries arrive pre-ranked. Returns
+    {league: {group, cols, rows:[{name,abbr,gp,w,l,otl,d,pts,pct,gb,streak,mine}]}}."""
+    out = {}
+    for t in STANDINGS_TEAMS:
+        abbr = t["abbr"].lower()
+        try:
+            url = f'https://site.api.espn.com/apis/v2/sports/{t["path"]}/standings?level=3'
+            resp = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+            groups = []
+            _standings_groups(resp.json(), groups)
+            mine = [g for g in groups
+                    if any((e.get("team", {}).get("abbreviation", "") or "").lower() == abbr for e in g[1])]
+            if not mine:
+                raise ValueError("team not found in standings")
+            mine.sort(key=lambda g: len(g[1]))       # smallest group = most specific (division)
+            gname, ents = mine[0]
+            rows = []
+            for e in ents:
+                team = e.get("team", {})
+                stats = e.get("stats") or []
+                ab = team.get("abbreviation", "") or ""
+                rows.append({
+                    "name": team.get("shortDisplayName") or team.get("displayName", ""),
+                    "abbr": ab,
+                    "gp": _stat(stats, "gamesplayed"),
+                    "w": _stat(stats, "wins"),
+                    "l": _stat(stats, "losses"),
+                    "otl": _stat(stats, "otlosses", "overtimelosses"),
+                    "d": _stat(stats, "ties"),
+                    "pts": _stat(stats, "points"),
+                    "pct": _stat(stats, "winpercent"),
+                    "gb": _stat(stats, "gamesbehind"),
+                    "streak": _stat(stats, "streak"),
+                    "mine": ab.lower() == abbr,
+                })
+            out[t["league"]] = {"group": gname, "cols": t["cols"], "rows": rows}
+            print(f'  • {t["league"]}: {gname} ({len(rows)} teams)')
+        except Exception as e:
+            print(f'  ✗ {t["league"]} standings: {e}')
+    return out
+
+
 def _localname(tag) -> str:
     return tag.rsplit("}", 1)[-1] if isinstance(tag, str) else ""
 
@@ -523,6 +598,9 @@ def main():
     print("Fetching My Teams scores...")
     scores = fetch_scores()
 
+    print("Fetching standings...")
+    standings = fetch_standings()
+
     print("Fetching stock quotes...")
     stocks = fetch_stocks()
 
@@ -561,6 +639,13 @@ def main():
         if url not in pharmacy and url in existing.get("pharmacy", {}):
             pharmacy[url] = existing["pharmacy"][url]
 
+    # Per-league standings fallback: keep the last good table for any league
+    # whose fetch failed this run (offseason / ESPN hiccup) so it never blanks.
+    for t in STANDINGS_TEAMS:
+        lg = t["league"]
+        if lg not in standings and lg in existing.get("standings", {}):
+            standings[lg] = existing["standings"][lg]
+
     # Build new cache, keeping existing data as fallback if live fetch failed
     cache = {
         "weather": weather or existing.get("weather"),
@@ -569,6 +654,7 @@ def main():
         "sports": sports if sports else existing.get("sports", {}),
         "pharmacy": pharmacy if pharmacy else existing.get("pharmacy", {}),
         "scores": scores if scores else existing.get("scores", []),
+        "standings": standings if standings else existing.get("standings", {}),
         "stocks": stocks if stocks else existing.get("stocks", {}),
         "air": air or existing.get("air"),
         "cameras": cameras if cameras else existing.get("cameras", []),  # events attached below

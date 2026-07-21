@@ -363,6 +363,21 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .score-teams{flex:1}
 .score-row{display:flex;justify-content:space-between;font-family:var(--fd);font-size:16px;font-weight:700;color:var(--t1);padding:2px 0;font-variant-numeric:tabular-nums}
 .score-status{font-family:var(--fd);font-size:10.5px;font-weight:800;color:var(--accent);text-align:right;width:100px;margin-left:12px;text-transform:uppercase;letter-spacing:1.4px}
+/* Standings tables (division/conference for followed teams; your team highlighted) */
+.standings-wrap{display:flex;flex-direction:column;gap:14px}
+.stand-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.stand-head{padding:12px 14px;font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:.4px;color:var(--t1);border-bottom:1px solid var(--line);background:var(--surface2)}
+.stand-head span{color:var(--t2);font-weight:600}
+.stand-table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.stand-table th{font-family:var(--fd);font-size:10px;font-weight:800;letter-spacing:1px;color:var(--t3);text-transform:uppercase;padding:8px 5px;text-align:center}
+.stand-table td{padding:10px 5px;text-align:center;color:var(--t2);border-top:1px solid var(--line)}
+.stand-table .st-rank{width:26px;color:var(--t3)}
+.stand-table .st-team{text-align:left;color:var(--t1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:118px}
+.stand-table tr.stand-mine td{background:var(--accent-soft);color:var(--accent);font-weight:800}
+.stand-table tr.stand-mine .st-team{color:var(--accent)}
+.stand-table tr.stand-gap td{color:var(--t3);padding:5px;font-size:12px;letter-spacing:3px}
+body[data-mode="drive"] .stand-table{font-size:16px}
+body[data-mode="drive"] .stand-table td{padding:12px 5px}
 
 /* SETTINGS */
 .set-group{position:relative;background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:24px;max-width:580px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -629,8 +644,11 @@ html.light #stocks-dropdown{background:linear-gradient(180deg,rgba(255,255,255,.
 .command-action.voice:hover{background:var(--accent2);color:#05070a}
 .command-action.glance-cta{background:var(--surface);color:var(--t1);border-color:var(--line)}
 .command-action.glance-cta:hover{background:var(--surface2);border-color:var(--accent-soft2);color:var(--accent)}
-/* Glance widget — always-visible at-a-glance card in the Live hero; tap expands the full-screen glance */
-.glance-widget{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:64px;padding:12px 16px;margin-top:2px;text-align:left;border:1px solid var(--line);border-radius:var(--r-sm);background:linear-gradient(135deg,var(--accent-soft) 0%,var(--surface) 62%);color:var(--t1);cursor:pointer;transition:border-color .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+/* Glance widget — always-visible at-a-glance card in the Live hero; swipe to move
+   through traffic/headlines, tap to expand the full-screen glance */
+.glance-widget{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:64px;padding:12px 16px 16px;margin-top:2px;text-align:left;border:1px solid var(--line);border-radius:var(--r-sm);background:linear-gradient(135deg,var(--accent-soft) 0%,var(--surface) 62%);color:var(--t1);cursor:pointer;transition:border-color .15s,transform .1s;-webkit-tap-highlight-color:transparent;touch-action:pan-y;user-select:none}
+.glance-widget .gw-bar{position:absolute;left:16px;right:16px;bottom:7px;height:3px;border-radius:2px;background:rgba(128,128,128,.22);overflow:hidden}
+.glance-widget .gw-bar-fill{display:block;height:100%;width:0;background:var(--accent);border-radius:2px;transition:width .3s ease}
 .glance-widget:hover{border-color:var(--accent-soft2)}
 .glance-widget:active{transform:scale(.99)}
 .glance-widget .gw-left{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1 1 auto;transition:opacity .28s}
@@ -1166,12 +1184,13 @@ body[data-mode="charging"] .charge-session{
       <!-- Glance widget: rotating at-a-glance insight (news/weather/sports/traffic/
            quote) from the cache. Tap to expand the full-screen glance. The daily
            briefing is read by the voice orb in the top-right corner. -->
-      <button type="button" id="glance-widget" class="glance-widget" onclick="glanceOpen()" aria-label="At a glance — tap to expand">
+      <button type="button" id="glance-widget" class="glance-widget" aria-label="At a glance — swipe for traffic and headlines, tap to expand">
         <span class="gw-left">
           <span class="gw-tag" id="gw-tag">Glance</span>
           <span class="gw-txt" id="gw-txt">Your day at a glance</span>
         </span>
         <span class="gw-time" id="gw-time" aria-hidden="true">--:--</span>
+        <span class="gw-bar" aria-hidden="true"><span class="gw-bar-fill" id="gw-bar-fill"></span></span>
       </button>
 
       <div class="charge-session" id="charge-session" aria-live="polite">
@@ -1269,9 +1288,13 @@ body[data-mode="charging"] .charge-session{
     </div>
   </section>
 
-  <!-- SPORTS NEWS PANEL -->
+  <!-- SPORTS PANEL: standings (baked hourly) + sports news feed -->
   <section class="panel" id="p-sports">
-    <div class="sec-title"><div class="live-dot"></div> Sports News</div>
+    <div class="sec-title"><div class="live-dot"></div> Standings</div>
+    <div id="standings-wrap" class="standings-wrap">
+      <div class="muted" style="text-align:center;padding:24px 16px;font-size:13px">Standings update hourly.</div>
+    </div>
+    <div class="sec-title" style="margin-top:24px"><div class="live-dot"></div> Sports News</div>
     <div class="feed-box h-sports" id="sports-feed">
       <div class="muted">Loading Sports News…</div>
     </div>
@@ -2151,76 +2174,78 @@ var glanceClockInt = null, glanceFactInt = null, glanceFactIdx = 0, glanceFactLi
 // Some feeds ship section headers ("Home Page Featured") as items — not headlines
 function isRealHeadline(t) { return t && t.length > 18 && !/home ?page|^featured$/i.test(t); }
 function glanceBuildFacts() {
-  var facts = [];
   var C = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE) || {};
-  // Headlines: top story from up to 4 news sources, interleaved with the
-  // other fact types by the caller order below
+  var newsCards = [], trafficCards = [], other = [];
+  // Headlines: top story from up to 6 news sources (deduped) — swipe through them
   try {
-    var news = C.news || {};
-    var seen = {};
+    var news = C.news || {}, seen = {};
     Object.keys(news).forEach(function(k) {
       var items = news[k].items || [];
       for (var i = 0; i < items.length; i++) {
         var t = items[i].title;
-        if (isRealHeadline(t) && !seen[t]) { seen[t] = 1; facts.push({tag: 'NEWS', txt: t}); break; }
+        if (isRealHeadline(t) && !seen[t]) { seen[t] = 1; if (newsCards.length < 6) newsCards.push({tag: 'NEWS', txt: t}); break; }
       }
     });
-    // keep at most 4 news facts so the rotation still gets to sports/traffic
-    var newsCount = 0;
-    facts = facts.filter(function(f) { return f.tag !== 'NEWS' || ++newsCount <= 4; });
+  } catch(e) {}
+  // Traffic: one card per incident on your routes (incidents / MAJOR + nearest
+  // first) with the road, type and a short description — swipe through them
+  try {
+    var evs = [];
+    (C.cameras || []).forEach(function(c) {
+      (c.events || []).forEach(function(ev) {
+        if (!ev) return;
+        var pri = (ev.type === 'Incident' || ev.severity === 'MAJOR') ? 0 : 1;
+        evs.push({pri: pri, ev: ev, km: (ev.km != null ? +ev.km : 999)});
+      });
+    });
+    var tseen = {};
+    evs = evs.filter(function(x) { var key = (x.ev.road || '') + '|' + (x.ev.desc || x.ev.type || ''); if (tseen[key]) return false; tseen[key] = 1; return true; });
+    evs.sort(function(a, b) { return a.pri - b.pri || a.km - b.km; });
+    evs.slice(0, 6).forEach(function(x) {
+      var ev = x.ev;
+      var head = (ev.road ? ev.road + ' — ' : '') + (ev.type || 'Event') + (ev.severity === 'MAJOR' ? ' (MAJOR)' : '');
+      trafficCards.push({tag: 'TRAFFIC', txt: head + (ev.desc ? ': ' + ev.desc : '') + (ev.km != null ? ' · ' + ev.km + ' km' : '')});
+    });
+    if (!trafficCards.length) trafficCards.push({tag: 'TRAFFIC', txt: 'No incidents on your routes'});
+  } catch(e) {}
+  // Weather now
+  try {
+    var cur = C.weather.current;
+    other.push({tag: 'WEATHER', txt: Math.round(cur.temperature_2m) + '°C, ' + getWeatherDescription(cur.weather_code)
+      + (cur.apparent_temperature != null ? ' · feels ' + Math.round(cur.apparent_temperature) + '°' : '')});
+  } catch(e) {}
+  // My Teams: up to 3 matchups
+  try {
+    var mt = 0;
+    (C.scores || []).forEach(function(s) {
+      if (!s.home || !s.away || mt >= 3) return;
+      mt++;
+      other.push({tag: s.league || 'MY TEAMS', txt: s.away.name + (s.away.score !== '-' ? ' ' + s.away.score : '') + ' @ '
+        + s.home.name + (s.home.score !== '-' ? ' ' + s.home.score : '') + (s.status ? ' · ' + s.status : '')});
+    });
   } catch(e) {}
   // Top sports headline
   try {
-    var sp = C.sports || {};
-    var spKeys = Object.keys(sp);
-    for (var s2 = 0; s2 < spKeys.length; s2++) {
-      var sit = sp[spKeys[s2]].items;
-      if (sit && sit[0] && isRealHeadline(sit[0].title)) { facts.push({tag: 'SPORTS', txt: sit[0].title}); break; }
-    }
+    var sp = C.sports || {}, spk = Object.keys(sp);
+    for (var s2 = 0; s2 < spk.length; s2++) { var sit = sp[spk[s2]].items; if (sit && sit[0] && isRealHeadline(sit[0].title)) { other.push({tag: 'SPORTS', txt: sit[0].title}); break; } }
   } catch(e) {}
   // Top pharmacy/medicine headline (David is a pharmacist)
   try {
-    var rx = C.pharmacy || {};
-    var rxKeys = Object.keys(rx);
-    for (var r2 = 0; r2 < rxKeys.length; r2++) {
-      var rit = rx[rxKeys[r2]].items;
-      if (rit && rit[0] && isRealHeadline(rit[0].title)) { facts.push({tag: 'RX', txt: rit[0].title}); break; }
-    }
-  } catch(e) {}
-  // My Teams: first entry with an actual matchup
-  try {
-    (C.scores || []).some(function(s) {
-      if (!s.home || !s.away) return false;
-      var line = s.away.name + (s.away.score !== '-' ? ' ' + s.away.score : '') + ' @ '
-               + s.home.name + (s.home.score !== '-' ? ' ' + s.home.score : '')
-               + (s.status ? ' · ' + s.status : '');
-      facts.push({tag: s.league || 'MY TEAMS', txt: line});
-      return true;
-    });
-  } catch(e) {}
-  // Traffic: incidents near the cached cameras
-  try {
-    var inc = 0;
-    (C.cameras || []).forEach(function(c) {
-      (c.events || []).forEach(function(ev) { if (ev.type === 'Incident' || ev.severity === 'MAJOR') inc++; });
-    });
-    facts.push({tag: 'TRAFFIC', txt: inc ? inc + ' incident' + (inc === 1 ? '' : 's') + ' reported near your cameras' : 'No incidents on your routes'});
+    var rx = C.pharmacy || {}, rxk = Object.keys(rx);
+    for (var r2 = 0; r2 < rxk.length; r2++) { var rit = rx[rxk[r2]].items; if (rit && rit[0] && isRealHeadline(rit[0].title)) { other.push({tag: 'RX', txt: rit[0].title}); break; } }
   } catch(e) {}
   // Daily quote
   try {
     var day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     var q = DAILY_QUOTES[day % DAILY_QUOTES.length];
-    facts.push({tag: 'QUOTE', txt: '“' + q[0] + '” — ' + q[1]});
+    other.push({tag: 'QUOTE', txt: '“' + q[0] + '” — ' + q[1]});
   } catch(e) {}
-  // Weave: alternate news with the other fact types so the rotation stays varied
-  var newsF = facts.filter(function(f) { return f.tag === 'NEWS'; });
-  var otherF = facts.filter(function(f) { return f.tag !== 'NEWS'; });
-  var woven = [], n = Math.max(newsF.length, otherF.length);
-  for (var w = 0; w < n; w++) {
-    if (newsF[w]) woven.push(newsF[w]);
-    if (otherF[w]) woven.push(otherF[w]);
-  }
-  return woven.length ? woven : [{tag: 'DASHBOARD', txt: 'Data refreshes hourly'}];
+  // Put headlines and traffic up front (David swipes through "traffic and
+  // headlines"), interleaved, then the rest.
+  var woven = [], n = Math.max(newsCards.length, trafficCards.length);
+  for (var w = 0; w < n; w++) { if (newsCards[w]) woven.push(newsCards[w]); if (trafficCards[w]) woven.push(trafficCards[w]); }
+  woven = woven.concat(other);
+  return woven.length ? woven : [{tag: 'GLANCE', txt: 'Your day at a glance — data refreshes hourly'}];
 }
 function glanceTick() {
   var d = new Date();
@@ -2274,30 +2299,59 @@ function glanceClose(e) {
 // ── GLANCE WIDGET: always-visible at-a-glance card in the Live hero. Cycles the
 // same cached facts as the full-screen glance (news/weather/sports/traffic/quote)
 // and shows the time. Tap opens the full-screen glance. Cache-driven, no fetch. ──
-var gwFacts = [], gwIdx = 0, gwInt = null;
+var gwFacts = [], gwIdx = 0, gwInt = null, gwSwiped = false;
 function glanceWidgetTime() {
   var el = document.getElementById('gw-time');
   if (!el) return;
   var d = new Date(), h = d.getHours() % 12 || 12, m = String(d.getMinutes()).padStart(2, '0');
   el.textContent = h + ':' + m;
 }
+function gwBuild() {
+  try { gwFacts = glanceBuildFacts(); } catch (e) { gwFacts = []; }
+  if (!gwFacts.length) gwFacts = [{tag: 'GLANCE', txt: 'Your day at a glance — data refreshes hourly'}];
+}
+function gwNorm(i) { var n = gwFacts.length; return ((i % n) + n) % n; }   // wrap
 function glanceWidgetShow(animate) {
   var w = document.getElementById('glance-widget'),
-      tag = document.getElementById('gw-tag'), txt = document.getElementById('gw-txt');
+      tag = document.getElementById('gw-tag'), txt = document.getElementById('gw-txt'),
+      bar = document.getElementById('gw-bar-fill');
   if (!w || !tag || !txt) return;
-  if (!gwFacts.length) { try { gwFacts = glanceBuildFacts(); } catch (e) { gwFacts = []; } }
-  if (!gwFacts.length) gwFacts = [{tag: 'GLANCE', txt: 'Your day at a glance — data refreshes hourly'}];
-  var f = gwFacts[gwIdx % gwFacts.length]; gwIdx++;
-  var apply = function() { tag.textContent = f.tag; txt.textContent = f.txt; };
-  if (animate) { w.classList.add('gw-fade'); setTimeout(function() { apply(); w.classList.remove('gw-fade'); }, 280); }
+  if (!gwFacts.length) gwBuild();
+  gwIdx = gwNorm(gwIdx);
+  var f = gwFacts[gwIdx];
+  var apply = function() {
+    tag.textContent = f.tag; txt.textContent = f.txt;
+    if (bar) bar.style.width = (gwFacts.length > 1 ? Math.round((gwIdx + 1) / gwFacts.length * 100) : 100) + '%';
+  };
+  if (animate) { w.classList.add('gw-fade'); setTimeout(function() { apply(); w.classList.remove('gw-fade'); }, 220); }
   else apply();
 }
-function glanceWidgetStart() {
-  if (!document.getElementById('glance-widget')) return;
-  gwFacts = []; gwIdx = 0;               // rebuild from the freshest cache
-  glanceWidgetTime(); glanceWidgetShow(false);
+function gwArm() {   // (re)start the 8s auto-advance
   clearInterval(gwInt);
-  gwInt = setInterval(function() { glanceWidgetTime(); glanceWidgetShow(true); }, 8000);
+  gwInt = setInterval(function() { glanceWidgetTime(); gwIdx = gwNorm(gwIdx + 1); glanceWidgetShow(true); }, 8000);
+}
+function gwGo(dir) { if (!gwFacts.length) gwBuild(); gwIdx = gwNorm(gwIdx + dir); glanceWidgetShow(true); gwArm(); }
+function glanceWidgetStart() {
+  var w = document.getElementById('glance-widget');
+  if (!w) return;
+  gwBuild(); gwIdx = 0;                   // rebuild from the freshest cache
+  glanceWidgetTime(); glanceWidgetShow(false);
+  gwArm();
+  if (!w.__wired) {
+    w.__wired = true;
+    var sx = 0, sy = 0;
+    w.addEventListener('pointerdown', function(e) { sx = e.clientX; sy = e.clientY; gwSwiped = false; });
+    w.addEventListener('pointerup', function(e) {
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { gwSwiped = true; gwGo(dx < 0 ? 1 : -1); }   // left = next
+    });
+    w.addEventListener('click', function(e) { if (gwSwiped) { gwSwiped = false; e.preventDefault(); return; } glanceOpen(); });
+    w.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); gwGo(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); gwGo(-1); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); glanceOpen(); }
+    });
+  }
 }
 
 // ── AUDIO BRIEFING (read the day aloud: weather, headlines, sports, scores) ──
@@ -2414,11 +2468,59 @@ function briefingStop() {
   if (briefingSupported()) { try { window.speechSynthesis.cancel(); } catch(e) {} }
   briefingSetBtns(false);
 }
+// Expand symbols/units/abbreviations to words so TTS pronounces them naturally
+// (mirrors speakable() in generate_briefing.py so the MP3 and this fallback match).
+function briefingSpeakable(s) {
+  s = String(s == null ? '' : s);
+  s = s.replace(/&/g, ' and ');
+  s = s.replace(/(\d)\s*%/g, '$1 percent').replace(/%/g, ' percent');
+  s = s.replace(/\$\s?(\d[\d,]*(?:\.\d+)?)\s?(million|billion|trillion|M|B|K)?\b/gi, function(_, n, sc) {
+    n = n.replace(/,/g, '');
+    var scale = {m: ' million', b: ' billion', k: ' thousand', million: ' million', billion: ' billion', trillion: ' trillion'};
+    return n + (sc ? (scale[sc.toLowerCase()] || '') : '') + ' dollars';
+  });
+  s = s.replace(/°\s?[CF]?/g, ' degrees');
+  s = s.replace(/(\d)\s?km\/h\b/gi, '$1 kilometres per hour').replace(/\bkm\/h\b/gi, 'kilometres per hour');
+  s = s.replace(/(\d)\s?km\b/gi, '$1 kilometres');
+  s = s.replace(/(\d)\s?(?:kg)\b/gi, '$1 kilograms').replace(/(\d)\s?mg\b/gi, '$1 milligrams');
+  s = s.replace(/\bvs\.?\b/gi, 'versus');
+  s = s.replace(/\bB\.C\.?/g, 'B C').replace(/\bU\.S\.(?:A\.)?/g, 'U S').replace(/\bU\.K\./g, 'U K');
+  s = s.replace(/\bAQI\b/g, 'A Q I').replace(/\bUV\b/g, 'U V').replace(/\bTSX\b/g, 'T S X').replace(/\bXEQT\b/gi, 'X E Q T');
+  s = s.replace(/\bNo\.\s?(\d)/g, 'number $1');
+  s = s.replace(/\s{2,}/g, ' ').trim();
+  return s;
+}
+// Pick the most natural available English voice (Siri/enhanced/Google, prefer
+// en-CA → en-GB → en-US, local voices first). Re-evaluated on voiceschanged.
+var briefingVoice = null;
+function pickBriefingVoice() {
+  if (!briefingSupported()) return null;
+  var vs = [];
+  try { vs = window.speechSynthesis.getVoices() || []; } catch (e) {}
+  if (!vs.length) return null;
+  var en = vs.filter(function(v) { return /^en(-|_|$)/i.test(v.lang || ''); });
+  if (!en.length) en = vs;
+  function score(v) {
+    var n = (v.name || '').toLowerCase(), lang = (v.lang || '').toLowerCase(), s = 0;
+    if (/enhanced|premium|natural|siri/.test(n)) s += 6;
+    if (/samantha|ava|allison|serena|zoe|karen|moira|fiona|daniel|arthur|nicky|aaron|evan|nathan|google/.test(n)) s += 4;
+    if (v.localService) s += 3;
+    if (/en-ca/.test(lang)) s += 3; else if (/en-gb/.test(lang)) s += 2; else if (/en-us|en-au/.test(lang)) s += 1;
+    if (/compact|eloquence|fred|albert|zarvox|whisper|novelty|bells|bad news|good news/.test(n)) s -= 8;
+    return s;
+  }
+  en.sort(function(a, b) { return score(b) - score(a); });
+  return en[0] || null;
+}
+function briefingVoiceReady() { briefingVoice = pickBriefingVoice(); }
+try { if (briefingSupported()) { window.speechSynthesis.onvoiceschanged = briefingVoiceReady; briefingVoiceReady(); } } catch (e) {}
 function briefingSpeakParts(parts) {
   var synth = window.speechSynthesis;
+  if (!briefingVoice) briefingVoice = pickBriefingVoice();
   parts.forEach(function(text, i) {
-    var u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.0; u.pitch = 1.0;
+    var u = new SpeechSynthesisUtterance(briefingSpeakable(text));
+    if (briefingVoice) { u.voice = briefingVoice; u.lang = briefingVoice.lang || 'en-CA'; } else { u.lang = 'en-CA'; }
+    u.rate = 0.97; u.pitch = 1.0; u.volume = 1;
     if (i === parts.length - 1) u.onend = function() { briefingOn = false; clearInterval(briefingKeepalive); briefingKeepalive = null; briefingSetBtns(false); };
     synth.speak(u);
   });
@@ -5886,6 +5988,49 @@ loadFeeds([
   });
   sfeed.innerHTML = html;
 })();
+
+// ── STANDINGS ── division / conference tables for the followed teams' leagues,
+// baked hourly into DASHBOARD_CACHE.standings by fetch_standings(). Cache-driven,
+// no live fetch; your team's row is highlighted. Big groups (e.g. the 15-team MLS
+// conference) are windowed to the top plus your team so the table stays compact.
+function renderStandings() {
+  var wrap = document.getElementById('standings-wrap');
+  if (!wrap) return;
+  var st = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE.standings) || {};
+  var ORDER = ['NHL', 'MLB', 'NBA', 'MLS', 'CFL'];
+  var EMO = { NHL: '🏒', MLB: '⚾', NBA: '🏀', MLS: '⚽', CFL: '🏈' };
+  var LBL = { gp: 'GP', w: 'W', l: 'L', otl: 'OTL', d: 'D', pts: 'PTS', pct: 'PCT', gb: 'GB', streak: 'STRK' };
+  var leagues = ORDER.filter(function(k) { return st[k] && st[k].rows && st[k].rows.length; });
+  if (!leagues.length) return;   // keep the "updates hourly" placeholder
+  var html = '';
+  leagues.forEach(function(lg) {
+    var d = st[lg], cols = (d.cols && d.cols.length) ? d.cols : ['w', 'l', 'pts'], rows = d.rows;
+    var myRank = -1;
+    rows.forEach(function(r, i) { if (r.mine) myRank = i; });
+    // Window large groups: top 8, plus your team's row (with a gap) if it's lower.
+    var view = rows;
+    if (rows.length > 9) {
+      view = rows.slice(0, 8);
+      if (myRank >= 8) view = view.concat([{ _gap: true }, rows[myRank]]);
+    }
+    html += '<div class="stand-card">'
+      + '<div class="stand-head">' + (EMO[lg] || '') + ' ' + escHtml(lg) + ' · <span>' + escHtml(d.group || '') + '</span></div>'
+      + '<table class="stand-table"><thead><tr><th class="st-rank">#</th><th class="st-team">Team</th>'
+      + cols.map(function(c) { return '<th>' + escHtml(LBL[c] || c.toUpperCase()) + '</th>'; }).join('')
+      + '</tr></thead><tbody>';
+    view.forEach(function(r) {
+      if (r._gap) { html += '<tr class="stand-gap"><td colspan="' + (2 + cols.length) + '">⋯</td></tr>'; return; }
+      html += '<tr class="' + (r.mine ? 'stand-mine' : '') + '">'
+        + '<td class="st-rank">' + (rows.indexOf(r) + 1) + '</td>'
+        + '<td class="st-team">' + escHtml(r.name || r.abbr || '') + '</td>'
+        + cols.map(function(c) { return '<td>' + escHtml(r[c] != null && r[c] !== '' ? r[c] : '—') + '</td>'; }).join('')
+        + '</tr>';
+    });
+    html += '</tbody></table></div>';
+  });
+  wrap.innerHTML = html;
+}
+renderStandings();
 
 // ── CALCULATOR ──
 function calcUpdate() {
