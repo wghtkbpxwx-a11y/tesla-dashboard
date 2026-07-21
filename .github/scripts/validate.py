@@ -210,8 +210,8 @@ def check_calendar_local(html):
     the parsed events live only in localStorage — they must NEVER be baked into the
     public DASHBOARD_CACHE (the site is world-readable). Lock that invariant so a
     future change can't silently start publishing his schedule."""
-    if "function parseICS" not in html or "cal_url_v1" not in html:
-        fail("calendar engine (parseICS / cal_url_v1) missing from the dashboard")
+    if "function parseICS" not in html or ("cal_urls_v1" not in html and "cal_url_v1" not in html):
+        fail("calendar engine (parseICS / cal_urls_v1) missing from the dashboard")
         return
     m = re.search(r"var DASHBOARD_CACHE = (\{[\s\S]*?\});\s*\n", html)
     if m:
