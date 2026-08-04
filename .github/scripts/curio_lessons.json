@@ -19,6 +19,15 @@
    ],
    "answer": 1,
    "why": "Blood from the gut passes through the liver first, which can clear a large fraction of the dose before it reaches the systemic circulation."
+  },
+  "viz": {
+   "type": "flow",
+   "mode": "liver",
+   "min": 0,
+   "max": 95,
+   "def": 80,
+   "label": "First-pass removal",
+   "unit": "%"
   }
  },
  {
@@ -63,6 +72,15 @@
    ],
    "answer": 2,
    "why": "After ~5 half-lives a drug reaches ~97% of steady state, where intake and elimination balance."
+  },
+  "viz": {
+   "type": "decay",
+   "mode": "accumulate",
+   "min": 1,
+   "max": 48,
+   "def": 12,
+   "label": "Half-life",
+   "unit": "h"
   }
  },
  {
@@ -195,6 +213,15 @@
    ],
    "answer": 1,
    "why": "72 ÷ 8 = 9 years. The Rule of 72 estimates doubling time from the growth rate."
+  },
+  "viz": {
+   "type": "growth",
+   "mode": "compound",
+   "min": 1,
+   "max": 15,
+   "def": 7,
+   "label": "Annual return",
+   "unit": "%"
   }
  },
  {
@@ -261,6 +288,15 @@
    ],
    "answer": 1,
    "why": "A fee drag compounds every year, so over decades even ~2% can erase a large share of your final balance."
+  },
+  "viz": {
+   "type": "growth",
+   "mode": "fee",
+   "min": 0,
+   "max": 3,
+   "def": 2,
+   "label": "Yearly fee",
+   "unit": "%"
   }
  },
  {
@@ -305,6 +341,15 @@
    ],
    "answer": 2,
    "why": "Real return ≈ nominal minus inflation, so 6% − 3% ≈ 3% of true purchasing-power growth."
+  },
+  "viz": {
+   "type": "growth",
+   "mode": "real",
+   "min": 0,
+   "max": 8,
+   "def": 3,
+   "label": "Inflation",
+   "unit": "%"
   }
  },
  {
@@ -327,6 +372,9 @@
    ],
    "answer": 1,
    "why": "Charging drives lithium ions into the anode; discharging lets them return, moving energy in and out reversibly."
+  },
+  "viz": {
+   "type": "ions"
   }
  },
  {
@@ -481,6 +529,9 @@
    ],
    "answer": 1,
    "why": "Rayleigh scattering favours short wavelengths, so blue light is scattered across the sky."
+  },
+  "viz": {
+   "type": "scatter"
   }
  },
  {
@@ -569,6 +620,15 @@
    ],
    "answer": 1,
    "why": "Repeated dosing and repeated investing are both exponential processes of inputs accumulating against a rate."
+  },
+  "viz": {
+   "type": "decay",
+   "mode": "accumulate",
+   "min": 1,
+   "max": 48,
+   "def": 12,
+   "label": "Half-life",
+   "unit": "h"
   }
  },
  {
@@ -679,6 +739,15 @@
    ],
    "answer": 1,
    "why": "The blood-brain barrier admits mostly small, fat-soluble molecules, keeping most drugs out of brain tissue."
+  },
+  "viz": {
+   "type": "flow",
+   "mode": "barrier",
+   "min": 0,
+   "max": 100,
+   "def": 85,
+   "label": "Blocked by barrier",
+   "unit": "%"
   }
  },
  {
@@ -701,6 +770,15 @@
    ],
    "answer": 1,
    "why": "Calcium and other metals chelate the antibiotic into an unabsorbable complex, cutting how much drug gets in."
+  },
+  "viz": {
+   "type": "flow",
+   "mode": "bind",
+   "min": 0,
+   "max": 100,
+   "def": 70,
+   "label": "Bound & lost",
+   "unit": "%"
   }
  },
  {
@@ -745,6 +823,10 @@
    ],
    "answer": 1,
    "why": "People weigh a loss roughly twice as heavily as an equivalent gain, biasing many financial choices."
+  },
+  "viz": {
+   "type": "bars",
+   "mode": "loss"
   }
  },
  {
@@ -811,6 +893,9 @@
    ],
    "answer": 1,
    "why": "Tidal locking makes the Moon rotate once per orbit, keeping one face toward Earth."
+  },
+  "viz": {
+   "type": "orbit"
   }
  },
  {
@@ -833,6 +918,13 @@
    ],
    "answer": 1,
    "why": "Stellar collapse packs matter into neutrons so densely that a teaspoon would weigh around a billion tonnes."
+  },
+  "viz": {
+   "type": "scale",
+   "mode": "log",
+   "label": "A teaspoon weighs",
+   "hi": "≈1,000,000,000 tonnes",
+   "lo": "water: 5 grams"
   }
  },
  {
@@ -855,6 +947,22 @@
    ],
    "answer": 1,
    "why": "At light speed, the ~150-million-km trip from Sun to Earth takes roughly eight minutes."
+  },
+  "viz": {
+   "type": "scale",
+   "mode": "bar",
+   "unit": " min",
+   "parts": [
+    [
+     "Sun → Earth light",
+     8
+    ],
+    [
+     "Sound would take",
+     13000
+    ]
+   ],
+   "note": "light vs sound, minutes"
   }
  },
  {
@@ -877,6 +985,24 @@
    ],
    "answer": 0,
    "why": "Ordinary matter is ~5%; the rest is dark matter (~27%) and dark energy (~68%), neither directly seen."
+  },
+  "viz": {
+   "type": "scale",
+   "mode": "pie",
+   "parts": [
+    [
+     "Ordinary matter",
+     5
+    ],
+    [
+     "Dark matter",
+     27
+    ],
+    [
+     "Dark energy",
+     68
+    ]
+   ]
   }
  },
  {
@@ -965,6 +1091,21 @@
    ],
    "answer": 2,
    "why": "Stanley Park is ~400 ha versus Central Park’s ~341 ha — about a fifth larger."
+  },
+  "viz": {
+   "type": "scale",
+   "mode": "bar",
+   "unit": " ha",
+   "parts": [
+    [
+     "Stanley Park",
+     405
+    ],
+    [
+     "Central Park",
+     341
+    ]
+   ]
   }
  },
  {
@@ -1053,6 +1194,15 @@
    ],
    "answer": 1,
    "why": "Radioactive decay and first-order drug elimination both halve a quantity every half-life."
+  },
+  "viz": {
+   "type": "decay",
+   "mode": "decay",
+   "min": 1000,
+   "max": 11400,
+   "def": 5700,
+   "label": "Half-life",
+   "unit": "yr"
   }
  }
 ]

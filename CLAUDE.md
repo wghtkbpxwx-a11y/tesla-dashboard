@@ -222,8 +222,16 @@ camera list is reused and fresh events still attach via stored lat/lon.
   that MP3 for today's lesson (media playback is audible in the Tesla, unlike
   speechSynthesis) and **falls back to `speechSynthesis`** for other lessons / on
   phone (`curioSpeakSynth()`, reusing `pickBriefingVoice()` + `briefingSpeakable()`).
-  Client opens on `cache.curio.id` (else a client-side daily pick). Interactive
-  **tap-quiz** (`curioAnswer()`) with green/red feedback + explanation; **streak**
+  Client opens on `cache.curio.id` (else a client-side daily pick).
+  **Interactive visualizations** (`curioViz`, a canvas engine): 17 lessons carry a
+  `viz` spec in the JSON (`growth`/`decay` curves, `flow` particle streams,
+  `scatter`, `orbit`, `scale` pie/bar/log, `bars`) you **scrub by dragging** to
+  change a parameter with a live readout; the rest get an animated category-tinted
+  `ambient` header. rAF is **gated to panel visibility** (started/stopped in
+  `goPanel`) and honours reduced-motion (single static frame). A game-like
+  **mastery** row (`curioRenderMastery()`, conic-gradient ring per field, tap to
+  filter) + a glowing streak flame + a correct-answer spark burst (`curioBurst`).
+  Interactive **tap-quiz** (`curioAnswer()`) with green/red feedback + explanation; **streak**
   (🔥, per-day in `curio_v1`) + learned count + % correct. Category filter chips +
   **Next**; tint via `--cu-rgb`. Surfaced in the **glance deck** (CURIO card) and
   the **briefing** (`briefingCurioLine()`). True daily *LLM-generated* lessons are

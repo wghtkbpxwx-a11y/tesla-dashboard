@@ -423,6 +423,30 @@ body[data-mode="drive"] .cu-title{font-size:30px}
 body[data-mode="drive"] .cu-body p,body[data-mode="drive"] .cu-opt{font-size:17px}
 body[data-mode="drive"] .cu-opt{min-height:60px}
 @media(max-width:760px){.cu-title{font-size:23px}.curio-nav{flex-direction:column}}
+/* Curio interactive viz canvas */
+.cu-viz-wrap{position:relative;margin:4px 0 16px}
+.cu-viz{display:block;width:100%;height:190px;border-radius:var(--r-sm);background:radial-gradient(120% 120% at 50% 0,rgba(var(--cu-rgb),.08),rgba(var(--cu-rgb),.02) 60%,transparent);border:1px solid rgba(var(--cu-rgb),.22);touch-action:pan-y;cursor:ew-resize;-webkit-tap-highlight-color:transparent}
+.cu-viz.cu-viz--sm{height:84px;cursor:default;opacity:.9}
+.cu-viz-hint{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgb(var(--cu-rgb));opacity:.7;pointer-events:none;transition:opacity .3s;animation:cuHint 2.4s ease-in-out infinite}
+@keyframes cuHint{0%,100%{opacity:.4}50%{opacity:.85}}
+.cu-viz-read{margin-top:9px;font-size:13px;line-height:1.5;color:var(--t2);min-height:18px}
+.cu-viz-read b{color:var(--t1);font-variant-numeric:tabular-nums}
+body[data-mode="drive"] .cu-viz{height:220px}
+/* Mastery rings (per-field progress) */
+.cu-mastery{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 16px}
+.cu-ring{--deg:0deg;position:relative;width:50px;height:50px;flex:0 0 auto;border:none;padding:0;background:conic-gradient(rgb(var(--r)) var(--deg),rgba(128,128,128,.2) 0);border-radius:50%;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform .12s;-webkit-tap-highlight-color:transparent}
+.cu-ring:active{transform:scale(.94)}
+.cu-ring::before{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--surface)}
+.cu-ring.full::before{background:rgba(var(--r),.16)}
+.cu-ring.full{box-shadow:0 0 12px -2px rgb(var(--r))}
+.cu-ring-face{position:relative;font-size:16px;line-height:1}
+.cu-ring-n{position:relative;font-family:var(--fd);font-size:9px;font-weight:800;color:var(--t3);margin-top:1px}
+.cu-ring.full .cu-ring-n{color:rgb(var(--r))}
+.curio-streak{position:relative;text-shadow:0 0 calc(6px + var(--flame,0)*10px) rgba(255,138,61,calc(.3 + var(--flame,0)*.6))}
+/* Correct-answer spark burst */
+.cu-spark{position:absolute;width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 8px #34d399;pointer-events:none;transform:translate(-50%,-50%);animation:cuSpark .72s ease-out forwards;z-index:3}
+@keyframes cuSpark{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.3)}}
+@media(prefers-reduced-motion:reduce){.cu-viz-hint{animation:none}.cu-spark{display:none}}
 
 /* SETTINGS */
 .set-group{position:relative;background:var(--glass2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:24px;max-width:580px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -1400,6 +1424,7 @@ body[data-mode="charging"] .charge-session{
       </div>
     </div>
     <div class="curio-sub">One curious thing a day — read it, or tap Listen and go hands-free.</div>
+    <div class="cu-mastery" id="curio-mastery" aria-label="Learning progress by field"></div>
     <div class="cu-chips" id="curio-cats"></div>
     <div class="curio-card" id="curio-card"></div>
     <div class="curio-nav">
@@ -2798,6 +2823,7 @@ function goPanel(p) {
     if (document.getElementById('game-shoot').style.display !== 'none') shootLoopStart();
     if (document.getElementById('game-mon').style.display !== 'none') monLoopStart();
   }
+  try { if (p === 'curio') { curioViz.resume(); } else { curioViz.stop(); } } catch (e) {}
 }
 function toggleDockSubmenu() {
   var submenu = document.getElementById('dock-submenu');
@@ -3553,6 +3579,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "Blood from the gut passes through the liver first, which can clear a large fraction of the dose before it reaches the systemic circulation."
+  },
+  "viz": {
+   "type": "flow",
+   "mode": "liver",
+   "min": 0,
+   "max": 95,
+   "def": 80,
+   "label": "First-pass removal",
+   "unit": "%"
   }
  },
  {
@@ -3597,6 +3632,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 2,
    "why": "After ~5 half-lives a drug reaches ~97% of steady state, where intake and elimination balance."
+  },
+  "viz": {
+   "type": "decay",
+   "mode": "accumulate",
+   "min": 1,
+   "max": 48,
+   "def": 12,
+   "label": "Half-life",
+   "unit": "h"
   }
  },
  {
@@ -3729,6 +3773,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "72 ÷ 8 = 9 years. The Rule of 72 estimates doubling time from the growth rate."
+  },
+  "viz": {
+   "type": "growth",
+   "mode": "compound",
+   "min": 1,
+   "max": 15,
+   "def": 7,
+   "label": "Annual return",
+   "unit": "%"
   }
  },
  {
@@ -3795,6 +3848,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "A fee drag compounds every year, so over decades even ~2% can erase a large share of your final balance."
+  },
+  "viz": {
+   "type": "growth",
+   "mode": "fee",
+   "min": 0,
+   "max": 3,
+   "def": 2,
+   "label": "Yearly fee",
+   "unit": "%"
   }
  },
  {
@@ -3839,6 +3901,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 2,
    "why": "Real return ≈ nominal minus inflation, so 6% − 3% ≈ 3% of true purchasing-power growth."
+  },
+  "viz": {
+   "type": "growth",
+   "mode": "real",
+   "min": 0,
+   "max": 8,
+   "def": 3,
+   "label": "Inflation",
+   "unit": "%"
   }
  },
  {
@@ -3861,6 +3932,9 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "Charging drives lithium ions into the anode; discharging lets them return, moving energy in and out reversibly."
+  },
+  "viz": {
+   "type": "ions"
   }
  },
  {
@@ -4015,6 +4089,9 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "Rayleigh scattering favours short wavelengths, so blue light is scattered across the sky."
+  },
+  "viz": {
+   "type": "scatter"
   }
  },
  {
@@ -4103,6 +4180,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "Repeated dosing and repeated investing are both exponential processes of inputs accumulating against a rate."
+  },
+  "viz": {
+   "type": "decay",
+   "mode": "accumulate",
+   "min": 1,
+   "max": 48,
+   "def": 12,
+   "label": "Half-life",
+   "unit": "h"
   }
  },
  {
@@ -4213,6 +4299,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "The blood-brain barrier admits mostly small, fat-soluble molecules, keeping most drugs out of brain tissue."
+  },
+  "viz": {
+   "type": "flow",
+   "mode": "barrier",
+   "min": 0,
+   "max": 100,
+   "def": 85,
+   "label": "Blocked by barrier",
+   "unit": "%"
   }
  },
  {
@@ -4235,6 +4330,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "Calcium and other metals chelate the antibiotic into an unabsorbable complex, cutting how much drug gets in."
+  },
+  "viz": {
+   "type": "flow",
+   "mode": "bind",
+   "min": 0,
+   "max": 100,
+   "def": 70,
+   "label": "Bound & lost",
+   "unit": "%"
   }
  },
  {
@@ -4279,6 +4383,10 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "People weigh a loss roughly twice as heavily as an equivalent gain, biasing many financial choices."
+  },
+  "viz": {
+   "type": "bars",
+   "mode": "loss"
   }
  },
  {
@@ -4345,6 +4453,9 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "Tidal locking makes the Moon rotate once per orbit, keeping one face toward Earth."
+  },
+  "viz": {
+   "type": "orbit"
   }
  },
  {
@@ -4367,6 +4478,13 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "Stellar collapse packs matter into neutrons so densely that a teaspoon would weigh around a billion tonnes."
+  },
+  "viz": {
+   "type": "scale",
+   "mode": "log",
+   "label": "A teaspoon weighs",
+   "hi": "≈1,000,000,000 tonnes",
+   "lo": "water: 5 grams"
   }
  },
  {
@@ -4389,6 +4507,22 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "At light speed, the ~150-million-km trip from Sun to Earth takes roughly eight minutes."
+  },
+  "viz": {
+   "type": "scale",
+   "mode": "bar",
+   "unit": " min",
+   "parts": [
+    [
+     "Sun → Earth light",
+     8
+    ],
+    [
+     "Sound would take",
+     13000
+    ]
+   ],
+   "note": "light vs sound, minutes"
   }
  },
  {
@@ -4411,6 +4545,24 @@ var CURIO_LESSONS = [
    ],
    "answer": 0,
    "why": "Ordinary matter is ~5%; the rest is dark matter (~27%) and dark energy (~68%), neither directly seen."
+  },
+  "viz": {
+   "type": "scale",
+   "mode": "pie",
+   "parts": [
+    [
+     "Ordinary matter",
+     5
+    ],
+    [
+     "Dark matter",
+     27
+    ],
+    [
+     "Dark energy",
+     68
+    ]
+   ]
   }
  },
  {
@@ -4499,6 +4651,21 @@ var CURIO_LESSONS = [
    ],
    "answer": 2,
    "why": "Stanley Park is ~400 ha versus Central Park’s ~341 ha — about a fifth larger."
+  },
+  "viz": {
+   "type": "scale",
+   "mode": "bar",
+   "unit": " ha",
+   "parts": [
+    [
+     "Stanley Park",
+     405
+    ],
+    [
+     "Central Park",
+     341
+    ]
+   ]
   }
  },
  {
@@ -4587,6 +4754,15 @@ var CURIO_LESSONS = [
    ],
    "answer": 1,
    "why": "Radioactive decay and first-order drug elimination both halve a quantity every half-life."
+  },
+  "viz": {
+   "type": "decay",
+   "mode": "decay",
+   "min": 1000,
+   "max": 11400,
+   "def": 5700,
+   "label": "Half-life",
+   "unit": "yr"
   }
  }
 ];
@@ -4618,8 +4794,20 @@ function curioRenderCats() {
 }
 function curioRenderStats() {
   var s = document.getElementById('curio-streak'), c = document.getElementById('curio-count');
-  if (s) s.textContent = '🔥 ' + (CU.streak || 0);
+  if (s) { s.textContent = '🔥 ' + (CU.streak || 0); s.style.setProperty('--flame', Math.min(1, (CU.streak || 0) / 10)); }
   if (c) { var n = Object.keys(CU.learned || {}).length, pct = CU.answered ? Math.round(CU.correct / CU.answered * 100) : 0; c.textContent = n + ' learned' + (CU.answered ? ' · ' + pct + '% correct' : ''); }
+  curioRenderMastery();
+}
+// Per-field mastery: a conic-gradient ring per category filling as lessons are learned
+function curioRenderMastery() {
+  var host = document.getElementById('curio-mastery'); if (!host) return;
+  var tot = {}, done = {};
+  CURIO_LESSONS.forEach(function (l) { tot[l.cat] = (tot[l.cat] || 0) + 1; if (CU.learned && CU.learned[l.id]) done[l.cat] = (done[l.cat] || 0) + 1; });
+  host.innerHTML = CURIO_CATS.map(function (cat) {
+    var t = tot[cat.id] || 0, d = done[cat.id] || 0, deg = t ? Math.round(d / t * 360) : 0, full = t && d >= t;
+    return '<button class="cu-ring' + (full ? ' full' : '') + '" onclick="curioSetCat(\'' + cat.id + '\')" title="' + cat.id + ' — ' + d + ' of ' + t + '" style="--r:' + cat.rgb + ';--deg:' + deg + 'deg">'
+      + '<span class="cu-ring-face">' + cat.emoji + '</span><span class="cu-ring-n">' + d + '/' + t + '</span></button>';
+  }).join('');
 }
 function curioRender() {
   curioRenderCats(); curioRenderStats();
@@ -4632,15 +4820,22 @@ function curioRender() {
     return '<button class="cu-opt" id="cu-opt-' + i + '" onclick="curioAnswer(' + i + ')"><span class="cu-opt-k">' + String.fromCharCode(65 + i) + '</span>' + escHtml(o) + '</button>';
   }).join('');
   card.style.setProperty('--cu-rgb', m.rgb);
+  var vspec = L.viz || { type: 'ambient' };
+  var interactive = vspec.min != null;
+  var viz = '<div class="cu-viz-wrap"><canvas id="cu-viz" class="cu-viz' + (L.viz ? '' : ' cu-viz--sm') + '"></canvas>'
+    + (interactive ? '<div class="cu-viz-hint" id="cu-viz-hint">⇽ drag to explore ⇾</div>' : '')
+    + (L.viz ? '<div class="cu-viz-read" id="cu-viz-read"></div>' : '') + '</div>';
   card.innerHTML =
     '<div class="cu-pill">' + m.emoji + ' ' + escHtml(L.cat) + '</div>'
     + '<h2 class="cu-title">' + escHtml(L.title) + '</h2>'
     + '<div class="cu-hook">' + escHtml(L.hook) + '</div>'
+    + viz
     + '<div class="cu-body">' + body + '</div>'
     + '<div class="cu-take"><span class="cu-take-k">Takeaway</span>' + escHtml(L.take) + '</div>'
     + '<div class="cu-quiz"><div class="cu-q">' + escHtml(L.quiz.q) + '</div><div class="cu-opts">' + opts + '</div>'
     + '<div class="cu-why" id="cu-why"></div></div>';
   curioAnswered = false;
+  try { curioViz.start(vspec); } catch (e) {}
 }
 function curioAnswer(i) {
   if (curioAnswered) return;
@@ -4658,7 +4853,26 @@ function curioAnswer(i) {
   }
   var why = document.getElementById('cu-why');
   if (why) { why.innerHTML = '<strong>' + (correct ? '✓ Correct.' : '✗ Not quite.') + '</strong> ' + escHtml(L.quiz.why); why.classList.add('show'); }
+  if (correct) curioBurst(document.getElementById('cu-opt-' + L.quiz.answer));
   curioRenderStats();
+}
+// celebratory spark burst from an element (reduced-motion aware)
+function curioBurst(el) {
+  try {
+    if (!el || matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    var host = document.getElementById('curio-card'); if (!host) return;
+    var hr = host.getBoundingClientRect(), r = el.getBoundingClientRect();
+    var cx = r.left - hr.left + r.width / 2, cy = r.top - hr.top + r.height / 2;
+    for (var i = 0; i < 16; i++) {
+      var p = document.createElement('span'); p.className = 'cu-spark';
+      var ang = Math.random() * 6.283, dist = 26 + Math.random() * 52;
+      p.style.left = cx + 'px'; p.style.top = cy + 'px';
+      p.style.setProperty('--dx', Math.round(Math.cos(ang) * dist) + 'px');
+      p.style.setProperty('--dy', Math.round(Math.sin(ang) * dist) + 'px');
+      host.appendChild(p);
+      (function (node) { setTimeout(function () { try { node.remove(); } catch (e) {} }, 760); })(p);
+    }
+  } catch (e) {}
 }
 function curioNext() { curioStopSpeak(); curioIdx++; curioRender(); try { document.getElementById('p-curio').scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
 function curioSetCat(cat) { curioStopSpeak(); CU.cat = cat; curioSave(); curioIdx = curioDailyIndex(); curioRender(); }
@@ -4713,6 +4927,171 @@ function curioSpeakSynth(L) {
   curioKeepalive = setInterval(function() { if (!curioSpeaking) { clearInterval(curioKeepalive); return; } try { synth.resume(); } catch (e) {} }, 4000);
 }
 function curioStatus(msg) { var b = document.getElementById('curio-listen'); if (b && msg) { b.innerHTML = msg; setTimeout(function() { if (!curioSpeaking && document.getElementById('curio-listen')) document.getElementById('curio-listen').innerHTML = '▶ Listen'; }, 2500); } }
+// ── CURIO VIZ ENGINE ── interactive, animated canvas visualizations per lesson.
+// Drag horizontally to scrub a parameter (rate, half-life, %). rAF is gated to
+// panel visibility; honours reduced-motion (draws a single static frame).
+var curioViz = (function () {
+  var cv = null, ctx = null, spec = null, raf = 0, t0 = 0, running = false, reduce = false;
+  var W = 0, H = 0, dpr = 1, param = 0.5, rgb = '42,245,196', flowP = null;
+  function reduced() { try { return matchMedia('(prefers-reduced-motion:reduce)').matches; } catch (e) { return false; } }
+  function ink(a) { return 'rgba(' + rgb + ',' + a + ')'; }
+  function solid() { return 'rgb(' + rgb + ')'; }
+  function txt(s, x, y, size, col, align) { ctx.fillStyle = col || ink(0.85); ctx.font = '600 ' + (size || 12) + 'px -apple-system,system-ui,sans-serif'; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y); ctx.textAlign = 'left'; }
+  function val() { return spec.min == null ? 0 : spec.min + (spec.max - spec.min) * param; }
+  function panelOn() { var p = document.getElementById('p-curio'); return p && p.classList.contains('on'); }
+  function sizeCanvas() {
+    if (!cv) return;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    var r = cv.getBoundingClientRect(); W = Math.max(20, r.width); H = Math.max(20, r.height);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function readRgb() { try { var c = document.getElementById('curio-card'); var v = getComputedStyle(c).getPropertyValue('--cu-rgb').trim(); if (v) rgb = v; } catch (e) {} }
+  function fmt(n) { return n >= 1000 ? Math.round(n).toLocaleString() : (n % 1 ? n.toFixed(1) : String(n)); }
+  function updateReadout() { var el = document.getElementById('cu-viz-read'); if (el) el.innerHTML = (R[spec.type] && R[spec.type].readout) ? R[spec.type].readout() : ''; }
+  function mkFlow(spread) { var x = spread ? Math.random() * W * 0.5 : -6; return { x: x, px: x, y: 16 + Math.random() * (H - 32), vy: 0, a: 1, vx: 0.8 + Math.random() * 0.9, st: 'go' }; }
+
+  var R = {
+    ambient: { draw: function (t) {
+      ctx.globalCompositeOperation = 'lighter';
+      for (var i = 0; i < 26; i++) { var a = t * 0.25 + i * 0.6; var x = ((i * 89 + t * (12 + i % 5 * 6)) % (W + 40)) - 20; var y = H * 0.5 + Math.sin(a) * H * 0.34 + Math.cos(a * 0.6) * 8; var s = 1 + (i % 4) * 0.5; ctx.fillStyle = ink(0.5); ctx.beginPath(); ctx.arc(x, y, s, 0, 7); ctx.fill(); }
+      ctx.globalCompositeOperation = 'source-over';
+      for (var j = 0; j < 5; j++) { var bx = (0.5 + 0.42 * Math.sin(t * 0.4 + j * 1.7)) * W; var by = (0.5 + 0.36 * Math.cos(t * 0.33 + j * 2.3)) * H; ctx.fillStyle = ink(0.05); ctx.beginPath(); ctx.arc(bx, by, 26 + 8 * Math.sin(t + j), 0, 7); ctx.fill(); }
+    } },
+    growth: {
+      rates: function () { var r = Math.max(val() / 100, 0); if (spec.mode === 'fee') return [{ r: 0.07, dim: true }, { r: Math.max(0.07 - r, 0), pri: true }]; if (spec.mode === 'real') return [{ r: 0.07, dim: true }, { r: Math.max(0.07 - r, 0), pri: true }]; return [{ r: r, pri: true }]; },
+      draw: function (t) {
+        var pad = 14, x0 = pad, x1 = W - pad, y1 = H - 20, y0 = 14, pw = x1 - x0, ph = y1 - y0, years = 40;
+        ctx.strokeStyle = ink(0.14); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0, y1); ctx.lineTo(x1, y1); ctx.stroke();
+        var rs = this.rates(), top = 0; rs.forEach(function (q) { if (q.r > top) top = q.r; });
+        var vmax = Math.max(Math.pow(1 + top, years), 1.3), sweep = Math.min(1, t / 1.4);
+        rs.forEach(function (q) {
+          ctx.beginPath();
+          for (var i = 0; i <= 60; i++) { var f = i / 60; if (f > sweep) break; var v = Math.pow(1 + q.r, years * f); var px = x0 + pw * f, py = y1 - ph * (v / vmax); i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py); }
+          ctx.strokeStyle = q.pri ? solid() : ink(0.3); ctx.lineWidth = q.pri ? 2.6 : 1.4; ctx.stroke();
+          if (q.pri) { var vv = Math.pow(1 + q.r, years * sweep), dx = x0 + pw * sweep, dy = y1 - ph * (vv / vmax); ctx.fillStyle = solid(); ctx.shadowColor = solid(); ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(dx, dy, 3.6, 0, 7); ctx.fill(); ctx.shadowBlur = 0; }
+        });
+        if (spec.mode === 'compound') { var r = Math.max(val() / 100, 0.001), yd = Math.log(2) / Math.log(1 + r); if (yd <= years) { var mx = x0 + pw * (yd / years); ctx.strokeStyle = ink(0.32); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(mx, y1); ctx.lineTo(mx, y0); ctx.stroke(); ctx.setLineDash([]); txt('2×', mx + 4, y0 + 7, 11, ink(0.75)); } }
+        txt('now', x0, y1 + 9, 10, ink(0.5)); txt('40 yrs', x1, y1 + 9, 10, ink(0.5), 'right');
+      },
+      readout: function () { var r = val(); if (spec.mode === 'fee') { var g = Math.pow(1.07, 30) * 10000, n = Math.pow(1 + (0.07 - r / 100), 30) * 10000; return '<b>' + r.toFixed(1) + '% fee</b> · $10k over 30 yrs → <b>$' + fmt(n) + '</b> vs $' + fmt(g) + ' — costs <b style="color:var(--red)">$' + fmt(g - n) + '</b>'; } if (spec.mode === 'real') return '<b>' + r.toFixed(1) + '% inflation</b> turns a 7% return into <b>' + (7 - r).toFixed(1) + '% real</b>'; return '<b>' + r.toFixed(1) + '%</b> → doubles in <b>~' + (72 / Math.max(r, 0.1)).toFixed(0) + ' yrs</b>; $10k → <b>$' + fmt(Math.pow(1 + r / 100, 40) * 10000) + '</b> in 40 yrs'; }
+    },
+    decay: {
+      draw: function (t) {
+        var pad = 14, x0 = pad, x1 = W - pad, y1 = H - 20, y0 = 14, pw = x1 - x0, ph = y1 - y0, N = 5, acc = spec.mode === 'accumulate';
+        for (var k = 1; k <= N; k++) { var gx = x0 + pw * (k / N); ctx.strokeStyle = ink(0.08); ctx.beginPath(); ctx.moveTo(gx, y0); ctx.lineTo(gx, y1); ctx.stroke(); txt(k + '×', gx, y1 + 9, 9, ink(0.45), 'center'); }
+        ctx.strokeStyle = ink(0.14); ctx.beginPath(); ctx.moveTo(x0, y1); ctx.lineTo(x1, y1); ctx.stroke();
+        var sweep = Math.min(1, t / 1.4);
+        ctx.beginPath(); ctx.moveTo(x0, y1);
+        for (var i = 0; i <= 60; i++) { var f = i / 60; if (f > sweep) break; var n = N * f, v = acc ? (1 - Math.pow(0.5, n)) : Math.pow(0.5, n); ctx.lineTo(x0 + pw * f, y1 - ph * v); }
+        var xe = x0 + pw * sweep; ctx.lineTo(xe, y1); ctx.closePath(); ctx.fillStyle = ink(0.12); ctx.fill();
+        ctx.beginPath();
+        for (var j = 0; j <= 60; j++) { var f2 = j / 60; if (f2 > sweep) break; var n2 = N * f2, v2 = acc ? (1 - Math.pow(0.5, n2)) : Math.pow(0.5, n2); var px = x0 + pw * f2, py = y1 - ph * v2; j === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py); }
+        ctx.strokeStyle = solid(); ctx.lineWidth = 2.6; ctx.stroke();
+        var ne = N * sweep, ve = acc ? (1 - Math.pow(0.5, ne)) : Math.pow(0.5, ne); ctx.fillStyle = solid(); ctx.shadowColor = solid(); ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(xe, y1 - ph * ve, 3.6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+        txt(acc ? 'steady state' : '≈97% gone', x1, y0 + 7, 10, ink(0.6), 'right');
+      },
+      readout: function () { var hl = val(), u = spec.unit || '', five = hl * 5; return '<b>Half-life ' + fmt(hl) + u + '</b> → ' + (spec.mode === 'accumulate' ? 'reaches steady state' : '~97% cleared') + ' in <b>~' + fmt(five) + u + '</b> (5 half-lives)'; }
+    },
+    flow: {
+      draw: function (t) {
+        if (!flowP) { flowP = []; for (var i = 0; i < 44; i++) flowP.push(mkFlow(true)); }
+        var gate = W * 0.54, frac = val() / 100;
+        var srcL = spec.mode === 'barrier' ? 'blood' : (spec.mode === 'bind' ? 'drug' : 'gut'), tgtL = spec.mode === 'barrier' ? 'brain' : (spec.mode === 'bind' ? 'absorbed' : 'bloodstream'), gL = spec.mode === 'barrier' ? 'barrier' : (spec.mode === 'bind' ? 'binds' : 'liver');
+        ctx.strokeStyle = ink(0.4); ctx.lineWidth = 2; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(gate, 8); ctx.lineTo(gate, H - 8); ctx.stroke(); ctx.setLineDash([]);
+        txt(srcL, 4, 11, 10, ink(0.55)); txt(tgtL, W - 4, 11, 10, ink(0.55), 'right'); txt(gL, gate, H - 4, 9, ink(0.6), 'center');
+        flowP.forEach(function (p) {
+          p.x += p.vx;
+          if (p.st === 'go' && p.px < gate && p.x >= gate) { if (Math.random() < frac) { p.st = 'gone'; p.vy = Math.random() * 1.8 + 0.7; } }
+          if (p.st === 'gone') { p.y += p.vy; p.a -= 0.02; }
+          p.px = p.x;
+          if (p.x > W + 8 || p.a <= 0) { var f = mkFlow(false); p.x = f.x; p.px = f.px; p.y = f.y; p.vy = 0; p.a = 1; p.vx = f.vx; p.st = 'go'; }
+          ctx.globalAlpha = Math.max(0, p.a); ctx.fillStyle = p.st === 'gone' ? ink(0.5) : solid(); ctx.beginPath(); ctx.arc(p.x, p.y, 2.5, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+        });
+      },
+      readout: function () { var f = val(), reach = (100 - f).toFixed(0); var verb = spec.mode === 'barrier' ? 'reaches the brain' : (spec.mode === 'bind' ? 'is absorbed' : 'reaches the bloodstream'); var what = spec.mode === 'barrier' ? 'blocked' : (spec.mode === 'bind' ? 'bound & lost' : 'removed first-pass'); return '<b>' + f.toFixed(0) + '%</b> ' + what + ' → only <b>' + reach + '%</b> ' + verb; }
+    },
+    scatter: {
+      draw: function (t) {
+        var sky = ctx.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, 'rgba(56,120,220,0.28)'); sky.addColorStop(1, 'rgba(255,150,70,0.16)'); ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+        var sunx = W * 0.16, suny = H * 0.3; ctx.fillStyle = 'rgba(255,220,120,0.95)'; ctx.shadowColor = 'rgba(255,210,110,0.8)'; ctx.shadowBlur = 18; ctx.beginPath(); ctx.arc(sunx, suny, 12, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+        for (var i = 0; i < 40; i++) {
+          var ph = (t * 60 + i * 37) % (W * 1.1); var blue = i % 2 === 0;
+          var bx = sunx + ph, by = suny + (blue ? Math.sin((ph + i) * 0.12) * (18 + ph * 0.12) : (ph * 0.14));
+          ctx.fillStyle = blue ? 'rgba(120,180,255,0.9)' : 'rgba(255,150,90,0.9)';
+          ctx.beginPath(); ctx.arc(bx, Math.min(H - 4, by), blue ? 2.2 : 1.8, 0, 7); ctx.fill();
+        }
+        txt('blue scatters ~10× more', W - 6, H - 8, 10, 'rgba(160,200,255,0.9)', 'right');
+      }
+    },
+    orbit: {
+      draw: function (t) {
+        var cx = W * 0.5, cy = H * 0.5, R2 = Math.min(W, H) * 0.34;
+        ctx.strokeStyle = ink(0.12); ctx.beginPath(); ctx.arc(cx, cy, R2, 0, 7); ctx.stroke();
+        ctx.fillStyle = 'rgba(80,150,240,0.9)'; ctx.beginPath(); ctx.arc(cx, cy, 13, 0, 7); ctx.fill(); txt('Earth', cx, cy + 24, 10, ink(0.55), 'center');
+        var a = t * 0.6, mx = cx + Math.cos(a) * R2, my = cy + Math.sin(a) * R2;
+        ctx.fillStyle = ink(0.9); ctx.beginPath(); ctx.arc(mx, my, 7, 0, 7); ctx.fill();
+        var nearx = mx - Math.cos(a) * 7, neary = my - Math.sin(a) * 7; ctx.fillStyle = solid(); ctx.beginPath(); ctx.arc(nearx, neary, 2.4, 0, 7); ctx.fill();
+        txt('same face always toward Earth', cx, H - 6, 10, ink(0.6), 'center');
+      }
+    },
+    bars: {
+      draw: function (t) {
+        var g = Math.min(1, t / 0.8), midy = H - 26, gx = W * 0.32, lx = W * 0.68, bw = W * 0.16, gh = (H - 50) * 0.5 * g, lh = (H - 50) * 1.0 * g;
+        ctx.fillStyle = ink(0.14); ctx.beginPath(); ctx.moveTo(0, midy); ctx.lineTo(W, midy); ctx.stroke();
+        ctx.fillStyle = 'rgba(52,211,153,0.7)'; ctx.fillRect(gx - bw / 2, midy - gh, bw, gh);
+        ctx.fillStyle = 'rgba(255,69,58,0.75)'; ctx.fillRect(lx - bw / 2, midy - lh, bw, lh);
+        txt('+$100 gain', gx, midy + 12, 10, ink(0.7), 'center'); txt('feels +50', gx, midy - gh - 8, 10, 'rgba(52,211,153,0.9)', 'center');
+        txt('−$100 loss', lx, midy + 12, 10, ink(0.7), 'center'); txt('feels −100', lx, midy - lh - 8, 10, 'rgba(255,120,110,0.95)', 'center');
+      }
+    },
+    scale: {
+      draw: function (t) {
+        var g = Math.min(1, t / 0.9);
+        if (spec.mode === 'pie') {
+          var cx = H * 0.55, cy = H * 0.5, rr = Math.min(H, W) * 0.36, a0 = -Math.PI / 2, tot = 0, cols = ['rgba(56,189,248,0.9)', 'rgba(167,139,250,0.85)', 'rgba(244,114,182,0.85)'];
+          spec.parts.forEach(function (p) { tot += p[1]; });
+          spec.parts.forEach(function (p, i) { var a1 = a0 + (p[1] / tot) * Math.PI * 2 * g; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, rr, a0, a1); ctx.closePath(); ctx.fillStyle = cols[i % 3]; ctx.fill(); a0 = a1; });
+          ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(cx, cy, rr * 0.55, 0, 7); ctx.fill(); ctx.globalCompositeOperation = 'source-over';
+          var ly = 14; spec.parts.forEach(function (p, i) { ctx.fillStyle = cols[i % 3]; ctx.fillRect(cx + rr + 12, ly - 4, 9, 9); txt(p[0] + ' ' + p[1] + '%', cx + rr + 26, ly, 11, ink(0.8)); ly += 20; });
+        } else if (spec.mode === 'bar') {
+          var max = 0; spec.parts.forEach(function (p) { if (p[1] > max) max = p[1]; });
+          var by = 20, bh = 22, pad = 14, mw = W - pad - 130;
+          spec.parts.forEach(function (p, i) { var w = mw * (p[1] / max) * g; ctx.fillStyle = i === 0 ? solid() : ink(0.35); ctx.fillRect(pad, by, Math.max(2, w), bh); txt(p[0], pad, by - 8, 10, ink(0.7)); txt(fmt(p[1]) + (spec.unit || ''), pad + Math.max(2, w) + 6, by + bh / 2, 11, ink(0.85)); by += bh + 22; });
+          if (spec.note) txt(spec.note, W - 6, H - 6, 9, ink(0.5), 'right');
+        } else {
+          txt(spec.label || '', W / 2, 20, 12, ink(0.7), 'center');
+          ctx.fillStyle = solid(); ctx.shadowColor = solid(); ctx.shadowBlur = 20 + 8 * Math.sin(t * 2); ctx.beginPath(); ctx.arc(W / 2, H * 0.52, 22 + 3 * Math.sin(t * 2), 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+          txt(spec.hi || '', W / 2, H * 0.82, 13, ink(0.95), 'center'); txt(spec.lo || '', W / 2, H * 0.82 + 16, 10, ink(0.5), 'center');
+        }
+      }
+    }
+  };
+
+  function frame(ts) { if (!running) return; if (!t0) t0 = ts; var t = (ts - t0) / 1000; ctx.clearRect(0, 0, W, H); (R[spec.type] || R.ambient).draw(t); if (!reduce && running) raf = requestAnimationFrame(frame); }
+  function staticFrame() { if (!ctx) return; ctx.clearRect(0, 0, W, H); (R[spec.type] || R.ambient).draw(0.9); }
+  var dragging = false;
+  function xToParam(clientX) { var r = cv.getBoundingClientRect(); return Math.max(0, Math.min(1, (clientX - r.left) / r.width)); }
+  function onDown(e) { if (spec.min == null) return; dragging = true; param = xToParam(e.clientX); updateReadout(); if (reduce) staticFrame(); var h = document.getElementById('cu-viz-hint'); if (h) h.style.opacity = '0'; try { cv.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); }
+  function onMove(e) { if (!dragging) return; param = xToParam(e.clientX); updateReadout(); if (reduce) staticFrame(); }
+  function onUp() { dragging = false; }
+  function wire() { if (!cv) return; cv.addEventListener('pointerdown', onDown); cv.addEventListener('pointermove', onMove); cv.addEventListener('pointerup', onUp); cv.addEventListener('pointercancel', onUp); }
+  function unwire() { if (!cv) return; cv.removeEventListener('pointerdown', onDown); cv.removeEventListener('pointermove', onMove); cv.removeEventListener('pointerup', onUp); cv.removeEventListener('pointercancel', onUp); }
+  function start(newSpec) {
+    stop();
+    cv = document.getElementById('cu-viz'); if (!cv) return;
+    ctx = cv.getContext('2d'); spec = newSpec || { type: 'ambient' }; reduce = reduced(); readRgb(); sizeCanvas();
+    param = (spec.def != null && spec.min != null) ? (spec.def - spec.min) / (spec.max - spec.min) : 0.5;
+    flowP = null; wire(); updateReadout();
+    if (!panelOn() || reduce) { staticFrame(); return; }   // no rAF while hidden
+    running = true; t0 = 0; raf = requestAnimationFrame(frame);
+  }
+  function stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; unwire(); }
+  function resume() { if (spec && cv && !running && panelOn()) { reduce = reduced(); sizeCanvas(); if (reduce) { staticFrame(); return; } running = true; t0 = 0; raf = requestAnimationFrame(frame); } }
+  window.addEventListener('resize', function () { if (cv && document.getElementById('cu-viz') === cv) { sizeCanvas(); if (!running) staticFrame(); } });
+  return { start: start, stop: stop, resume: resume };
+})();
+
 function curioInit() {
   curioLoad();
   var today = curioDayKey();
