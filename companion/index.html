@@ -65,10 +65,20 @@
 
     <section class="tab-panel" id="tab-feed" data-tab="Feed">
       <h2 class="sec-head">Continuity feed</h2>
+      <div class="chips" id="feed-filter-chips">
+        <button type="button" class="chip on" data-feed="all">All</button>
+        <button type="button" class="chip" data-feed="chat">Chats</button>
+        <button type="button" class="chip" data-feed="scene">Scenes</button>
+        <button type="button" class="chip" data-feed="note">Notes</button>
+      </div>
       <div id="feed-list"><p class="card" style="color:var(--muted)">No moments yet — chat or visit a venue.</p></div>
     </section>
 
     <section class="tab-panel" id="tab-chats" data-tab="Chats">
+      <div class="chat-head">
+        <div class="sec-head" id="chat-active-name" style="margin:0">With companion</div>
+        <button type="button" class="btn btn-ghost btn-sm" id="chat-clear">Clear</button>
+      </div>
       <div class="chips" id="chat-person-chips"></div>
       <div class="chat-log" id="chat-log"></div>
       <div class="chat-compose">
@@ -85,6 +95,26 @@
     <section class="tab-panel" id="tab-people" data-tab="People">
       <h2 class="sec-head">Companions</h2>
       <div class="people-grid" id="people-list"></div>
+      <div class="card" id="add-companion-card">
+        <h3>Add companion</h3>
+        <label class="set-label" style="display:block">
+          <div class="t">Name</div>
+          <input type="text" class="set-input" id="add-name" autocomplete="off">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px">
+          <div class="t">Vibe</div>
+          <input type="text" class="set-input" id="add-vibe" placeholder="Warm, curious, steady">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px">
+          <div class="t">Avatar emoji</div>
+          <input type="text" class="set-input" id="add-avatar" placeholder="🌿" maxlength="4">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px">
+          <div class="t">Traits (comma-separated)</div>
+          <input type="text" class="set-input" id="add-traits" placeholder="listener, planner">
+        </label>
+        <button type="button" class="btn btn-primary btn-sm" id="add-companion-btn" style="margin-top:12px">Add companion</button>
+      </div>
     </section>
 
     <section class="tab-panel" id="tab-settings" data-tab="Settings">
@@ -129,7 +159,17 @@
 
       <div class="card">
         <h2 class="sec-head">Private Gist vault</h2>
-        <p style="color:var(--muted);font-size:13px;margin:0 0 12px">Sync <code>companion-memory-sync.json</code> to your own secret Gist. Credentials stay on-device.</p>
+        <p style="color:var(--muted);font-size:13px;margin:0 0 12px">Sync <code>companion-memory-sync.json</code> with your iOS app via a secret Gist. Credentials stay on-device.</p>
+        <div class="set-row">
+          <div class="set-label">
+            <div class="t">Auto-sync on unlock</div>
+            <div class="s">Pull vault when you open Session vault</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-auto-sync" checked>
+            <span class="switch-track"></span>
+          </label>
+        </div>
         <label class="set-label" style="display:block">
           <div class="t">Gist ID</div>
           <input type="text" class="set-input" id="set-gist-id" autocomplete="off" spellcheck="false">

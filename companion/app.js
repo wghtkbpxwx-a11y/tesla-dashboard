@@ -8,12 +8,22 @@
   var pinBuffer = '';
   var activeTab = 'universe';
   var universeMode = 'walk';
+  var feedFilter = 'all';
   var activePerson = null;
   var venues = [];
   var sceneState = null;
   var mediaRecorder = null;
   var voiceChunks = [];
   var voiceSupported = false;
+
+  var FALLBACK_VENUES = [
+    { id: 'stanley-park', name: 'Stanley Park Seawall', area: 'Vancouver', tags: ['walk', 'date', 'roam'], blurb: 'Seawall loop with mountain views and cedar forest.' },
+    { id: 'gastown', name: 'Gastown Steam Clock', area: 'Vancouver', tags: ['walk', 'date', 'roam'], blurb: 'Cobblestone streets, cafés, and evening lights.' },
+    { id: 'granville-island', name: 'Granville Island Market', area: 'Vancouver', tags: ['walk', 'date', 'roam'], blurb: 'Public market, waterfront benches, and live buskers.' },
+    { id: 'lynn-canyon', name: 'Lynn Canyon Suspension Bridge', area: 'North Vancouver', tags: ['walk', 'roam'], blurb: 'Forest trails and a free suspension bridge.' },
+    { id: 'steveston', name: 'Steveston Village Wharf', area: 'Richmond', tags: ['walk', 'date', 'roam'], blurb: 'Fishing village boardwalk and sunset views.' },
+    { id: 'queen-elizabeth', name: 'Queen Elizabeth Park', area: 'Vancouver', tags: ['walk', 'date'], blurb: 'City lookout, gardens, and quiet picnic lawns.' }
+  ];
 
   function loadPkg() {
     try {
@@ -50,6 +60,18 @@
     toast._t = setTimeout(function () { el.classList.remove('show'); }, 2200);
   }
 
+  function esc(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function slugId(name) {
+    var base = String(name || 'companion').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'companion';
+    var id = base;
+    var n = 2;
+    while (personById(id)) { id = base + '-' + n; n++; }
+    return id;
+  }
+
   function personById(id) {
     for (var i = 0; i < pkg.companions.length; i++) {
       if (pkg.companions[i].id === id) return pkg.companions[i];
@@ -57,11 +79,30 @@
     return null;
   }
 
-  function addFeed(text, kind) {
-    pkg.feed.unshift({ t: Date.now(), text: text, kind: kind || 'note' });
+  function addFeed(text, kind, meta) {
+    var item = { t: Date.now(), text: text, kind: kind || 'note' };
+    if (meta) {
+      if (meta.companionId) item.companionId = meta.companionId;
+      if (meta.venueId) item.venueId = meta.venueId;
+    }
+    pkg.feed.unshift(item);
     if (pkg.feed.length > 100) pkg.feed.length = 100;
     savePkg();
     renderFeed();
+  }
+
+  function feedKindLabel(kind) {
+    if (kind === 'chat') return '💬 Chat';
+    if (kind === 'scene') return '📍 Scene';
+    return '📝 Note';
+  }
+
+  function refreshAll() {
+    fillSettingsUi();
+    renderPeople();
+    renderFeed();
+    renderChatLog();
+    renderVenues();
   }
 
   /* ── PIN gate ── */
@@ -78,6 +119,18 @@
     document.getElementById('pin-gate').classList.add('hidden');
     document.getElementById('app-shell').classList.remove('hidden');
     initApp();
+    maybeAutoSync();
+  }
+
+  function maybeAutoSync() {
+    var s = pkg.settings || {};
+    if (!s.autoSync || !s.gistId || !s.gistToken) return;
+    sync.pullVault(s.gistId, s.gistToken).then(function (remote) {
+      pkg = sync.mergePackages(pkg, remote);
+      savePkg();
+      refreshAll();
+      toast('Vault synced');
+    }).catch(function () {});
   }
 
   function bindPinPad() {
@@ -137,11 +190,11 @@
   /* ── Universe ── */
   function loadVenues() {
     return fetch('data/venues.json').then(function (r) { return r.json(); }).then(function (data) {
-      venues = Array.isArray(data) ? data : [];
+      venues = Array.isArray(data) ? data : FALLBACK_VENUES.slice();
       renderVenues();
     }).catch(function () {
-      venues = [];
-      document.getElementById('venue-list').innerHTML = '<p class="card" style="color:var(--muted)">Venues unavailable offline.</p>';
+      venues = FALLBACK_VENUES.slice();
+      renderVenues();
     });
   }
 
@@ -149,6 +202,10 @@
     return venues.filter(function (v) {
       return !v.tags || v.tags.indexOf(universeMode === 'walk' ? 'walk' : universeMode) >= 0;
     });
+  }
+
+  function visitCount(venueId) {
+    return (pkg.scenes[venueId] && pkg.scenes[venueId].visits) || 0;
   }
 
   function renderVenues() {
@@ -159,24 +216,35 @@
       return;
     }
     list.innerHTML = items.map(function (v) {
+      var visits = visitCount(v.id);
+      var badge = visits ? '<span class="visit-badge">' + visits + '×</span>' : '';
       return '<div class="venue-card" data-venue="' + v.id + '">' +
         '<div class="venue-pin">📍</div>' +
-        '<div class="venue-meta"><strong>' + esc(v.name) + '</strong><small>' + esc(v.area) + ' · ' + esc(v.blurb || '') + '</small></div>' +
+        '<div class="venue-meta"><strong>' + esc(v.name) + badge + '</strong><small>' + esc(v.area) + ' · ' + esc(v.blurb || '') + '</small></div>' +
         '<button type="button" class="btn btn-primary btn-sm venue-go">Go</button></div>';
     }).join('');
   }
 
-  function esc(s) {
-    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
   function offlineSceneLine(venue, person, lineIdx) {
-    var lines = [
-      person.name + ' smiles as you reach ' + venue.name + '. "' + (venue.blurb || 'Nice spot.') + '"',
-      'You pause at ' + venue.name + '. ' + person.name + ' asks what you notice first.',
-      'The air at ' + venue.area + ' feels calm. ' + person.name + ' matches your pace.',
-      person.name + ' points out a detail you would have missed at ' + venue.name + '.'
-    ];
+    var mode = universeMode;
+    var pool = {
+      walk: [
+        person.name + ' matches your pace along ' + venue.name + '. "' + (venue.blurb || 'Nice spot.') + '"',
+        'You both pause at ' + venue.name + '. ' + person.name + ' asks what you notice first.',
+        person.name + ' points out a detail you would have missed at ' + venue.name + '.'
+      ],
+      date: [
+        person.name + ' lingers with you at ' + venue.name + '. The ' + venue.area + ' air feels unhurried.',
+        'At ' + venue.name + ', ' + person.name + ' suggests one small thing to try before you leave.',
+        person.name + ' keeps the mood light at ' + venue.name + ' — easy conversation, no rush.'
+      ],
+      roam: [
+        person.name + ' is up for wherever ' + venue.area + ' leads next. ' + venue.name + ' is a good anchor.',
+        'You drift through ' + venue.name + ' with no agenda. ' + person.name + ' follows your curiosity.',
+        person.name + ' treats ' + venue.name + ' like a discovery, not a checklist.'
+      ]
+    };
+    var lines = pool[mode] || pool.walk;
     return lines[lineIdx % lines.length];
   }
 
@@ -189,10 +257,13 @@
     document.getElementById('scene-card').style.display = 'block';
     document.getElementById('scene-venue').textContent = venue.name;
     document.getElementById('scene-text').textContent = offlineSceneLine(venue, person, 0);
-    addFeed('Visited ' + venue.name + ' with ' + person.name, 'scene');
-    if (!pkg.scenes[venue.id]) pkg.scenes[venue.id] = { visits: 0 };
+    addFeed('Visited ' + venue.name + ' with ' + person.name, 'scene', { companionId: person.id, venueId: venue.id });
+    if (!pkg.scenes[venue.id]) pkg.scenes[venue.id] = { visits: 0, companionId: person.id, lastAt: Date.now() };
     pkg.scenes[venue.id].visits = (pkg.scenes[venue.id].visits || 0) + 1;
+    pkg.scenes[venue.id].companionId = person.id;
+    pkg.scenes[venue.id].lastAt = Date.now();
     savePkg();
+    renderVenues();
   }
 
   function bindUniverse() {
@@ -216,22 +287,42 @@
       document.getElementById('scene-text').textContent = offlineSceneLine(sceneState.venue, sceneState.person, sceneState.idx);
     });
     document.getElementById('scene-speak').addEventListener('click', function () {
-      var text = document.getElementById('scene-text').textContent;
-      speak(text);
+      speak(document.getElementById('scene-text').textContent);
     });
   }
 
   /* ── Feed ── */
+  function filteredFeed() {
+    if (feedFilter === 'all') return pkg.feed;
+    return pkg.feed.filter(function (item) { return item.kind === feedFilter; });
+  }
+
   function renderFeed() {
     var el = document.getElementById('feed-list');
-    if (!pkg.feed.length) {
+    var items = filteredFeed();
+    if (!items.length) {
       el.innerHTML = '<p class="card" style="color:var(--muted)">No moments yet — chat or visit a venue.</p>';
       return;
     }
-    el.innerHTML = pkg.feed.map(function (item) {
+    el.innerHTML = items.map(function (item) {
       var d = new Date(item.t);
-      return '<div class="feed-item"><time>' + d.toLocaleString() + '</time><div>' + esc(item.text) + '</div></div>';
+      var kind = feedKindLabel(item.kind);
+      return '<div class="feed-item" data-feed-kind="' + esc(item.kind || 'note') + '">' +
+        '<div class="feed-meta"><span class="feed-kind">' + kind + '</span><time>' + d.toLocaleString() + '</time></div>' +
+        '<div>' + esc(item.text) + '</div></div>';
     }).join('');
+  }
+
+  function bindFeed() {
+    document.getElementById('feed-filter-chips').addEventListener('click', function (e) {
+      var chip = e.target.closest('.chip[data-feed]');
+      if (!chip) return;
+      feedFilter = chip.getAttribute('data-feed');
+      document.querySelectorAll('#feed-filter-chips .chip').forEach(function (c) {
+        c.classList.toggle('on', c === chip);
+      });
+      renderFeed();
+    });
   }
 
   /* ── People ── */
@@ -239,9 +330,13 @@
     var el = document.getElementById('people-list');
     el.innerHTML = pkg.companions.map(function (p) {
       var on = activePerson && activePerson.id === p.id ? ' on' : '';
+      var stats = sync.companionStats(pkg, p.id);
       return '<div class="person-card' + on + '" data-person="' + p.id + '">' +
         '<div class="person-avatar">' + esc(p.avatar || '👤') + '</div>' +
-        '<div><strong>' + esc(p.name) + '</strong><div style="color:var(--muted);font-size:13px;margin-top:4px">' + esc(p.vibe || '') + '</div></div></div>';
+        '<div class="person-body"><strong>' + esc(p.name) + '</strong>' +
+        '<div class="person-vibe">' + esc(p.vibe || '') + '</div>' +
+        '<div class="person-stats">' + stats.messages + ' msgs · ' + stats.visits + ' visits</div></div>' +
+        '<button type="button" class="btn btn-ghost btn-sm chat-open" data-chat-open="' + p.id + '">Chat</button></div>';
     }).join('');
     renderChatPersonChips();
   }
@@ -255,21 +350,50 @@
     }).join('');
   }
 
+  function selectPerson(id) {
+    activePerson = personById(id);
+    renderPeople();
+    renderChatLog();
+  }
+
   function bindPeople() {
     document.getElementById('people-list').addEventListener('click', function (e) {
+      var chatBtn = e.target.closest('[data-chat-open]');
+      if (chatBtn) {
+        selectPerson(chatBtn.getAttribute('data-chat-open'));
+        goTab('chats');
+        return;
+      }
       var card = e.target.closest('[data-person]');
       if (!card) return;
-      activePerson = personById(card.getAttribute('data-person'));
-      renderPeople();
-      renderChatLog();
+      selectPerson(card.getAttribute('data-person'));
     });
     document.getElementById('chat-person-chips').addEventListener('click', function (e) {
       var chip = e.target.closest('[data-person]');
       if (!chip) return;
-      activePerson = personById(chip.getAttribute('data-person'));
-      renderPeople();
-      renderChatLog();
+      selectPerson(chip.getAttribute('data-person'));
     });
+    document.getElementById('add-companion-btn').addEventListener('click', addCompanionFromForm);
+  }
+
+  function addCompanionFromForm() {
+    var name = document.getElementById('add-name').value.trim();
+    if (!name) { toast('Name required'); return; }
+    var vibe = document.getElementById('add-vibe').value.trim() || 'Warm companion';
+    var avatar = document.getElementById('add-avatar').value.trim() || '👤';
+    var traitsRaw = document.getElementById('add-traits').value.trim();
+    var traits = traitsRaw ? traitsRaw.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : ['supportive'];
+    var person = { id: slugId(name), name: name, vibe: vibe, avatar: avatar.slice(0, 4), traits: traits };
+    pkg.companions.push(person);
+    activePerson = person;
+    savePkg();
+    document.getElementById('add-name').value = '';
+    document.getElementById('add-vibe').value = '';
+    document.getElementById('add-avatar').value = '';
+    document.getElementById('add-traits').value = '';
+    renderPeople();
+    renderChatLog();
+    toast('Added ' + name);
   }
 
   /* ── Chat ── */
@@ -286,6 +410,8 @@
   function renderChatLog() {
     var log = getChatLog();
     var el = document.getElementById('chat-log');
+    var person = activePerson || pkg.companions[0];
+    document.getElementById('chat-active-name').textContent = person ? ('With ' + person.name) : 'Pick a companion';
     if (!log.length) {
       el.innerHTML = '<div class="bubble bot">Pick a companion and say hello.</div>';
       return;
@@ -301,6 +427,7 @@
     if (getChatLog().length > 80) getChatLog().splice(0, getChatLog().length - 80);
     savePkg();
     renderChatLog();
+    renderPeople();
   }
 
   function sendChat() {
@@ -315,10 +442,10 @@
     if (!s.apiKey) {
       var offline = person.name + ': "' + offlineSceneLine({ name: 'the road', area: 'BC', blurb: 'keeping you company' }, person, getChatLog().length) + '"';
       pushChat('assistant', offline);
-      addFeed('Offline chat with ' + person.name, 'chat');
+      addFeed('Offline chat with ' + person.name, 'chat', { companionId: person.id });
       return;
     }
-    var messages = [{ role: 'system', content: 'You are ' + person.name + ', a warm in-car companion. Keep replies brief (1-3 sentences), safe for driving.' }];
+    var messages = [{ role: 'system', content: sync.buildSystemPrompt(person, pkg, venues) }];
     getChatLog().forEach(function (m) {
       messages.push({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content });
     });
@@ -328,7 +455,7 @@
       log[log.length - 1].content = reply || '(empty reply)';
       savePkg();
       renderChatLog();
-      addFeed('Chat with ' + person.name, 'chat');
+      addFeed('Chat with ' + person.name, 'chat', { companionId: person.id });
       if (s.voice) speak(reply);
     }).catch(function (err) {
       log[log.length - 1].content = 'API error: ' + (err.message || 'failed');
@@ -337,17 +464,34 @@
     });
   }
 
+  function clearChat() {
+    var person = activePerson || pkg.companions[0];
+    if (!person) return;
+    if (!confirm('Clear chat with ' + person.name + '?')) return;
+    pkg.chats[chatKey()] = [];
+    savePkg();
+    renderChatLog();
+    toast('Chat cleared');
+  }
+
   function offlineChatScene() {
     var person = activePerson || pkg.companions[0];
     if (!person) return;
     var line = offlineSceneLine({ name: 'the drive', area: 'Metro Vancouver', blurb: 'windows down' }, person, Date.now() % 4);
     pushChat('assistant', line);
-    addFeed('Offline scene with ' + person.name, 'scene');
+    addFeed('Offline scene with ' + person.name, 'scene', { companionId: person.id });
   }
 
   function bindChat() {
     document.getElementById('chat-send').addEventListener('click', sendChat);
     document.getElementById('chat-offline').addEventListener('click', offlineChatScene);
+    document.getElementById('chat-clear').addEventListener('click', clearChat);
+    document.getElementById('chat-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChat();
+      }
+    });
   }
 
   /* ── Voice ── */
@@ -453,6 +597,7 @@
     pkg.settings.model = document.getElementById('set-model').value.trim();
     pkg.settings.apiBase = document.getElementById('set-api-base').value.trim();
     pkg.settings.voice = document.getElementById('set-voice').checked;
+    pkg.settings.autoSync = document.getElementById('set-auto-sync').checked;
     pkg.settings.gistId = document.getElementById('set-gist-id').value.trim();
     pkg.settings.gistToken = document.getElementById('set-gist-token').value.trim();
     savePkg();
@@ -468,6 +613,7 @@
     document.getElementById('set-model').value = s.model || '';
     document.getElementById('set-api-base').value = s.apiBase || '';
     document.getElementById('set-voice').checked = !!s.voice;
+    document.getElementById('set-auto-sync').checked = s.autoSync !== false;
     document.getElementById('set-gist-id').value = s.gistId || '';
     document.getElementById('set-gist-token').value = s.gistToken || '';
     document.getElementById('custom-base-wrap').style.display = (s.provider === 'custom') ? 'block' : 'none';
@@ -487,6 +633,7 @@
       document.getElementById(id).addEventListener('blur', readSettingsUi);
     });
     document.getElementById('set-voice').addEventListener('change', readSettingsUi);
+    document.getElementById('set-auto-sync').addEventListener('change', readSettingsUi);
 
     document.getElementById('set-save-pin').addEventListener('click', function () {
       var pin = document.getElementById('set-new-pin').value.trim();
@@ -503,10 +650,7 @@
       sync.pullVault(s.gistId, s.gistToken).then(function (remote) {
         pkg = sync.mergePackages(pkg, remote);
         savePkg();
-        fillSettingsUi();
-        renderPeople();
-        renderFeed();
-        renderChatLog();
+        refreshAll();
         toast('Vault pulled');
       }).catch(function (err) { toast(err.message || 'Pull failed'); });
     });
@@ -526,10 +670,7 @@
         var incoming = JSON.parse(raw);
         pkg = sync.mergePackages(pkg, incoming);
         savePkg();
-        fillSettingsUi();
-        renderPeople();
-        renderFeed();
-        renderChatLog();
+        refreshAll();
         document.getElementById('import-area').value = '';
         toast('Imported');
       } catch (e) {
@@ -555,6 +696,7 @@
     if (!activePerson && pkg.companions.length) activePerson = pkg.companions[0];
     bindTabs();
     bindUniverse();
+    bindFeed();
     bindPeople();
     bindChat();
     bindSettings();

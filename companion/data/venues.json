@@ -52,5 +52,59 @@
     "lon": -123.1129,
     "tags": ["walk", "date"],
     "blurb": "City lookout, gardens, and quiet picnic lawns."
+  },
+  {
+    "id": "english-bay",
+    "name": "English Bay Beach",
+    "area": "Vancouver",
+    "lat": 49.2867,
+    "lon": -123.1410,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Sunset walks, seawall benches, and city skyline views."
+  },
+  {
+    "id": "kits-beach",
+    "name": "Kitsilano Beach",
+    "area": "Vancouver",
+    "lat": 49.2754,
+    "lon": -123.1538,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Wide sand, mountain backdrop, and relaxed West Side energy."
+  },
+  {
+    "id": "capilano",
+    "name": "Capilano Suspension Bridge",
+    "area": "North Vancouver",
+    "lat": 49.3428,
+    "lon": -123.1147,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Treetop bridges and canyon views above the river."
+  },
+  {
+    "id": "deep-cove",
+    "name": "Deep Cove Village",
+    "area": "North Vancouver",
+    "lat": 49.3230,
+    "lon": -122.9496,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Harbour boardwalk, kayak rentals, and doughnut stops."
+  },
+  {
+    "id": "whistler-village",
+    "name": "Whistler Village Stroll",
+    "area": "Whistler",
+    "lat": 50.1163,
+    "lon": -122.9574,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Pedestrian village paths, plaza lights, and mountain air."
+  },
+  {
+    "id": "cultus-lake",
+    "name": "Cultus Lake Beach",
+    "area": "Chilliwack",
+    "lat": 49.0568,
+    "lon": -121.9899,
+    "tags": ["walk", "roam"],
+    "blurb": "Warm lake days, dock walks, and summer drive energy."
   }
 ]

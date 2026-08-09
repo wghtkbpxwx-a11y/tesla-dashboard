@@ -21,7 +21,8 @@
         model: 'openrouter/auto',
         voice: false,
         gistId: '',
-        gistToken: ''
+        gistToken: '',
+        autoSync: true
       },
       companions: [],
       chats: {},
@@ -53,6 +54,23 @@
     }
   }
 
+  function mergeFeedItems(a, b) {
+    var seen = {};
+    var out = [];
+    var all = (a || []).concat(b || []);
+    all.sort(function (x, y) { return (y.t || 0) - (x.t || 0); });
+    for (var i = 0; i < all.length; i++) {
+      var item = all[i];
+      if (!item || !item.text) continue;
+      var key = String(item.t || 0) + '|' + item.text + '|' + (item.kind || '');
+      if (seen[key]) continue;
+      seen[key] = true;
+      out.push(item);
+      if (out.length >= 200) break;
+    }
+    return out;
+  }
+
   function mergePackages(base, incoming) {
     var out = emptyPackage();
     var a = base && typeof base === 'object' ? base : emptyPackage();
@@ -63,9 +81,59 @@
     out.settings = Object.assign({}, a.settings || {}, b.settings || {});
     out.companions = b.companions && b.companions.length ? b.companions.slice() : (a.companions || seedCompanions()).slice();
     out.chats = Object.assign({}, a.chats || {}, b.chats || {});
-    out.feed = (b.feed && b.feed.length ? b.feed : a.feed || []).slice(0, 200);
+    out.feed = mergeFeedItems(a.feed, b.feed);
     out.scenes = Object.assign({}, a.scenes || {}, b.scenes || {});
     return out;
+  }
+
+  function companionStats(pkg, personId) {
+    var chats = (pkg && pkg.chats && pkg.chats[personId]) || [];
+    var msgs = 0;
+    for (var i = 0; i < chats.length; i++) if (chats[i].role === 'user') msgs++;
+    var visits = 0;
+    var scenes = (pkg && pkg.scenes) || {};
+    for (var k in scenes) {
+      if (scenes[k] && scenes[k].companionId === personId) visits += scenes[k].visits || 0;
+    }
+    return { messages: msgs, visits: visits };
+  }
+
+  function recentFeedLines(pkg, limit) {
+    var n = limit || 5;
+    var feed = (pkg && pkg.feed) || [];
+    var out = [];
+    for (var i = 0; i < feed.length && out.length < n; i++) {
+      if (feed[i].text) out.push(feed[i].text);
+    }
+    return out;
+  }
+
+  function buildSystemPrompt(person, pkg, venues) {
+    var p = person || {};
+    var traits = (p.traits && p.traits.length) ? p.traits.join(', ') : 'supportive';
+    var lines = [
+      'You are ' + (p.name || 'Companion') + ', a warm in-car companion for Metro Vancouver drives.',
+      'Personality: ' + (p.vibe || 'friendly') + '. Traits: ' + traits + '.',
+      'Keep replies brief (1-3 sentences), safe for driving, and emotionally present.',
+      'Reference shared continuity naturally when relevant — do not invent facts about the user.'
+    ];
+    var recent = recentFeedLines(pkg, 4);
+    if (recent.length) lines.push('Recent continuity: ' + recent.join(' · '));
+    var sceneBits = [];
+    var scenes = (pkg && pkg.scenes) || {};
+    for (var id in scenes) {
+      if (!scenes[id] || !scenes[id].visits) continue;
+      var venueName = id;
+      if (venues && venues.length) {
+        for (var v = 0; v < venues.length; v++) {
+          if (venues[v].id === id) { venueName = venues[v].name; break; }
+        }
+      }
+      sceneBits.push(venueName + ' (' + scenes[id].visits + ' visits)');
+      if (sceneBits.length >= 4) break;
+    }
+    if (sceneBits.length) lines.push('Places you have shared: ' + sceneBits.join(', ') + '.');
+    return lines.join(' ');
   }
 
   function gistHeaders(token) {
@@ -126,6 +194,14 @@
     return 'https://openrouter.ai/api/v1/chat/completions';
   }
 
+  function defaultModel(settings) {
+    var p = (settings && settings.provider) || 'openrouter';
+    if (settings && settings.model) return settings.model;
+    if (p === 'openai') return 'gpt-4o-mini';
+    if (p === 'xai') return 'grok-2-latest';
+    return 'openrouter/auto';
+  }
+
   function chatCompletion(settings, messages) {
     if (!settings || !settings.apiKey) return Promise.reject(new Error('API key required'));
     var headers = {
@@ -136,14 +212,10 @@
       headers['HTTP-Referer'] = location.href;
       headers['X-Title'] = 'Tesla Companion';
     }
-    var model = settings.model || 'openrouter/auto';
-    if (settings.provider === 'openrouter' && !model) model = 'openrouter/auto';
-    if (settings.provider === 'openai' && !model) model = 'gpt-4o-mini';
-    if (settings.provider === 'xai' && !model) model = 'grok-2-latest';
     return fetch(providerUrl(settings), {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify({ model: model, messages: messages || [] })
+      body: JSON.stringify({ model: defaultModel(settings), messages: messages || [] })
     }).then(function (res) {
       return res.json().then(function (data) {
         if (!res.ok) {
@@ -185,10 +257,14 @@
     encodeRoster: encodeRoster,
     decodeRoster: decodeRoster,
     mergePackages: mergePackages,
+    mergeFeedItems: mergeFeedItems,
+    companionStats: companionStats,
+    buildSystemPrompt: buildSystemPrompt,
     pullVault: pullVault,
     pushVault: pushVault,
     chatCompletion: chatCompletion,
     transcribeAudio: transcribeAudio,
-    providerUrl: providerUrl
+    providerUrl: providerUrl,
+    defaultModel: defaultModel
   };
 })(window);
