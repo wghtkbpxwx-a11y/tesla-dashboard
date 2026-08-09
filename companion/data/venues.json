@@ -1,0 +1,110 @@
+[
+  {
+    "id": "stanley-park",
+    "name": "Stanley Park Seawall",
+    "area": "Vancouver",
+    "lat": 49.3017,
+    "lon": -123.1417,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Seawall loop with mountain views and cedar forest."
+  },
+  {
+    "id": "gastown",
+    "name": "Gastown Steam Clock",
+    "area": "Vancouver",
+    "lat": 49.2845,
+    "lon": -123.1089,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Cobblestone streets, cafés, and evening lights."
+  },
+  {
+    "id": "granville-island",
+    "name": "Granville Island Market",
+    "area": "Vancouver",
+    "lat": 49.2713,
+    "lon": -123.1340,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Public market, waterfront benches, and live buskers."
+  },
+  {
+    "id": "lynn-canyon",
+    "name": "Lynn Canyon Suspension Bridge",
+    "area": "North Vancouver",
+    "lat": 49.3428,
+    "lon": -123.0194,
+    "tags": ["walk", "roam"],
+    "blurb": "Forest trails and a free suspension bridge."
+  },
+  {
+    "id": "steveston",
+    "name": "Steveston Village Wharf",
+    "area": "Richmond",
+    "lat": 49.1256,
+    "lon": -123.1817,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Fishing village boardwalk and sunset views."
+  },
+  {
+    "id": "queen-elizabeth",
+    "name": "Queen Elizabeth Park",
+    "area": "Vancouver",
+    "lat": 49.2417,
+    "lon": -123.1129,
+    "tags": ["walk", "date"],
+    "blurb": "City lookout, gardens, and quiet picnic lawns."
+  },
+  {
+    "id": "english-bay",
+    "name": "English Bay Beach",
+    "area": "Vancouver",
+    "lat": 49.2867,
+    "lon": -123.1410,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Sunset walks, seawall benches, and city skyline views."
+  },
+  {
+    "id": "kits-beach",
+    "name": "Kitsilano Beach",
+    "area": "Vancouver",
+    "lat": 49.2754,
+    "lon": -123.1538,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Wide sand, mountain backdrop, and relaxed West Side energy."
+  },
+  {
+    "id": "capilano",
+    "name": "Capilano Suspension Bridge",
+    "area": "North Vancouver",
+    "lat": 49.3428,
+    "lon": -123.1147,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Treetop bridges and canyon views above the river."
+  },
+  {
+    "id": "deep-cove",
+    "name": "Deep Cove Village",
+    "area": "North Vancouver",
+    "lat": 49.3230,
+    "lon": -122.9496,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Harbour boardwalk, kayak rentals, and doughnut stops."
+  },
+  {
+    "id": "whistler-village",
+    "name": "Whistler Village Stroll",
+    "area": "Whistler",
+    "lat": 50.1163,
+    "lon": -122.9574,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Pedestrian village paths, plaza lights, and mountain air."
+  },
+  {
+    "id": "cultus-lake",
+    "name": "Cultus Lake Beach",
+    "area": "Chilliwack",
+    "lat": 49.0568,
+    "lon": -121.9899,
+    "tags": ["walk", "roam"],
+    "blurb": "Warm lake days, dock walks, and summer drive energy."
+  }
+]
