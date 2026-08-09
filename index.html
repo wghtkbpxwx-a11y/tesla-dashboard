@@ -1755,6 +1755,41 @@ body[data-mode="charging"] .charge-session{
 }
 
 
+</style>
+</head>
+<body data-mode="parked">
+
+<header id="header">
+  <div id="s-left">
+    <!-- Brand lockup -->
+    <div class="brand" onclick="goPanel('live')" title="Back to Live" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPanel('live')}">
+      <svg class="tesla-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 5.362l2.475-3.026s4.245.09 8.471 2.054c-1.082 1.636-3.231 2.438-3.231 2.438-.146-1.439-1.154-1.79-4.354-1.79L12 24 8.619 5.038c-3.18 0-4.207.35-4.353 1.79 0 0-2.15-.803-3.231-2.438C5.26 2.427 9.524 2.336 9.524 2.336L12 5.362l-.001.001H12z"/>
+      </svg>
+      <div class="brand-lockup">
+        <span class="tesla-word">TESLA</span>
+        <span class="brand-sub">Home</span>
+      </div>
+    </div>
+    <div id="s-date">———</div>
+  </div>
+  <div id="s-right">
+    <div id="stock-widget">
+      <span class="stk-label">XEQT.TO</span>
+      <a href="https://finance.yahoo.com/quote/XEQT.TO/" target="_blank" rel="noopener" id="stk-px" style="color:var(--t1)">Loading...</a>
+      <span id="stk-chg" style="font-size:15px">—</span>
+    </div>
+    <div id="weather-widget" onclick="goPanel('weather')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goPanel('weather')}" style="cursor:pointer" title="Open weather" role="button" tabindex="0">
+      <span class="w-temp">--°C</span>
+      <span class="w-icon"></span>
+    </div>
+    <button id="dash-orb" class="dash-orb" type="button" aria-pressed="false" aria-label="Voice mode — tap to talk, hold for your briefing" title="Voice — tap to talk, hold for your briefing">
+      <canvas id="dash-orb-cv" width="88" height="88" aria-hidden="true"></canvas>
+      <span class="dash-orb-core" aria-hidden="true"></span>
+    </button>
+  </div>
+</header>
+<div id="dash-orb-cap" role="status" aria-live="polite"></div>
 
 <div id="companion-overlay" role="dialog" aria-modal="true" aria-label="Session vault">
 
