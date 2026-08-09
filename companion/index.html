@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05070a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="PIN-gated companion continuity for Tesla drive mode.">
+  <title>Session vault</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="back-link pin-back" href="../" aria-label="Return to dashboard">← Dashboard</a>
+
+  <div id="pin-gate" aria-hidden="false">
+    <div class="pin-card">
+      <h1>Session vault</h1>
+      <p>Enter your 4-digit PIN</p>
+      <div class="pin-display" id="pin-display" aria-live="polite">••••</div>
+      <div class="pin-grid" id="pin-grid">
+        <button type="button" data-digit="1">1</button>
+        <button type="button" data-digit="2">2</button>
+        <button type="button" data-digit="3">3</button>
+        <button type="button" data-digit="4">4</button>
+        <button type="button" data-digit="5">5</button>
+        <button type="button" data-digit="6">6</button>
+        <button type="button" data-digit="7">7</button>
+        <button type="button" data-digit="8">8</button>
+        <button type="button" data-digit="9">9</button>
+        <button type="button" data-action="clear">Clear</button>
+        <button type="button" data-digit="0">0</button>
+        <button type="button" data-action="back">⌫</button>
+      </div>
+      <div class="pin-actions">
+        <button type="button" id="pin-submit">Unlock</button>
+      </div>
+      <p id="pin-error" style="color:var(--red);font-size:13px;min-height:18px;margin-top:12px"></p>
+    </div>
+  </div>
+
+  <div id="app-shell" class="hidden">
+    <header class="topbar">
+      <a class="back-link" href="../" aria-label="Return to dashboard">← Dashboard</a>
+      <h1 id="view-title">Universe</h1>
+      <span class="status-dot" aria-hidden="true"></span>
+    </header>
+
+    <section class="tab-panel on" id="tab-universe" data-tab="Universe">
+      <div class="chips" id="mode-chips">
+        <button type="button" class="chip on" data-mode="walk">Walk in</button>
+        <button type="button" class="chip" data-mode="date">Date night</button>
+        <button type="button" class="chip" data-mode="roam">Free roam</button>
+      </div>
+      <div class="card" id="scene-card" style="display:none">
+        <h3 id="scene-venue">—</h3>
+        <div class="scene-box" id="scene-text"></div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="scene-next">Next line</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="scene-speak">Speak</button>
+        </div>
+      </div>
+      <h2 class="sec-head">Metro Vancouver pins</h2>
+      <div class="venue-list" id="venue-list"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-feed" data-tab="Feed">
+      <h2 class="sec-head">Continuity feed</h2>
+      <div id="feed-list"><p class="card" style="color:var(--muted)">No moments yet — chat or visit a venue.</p></div>
+    </section>
+
+    <section class="tab-panel" id="tab-chats" data-tab="Chats">
+      <div class="chips" id="chat-person-chips"></div>
+      <div class="chat-log" id="chat-log"></div>
+      <div class="chat-compose">
+        <textarea id="chat-input" placeholder="Type a message…" rows="3"></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="chat-send">Send</button>
+          <button type="button" class="btn btn-ghost" id="chat-offline">Offline scene</button>
+          <button type="button" class="btn btn-ghost" id="voice-btn" style="display:none">🎙 Hold to talk</button>
+        </div>
+        <div id="voice-hint" class="voice-hint hidden"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="tab-people" data-tab="People">
+      <h2 class="sec-head">Companions</h2>
+      <div class="people-grid" id="people-list"></div>
+    </section>
+
+    <section class="tab-panel" id="tab-settings" data-tab="Settings">
+      <div class="card">
+        <h2 class="sec-head">Cloud chat</h2>
+        <div class="chips" id="provider-chips">
+          <button type="button" class="chip on" data-provider="openrouter">OpenRouter</button>
+          <button type="button" class="chip" data-provider="openai">OpenAI</button>
+          <button type="button" class="chip" data-provider="xai">xAI</button>
+          <button type="button" class="chip" data-provider="custom">Custom</button>
+        </div>
+        <label class="set-label">
+          <div class="t">API key</div>
+          <div class="s">Stored only in this browser</div>
+          <input type="password" class="set-input" id="set-api-key" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px">
+          <div class="t">Model</div>
+          <input type="text" class="set-input" id="set-model" placeholder="openrouter/auto">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px" id="custom-base-wrap">
+          <div class="t">Custom base URL</div>
+          <div class="s">OpenAI-compatible /v1 root</div>
+          <input type="text" class="set-input" id="set-api-base" placeholder="https://api.example.com/v1">
+        </label>
+      </div>
+
+      <div class="card">
+        <h2 class="sec-head">Voice</h2>
+        <div class="set-row">
+          <div class="set-label">
+            <div class="t">Voice input</div>
+            <div class="s">Whisper-compatible transcription when mic works</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="set-voice">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div id="voice-lock-hint" class="voice-hint hidden"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="sec-head">Private Gist vault</h2>
+        <p style="color:var(--muted);font-size:13px;margin:0 0 12px">Sync <code>companion-memory-sync.json</code> to your own secret Gist. Credentials stay on-device.</p>
+        <label class="set-label" style="display:block">
+          <div class="t">Gist ID</div>
+          <input type="text" class="set-input" id="set-gist-id" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px">
+          <div class="t">GitHub token</div>
+          <div class="s">Fine-grained token with gist access</div>
+          <input type="password" class="set-input" id="set-gist-token" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="btn-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="vault-pull">Pull vault</button>
+          <button type="button" class="btn btn-primary btn-sm" id="vault-push">Push vault</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="sec-head">PIN</h2>
+        <label class="set-label" style="display:block">
+          <div class="t">New 4-digit PIN</div>
+          <input type="password" class="set-input" id="set-new-pin" inputmode="numeric" maxlength="4" autocomplete="off">
+        </label>
+        <button type="button" class="btn btn-ghost btn-sm" id="set-save-pin" style="margin-top:12px">Save PIN</button>
+      </div>
+
+      <div class="card">
+        <h2 class="sec-head">Import / export</h2>
+        <p style="color:var(--muted);font-size:13px;margin:0 0 8px">Paste JSON below (Tesla file pickers are unreliable).</p>
+        <textarea class="set-textarea" id="import-area" placeholder="Paste package JSON…"></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="import-btn">Import paste</button>
+          <button type="button" class="btn btn-primary btn-sm" id="export-btn">Copy export</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="tabbar" id="tabbar" aria-label="Companion tabs">
+      <button type="button" class="on" data-tab="universe">Universe</button>
+      <button type="button" data-tab="feed">Feed</button>
+      <button type="button" data-tab="chats">Chats</button>
+      <button type="button" data-tab="people">People</button>
+      <button type="button" data-tab="settings">Settings</button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="sync.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

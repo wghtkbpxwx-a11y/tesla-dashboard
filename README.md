@@ -6,7 +6,7 @@
 
 This repository hosts three connected GitHub Pages apps:
 
-- Tesla Dashboard at `/tesla-dashboard/` (includes an embedded **Session vault** companion overlay for the Tesla browser — launch: **Messages → Session vault**);
+- Tesla Dashboard at `/tesla-dashboard/` (with a separate **Session vault** companion app at `/companion/` — launch: **Messages → Session vault**; return via **← Dashboard**);
 - Homebase AI at `/tesla-dashboard/ai/`;
 - the data-free Pederson Finances shell at `/tesla-dashboard/finance/`.
 

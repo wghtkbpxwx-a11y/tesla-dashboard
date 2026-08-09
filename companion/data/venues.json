@@ -1,0 +1,56 @@
+[
+  {
+    "id": "stanley-park",
+    "name": "Stanley Park Seawall",
+    "area": "Vancouver",
+    "lat": 49.3017,
+    "lon": -123.1417,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Seawall loop with mountain views and cedar forest."
+  },
+  {
+    "id": "gastown",
+    "name": "Gastown Steam Clock",
+    "area": "Vancouver",
+    "lat": 49.2845,
+    "lon": -123.1089,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Cobblestone streets, cafés, and evening lights."
+  },
+  {
+    "id": "granville-island",
+    "name": "Granville Island Market",
+    "area": "Vancouver",
+    "lat": 49.2713,
+    "lon": -123.1340,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Public market, waterfront benches, and live buskers."
+  },
+  {
+    "id": "lynn-canyon",
+    "name": "Lynn Canyon Suspension Bridge",
+    "area": "North Vancouver",
+    "lat": 49.3428,
+    "lon": -123.0194,
+    "tags": ["walk", "roam"],
+    "blurb": "Forest trails and a free suspension bridge."
+  },
+  {
+    "id": "steveston",
+    "name": "Steveston Village Wharf",
+    "area": "Richmond",
+    "lat": 49.1256,
+    "lon": -123.1817,
+    "tags": ["walk", "date", "roam"],
+    "blurb": "Fishing village boardwalk and sunset views."
+  },
+  {
+    "id": "queen-elizabeth",
+    "name": "Queen Elizabeth Park",
+    "area": "Vancouver",
+    "lat": 49.2417,
+    "lon": -123.1129,
+    "tags": ["walk", "date"],
+    "blurb": "City lookout, gardens, and quiet picnic lawns."
+  }
+]
