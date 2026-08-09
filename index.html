@@ -151,7 +151,7 @@ a { color: var(--accent); }
 
 #companion-overlay #cp-pin-gate {
   position: absolute;
-  inset: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -652,8 +652,9 @@ a { color: var(--accent); }
   }
 }
 
-#companion-overlay{position:fixed;inset:0;z-index:850;display:none;overflow-y:auto;-webkit-text-size-adjust:100%}
-#companion-overlay.open{display:block}
+#companion-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:850;overflow-y:auto;-webkit-text-size-adjust:100%}
+#companion-overlay:not(.open){display:none!important;visibility:hidden!important;pointer-events:none!important}
+#companion-overlay.open{display:block!important;visibility:visible!important;pointer-events:auto!important}
 #companion-overlay .cp-hidden{display:none!important}
 
 
@@ -1791,174 +1792,6 @@ body[data-mode="charging"] .charge-session{
 </header>
 <div id="dash-orb-cap" role="status" aria-live="polite"></div>
 
-<div id="companion-overlay" role="dialog" aria-modal="true" aria-label="Session vault">
-
-  <div id="cp-pin-gate" aria-hidden="false">
-    <div class="pin-card">
-      <h1>Session vault</h1>
-      <p>Enter your 4-digit PIN</p>
-      <div class="pin-display" id="cp-pin-display" aria-live="polite">••••</div>
-      <div class="pin-grid" id="cp-pin-grid">
-        <button type="button" data-digit="1">1</button>
-        <button type="button" data-digit="2">2</button>
-        <button type="button" data-digit="3">3</button>
-        <button type="button" data-digit="4">4</button>
-        <button type="button" data-digit="5">5</button>
-        <button type="button" data-digit="6">6</button>
-        <button type="button" data-digit="7">7</button>
-        <button type="button" data-digit="8">8</button>
-        <button type="button" data-digit="9">9</button>
-        <button type="button" data-action="clear">Clear</button>
-        <button type="button" data-digit="0">0</button>
-        <button type="button" data-action="back">⌫</button>
-      </div>
-      <div class="pin-actions">
-        <button type="button" id="cp-pin-submit">Unlock</button>
-      </div>
-      <p id="cp-pin-error" style="color:var(--red);font-size:13px;min-height:18px;margin-top:12px"></p>
-    </div>
-  </div>
-
-  <div id="cp-app-shell" class="cp-hidden">
-    <header class="topbar">
-      <a class="back-link" href="#" onclick="companionClose();return false" aria-label="Back to dashboard">‹</a>
-      <h1 id="cp-view-title">Universe</h1>
-      <span class="status-dot" aria-hidden="true"></span>
-    </header>
-
-    <section class="tab-panel on" id="cp-tab-universe" data-tab="Universe">
-      <div class="chips" id="cp-mode-chips">
-        <button type="button" class="chip on" data-mode="walk">Walk in</button>
-        <button type="button" class="chip" data-mode="date">Date night</button>
-        <button type="button" class="chip" data-mode="roam">Free roam</button>
-      </div>
-      <div class="card" id="cp-scene-card" style="display:none">
-        <h3 id="cp-scene-venue">—</h3>
-        <div class="scene-box" id="cp-scene-text"></div>
-        <div class="btn-row">
-          <button type="button" class="btn btn-ghost btn-sm" id="cp-scene-next">Next line</button>
-          <button type="button" class="btn btn-ghost btn-sm" id="cp-scene-speak">Speak</button>
-        </div>
-      </div>
-      <h2 class="sec-head">Metro Vancouver pins</h2>
-      <div class="venue-list" id="cp-venue-list"></div>
-    </section>
-
-    <section class="tab-panel" id="cp-tab-feed" data-tab="Feed">
-      <h2 class="sec-head">Continuity feed</h2>
-      <div id="cp-feed-list"><p class="card" style="color:var(--muted)">No moments yet — chat or visit a venue.</p></div>
-    </section>
-
-    <section class="tab-panel" id="cp-tab-chats" data-tab="Chats">
-      <div class="chips" id="cp-chat-person-chips"></div>
-      <div class="chat-log" id="cp-chat-log"></div>
-      <div class="chat-compose">
-        <textarea id="cp-chat-input" placeholder="Type a message…" rows="3"></textarea>
-        <div class="btn-row">
-          <button type="button" class="btn btn-primary" id="cp-chat-send">Send</button>
-          <button type="button" class="btn btn-ghost" id="cp-chat-offline">Offline scene</button>
-          <button type="button" class="btn btn-ghost" id="cp-voice-btn" style="display:none">🎙 Hold to talk</button>
-        </div>
-        <div id="cp-voice-hint" class="voice-hint cp-hidden"></div>
-      </div>
-    </section>
-
-    <section class="tab-panel" id="cp-tab-people" data-tab="People">
-      <h2 class="sec-head">Companions</h2>
-      <div class="people-grid" id="cp-people-list"></div>
-    </section>
-
-    <section class="tab-panel" id="cp-tab-settings" data-tab="Settings">
-      <div class="card">
-        <h2 class="sec-head">Cloud chat</h2>
-        <div class="chips" id="cp-provider-chips">
-          <button type="button" class="chip on" data-provider="openrouter">OpenRouter</button>
-          <button type="button" class="chip" data-provider="openai">OpenAI</button>
-          <button type="button" class="chip" data-provider="xai">xAI</button>
-          <button type="button" class="chip" data-provider="custom">Custom</button>
-        </div>
-        <label class="set-label">
-          <div class="t">API key</div>
-          <div class="s">Stored only in this browser</div>
-          <input type="password" class="set-input" id="cp-set-api-key" autocomplete="off" spellcheck="false">
-        </label>
-        <label class="set-label" style="display:block;margin-top:12px">
-          <div class="t">Model</div>
-          <input type="text" class="set-input" id="cp-set-model" placeholder="openrouter/auto">
-        </label>
-        <label class="set-label" style="display:block;margin-top:12px" id="cp-custom-base-wrap">
-          <div class="t">Custom base URL</div>
-          <div class="s">OpenAI-compatible /v1 root</div>
-          <input type="text" class="set-input" id="cp-set-api-base" placeholder="https://api.example.com/v1">
-        </label>
-      </div>
-
-      <div class="card">
-        <h2 class="sec-head">Voice</h2>
-        <div class="set-row">
-          <div class="set-label">
-            <div class="t">Voice input</div>
-            <div class="s">Whisper-compatible transcription when mic works</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="cp-set-voice">
-            <span class="switch-track"></span>
-          </label>
-        </div>
-        <div id="cp-voice-lock-hint" class="voice-hint cp-hidden"></div>
-      </div>
-
-      <div class="card">
-        <h2 class="sec-head">Private Gist vault</h2>
-        <p style="color:var(--muted);font-size:13px;margin:0 0 12px">Sync <code>companion-memory-sync.json</code> to your own secret Gist. Credentials stay on-device.</p>
-        <label class="set-label" style="display:block">
-          <div class="t">Gist ID</div>
-          <input type="text" class="set-input" id="cp-set-gist-id" autocomplete="off" spellcheck="false">
-        </label>
-        <label class="set-label" style="display:block;margin-top:12px">
-          <div class="t">GitHub token</div>
-          <div class="s">Fine-grained token with gist access</div>
-          <input type="password" class="set-input" id="cp-set-gist-token" autocomplete="off" spellcheck="false">
-        </label>
-        <div class="btn-row">
-          <button type="button" class="btn btn-ghost btn-sm" id="cp-vault-pull">Pull vault</button>
-          <button type="button" class="btn btn-primary btn-sm" id="cp-vault-push">Push vault</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 class="sec-head">PIN</h2>
-        <label class="set-label" style="display:block">
-          <div class="t">New 4-digit PIN</div>
-          <input type="password" class="set-input" id="cp-set-new-pin" inputmode="numeric" maxlength="4" autocomplete="off">
-        </label>
-        <button type="button" class="btn btn-ghost btn-sm" id="cp-set-save-pin" style="margin-top:12px">Save PIN</button>
-      </div>
-
-      <div class="card">
-        <h2 class="sec-head">Import / export</h2>
-        <p style="color:var(--muted);font-size:13px;margin:0 0 8px">Paste JSON below (Tesla file pickers are unreliable).</p>
-        <textarea class="set-textarea" id="cp-import-area" placeholder="Paste package JSON…"></textarea>
-        <div class="btn-row">
-          <button type="button" class="btn btn-ghost btn-sm" id="cp-import-btn">Import paste</button>
-          <button type="button" class="btn btn-primary btn-sm" id="cp-export-btn">Copy export</button>
-        </div>
-      </div>
-    </section>
-
-    <nav class="tabbar" id="cp-tabbar" aria-label="Companion tabs">
-      <button type="button" class="on" data-tab="universe">Universe</button>
-      <button type="button" data-tab="feed">Feed</button>
-      <button type="button" data-tab="chats">Chats</button>
-      <button type="button" data-tab="people">People</button>
-      <button type="button" data-tab="settings">Settings</button>
-    </nav>
-  </div>
-
-  <div class="toast" id="cp-toast" role="status"></div>
-
-  
-</div>
 <div id="hb-embed" class="hb-embed" role="dialog" aria-modal="true" aria-label="Homebase voice" onclick="hbBackdrop(event)">
   <div class="hb-embed-card">
     <button type="button" class="hb-embed-close" onclick="closeHomebase()" aria-label="Close Homebase" title="Close">✕</button>
@@ -2692,6 +2525,175 @@ body[data-mode="charging"] .charge-session{
   <div class="stocks-dropdown-list" id="stocks-dropdown-list">
     <div class="muted" style="padding:20px;text-align:center;font-size:13px">No stocks yet</div>
   </div>
+</div>
+
+<div id="companion-overlay" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Session vault" style="display:none!important;visibility:hidden;pointer-events:none">
+
+  <div id="cp-pin-gate" aria-hidden="false">
+    <div class="pin-card">
+      <h1>Session vault</h1>
+      <p>Enter your 4-digit PIN</p>
+      <div class="pin-display" id="cp-pin-display" aria-live="polite">••••</div>
+      <div class="pin-grid" id="cp-pin-grid">
+        <button type="button" data-digit="1">1</button>
+        <button type="button" data-digit="2">2</button>
+        <button type="button" data-digit="3">3</button>
+        <button type="button" data-digit="4">4</button>
+        <button type="button" data-digit="5">5</button>
+        <button type="button" data-digit="6">6</button>
+        <button type="button" data-digit="7">7</button>
+        <button type="button" data-digit="8">8</button>
+        <button type="button" data-digit="9">9</button>
+        <button type="button" data-action="clear">Clear</button>
+        <button type="button" data-digit="0">0</button>
+        <button type="button" data-action="back">⌫</button>
+      </div>
+      <div class="pin-actions">
+        <button type="button" id="cp-pin-submit">Unlock</button>
+      </div>
+      <p id="cp-pin-error" style="color:var(--red);font-size:13px;min-height:18px;margin-top:12px"></p>
+    </div>
+  </div>
+
+  <div id="cp-app-shell" class="cp-hidden">
+    <header class="topbar">
+      <a class="back-link" href="#" onclick="companionClose();return false" aria-label="Back to dashboard">‹</a>
+      <h1 id="cp-view-title">Universe</h1>
+      <span class="status-dot" aria-hidden="true"></span>
+    </header>
+
+    <section class="tab-panel on" id="cp-tab-universe" data-tab="Universe">
+      <div class="chips" id="cp-mode-chips">
+        <button type="button" class="chip on" data-mode="walk">Walk in</button>
+        <button type="button" class="chip" data-mode="date">Date night</button>
+        <button type="button" class="chip" data-mode="roam">Free roam</button>
+      </div>
+      <div class="card" id="cp-scene-card" style="display:none">
+        <h3 id="cp-scene-venue">—</h3>
+        <div class="scene-box" id="cp-scene-text"></div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="cp-scene-next">Next line</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="cp-scene-speak">Speak</button>
+        </div>
+      </div>
+      <h2 class="sec-head">Metro Vancouver pins</h2>
+      <div class="venue-list" id="cp-venue-list"></div>
+    </section>
+
+    <section class="tab-panel" id="cp-tab-feed" data-tab="Feed">
+      <h2 class="sec-head">Continuity feed</h2>
+      <div id="cp-feed-list"><p class="card" style="color:var(--muted)">No moments yet — chat or visit a venue.</p></div>
+    </section>
+
+    <section class="tab-panel" id="cp-tab-chats" data-tab="Chats">
+      <div class="chips" id="cp-chat-person-chips"></div>
+      <div class="chat-log" id="cp-chat-log"></div>
+      <div class="chat-compose">
+        <textarea id="cp-chat-input" placeholder="Type a message…" rows="3"></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="cp-chat-send">Send</button>
+          <button type="button" class="btn btn-ghost" id="cp-chat-offline">Offline scene</button>
+          <button type="button" class="btn btn-ghost" id="cp-voice-btn" style="display:none">🎙 Hold to talk</button>
+        </div>
+        <div id="cp-voice-hint" class="voice-hint cp-hidden"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="cp-tab-people" data-tab="People">
+      <h2 class="sec-head">Companions</h2>
+      <div class="people-grid" id="cp-people-list"></div>
+    </section>
+
+    <section class="tab-panel" id="cp-tab-settings" data-tab="Settings">
+      <div class="card">
+        <h2 class="sec-head">Cloud chat</h2>
+        <div class="chips" id="cp-provider-chips">
+          <button type="button" class="chip on" data-provider="openrouter">OpenRouter</button>
+          <button type="button" class="chip" data-provider="openai">OpenAI</button>
+          <button type="button" class="chip" data-provider="xai">xAI</button>
+          <button type="button" class="chip" data-provider="custom">Custom</button>
+        </div>
+        <label class="set-label">
+          <div class="t">API key</div>
+          <div class="s">Stored only in this browser</div>
+          <input type="password" class="set-input" id="cp-set-api-key" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px">
+          <div class="t">Model</div>
+          <input type="text" class="set-input" id="cp-set-model" placeholder="openrouter/auto">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px" id="cp-custom-base-wrap">
+          <div class="t">Custom base URL</div>
+          <div class="s">OpenAI-compatible /v1 root</div>
+          <input type="text" class="set-input" id="cp-set-api-base" placeholder="https://api.example.com/v1">
+        </label>
+      </div>
+
+      <div class="card">
+        <h2 class="sec-head">Voice</h2>
+        <div class="set-row">
+          <div class="set-label">
+            <div class="t">Voice input</div>
+            <div class="s">Whisper-compatible transcription when mic works</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="cp-set-voice">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div id="cp-voice-lock-hint" class="voice-hint cp-hidden"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="sec-head">Private Gist vault</h2>
+        <p style="color:var(--muted);font-size:13px;margin:0 0 12px">Sync <code>companion-memory-sync.json</code> to your own secret Gist. Credentials stay on-device.</p>
+        <label class="set-label" style="display:block">
+          <div class="t">Gist ID</div>
+          <input type="text" class="set-input" id="cp-set-gist-id" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="set-label" style="display:block;margin-top:12px">
+          <div class="t">GitHub token</div>
+          <div class="s">Fine-grained token with gist access</div>
+          <input type="password" class="set-input" id="cp-set-gist-token" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="btn-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="cp-vault-pull">Pull vault</button>
+          <button type="button" class="btn btn-primary btn-sm" id="cp-vault-push">Push vault</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="sec-head">PIN</h2>
+        <label class="set-label" style="display:block">
+          <div class="t">New 4-digit PIN</div>
+          <input type="password" class="set-input" id="cp-set-new-pin" inputmode="numeric" maxlength="4" autocomplete="off">
+        </label>
+        <button type="button" class="btn btn-ghost btn-sm" id="cp-set-save-pin" style="margin-top:12px">Save PIN</button>
+      </div>
+
+      <div class="card">
+        <h2 class="sec-head">Import / export</h2>
+        <p style="color:var(--muted);font-size:13px;margin:0 0 8px">Paste JSON below (Tesla file pickers are unreliable).</p>
+        <textarea class="set-textarea" id="cp-import-area" placeholder="Paste package JSON…"></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn btn-ghost btn-sm" id="cp-import-btn">Import paste</button>
+          <button type="button" class="btn btn-primary btn-sm" id="cp-export-btn">Copy export</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="tabbar" id="cp-tabbar" aria-label="Companion tabs">
+      <button type="button" class="on" data-tab="universe">Universe</button>
+      <button type="button" data-tab="feed">Feed</button>
+      <button type="button" data-tab="chats">Chats</button>
+      <button type="button" data-tab="people">People</button>
+      <button type="button" data-tab="settings">Settings</button>
+    </nav>
+  </div>
+
+  <div class="toast" id="cp-toast" role="status"></div>
+
+  
 </div>
 
 <script>
@@ -12250,6 +12252,11 @@ var COMPANION_VENUES = [
     document.getElementById('cp-pin-error').textContent = '';
     document.getElementById('cp-pin-gate').classList.remove('cp-hidden');
     document.getElementById('cp-app-shell').classList.add('cp-hidden');
+    ov.removeAttribute('hidden');
+    ov.setAttribute('aria-hidden', 'false');
+    ov.style.display = 'block';
+    ov.style.visibility = 'visible';
+    ov.style.pointerEvents = 'auto';
     ov.classList.add('open');
     document.body.style.overflow = 'hidden';
   };
@@ -12257,6 +12264,11 @@ var COMPANION_VENUES = [
     var ov = document.getElementById('companion-overlay');
     if (!ov) return;
     ov.classList.remove('open');
+    ov.setAttribute('hidden', '');
+    ov.setAttribute('aria-hidden', 'true');
+    ov.style.display = 'none';
+    ov.style.visibility = 'hidden';
+    ov.style.pointerEvents = 'none';
     document.body.style.overflow = '';
     try { if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop(); } catch(e) {}
     try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e) {}
