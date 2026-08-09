@@ -4,12 +4,11 @@
 > It identifies verified work, high-risk audit packages, invariants, and low-value
 > tasks to avoid so a full review can spend its context on consequential changes.
 
-This repository hosts four connected GitHub Pages apps:
+This repository hosts three connected GitHub Pages apps:
 
-- Tesla Dashboard at `/tesla-dashboard/`;
+- Tesla Dashboard at `/tesla-dashboard/` (includes an embedded **Session vault** companion overlay for the Tesla browser — launch: **Messages → Session vault**);
 - Homebase AI at `/tesla-dashboard/ai/`;
-- the data-free Pederson Finances shell at `/tesla-dashboard/finance/`;
-- Companion Session vault at `/tesla-dashboard/companion/` (launch: Dashboard → Settings → **Session vault** — not on Live or Apps).
+- the data-free Pederson Finances shell at `/tesla-dashboard/finance/`.
 
 The finance shell stores imported private data only in the user's browser and
 shares a minimized local glance with Homebase. Financial bundles, balances,
