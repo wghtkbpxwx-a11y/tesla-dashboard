@@ -6,7 +6,7 @@
 
 This repository hosts three connected GitHub Pages apps:
 
-- Tesla Dashboard at `/tesla-dashboard/` (with a separate **Session vault** companion app at `/companion/` — launch: **Messages → Session vault**; return via **← Dashboard**);
+- Tesla Dashboard at `/tesla-dashboard/` (Companion **Session vault** opens from **Settings → Session vault** at [companion-tesla.vercel.app](https://companion-tesla.vercel.app) — hosted on Vercel; source stays private);
 - Homebase AI at `/tesla-dashboard/ai/`;
 - the data-free Pederson Finances shell at `/tesla-dashboard/finance/`.
 
