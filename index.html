@@ -284,7 +284,7 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .muted{padding:40px;text-align:center;color:var(--t3)}
 .col{display:flex;flex-direction:column;gap:20px}
 /* Natural heights — inner scroll areas are unreachable on Tesla's touchscreen */
-.h-news,.h-scores,.h-sports{height:auto;max-height:none}
+.h-news,.h-scores{height:auto;max-height:none}
 
 /* FEEDS — dense, hairline dividers, left mint hairline on hover */
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2s infinite ease-in-out}
@@ -365,20 +365,17 @@ html.light .dock-submenu{background:linear-gradient(180deg,rgba(255,255,255,.96)
 .score-row{display:flex;justify-content:space-between;font-family:var(--fd);font-size:16px;font-weight:700;color:var(--t1);padding:2px 0;font-variant-numeric:tabular-nums}
 .score-status{font-family:var(--fd);font-size:10.5px;font-weight:800;color:var(--accent);text-align:right;width:100px;margin-left:12px;text-transform:uppercase;letter-spacing:1.4px}
 /* Standings tables (division/conference for followed teams; your team highlighted) */
-.standings-wrap{display:flex;flex-direction:column;gap:14px}
-.stand-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
-.stand-head{padding:12px 14px;font-family:var(--fd);font-size:13px;font-weight:800;letter-spacing:.4px;color:var(--t1);border-bottom:1px solid var(--line);background:var(--surface2)}
-.stand-head span{color:var(--t2);font-weight:600}
-.stand-table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
-.stand-table th{font-family:var(--fd);font-size:10px;font-weight:800;letter-spacing:1px;color:var(--t3);text-transform:uppercase;padding:8px 5px;text-align:center}
-.stand-table td{padding:10px 5px;text-align:center;color:var(--t2);border-top:1px solid var(--line)}
-.stand-table .st-rank{width:26px;color:var(--t3)}
-.stand-table .st-team{text-align:left;color:var(--t1);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:118px}
-.stand-table tr.stand-mine td{background:var(--accent-soft);color:var(--accent);font-weight:800}
-.stand-table tr.stand-mine .st-team{color:var(--accent)}
-.stand-table tr.stand-gap td{color:var(--t3);padding:5px;font-size:12px;letter-spacing:3px}
-body[data-mode="drive"] .stand-table{font-size:16px}
-body[data-mode="drive"] .stand-table td{padding:12px 5px}
+/* News module (feed.json) — theme tokens only */
+.nf-must{margin:0 0 14px;padding:14px 18px;border-radius:var(--r-sm);background:var(--red-bg)}
+.nf-must a{display:block}
+.nf-must a+a{margin-top:12px;padding-top:12px;border-top:1px solid var(--hair)}
+.nf-lab{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.nf-lab i{width:6px;height:6px;border-radius:50%;background:var(--red)}
+.nf-must .feed-t{margin-top:6px;-webkit-line-clamp:3;line-clamp:3}
+.nf-must .feed-m{opacity:.72;text-transform:none;letter-spacing:0;font-size:12px;font-weight:500}
+.nf-stamp{margin:10px 2px 0;font-size:11px;color:var(--t3)}
+.score-row.nf-next{font-weight:500;color:var(--t2);font-size:13px}
+a.score-card{color:inherit}
 /* Curio — daily learning engine (category-tinted via --cu-rgb) */
 .curio-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .curio-stats{display:flex;align-items:center;gap:10px}
@@ -1182,8 +1179,8 @@ body[data-mode="charging"] .charge-session{
 }
 
 /* Feed: lead story slightly louder; meta quieter; bookmark until needed */
-#news-feed .feed-item:first-child .feed-t{font-size:17px;letter-spacing:-.02em;font-weight:650;-webkit-line-clamp:3;line-clamp:3}
-#news-feed .feed-m,#sports-feed .feed-m{opacity:.72;text-transform:none;letter-spacing:0;font-size:12px;font-weight:500}
+#nf-list .feed-item:first-child .feed-t{font-size:17px;letter-spacing:-.02em;font-weight:650;-webkit-line-clamp:3;line-clamp:3}
+#nf-list .feed-m,#nf-fan .feed-m{opacity:.72;text-transform:none;letter-spacing:0;font-size:12px;font-weight:500}
 .feed-item .bm-btn,.row .bm-btn{opacity:.35;transition:opacity .15s}
 .feed-item:hover .bm-btn,.feed-item:focus-within .bm-btn,
 .row:hover .bm-btn,.row:focus-within .bm-btn{opacity:1}
@@ -1357,20 +1354,26 @@ body[data-mode="charging"] .charge-session{
       <div class="lq-author" id="lq-author"></div>
     </div>
 
-    <!-- News, Scores, Fantasy in tabbed layout -->
+    <!-- NEWS MODULE: the ONLY news/sports source is news-widget-feed feed.json
+         (same file that drives the iPhone Scriptable widget). -->
     <div class="split">
-      <div>
-        <div class="sec-title"><div class="live-dot"></div> Live News
-          <div class="news-tabs">
-            <button class="ntab on" data-news="local">Local</button>
-            <button class="ntab" data-news="national">National</button>
-            <button class="ntab" data-news="world">World</button>
-            <button class="ntab" data-news="pharmacy" title="Pharmacy & medicine — landmark trials and health news">Rx</button>
+      <div id="nf">
+        <div class="sec-title"><div class="live-dot"></div> News
+          <div class="news-tabs" id="nf-tabs">
+            <button class="ntab on" data-nf="all">Top</button>
+            <button class="ntab" data-nf="Local">Local</button>
+            <button class="ntab" data-nf="National">Canada</button>
+            <button class="ntab" data-nf="World">World</button>
+            <button class="ntab" data-nf="Teams">Sports</button>
+            <button class="ntab" data-nf="Health">Rx</button>
+            <button class="ntab" data-nf="Tech">Tech</button>
           </div>
         </div>
-        <div class="feed-box h-news" id="news-feed">
+        <div class="nf-must" id="nf-must" style="display:none"></div>
+        <div class="feed-box h-news" id="nf-list">
           <div class="muted">Loading News…</div>
         </div>
+        <div class="nf-stamp" id="nf-stamp"></div>
       </div>
       <div class="col">
         <div>
@@ -1392,25 +1395,15 @@ body[data-mode="charging"] .charge-session{
             </a>
           </div>
         </div>
-        <div>
+        <div id="nf-teams-wrap">
           <div class="sec-title"><div class="live-dot"></div> My Teams</div>
-          <div class="feed-box h-scores" id="scores-feed">
-            <div class="muted">Loading Scores…</div>
-          </div>
+          <div class="feed-box h-scores" id="nf-scores"><div class="muted">Loading Scores…</div></div>
+        </div>
+        <div id="nf-fan-wrap" style="display:none">
+          <div class="sec-title">My Players</div>
+          <div class="feed-box" id="nf-fan"></div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- SPORTS PANEL: standings (baked hourly) + sports news feed -->
-  <section class="panel" id="p-sports">
-    <div class="sec-title"><div class="live-dot"></div> Standings</div>
-    <div id="standings-wrap" class="standings-wrap">
-      <div class="muted" style="text-align:center;padding:24px 16px;font-size:13px">Standings update hourly.</div>
-    </div>
-    <div class="sec-title" style="margin-top:24px"><div class="live-dot"></div> Sports News</div>
-    <div class="feed-box h-sports" id="sports-feed">
-      <div class="muted">Loading Sports News…</div>
     </div>
   </section>
 
@@ -1944,7 +1937,6 @@ body[data-mode="charging"] .charge-session{
 <div class="dock-submenu" id="dock-submenu">
   <div class="dock-submenu-head">Info</div>
   <div class="dock-submenu-grid">
-    <button class="dock-submenu-item" data-p="sports">Sports</button>
     <button class="dock-submenu-item" data-p="weather">Weather</button>
     <button class="dock-submenu-item" data-p="traffic">Traffic</button>
     <button class="dock-submenu-item" data-p="saved">Saved</button>
@@ -2000,7 +1992,7 @@ body[data-mode="charging"] .charge-session{
 
 // ── VARIABLES (declared early to avoid undefined reference errors) ──
 var SETTINGS_KEY = 'dash_settings_v1';
-var defaultSettings = {theme:'dark', themeMode:'manual', calShow:true, departShow:true, departBuffer:25, modules:{curio:true, sports:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, links:true, saved:true, traffic:true, games:true}};
+var defaultSettings = {theme:'dark', themeMode:'manual', calShow:true, departShow:true, departBuffer:25, modules:{curio:true, msg:true, apple:true, cap:true, stream:true, learn:true, weather:true, links:true, saved:true, traffic:true, games:true}};
 var settings;
 var themePresets = {default: {accent:'#2af5c4'}, cyberpunk: {accent:'#ff006e'}, sunset: {accent:'#ff6b35'}, forest: {accent:'#22c55e'}, lavender: {accent:'#a78bfa'}};
 var draggedBtn = null;
@@ -2008,10 +2000,7 @@ var bookmarks = [];
 var tasks = [];
 var watchlist = [];
 var quickLinks = [];
-var currentFeed = [];
-var RSS = 'https://api.rss2json.com/v1/api.json?rss_url=';
 var API_BASE = window.location.origin.includes('vercel') ? window.location.origin : null; // Use local proxy if deployed on Vercel
-var newsCategories = {};
 var calcCur = '0', calcPrev = '', calcOperator = '', calcReset = false;
 var notes = [];
 var rec = null, isRec = false;
@@ -3037,7 +3026,6 @@ document.getElementById('accent-picker').addEventListener('input', function(e) {
 // ── DOCK REORDERING & SHORTCUTS ──
 // Panels that live under "More" but can be pinned into the bottom dock.
 var DOCK_PROMOTABLE = [
-  {p:'sports',  label:'Sports'},
   {p:'weather', label:'Weather'},
   {p:'traffic', label:'Traffic'},
   {p:'saved',   label:'Saved'},
@@ -3253,7 +3241,6 @@ function removeFromDock(panelId) { demoteFromDock(panelId); }
 // Merged Settings list: each panel gets a "Show" (module) and a "Dock" (pin) toggle
 var MENU_ITEMS = [
   {p:'curio',   label:'Curio',           sub:'Daily learning — pharmacy, money, tech, science'},
-  {p:'sports',  label:'Sports News',     sub:'Live sports headlines'},
   {p:'msg',     label:'Messages',        sub:'Messaging hub shortcuts'},
   {p:'weather', label:'Weather',         sub:'Forecast & conditions panel'},
   {p:'traffic', label:'Traffic Cameras', sub:'DriveBC bridge & highway cams'},
@@ -5140,7 +5127,7 @@ function saveBookmark(title, link, source) {
   }
   saveLS('bookmarks_v1', bookmarks);
   renderBookmarks();
-  renderFeed(currentFeed || [], 'news-feed');
+  nfRender();
   return true;
 }
 function deleteBookmark(idx) {
@@ -5646,1624 +5633,129 @@ var DASHBOARD_CACHE = {
     }
   },
   "news": {
-    "https://globalnews.ca/bc/feed/": {
+    "https://wghtkbpxwx-a11y.github.io/news-widget-feed/feed.json#news": {
       "status": "ok",
       "items": [
         {
-          "title": "Vancouver e-scooter riders overwhelmingly don’t wear helmets, police find",
-          "link": "https://globalnews.ca/news/12086152/vancouver-e-scooter-riders-helmets-police/",
-          "pubDate": "2026-10-02T23:31:46Z",
-          "source": "Global BC"
+          "title": "G7 nations will release 100 million barrels of oil and diesel fuel after prices soar",
+          "link": "https://www.vancouverisawesome.com/the-mix/g7-nations-will-release-100-million-barrels-of-oil-and-diesel-fuel-after-prices-soar-12849275",
+          "pubDate": "2026-10-02T21:20:19+00:00",
+          "source": "Vancouver Is Awesome"
         },
         {
-          "title": "BC NDP promises to cap grocery profits while Conservatives unveil wildfire plan",
-          "link": "https://globalnews.ca/news/12086006/bc-ndp-promises-grocery-cap-profits-bc-conservatives-wildfire-plan/",
-          "pubDate": "2026-10-02T21:59:18Z",
-          "source": "Global BC"
+          "title": "Eby announces B.C. grocery ‘price guard’ during Kelowna visit",
+          "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPSFlyUHN1QzIzekJtZXl3LWs3T0dNX1p0eDhYYXBydFBpVEZtUVdlUjBtVVk2OWJDQWhiY0ZJMkFNMGVBODY0RnROZnliUHhYVHQwVG9uS2EzcHhRZlhkNjdyRlBFWUU4VWEzcnZUQVVWZjNMSzhWeGVvR3pzVHN1a1NwZkduN2xDVkxiRXFkYkNwT3FwSmtBYkJnN2h1MG9EdmdzRg?oc=5",
+          "pubDate": "2026-10-02T23:34:21+00:00",
+          "source": "Langley Advance Times"
         },
         {
-          "title": "Babcock takes blame as Oilers struggle defensively",
-          "link": "https://globalnews.ca/news/12086018/babcock-takes-blame-as-oilers-struggle-defensively/",
-          "pubDate": "2026-10-02T21:06:31Z",
-          "source": "Global BC"
+          "title": "B.C. Conservatives criticize Eby grocery plan during Okanagan visit",
+          "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQSV9RMGU3ZWRjcnFxaTJVRFc0OEFiMDFfcEZ1TWFCMGhkLXR6aG1tWTN3Wms2QmZoUEh0REF5RHJCa2M4N1Q1NHZobm9KQ25BM25fWllWQTVwMGFEQ3JRNGJUR1pYTlVXODRoN2hUUXBNTUp3OHVQQUlMdVg5MmNUU0hYN09Cem1KelRsZl9xdEF0WXJxdWxnNXVIa2NJc0VHSjBOYlVzUE8yd0FuWG1sbA?oc=5",
+          "pubDate": "2026-10-02T22:28:00+00:00",
+          "source": "Castanet"
         },
         {
-          "title": "Grindr is being used to lure victims to assault by young people, RCMP warn",
-          "link": "https://globalnews.ca/news/12085773/north-vancouver-rcmp-young-people-grindr-lure-victims-assault/",
-          "pubDate": "2026-10-02T19:44:37Z",
-          "source": "Global BC"
+          "title": "B.C.’s Eby promises to lower gas prices, while Doerkson praises pipeline as election campaigns continues",
+          "link": "https://www.theglobeandmail.com/canada/british-columbia/article-bcs-eby-vows-to-temporary-suspend-gas-tax-regulate-pump-price-under-if/",
+          "pubDate": "2026-10-01T17:38:38+00:00",
+          "source": "Globe and Mail"
         },
         {
-          "title": "5 foreign nationals charged with extortion-related crimes in B.C.",
-          "link": "https://globalnews.ca/news/12085588/5-foreign-nationals-charged-extortion-related-crimes-bc/",
-          "pubDate": "2026-10-02T17:53:30Z",
-          "source": "Global BC"
-        }
-      ]
-    },
-    "https://www.cbc.ca/cmlink/rss-canada-britishcolumbia": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "5 foreign nationals arrested in connection to B.C. extortions, shootings and arsons",
-          "link": "https://www.cbc.ca/news/canada/british-columbia/livestory/langley-rcmp-project-e-pursuance-extortion-allegations-9.7367120?cmp=rss",
-          "pubDate": "2026-10-02T16:58:49Z",
-          "source": "CBC BC"
-        },
-        {
-          "title": "B.C. man sentenced to 8 months in jail for antisemitic graffiti on Victoria synagogue",
-          "link": "https://www.cbc.ca/news/canada/british-columbia/b-c-man-sentenced-8-months-in-jail-antisemitic-graffiti-victoria-synagogue-9.7367841?cmp=rss",
-          "pubDate": "2026-10-02T23:02:10Z",
-          "source": "CBC BC"
-        },
-        {
-          "title": "2 separate crashes on B.C. highways kill 4 people",
-          "link": "https://www.cbc.ca/news/canada/british-columbia/separate-crashes-bc-chase-new-hazelton-9.7367524?cmp=rss",
-          "pubDate": "2026-10-02T22:09:14Z",
-          "source": "CBC BC"
-        },
-        {
-          "title": "Human remains found inside sunken vehicle in Kootenay River",
-          "link": "https://www.cbc.ca/news/canada/british-columbia/kootenay-river-human-remains-george-davis-missing-2004-9.7367532?cmp=rss",
-          "pubDate": "2026-10-02T22:12:06Z",
-          "source": "CBC BC"
-        },
-        {
-          "title": "Tailoring services, most textiles now subject to PST in B.C.",
-          "link": "https://www.cbc.ca/news/canada/british-columbia/textiles-tailoring-materials-provincial-service-tax-bc-9.7367477?cmp=rss",
-          "pubDate": "2026-10-02T21:38:02Z",
-          "source": "CBC BC"
-        }
-      ]
-    },
-    "https://vancouver.citynews.ca/feed/": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Overnight fire at North Vancouver’s Dorothy Lynas Elementary deemed suspicious",
-          "link": "https://vancouver.citynews.ca/2026/10/02/overnight-school-fire-north-van/",
-          "pubDate": "2026-10-02T22:42:32Z",
-          "source": "CityNews Van"
-        },
-        {
-          "title": "VIFF opens with Jesse Eisenberg-directed ‘The Debut’",
-          "link": "https://vancouver.citynews.ca/2026/10/02/viff-the-debut-jesse-eisenberg-julianne-moore/",
-          "pubDate": "2026-10-02T21:55:35Z",
-          "source": "CityNews Van"
-        },
-        {
-          "title": "Police seek help identifying possible witnesses in CRAB Park homicide",
-          "link": "https://vancouver.citynews.ca/2026/10/02/vpd-video-crab-park/",
-          "pubDate": "2026-10-02T21:25:09Z",
-          "source": "CityNews Van"
-        },
-        {
-          "title": "Michael J. Fox laments Canada-U.S. trade war, says people-to-people ties still strong",
-          "link": "https://vancouver.citynews.ca/2026/10/02/michael-j-fox-laments-canada-u-s-trade-war-says-people-to-people-ties-still-strong/",
-          "pubDate": "2026-10-02T21:03:20Z",
-          "source": "CityNews Van"
-        },
-        {
-          "title": "Truck splits in half, bursts into flames after hitting building in Vancouver",
-          "link": "https://vancouver.citynews.ca/2026/10/02/truck-crash-flames-vancouver/",
-          "pubDate": "2026-10-02T20:47:43Z",
-          "source": "CityNews Van"
-        }
-      ]
-    },
-    "https://dailyhive.com/feed/vancouver": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Brenda Locke's Surrey Connect platform outlines $1.5 billion in projects and property tax increases capped at inflation",
-          "link": "https://dailyhive.com/vancouver/brenda-locke-surrey-connect-election-platform-2026",
-          "pubDate": "2026-10-02T22:30:41Z",
-          "source": "Daily Hive"
-        },
-        {
-          "title": "City of Surrey denies removing election signs after Doug McCallum alleges favouritism",
-          "link": "https://dailyhive.com/vancouver/safe-surrey-coalition-doug-mccallum-political-party-signs",
-          "pubDate": "2026-10-02T21:48:11Z",
-          "source": "Daily Hive"
-        },
-        {
-          "title": "Our predictions for Vancouver's 2026 Michelin Guide ceremony",
-          "link": "https://dailyhive.com/vancouver/vancouver-michelin-guide-2026-predictions",
-          "pubDate": "2026-10-02T20:45:32Z",
-          "source": "Daily Hive"
-        },
-        {
-          "title": "Opinion: Vancouver cannot keep growing without investing in parks and recreation",
-          "link": "https://dailyhive.com/vancouver/vancouver-parks-recreation-aging-facilities-renewal-need-green",
-          "pubDate": "2026-10-02T20:29:12Z",
-          "source": "Daily Hive"
-        },
-        {
-          "title": "BC NDP's David Eby says he will not create a new annual TransLink levy of up to $150 on every vehicle in Metro Vancouver",
-          "link": "https://dailyhive.com/vancouver/bc-ndp-david-eby-translink-vehicle-levy",
-          "pubDate": "2026-10-02T20:04:00Z",
-          "source": "Daily Hive"
-        }
-      ]
-    },
-    "https://vancouversun.com/feed": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "David Eby pledges price cap on groceries in suite of affordability measures",
-          "link": "https://vancouversun.com/news/david-eby-pledges-price-cap-on-groceries-in-suite-of-affordability-measures",
-          "pubDate": "2026-10-02T23:12:37Z",
-          "source": "Vancouver Sun"
-        },
-        {
-          "title": "Opinion: Every political party must adopt these five wildfire platform commitments",
-          "link": "https://vancouversun.com/opinion/op-ed/opinion-every-political-party-must-adopt-these-five-wildfire-platform-commitments",
-          "pubDate": "2026-10-02T23:00:40Z",
-          "source": "Vancouver Sun"
-        },
-        {
-          "title": "Riding that e-scooter without a helmet or with a friend? Vancouver police are cracking down",
-          "link": "https://vancouversun.com/news/riding-e-scooter-vancouver-police-are-cracking-down",
-          "pubDate": "2026-10-02T22:40:32Z",
-          "source": "Vancouver Sun"
-        },
-        {
-          "title": "Five arrested after year-long probe into extortion at Langley car dealership",
-          "link": "https://vancouversun.com/news/five-arrested-extortion-langley-car-dealership-rcmp",
-          "pubDate": "2026-10-02T22:20:27Z",
-          "source": "Vancouver Sun"
-        },
-        {
-          "title": "How B.C. parties will tackle affordability, voters' top election issue",
-          "link": "https://vancouversun.com/news/politics/how-bc-parties-will-tackle-affordability-voters-top-election-issue",
-          "pubDate": "2026-10-02T19:00:22Z",
-          "source": "Vancouver Sun"
-        }
-      ]
-    },
-    "https://www.cbc.ca/cmlink/rss-topstories": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "'I am Jane Doe': Online rally to protect Cornell rape accuser's identity becomes a reckoning",
-          "link": "https://www.cbc.ca/news/world/jane-doe-cornell-rape-identity-9.7366668?cmp=rss",
-          "pubDate": "2026-10-02T09:53:21Z",
-          "source": "CBC News"
-        },
-        {
-          "title": "Stephen Harper warns Alberta separatism will bring 'no benefit'",
-          "link": "https://www.cbc.ca/news/canada/calgary/stephen-harper-alberta-separatism-9.7367419?cmp=rss",
-          "pubDate": "2026-10-02T15:18:43Z",
-          "source": "CBC News"
-        },
-        {
-          "title": "Hidden cameras show some stores unlocking speed limits on e-bikes, selling e-scooters that go up to 120 km/h",
-          "link": "https://www.cbc.ca/news/marketplace/e-bikes-e-scooters-9.7363992?cmp=rss",
-          "pubDate": "2026-10-02T08:02:29Z",
-          "source": "CBC News"
-        },
-        {
-          "title": "Hudson Williams wore this cardigan. Then the Indigenous designer's business went viral",
-          "link": "https://www.cbc.ca/news/entertainment/hudson-williams-sweater-by-canadian-indigenous-designer-9.7367645?cmp=rss",
-          "pubDate": "2026-10-02T23:14:49Z",
-          "source": "CBC News"
-        },
-        {
-          "title": "LNG Canada to use Chinese steel on $33B expansion project in Kitimat, B.C.",
-          "link": "https://www.cbc.ca/news/politics/lng-expansion-chinese-steel-9.7366745?cmp=rss",
-          "pubDate": "2026-10-02T14:51:57Z",
-          "source": "CBC News"
-        }
-      ]
-    },
-    "https://globalnews.ca/feed/": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Vancouver e-scooter riders overwhelmingly don’t wear helmets, police find",
-          "link": "https://globalnews.ca/news/12086152/vancouver-e-scooter-riders-helmets-police/",
-          "pubDate": "2026-10-02T23:31:46Z",
-          "source": "Global News"
-        },
-        {
-          "title": "BC NDP promises to cap grocery profits while Conservatives unveil wildfire plan",
-          "link": "https://globalnews.ca/news/12086006/bc-ndp-promises-grocery-cap-profits-bc-conservatives-wildfire-plan/",
-          "pubDate": "2026-10-02T21:59:18Z",
-          "source": "Global News"
-        },
-        {
-          "title": "Veteran linebacker Pickett shines again with Argos",
-          "link": "https://globalnews.ca/news/12086095/veteran-linebacker-pickett-shines-again-with-argos/",
-          "pubDate": "2026-10-02T21:48:51Z",
-          "source": "Global News"
-        },
-        {
-          "title": "Quebec Conservative Leader Éric Duhaime admits to using AI to write book",
-          "link": "https://globalnews.ca/news/12086081/quebec-conservative-eric-duhaime-ai/",
-          "pubDate": "2026-10-02T21:46:07Z",
-          "source": "Global News"
-        },
-        {
-          "title": "Toronto man guilty in rash of home invasions, vehicle thefts over 2 weeks in 2023",
-          "link": "https://globalnews.ca/news/12085457/toronto-man-guilty-2023-home-invasions/",
-          "pubDate": "2026-10-02T21:39:43Z",
-          "source": "Global News"
-        }
-      ]
-    },
-    "https://nationalpost.com/feed/": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Toronto soldiers arrested on kidnapping, weapons theft and organized crime charges",
-          "link": "https://nationalpost.com/news/canada/toronto-soldiers-arrested-on-kidnapping-weapons-theft-and-organized-crime-charges",
-          "pubDate": "2026-10-02T21:53:29Z",
-          "source": "National Post"
-        },
-        {
-          "title": "Afternoon front page: Stephen Harper speaks against Alberta separatism; State of the Nation poll finds 45% of Canadians feel worse off than a year ago; and more",
-          "link": "https://nationalpost.com/editors/afternoon-front-page-64",
-          "pubDate": "2026-10-02T21:25:09Z",
-          "source": "National Post"
-        },
-        {
-          "title": "‘He’s stabbing the pilot’: How terror unfolded on Flydubai Flight 1073",
-          "link": "https://nationalpost.com/news/how-flydubai-flight-1073-drama-unfolded",
-          "pubDate": "2026-10-02T20:47:35Z",
-          "source": "National Post"
-        },
-        {
-          "title": "12 Jewish teachers bring human rights claims against four Ontario school boards and two unions",
-          "link": "https://nationalpost.com/news/canada/12-jewish-teachers-bring-human-rights-claims-against-four-ontario-school-boards-and-two-unions",
-          "pubDate": "2026-10-02T20:36:53Z",
-          "source": "National Post"
-        },
-        {
-          "title": "Senators have doubled overseas trips with costs to taxpayers jumping 88%, according to CTF",
-          "link": "https://nationalpost.com/news/canada/canadian-taxpayers-federation-senator-spending",
-          "pubDate": "2026-10-02T19:21:18Z",
-          "source": "National Post"
-        }
-      ]
-    },
-    "https://financialpost.com/feed": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "ARCF IV Participates in US$5.7 million Registered Direct Offering",
-          "link": "https://financialpost.com/globe-newswire/arcf-iv-participates-in-us5-7-million-registered-direct-offering",
-          "pubDate": "2026-10-02T23:57:56Z",
-          "source": "Financial Post"
-        },
-        {
-          "title": "Plato Gold Corp. Closes Initial $55,000 Tranche of Critical-Mineral Flow-Through Private Placement",
-          "link": "https://financialpost.com/globe-newswire/plato-gold-corp-closes-initial-55000-tranche-of-critical-mineral-flow-through-private-placement",
-          "pubDate": "2026-10-02T23:37:34Z",
-          "source": "Financial Post"
-        },
-        {
-          "title": "Alpha Cognition Reports Inducement Grants Under Nasdaq Listing Rule 5635(c)(4)",
-          "link": "https://financialpost.com/pmn/business-wire-news-releases-pmn/alpha-cognition-reports-inducement-grants-under-nasdaq-listing-rule-5635c4-4",
-          "pubDate": "2026-10-02T23:08:57Z",
-          "source": "Financial Post"
-        },
-        {
-          "title": "McFarlane Files Updated Mineral Resource Estimate on Juby Gold Project",
-          "link": "https://financialpost.com/globe-newswire/mcfarlane-files-updated-mineral-resource-estimate-on-juby-gold-project",
-          "pubDate": "2026-10-02T22:41:35Z",
-          "source": "Financial Post"
-        },
-        {
-          "title": "Electra Reports Quarterly Update on Capital Markets Activity",
-          "link": "https://financialpost.com/globe-newswire/electra-reports-quarterly-update-on-capital-markets-activity",
-          "pubDate": "2026-10-02T22:03:17Z",
-          "source": "Financial Post"
-        }
-      ]
-    },
-    "https://www.cbc.ca/cmlink/rss-politics": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Stephen Harper warns Alberta separatism will bring 'no benefit'",
-          "link": "https://www.cbc.ca/news/canada/calgary/stephen-harper-alberta-separatism-9.7367419?cmp=rss",
-          "pubDate": "2026-10-02T22:05:51Z",
-          "source": "CBC Politics"
-        },
-        {
-          "title": "Carney, Smith say new West Coast pipeline could get oil companies building again",
-          "link": "https://www.cbc.ca/news/canada/edmonton/west-coast-pipeline-oil-boom-9.7367465?cmp=rss",
-          "pubDate": "2026-10-02T21:02:38Z",
-          "source": "CBC Politics"
-        },
-        {
-          "title": "LNG Canada to use Chinese steel on $33B expansion project in Kitimat, B.C.",
-          "link": "https://www.cbc.ca/news/politics/lng-expansion-chinese-steel-9.7366745?cmp=rss",
-          "pubDate": "2026-10-02T14:51:57Z",
-          "source": "CBC Politics"
-        },
-        {
-          "title": "Ottawa launches new national AI council to advise on safety, deployment",
-          "link": "https://www.cbc.ca/news/politics/carney-national-council-ai-9.7367475?cmp=rss",
-          "pubDate": "2026-10-02T20:58:51Z",
-          "source": "CBC Politics"
-        },
-        {
-          "title": "Trump's trade rep sounds pessimistic about deal with Canada, saying issues are 'quite difficult to resolve'",
-          "link": "https://www.cbc.ca/news/world/trump-trade-rep-pessimistic-about-canada-deal-9.7366028?cmp=rss",
-          "pubDate": "2026-10-01T23:01:45Z",
-          "source": "CBC Politics"
-        }
-      ]
-    },
-    "https://feeds.bbci.co.uk/news/world/rss.xml": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "G7 to release 100 million barrels of oil and diesel after Trump export ban threat",
-          "link": "https://www.bbc.co.uk/news/articles/ck87zg8jnwngo?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-10-02T20:25:19Z",
-          "source": "BBC World"
-        },
-        {
-          "title": "US murderer Christa Pike unconscious and on ventilator after failed execution, lawyers say",
-          "link": "https://www.bbc.co.uk/news/articles/c3kgqw7zvz47o?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-10-02T20:32:07Z",
-          "source": "BBC World"
-        },
-        {
-          "title": "Cornell frat house rape accuser 'under siege' online, says lawyer",
-          "link": "https://www.bbc.co.uk/news/articles/c6ly0ljypzrdo?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-10-02T23:53:35Z",
-          "source": "BBC World"
-        },
-        {
-          "title": "Riot police clash with students as education protests rage in France",
-          "link": "https://www.bbc.co.uk/news/articles/ck3r5dxxwqzpo?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-10-02T21:13:27Z",
-          "source": "BBC World"
-        },
-        {
-          "title": "Spanish PM Sánchez loses key housing crisis vote after eviction of woman, 87",
-          "link": "https://www.bbc.co.uk/news/articles/c623dlk4y75mo?at_medium=RSS&at_campaign=rss",
-          "pubDate": "2026-10-02T15:30:12Z",
-          "source": "BBC World"
-        }
-      ]
-    },
-    "https://www.aljazeera.com/xml/rss/all.xml": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Iran war live: Fighting intensifies in Yemen, hundreds killed or injured",
-          "link": "https://www.aljazeera.com/news/liveblog/2026/10/3/iran-war-live-fighting-intensifies-in-yemen-hundreds-killed-or-injured?traffic_source=rss",
-          "pubDate": "2026-10-03T00:00:00Z",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "North Korea fires ballistic missile towards the sea, South Korea says",
-          "link": "https://www.aljazeera.com/news/2026/10/2/north-korea-fires-ballistic-missile-towards-the-sea-south-korea-says?traffic_source=rss",
-          "pubDate": "2026-10-02T23:55:24Z",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "Dutch royal house helped slave trade to survive, study finds",
-          "link": "https://www.aljazeera.com/news/2026/10/2/dutch-royal-house-helped-slave-trade-to-survive-study-finds?traffic_source=rss",
-          "pubDate": "2026-10-02T23:43:50Z",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "Flydubai pilot recounts cockpit stabbing in call with Indian PM Modi",
-          "link": "https://www.aljazeera.com/news/2026/10/2/flydubai-pilot-recounts-cockpit-stabbing-in-call-with-indian-pm-modi?traffic_source=rss",
-          "pubDate": "2026-10-02T22:50:23Z",
-          "source": "Al Jazeera"
-        },
-        {
-          "title": "Why Carney’s economic overhaul is clashing with Canada’s unions",
-          "link": "https://www.aljazeera.com/economy/2026/10/2/why-carneys-economic-overhaul-is-clashing-with-canadas-unions?traffic_source=rss",
-          "pubDate": "2026-10-02T22:14:34Z",
-          "source": "Al Jazeera"
-        }
-      ]
-    },
-    "https://www.theguardian.com/international/rss": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "The US midterm races that will decide control of Congress – mapped",
-          "link": "https://www.theguardian.com/us-news/ng-interactive/2026/oct/02/midterm-races-control-congress-charts-visuals",
-          "pubDate": "2026-10-02T11:30:41Z",
-          "source": "Guardian"
-        },
-        {
-          "title": "‘The enemy is tearing our city apart’: terror in Kyiv as Russia ramps up attacks",
-          "link": "https://www.theguardian.com/world/2026/oct/02/terror-kyiv-russia-ramps-up-attacks-ukraine",
-          "pubDate": "2026-10-02T14:50:59Z",
-          "source": "Guardian"
-        },
-        {
-          "title": "Feeling wired? The truth about ‘nervous system resets’",
-          "link": "https://www.theguardian.com/lifeandstyle/ng-interactive/2026/oct/02/feeling-wired-the-truth-about-nervous-system-resets",
-          "pubDate": "2026-10-02T14:00:09Z",
-          "source": "Guardian"
-        },
-        {
-          "title": "The incredible science of memory manipulation",
-          "link": "https://www.theguardian.com/science/video/2026/oct/02/scientists-could-one-day-remove-your-bad-memories-heres-how",
-          "pubDate": "2026-10-02T10:55:50Z",
-          "source": "Guardian"
-        },
-        {
-          "title": "‘Starchitects go home’: what’s the truth behind Albania’s astonishing building boom?",
-          "link": "https://www.theguardian.com/artanddesign/2026/oct/02/starchitects-go-home-albania-building-boom-edi-rama",
-          "pubDate": "2026-10-02T10:15:08Z",
-          "source": "Guardian"
-        }
-      ]
-    },
-    "https://www.france24.com/en/rss": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "French media respond to M. Le Pen’s ‘Kevlar suit’ comments against investigative outlet",
-          "link": "https://www.france24.com/en/france/20261002-french-media-react-to-m-le-pen-s-kevlar-suit-comments-against-investigative-press-outlet",
-          "pubDate": "2026-10-02T21:37:11Z",
-          "source": "France24"
-        },
-        {
-          "title": "Ethiopian army pushes back Tigrayan rebels",
-          "link": "https://www.france24.com/en/tv-shows/eye-on-africa/20261002-ethiopian-army-pushes-back-tigrayan-rebels",
-          "pubDate": "2026-10-02T20:46:00Z",
-          "source": "France24"
-        },
-        {
-          "title": "On the run for 20 years, Ugandan warlord Kony still 'active' within the Lord's Resistance Army",
-          "link": "https://www.france24.com/en/africa/20261002-on-the-run-for-20-years-ugandan-warlord-kony-still-active-within-the-lord-s-resistance-army",
-          "pubDate": "2026-10-02T19:31:27Z",
-          "source": "France24"
-        },
-        {
-          "title": "French Unrest: Are we witnessing a new 'Yellow Vests' movement?",
-          "link": "https://www.france24.com/en/tv-shows/spotlight/20261002-french-unrest-are-we-witnessing-a-new-yellow-vests-movement",
-          "pubDate": "2026-10-02T18:54:00Z",
-          "source": "France24"
-        },
-        {
-          "title": "Brazil’s Lula gears up for ‘last dance’ with run for fourth presidential term",
-          "link": "https://www.france24.com/en/americas/20261002-brazil-s-lula-gears-up-for-last-dance-with-run-for-fourth-presidential-term",
-          "pubDate": "2026-10-02T16:20:06Z",
-          "source": "France24"
-        }
-      ]
-    },
-    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "How FlyDubai Passengers and Crew Averted Disaster After Pilot Was Stabbed During Flight",
-          "link": "https://www.nytimes.com/2026/10/02/world/middleeast/flydubai-attack-timeline.html",
-          "pubDate": "2026-10-02T15:43:17Z",
-          "source": "NYT World"
-        },
-        {
-          "title": "Argentina’s ‘Golden Passport’ Program Offers Citizenship in Exchange for Foreign Cash",
-          "link": "https://www.nytimes.com/2026/10/02/world/americas/argentina-citizenship-golden-passport-money.html",
-          "pubDate": "2026-10-02T20:17:55Z",
-          "source": "NYT World"
-        },
-        {
-          "title": "Mass Shootings Surge in South Africa as Illegal Guns Flood Streets",
-          "link": "https://www.nytimes.com/2026/10/02/world/africa/south-africa-mass-shootings-guns.html",
-          "pubDate": "2026-10-02T18:52:40Z",
-          "source": "NYT World"
-        },
-        {
-          "title": "Fighting Intensifies in Yemen, Raising Fresh Fears of All-Out War",
-          "link": "https://www.nytimes.com/2026/10/02/world/middleeast/yemen-houthis-saudi-arabia-sanaa-taiz.html",
-          "pubDate": "2026-10-02T18:06:53Z",
-          "source": "NYT World"
-        },
-        {
-          "title": "Widdecombe Murder Suspect Charged With Preparing Acts of Terrorism, Including Against Farage",
-          "link": "https://www.nytimes.com/2026/10/02/world/europe/uk-terrorism-nigel-farage.html",
-          "pubDate": "2026-10-02T21:15:50Z",
-          "source": "NYT World"
-        }
-      ]
-    },
-    "https://feeds.skynews.com/feeds/rss/world.xml": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Hero captain describes fight to open cockpit door while being attacked by co-pilot",
-          "link": "https://news.sky.com/story/flydubai-captain-says-he-fought-to-open-cockpit-door-while-still-being-attacked-13594247",
-          "pubDate": "2026-10-02T07:14:00Z",
-          "source": "Sky News"
-        },
-        {
-          "title": "Nepal plans to drain four dangerous glacial lakes after deadly flood",
-          "link": "https://news.sky.com/story/nepal-plans-to-drain-four-dangerous-glacial-lakes-after-deadly-flash-flood-13594475",
-          "pubDate": "2026-10-02T16:34:00Z",
-          "source": "Sky News"
-        },
-        {
-          "title": "Tear gas and fires on French streets as student protests turn violent",
-          "link": "https://news.sky.com/story/tear-gas-and-fires-on-french-streets-as-student-protests-turn-violent-13594370",
-          "pubDate": "2026-10-02T11:40:00Z",
-          "source": "Sky News"
-        },
-        {
-          "title": "Remains of 10 infants discovered at former mother and baby home in Ireland",
-          "link": "https://news.sky.com/story/remains-of-10-infants-discovered-at-former-mother-and-baby-home-in-ireland-13594416",
-          "pubDate": "2026-10-02T13:38:00Z",
-          "source": "Sky News"
-        },
-        {
-          "title": "Seized shipping containers used as barricades ahead of Imran Khan protest march",
-          "link": "https://news.sky.com/story/imran-khan-supporters-to-be-kept-out-of-pakistans-capital-by-shipping-containers-seized-from-distressed-lorry-drivers-13594249",
-          "pubDate": "2026-10-02T07:31:00Z",
-          "source": "Sky News"
-        }
-      ]
-    },
-    "https://www.cbc.ca/cmlink/rss-world": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "G7 nations agree to release 100 million barrels of oil, including diesel, amid energy crunch",
-          "link": "https://www.cbc.ca/news/business/g7-trump-diesel-reserve-release-9.7366871?cmp=rss",
-          "pubDate": "2026-10-02T15:21:30Z",
-          "source": "CBC World"
-        },
-        {
-          "title": "CBS Sports describes Tony Romo's permanent exit as mutual parting",
-          "link": "https://www.cbc.ca/sports/football/nfl/tony-romo-cbs-sports-mutual-parting-arrest-dwi-9.7367127?cmp=rss",
-          "pubDate": "2026-10-02T17:08:07Z",
-          "source": "CBC World"
-        },
-        {
-          "title": "'I was fighting for my life': Indian pilot hailed as hero recalls FlyDubai cockpit attack",
-          "link": "https://www.cbc.ca/news/world/flydubai-pilot-interview-hospital-9.7366522?cmp=rss",
-          "pubDate": "2026-10-02T09:36:47Z",
-          "source": "CBC World"
-        },
-        {
-          "title": "Christa Pike on ventilator after surviving Tennessee execution attempt, lawyer says",
-          "link": "https://www.cbc.ca/news/world/christa-pike-ventilator-tennessee-execution-9.7367500?cmp=rss",
-          "pubDate": "2026-10-02T20:49:23Z",
-          "source": "CBC World"
+          "title": "Belgian test finds Tesla FSD sped through 20 mph zones, tried illegal cyclist passes",
+          "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNTVZBYlQtek9jRlQ2c2ROU1JHdlZMTlgxSmZVbVl0a0wyY0s0c1FCcUxEYm5WeE5JeDBfMlRNVDAwQ3Y5U3hUUUhEYUZiSGtVUDNieDB1ZXVCZ0JvVWZWWndtdTVZdG5kS0k2UVh4SC1SbmxuZ1VJbFBzaGlzTVJuaXdtUXZmRWJuTzVPbTdhTzB4SFgxLTNiSWx5YjdlZ2Vt?oc=5",
+          "pubDate": "2026-10-02T02:23:00+00:00",
+          "source": "Yahoo Autos"
         },
         {
           "title": "Congo's Ebola outbreak surpasses 4,000 deaths amid violence and mistrust",
           "link": "https://www.cbc.ca/news/world/congo-outbreak-death-toll-treatment-centre-beating-9.7366690?cmp=rss",
-          "pubDate": "2026-10-02T14:15:35Z",
+          "pubDate": "2026-10-02T14:15:35+00:00",
           "source": "CBC World"
+        },
+        {
+          "title": "North American Agriculture Leaders Back CUSMA and Long-Term Trade Stability",
+          "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxQdXZvaVp4b0NqVDdDNnpwLXlXQzhIMDJzbk5NaWxWV1ZZN3NTVzdjRDVfMnRSaURRNXJUZW1BNEFRRnhmaDV4cFJaMHpGN21tRHBZclJmMmkwR3JHMVpvNjlxMjZNLXRFSXJnN0VWNThiZ0lZNHZ6VGtlak15cnJjR3ZVbmg0b25lWkRWSWlWcjQ5U2c1bnI2dWdfSEtMd0dkYlE4cUtTdm00ckRtbmZMeTNjV2E5YXlVZ3BtcWlubUI?oc=5",
+          "pubDate": "2026-10-02T22:19:08+00:00",
+          "source": "Farms.com"
+        },
+        {
+          "title": "The cautionary case for investing in OpenAI and Anthropic",
+          "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNMms3aFZ3T1Z0T0VsbEltWS1UTGFFb2gwNlJuSnJ2eXpHLWRScjRwYkd2UTNnRmtSZUJHdk5UREhmMWRpa3YzOF9sRUtZMXRDVEE2THkxUThaT2VRYVZyS3FPZ1FYQTN6a2NneFlxM1FVdGpVWmkyNXVNUFk0MTlEcDNRMWhheF9tVi1SXzJsOXJYN3c?oc=5",
+          "pubDate": "2026-10-02T20:37:00+00:00",
+          "source": "Yahoo Finance"
         }
       ]
     }
   },
   "sports": {
-    "https://www.sportsnet.ca/feed/": {
+    "https://wghtkbpxwx-a11y.github.io/news-widget-feed/feed.json#sports": {
       "status": "ok",
       "items": [
         {
-          "title": "Home Page Featured",
-          "link": "https://www.sportsnet.ca/?sn-collection=6691484",
-          "pubDate": "2026-08-28T04:37:42Z",
-          "source": "Sportsnet"
-        },
-        {
-          "title": "NHL on Sportsnet: Capitals vs. Hurricanes",
-          "link": "https://www.sportsnet.ca/hockey/nhl/games/5249386a-8fa7-4f52-a591-cd422a88b7b3",
-          "pubDate": "2026-10-02T22:57:13Z",
-          "source": "Sportsnet"
-        },
-        {
-          "title": "Things we (think we) know: Oilers goaltending raises alarm bells",
-          "link": "https://www.sportsnet.ca/nhl/article/things-we-think-we-know-oilers-goaltending-raises-alarm-bells/",
-          "pubDate": "2026-10-02T21:50:23Z",
-          "source": "Sportsnet"
-        },
-        {
-          "title": "Why left-wing assignment is welcome return for Maple Leafs’ Marchenko",
-          "link": "https://www.sportsnet.ca/nhl/article/why-left-wing-assignment-is-welcome-return-for-maple-leafs-marchenko/",
-          "pubDate": "2026-10-02T20:15:20Z",
-          "source": "Sportsnet"
-        },
-        {
-          "title": "Maple Leafs GM John Chayka talks data, goaltending, McKenna",
-          "link": "https://www.sportsnet.ca/nhl/article/maple-leafs-gm-john-chayka-talks-data-goaltending-mckenna/",
-          "pubDate": "2026-10-02T21:47:04Z",
-          "source": "Sportsnet"
-        }
-      ]
-    },
-    "https://www.mlb.com/feeds/news/rss.xml": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Which lineups are built to better handle postseason pitching?",
-          "link": "https://www.mlb.com/news/which-lineups-are-built-to-handle-postseason-pitching",
-          "pubDate": "2026-10-02T04:04:28Z",
-          "source": "MLB.com"
-        },
-        {
-          "title": "Skubal gets the nod over Yamamoto for LA in NLDS Game 1",
-          "link": "https://www.mlb.com/news/tarik-skubal-to-start-game-1-of-2026-nlds",
-          "pubDate": "2026-10-02T22:03:00Z",
-          "source": "MLB.com"
-        },
-        {
-          "title": "Breaking down each of the 4 Division Series",
-          "link": "https://www.mlb.com/news/mlb-2026-division-series-matchups",
-          "pubDate": "2026-10-02T14:05:00Z",
-          "source": "MLB.com"
-        },
-        {
-          "title": "Will Aaron Judge be on the Yankees' ALDS roster? Here's the latest",
-          "link": "https://www.mlb.com/news/yankees-aaron-judge-injury-update-ahead-of-alds",
-          "pubDate": "2026-10-02T20:57:00Z",
-          "source": "MLB.com"
-        },
-        {
-          "title": "How has having a bye affected teams in the DS?",
-          "link": "https://www.mlb.com/news/how-first-round-bye-affects-mlb-playoff-teams",
-          "pubDate": "2026-10-02T16:31:00Z",
-          "source": "MLB.com"
-        }
-      ]
-    },
-    "https://www.cbc.ca/cmlink/rss-sports": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Canada Super 60 Cricket League: Vancouver Anchors vs Toronto Sixers",
-          "link": "https://www.cbc.ca/player/play/9.7345020?cmp=rss",
-          "pubDate": "2026-10-02T22:55:00Z",
-          "source": "CBC Sports"
-        },
-        {
-          "title": "CBC's new Saturday night sports show is ready for launch",
-          "link": "https://www.cbc.ca/sports/the-buzzer-newsletter-cbc-saturday-night-sports-show-9.7367692?cmp=rss",
-          "pubDate": "2026-10-02T21:43:04Z",
-          "source": "CBC Sports"
-        },
-        {
-          "title": "CBC/Radio-Canada reveals PWHL broadcast schedule, league announces playoff expansion",
-          "link": "https://www.cbc.ca/sports/hockey/pwhl/cbc-hockey-night-in-canada-pwhl-schedule-revealed-october-2-9.7366402?cmp=rss",
-          "pubDate": "2026-10-02T13:00:55Z",
-          "source": "CBC Sports"
-        },
-        {
-          "title": "Ruck, Knox add to Canada's medal haul at Swimming World Cup",
-          "link": "https://www.cbc.ca/sports/olympics/summer/aquatics/swimming/ruck-knox-swimming-world-cup-recap-oct2-baku-9.7367628?cmp=rss",
-          "pubDate": "2026-10-02T21:00:45Z",
-          "source": "CBC Sports"
-        },
-        {
-          "title": "No Canadians elected to world hockey governing body; Turkey, New Zealand represented",
-          "link": "https://www.cbc.ca/sports/hockey/katherine-henderson-iihf-council-election-hockey-canada-9.7367183?cmp=rss",
-          "pubDate": "2026-10-02T17:41:54Z",
-          "source": "CBC Sports"
-        }
-      ]
-    },
-    "https://sports.yahoo.com/rss/": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Texas vs Mississippi State volleyball: Live updates as Longhorns continue SEC play",
-          "link": "https://sports.yahoo.com/articles/texas-vs-mississippi-state-volleyball-000726676.html",
-          "pubDate": "2026-10-03T00:07:26Z",
-          "source": "Yahoo Sports"
-        },
-        {
-          "title": "How Draymond Green has become Yaxel Lendeborg&#39;s ‘vet,&#39; helping Warriors rookie achieve hoop dreams",
-          "link": "https://sports.yahoo.com/articles/draymond-green-become-yaxel-lendeborgs-000530725.html",
-          "pubDate": "2026-10-03T00:05:30Z",
-          "source": "Yahoo Sports"
-        },
-        {
-          "title": "After sharing flight to Utah, Austin Smotherman and Kevin Roy will tee off as final pairing Saturday",
-          "link": "https://sports.yahoo.com/articles/sharing-flight-utah-austin-smotherman-000500558.html",
-          "pubDate": "2026-10-03T00:05:00Z",
-          "source": "Yahoo Sports"
-        },
-        {
-          "title": "Illinois high school football scores: Week 7 in the Peoria area",
-          "link": "https://sports.yahoo.com/articles/illinois-high-school-football-scores-000330644.html",
-          "pubDate": "2026-10-03T00:03:30Z",
-          "source": "Yahoo Sports"
-        },
-        {
-          "title": "HIGH SCHOOL FOOTBALL SCOREBOARD: Week 6",
-          "link": "https://sports.yahoo.com/articles/high-school-football-scoreboard-week-000200143.html",
-          "pubDate": "2026-10-03T00:02:00Z",
-          "source": "Yahoo Sports"
-        }
-      ]
-    },
-    "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/sports/": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Babcock takes blame as Oilers struggle defensively",
-          "link": "https://www.theglobeandmail.com/sports/hockey/article-babcock-takes-blame-as-oilers-struggle-defensively/",
-          "pubDate": "2026-10-02T21:28:35Z",
-          "source": "Globe Sports"
-        },
-        {
-          "title": "Niagara Region thanks Buffalo in open letter",
-          "link": "https://www.theglobeandmail.com/canada/toronto/article-niagara-region-thanks-buffalo-in-open-letter/",
-          "pubDate": "2026-10-02T21:23:17Z",
-          "source": "Globe Sports"
-        },
-        {
-          "title": "Kelly out, Arbuckle to start for Argos vs. Lions",
-          "link": "https://www.theglobeandmail.com/sports/article-kelly-out-arbuckle-to-start-for-argos-vs-lions/",
-          "pubDate": "2026-10-02T21:19:52Z",
-          "source": "Globe Sports"
-        },
-        {
-          "title": "Alouettes’ Philpot closes in on Canadian record",
-          "link": "https://www.theglobeandmail.com/sports/article-alouettes-philpot-closes-in-on-canadian-record/",
-          "pubDate": "2026-10-02T21:17:17Z",
-          "source": "Globe Sports"
-        },
-        {
-          "title": "Raptors coach undecided on Leonard’s availability for Quebec City game",
-          "link": "https://www.theglobeandmail.com/sports/basketball/article-raptors-coach-undecided-on-leonards-availability-for-quebec-city-game/",
-          "pubDate": "2026-10-02T21:07:58Z",
-          "source": "Globe Sports"
-        }
-      ]
-    },
-    "https://www.espn.com/espn/rss/news": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Messi, Argentina stun England late to reach final",
-          "link": "https://www.espn.com/soccer/story/_/id/49369105/england-argentina-2026-fifa-world-cup-semifinal-final",
-          "pubDate": "2026-07-15T22:26:20Z",
+          "title": "Rookie RB Price ruled out by Seahawks for Week 4 with chest injury",
+          "link": "https://www.espn.com/nhl/story/_/id/50086884/rb-jadarian-price-ruled-seattle-seahawks-week-4",
+          "pubDate": "2026-10-02T23:20:34+00:00",
           "source": "ESPN"
         },
         {
-          "title": "World Cup Daily: Martínez with winner vs. England ...",
-          "link": "https://www.espn.com/soccer/story/_/id/49363385/world-cup-daily-live-argentina-fans-take-atlanta-england-game-spain-celebrates-reaching-final",
-          "pubDate": "2026-07-15T22:26:20Z",
-          "source": "ESPN"
+          "title": "Edmonton Oilers, Vancouver Canucks take lessons from high-scoring games",
+          "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPcV95OFgyS2dwYnBudVV3TlRKT242ZE9UUHZJemtOS1hfNlkzU3AwLV9VLU1uUFZrVHdhNmprOG9mWm9JbER6MXhuSU5GNURYNDNNcllNanF3UjlGZWxHZFo1LVV1MTBxLWd2UkdQUVlNMS11amdTeGZreWVDekstYkZZYi15TDJqaEd6UlMwcWNJbHhMR05DeHU2dTc5T1lmWUVrUlBULWVBcnlPUThuN2J2bzU?oc=5",
+          "pubDate": "2026-10-02T13:36:12+00:00",
+          "source": "CTV News"
         },
         {
-          "title": "Sources: Kamara reworks deal to stay with Saints",
-          "link": "https://www.espn.com/nfl/story/_/id/49369711/alvin-kamara-agrees-reworked-deal-stay-saints",
-          "pubDate": "2026-07-15T22:23:36Z",
-          "source": "ESPN"
+          "title": "Injury Report, Week 4 at Eagles: Puka Nacua and Kamren Kinchens good to go; Colby Parkinson questionable; Terrance Ferguson, Jaylen Watson and Aaron Donald ruled out",
+          "link": "https://news.google.com/rss/articles/CBMiiwJBVV95cUxNQkx4MEhZS0ZVeG5TM0FiYk9GSk9ySDlCZURpYzNnb2ZHNFdPVE4ySnhqOUQ0VE15SUp4YkNuNDNTREZQMFdxc21XQlZubUR0bkQteUZPbnBXQ1ZNWEJ5OFdqU0tVbEJnZXZvaVo3VGJQN2xHTm9VMWg5bWVlSUkybWhHQjJ4cFo1cldPTnhMQzM2OWFJQ1VUZ3RtdjI4VDJPS1JMVTg0aE5YcTZjRmNQbzV2Vi12d2FkZV9sejhsc1o3c3JHa2xCVVV2WERwSGRWMFRRNUhrVUpOYlprVkdCc05LZkFISGlrMHNkTVlrczJSb3E1WE9Vd1cxeE41YW4tQXJ0dm90ZW9XMWc?oc=5",
+          "pubDate": "2026-10-02T21:28:07+00:00",
+          "source": "Rams"
         },
         {
-          "title": "Pickens to play on $27.3M tag as deadline passes",
-          "link": "https://www.espn.com/nfl/story/_/id/49367546/cowboys-george-pickens-play-273m-tag-deadline-passes",
-          "pubDate": "2026-07-15T22:23:36Z",
-          "source": "ESPN"
+          "title": "Blue Jays notebook: Dylan Cease plans ashram visit amid shoulder work",
+          "link": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxNSXU3eWk2Q0dVU0IxaDZuQk5OREl4TjVLWmFOdTZTdl9NUmlyYi1tSGN3X05qcmllenZYWmduNWo3Q095ejAwVkMzNnY5bXg5WFNWNzlqSHVkMl8wbU96djh6dDVzX3RmcEpMTVdPWjdpNEp5LUdKRURWTzFiejBFa2RQQVNYemhlTTl1c1d5aVV3ekpibjI4NmZvdlJPZWN2cGpoeHBQTy1TZw?oc=5",
+          "pubDate": "2026-10-02T20:48:00+00:00",
+          "source": "Sportsnet.ca"
         },
         {
-          "title": "Reports: Brewers finalizing trade for McCullers",
-          "link": "https://www.espn.com/mlb/story/_/id/49367420/reports-astros-finalizing-trade-lance-mccullers-brewers",
-          "pubDate": "2026-07-15T22:23:36Z",
-          "source": "ESPN"
-        }
-      ]
-    },
-    "https://www.cfl.ca/rss/": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "3 stats that defined BC’s Week 13 win over Ottawa",
-          "link": "https://www.cfl.ca/2026/08/30/3-stats-that-defined-bcs-week-13-win-over-ottawa/",
-          "pubDate": "2026-08-31T08:19:08Z",
-          "source": "CFL.ca"
+          "title": "EVERYONE WINS! Jamal Shead's extension is a home run for the player, the Toronto Raptors & the fans",
+          "link": "https://news.google.com/rss/articles/CBMiqgJBVV95cUxPallBbVl2VEUyS2pJbXhTejA0bTBFSTRSUW5Mdk9Sb1l6cm0zOXgydF9aNmRkaHdlREtCY0tlRjFOaUZEajAtcE5PdEJ5RVNjQURiLWFNMzFBRTM1MGN3a1lQY1J5U1BrT3VQWFZJcXNWN09lZnRtQU9IWmJibFkwdFdmRm5zeUg1QmEwQ1ZpakdEa004LVltUWtUS1c3cXpDTmJzbWI4cndUb3pVTkpvRTd1ekxZNEJxNGYwOGc2YzZjVkd0MWUteUxOd19RM3ZYcjI2b1VwYWZGTS1aOEJWNjNuR2NhZktWUDJuQjRablRfMlNqR2J2aFJoTVIzeGR4aWxtM293SXFRbHJzV3ZSOHNwbW1rOERldGFFQzVpbFc3NHcwaVQ1QzBn?oc=5",
+          "pubDate": "2026-10-02T17:06:00+00:00",
+          "source": "KGW"
         },
         {
-          "title": "Horvath leads Lions past REDBLACKS for fifth straight win",
-          "link": "https://www.cfl.ca/2026/08/30/horvath-leads-lions-past-redblacks-for-fifth-straight-win/",
-          "pubDate": "2026-08-31T08:19:08Z",
-          "source": "CFL.ca"
+          "title": "Week 18: BC Lions at Toronto Argonauts",
+          "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE8zaGhtUU11LU9mU1RCRGU4c2NxUW9qOWRJMlh3LTVKRWxJdV9KWGRnd2ZDVzVBUHBnQi0wc1ZHeWlyT3VvLXAtdnhubVkyc3JvWVFhenJtRE52UGhnZ1RtNjFJSjdfX2lTLUtXcg?oc=5",
+          "pubDate": "2026-10-01T22:05:34+00:00",
+          "source": "CFL"
         },
         {
-          "title": "3 stats that defined Saskatchewan’s Week 13 win over Toronto",
-          "link": "https://www.cfl.ca/2026/08/29/3-stats-that-defined-saskatchewans-week-13-win-over-toronto/",
-          "pubDate": "2026-08-31T08:19:08Z",
-          "source": "CFL.ca"
+          "title": "Seahawks Injury Report: Jadarian Price Officially Ruled Out",
+          "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNOTFLT1Z2cE5BMGtkT3ZiNHdIVXNsc09jWWRDTVphTk9MUVZqSjhIRzFmTGVmUWgzbE5mTERsOXN3dHpidm1wXzdJcmtVVUQyWXN5SGpzV1lOa1UxOTJqS2hMa3ZzNEpzVFI5dUFkdFFKR3ZiSjFpX2d1Zk9meU9HYTRWMDRmeTVLV1RDa29RMXA1X3VYX0ZVdU5vNA?oc=5",
+          "pubDate": "2026-10-02T21:09:51+00:00",
+          "source": "Sports Illustrated"
         },
         {
-          "title": "Roughriders complete comeback to defeat Argonauts",
-          "link": "https://www.cfl.ca/2026/08/29/roughriders-complete-comeback-to-edge-argonauts/",
-          "pubDate": "2026-08-31T08:19:08Z",
-          "source": "CFL.ca"
-        },
-        {
-          "title": "3 stats that defined Calgary’s Week 13 win over Hamilton",
-          "link": "https://www.cfl.ca/2026/08/29/3-stats-that-defined-calgarys-week-13-win-over-hamilton/",
-          "pubDate": "2026-08-31T08:19:08Z",
-          "source": "CFL.ca"
-        }
-      ]
-    },
-    "https://www.espn.com/espn/rss/nhl/news": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Live NHL free agency tracker: Contract details for...",
-          "link": "https://www.espn.com/nhl/story/_/id/49235590/nhl-free-agency-tracker-2026-contracts-teams-analysis-updates",
-          "pubDate": "2026-07-15T15:41:27Z",
-          "source": "ESPN NHL"
-        },
-        {
-          "title": "NHL free agency 2026: Grades, fits for Andersen, C...",
-          "link": "https://www.espn.com/nhl/story/_/id/49236055/nhl-free-agency-2026-grades-fits-all-big-signings",
-          "pubDate": "2026-07-15T15:41:27Z",
-          "source": "ESPN NHL"
-        },
-        {
-          "title": "Yzerman abruptly steps down as Red Wings GM",
-          "link": "https://www.espn.com/nhl/story/_/id/49366494/steve-yzerman-abruptly-steps-red-wings-gm",
-          "pubDate": "2026-07-15T21:51:21Z",
-          "source": "ESPN NHL"
-        },
-        {
-          "title": "Source: Jets, Perfetti agree to 5-year, $30M deal",
-          "link": "https://www.espn.com/nhl/story/_/id/49369676/source-jets-perfetti-avoid-arbitration-agree-5-year-deal",
-          "pubDate": "2026-07-15T21:51:21Z",
-          "source": "ESPN NHL"
-        },
-        {
-          "title": "Canes to raise Cup banner Sept. 29 vs. Panthers",
-          "link": "https://www.espn.com/nhl/story/_/id/49367105/champion-hurricanes-open-nhl-season-panthers",
-          "pubDate": "2026-07-15T21:51:21Z",
-          "source": "ESPN NHL"
-        }
-      ]
-    },
-    "https://www.espn.com/espn/rss/mlb/news": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Updated top 10 prospect rankings for all 30 MLB te...",
-          "link": "https://www.espn.com/mlb/story/_/id/47684227/2026-top-10-prospect-rankings-all-30-mlb-teams-kiley-mcdaniel",
-          "pubDate": "2026-07-15T20:10:41Z",
-          "source": "ESPN MLB"
-        },
-        {
-          "title": "2026 MLB draft recap for all 30 teams: Best picks,...",
-          "link": "https://www.espn.com/mlb/story/_/id/49350376/mlb-draft-2026-recap-kiley-mcdaniel-analysis-all-30-teams",
-          "pubDate": "2026-07-15T20:10:41Z",
-          "source": "ESPN MLB"
-        },
-        {
-          "title": "Reports: Brewers finalizing trade for McCullers",
-          "link": "https://www.espn.com/mlb/story/_/id/49367420/reports-astros-finalizing-trade-lance-mccullers-brewers",
-          "pubDate": "2026-07-15T22:23:36Z",
-          "source": "ESPN MLB"
-        },
-        {
-          "title": "Cease, 10 AL relievers silence NL in 15-K shutout",
-          "link": "https://www.espn.com/mlb/story/_/id/49364253/cease-bullpen-silence-nl-15-k-shutout-al-wins-all-star-game",
-          "pubDate": "2026-07-15T20:10:56Z",
-          "source": "ESPN MLB"
-        },
-        {
-          "title": "AL 3B Caminero hit by pitch, exits in 3rd inning",
-          "link": "https://www.espn.com/mlb/story/_/id/49363719/al-3b-junior-caminero-hit-pitch-exits-third-inning",
-          "pubDate": "2026-07-15T20:10:56Z",
-          "source": "ESPN MLB"
+          "title": "Vancouver Canucks Straight Up: Trying to piece together what happened in 9-7 loss to the Oilers",
+          "link": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPQlhyOHFxTFZ5WlFISl9BdmlZcHBIWEhlLVI5bFB3TVZ3TW5fdGJVaUZ1MlB0TVBBamZ5dEMwZWNyRmxHSk4zb05XUmRlTmplNUJFQzJ1RWgwUWdwNTQ2MVJrQUw3TVUwM1ozZzZqTEtnY2JUX09JWHVsWWNfYThtWDliSjlTd3RTemxIRUtVWXNBMW9KZENxa0kwWnA0aUtvMXphWk04RVdYdV9VeTJGTG1zN0hfY3pQMW45WFB3?oc=5",
+          "pubDate": "2026-10-02T07:30:29+00:00",
+          "source": "The Georgia Straight"
         }
       ]
     }
   },
   "pharmacy": {
-    "https://www.nejm.org/action/showFeed?jc=nejm&type=etoc&feed=rss": {
+    "https://wghtkbpxwx-a11y.github.io/news-widget-feed/feed.json#health": {
       "status": "ok",
       "items": [
         {
-          "title": "Giredestrant plus Everolimus in Advanced Breast Cancer",
-          "link": "https://www.nejm.org/doi/full/10.1056/NEJMoa2602457?af=R&rss=currentIssue",
-          "pubDate": "2026-09-30T09:00:09Z",
-          "source": "NEJM"
-        },
-        {
-          "title": "Obexelimab for the Treatment of IgG4-Related Disease",
-          "link": "https://www.nejm.org/doi/full/10.1056/NEJMoa2601337?af=R&rss=currentIssue",
-          "pubDate": "2026-06-02T11:01:46Z",
-          "source": "NEJM"
-        },
-        {
-          "title": "Atorvastatin, Cardiovascular Events, and Disability-free Survival in Older Adults",
-          "link": "https://www.nejm.org/doi/full/10.1056/NEJMoa2607314?af=R&rss=currentIssue",
-          "pubDate": "2026-08-29T06:15:12Z",
-          "source": "NEJM"
-        },
-        {
-          "title": "Phase 3 Trial of Weekly Oral Islatravir–Lenacapavir for HIV-1 Treatment",
-          "link": "https://www.nejm.org/doi/full/10.1056/NEJMoa2607973?af=R&rss=currentIssue",
-          "pubDate": "2026-07-29T06:35:02Z",
-          "source": "NEJM"
-        },
-        {
-          "title": "Andes Virus — A Clinical Review",
-          "link": "https://www.nejm.org/doi/full/10.1056/NEJMra2606651?af=R&rss=currentIssue",
-          "pubDate": "2026-07-15T09:00:00Z",
-          "source": "NEJM"
-        }
-      ]
-    },
-    "https://www.thelancet.com/rssfeed/lancet_current.xml": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "[Editorial] Peripheral arterial disease: counting what matters",
-          "link": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(26)01985-9/fulltext?rss=yes",
-          "pubDate": "2026-10-03T00:00:00Z",
-          "source": "The Lancet"
-        },
-        {
-          "title": "[Comment] Combining immunotherapy with stereotactic body radiation therapy in localised non-small-cell lung cancer",
-          "link": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(26)01816-7/fulltext?rss=yes",
-          "pubDate": "2026-10-03T00:00:00Z",
-          "source": "The Lancet"
-        },
-        {
-          "title": "[Comment] Can physiotherapist-led care relieve the emergency physician bottleneck?",
-          "link": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(26)01552-7/fulltext?rss=yes",
-          "pubDate": "2026-08-27T22:30:01Z",
-          "source": "The Lancet"
-        },
-        {
-          "title": "[Comment] The US experiments with international reference pricing for prescription drugs",
-          "link": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(26)01854-4/fulltext?rss=yes",
-          "pubDate": "2026-09-13T22:30:02Z",
-          "source": "The Lancet"
-        },
-        {
-          "title": "[Comment] Can wealth redistribution offset the collapse of aid?",
-          "link": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(26)01814-3/fulltext?rss=yes",
-          "pubDate": "2026-09-07T22:30:01Z",
-          "source": "The Lancet"
-        }
-      ]
-    },
-    "https://jamanetwork.com/rss/site_3/67.xml": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Audio Highlights August 28, 2026",
-          "link": "https://jamanetwork.com/journals/jama/fullarticle/2853633",
-          "pubDate": "2026-09-22T00:00:00Z",
-          "source": "JAMA"
-        },
-        {
-          "title": "Measles in the Americas 3 Times Higher Than in All of 2025, PAHO Warns",
-          "link": "https://jamanetwork.com/journals/jama/fullarticle/2853632",
-          "pubDate": "2026-09-22T00:00:00Z",
-          "source": "JAMA"
-        },
-        {
-          "title": "ICE Activity Tied to Disruptions in Pediatric Care",
-          "link": "https://jamanetwork.com/journals/jama/fullarticle/2853631",
-          "pubDate": "2026-09-22T00:00:00Z",
-          "source": "JAMA"
-        },
-        {
-          "title": "Physical Fitness Assessments Could Help Guide Older Adult Care",
-          "link": "https://jamanetwork.com/journals/jama/fullarticle/2853630",
-          "pubDate": "2026-09-22T00:00:00Z",
-          "source": "JAMA"
-        },
-        {
-          "title": "Hypertension Widely Undertreated, New Study Suggests",
-          "link": "https://jamanetwork.com/journals/jama/fullarticle/2853629",
-          "pubDate": "2026-09-22T00:00:00Z",
-          "source": "JAMA"
-        }
-      ]
-    },
-    "https://www.cbc.ca/webfeed/rss/rss-health": {
-      "status": "ok",
-      "items": [
-        {
-          "title": "Woman in fake nurse case narrowly escapes arrest warrant after 6th postponement",
-          "link": "https://www.cbc.ca/news/canada/newfoundland-labrador/lisa-driscoll-strickland-fake-nurse-9.7366837?cmp=rss",
-          "pubDate": "2026-10-02T15:04:57Z",
-          "source": "CBC Health"
-        },
-        {
-          "title": "Suspected Ebola case at Montreal hospital turns out to be a false alarm",
-          "link": "https://www.cbc.ca/news/canada/montreal/montreal-hospital-ebola-9.7366256?cmp=rss",
-          "pubDate": "2026-10-01T23:05:38Z",
-          "source": "CBC Health"
-        },
-        {
-          "title": "Fruit giant Driscoll's faces class-action lawsuit in Quebec",
-          "link": "https://www.cbc.ca/news/canada/montreal/driscolls-class-action-9.7365610?cmp=rss",
-          "pubDate": "2026-10-01T19:20:14Z",
-          "source": "CBC Health"
-        },
-        {
-          "title": "Can I get AI face? Plastic surgeons say AI-generated inspiration is more than meets the eye",
-          "link": "https://www.cbc.ca/news/health/ai-face-plastic-surgery-9.7340688?cmp=rss",
-          "pubDate": "2026-09-28T08:00:03Z",
-          "source": "CBC Health"
-        },
-        {
-          "title": "Toronto hospital to greatly expand permanent housing program that reduces ER visits",
-          "link": "https://www.cbc.ca/news/canada/toronto/ont-dunn-house-9.7365728?cmp=rss",
-          "pubDate": "2026-10-01T18:42:03Z",
-          "source": "CBC Health"
+          "title": "Possible measles exposure at The Pas hospital ER waiting room, province warns",
+          "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPSWwyemhXS2w2WmdGT2lqMW5tYkVFaUlfNDFmZWpLYnNPd0FwaFh2cHJwTUlvSlVSdjQxWTlTZlBsbnhySm9rVFotcTJ2aDNfQzYzYkZSamFFZmJHVkJEOWZweFotRUpTUE9vN202UjI2TnBadU4xTWtDWE5xUllMblZ1RzItd29yV01yLUw2Yw?oc=5",
+          "pubDate": "2026-10-02T20:33:07+00:00",
+          "source": "CBC"
         }
       ]
     }
   },
-  "scores": [
-    {
-      "team": "Blue Jays",
-      "league": "MLB",
-      "status": "No game"
-    },
-    {
-      "team": "Canucks",
-      "league": "NHL",
-      "home": {
-        "abbr": "VAN",
-        "name": "Canucks",
-        "score": "7",
-        "winner": false
-      },
-      "away": {
-        "abbr": "EDM",
-        "name": "Oilers",
-        "score": "9",
-        "winner": true
-      },
-      "state": "post",
-      "status": "Final"
-    },
-    {
-      "team": "Raptors",
-      "league": "NBA",
-      "home": {
-        "abbr": "TOR",
-        "name": "Raptors",
-        "score": "-",
-        "winner": false
-      },
-      "away": {
-        "abbr": "MIA",
-        "name": "Heat",
-        "score": "-",
-        "winner": false
-      },
-      "state": "pre",
-      "status": "10/3 - 7:00 PM EDT"
-    },
-    {
-      "team": "Whitecaps",
-      "league": "MLS",
-      "status": "No game"
-    },
-    {
-      "team": "BC Lions",
-      "league": "CFL",
-      "status": "No game"
-    }
-  ],
-  "standings": {
-    "NHL": {
-      "group": "Pacific Division",
-      "cols": [
-        "gp",
-        "w",
-        "l",
-        "otl",
-        "pts"
-      ],
-      "rows": [
-        {
-          "name": "Oilers",
-          "abbr": "EDM",
-          "gp": "2",
-          "w": "1",
-          "l": "0",
-          "otl": "1",
-          "d": "",
-          "pts": "3",
-          "pct": "",
-          "gb": "-",
-          "streak": "W1",
-          "mine": false
-        },
-        {
-          "name": "Kraken",
-          "abbr": "SEA",
-          "gp": "1",
-          "w": "1",
-          "l": "0",
-          "otl": "0",
-          "d": "",
-          "pts": "2",
-          "pct": "",
-          "gb": "1",
-          "streak": "W1",
-          "mine": false
-        },
-        {
-          "name": "Golden Knights",
-          "abbr": "VGK",
-          "gp": "1",
-          "w": "1",
-          "l": "0",
-          "otl": "0",
-          "d": "",
-          "pts": "2",
-          "pct": "",
-          "gb": "1",
-          "streak": "W1",
-          "mine": false
-        },
-        {
-          "name": "Sharks",
-          "abbr": "SJ",
-          "gp": "1",
-          "w": "1",
-          "l": "0",
-          "otl": "0",
-          "d": "",
-          "pts": "2",
-          "pct": "",
-          "gb": "1",
-          "streak": "W1",
-          "mine": false
-        },
-        {
-          "name": "Canucks",
-          "abbr": "VAN",
-          "gp": "2",
-          "w": "1",
-          "l": "1",
-          "otl": "0",
-          "d": "",
-          "pts": "2",
-          "pct": "",
-          "gb": "1",
-          "streak": "L1",
-          "mine": true
-        },
-        {
-          "name": "Ducks",
-          "abbr": "ANA",
-          "gp": "0",
-          "w": "0",
-          "l": "0",
-          "otl": "0",
-          "d": "",
-          "pts": "0",
-          "pct": "",
-          "gb": "3",
-          "streak": "-",
-          "mine": false
-        },
-        {
-          "name": "Kings",
-          "abbr": "LA",
-          "gp": "1",
-          "w": "0",
-          "l": "1",
-          "otl": "0",
-          "d": "",
-          "pts": "0",
-          "pct": "",
-          "gb": "3",
-          "streak": "L1",
-          "mine": false
-        },
-        {
-          "name": "Flames",
-          "abbr": "CGY",
-          "gp": "1",
-          "w": "0",
-          "l": "1",
-          "otl": "0",
-          "d": "",
-          "pts": "0",
-          "pct": "",
-          "gb": "3",
-          "streak": "L1",
-          "mine": false
-        }
-      ]
-    },
-    "MLB": {
-      "group": "American League East",
-      "cols": [
-        "w",
-        "l",
-        "pct",
-        "gb"
-      ],
-      "rows": [
-        {
-          "name": "Yankees",
-          "abbr": "NYY",
-          "gp": "161",
-          "w": "93",
-          "l": "68",
-          "otl": "11",
-          "d": "0",
-          "pts": "12.5",
-          "pct": ".578",
-          "gb": "4.5",
-          "streak": "W1",
-          "mine": false
-        },
-        {
-          "name": "Red Sox",
-          "abbr": "BOS",
-          "gp": "162",
-          "w": "87",
-          "l": "75",
-          "otl": "4",
-          "d": "0",
-          "pts": "6.0",
-          "pct": ".537",
-          "gb": "11",
-          "streak": "L1",
-          "mine": false
-        },
-        {
-          "name": "Orioles",
-          "abbr": "BAL",
-          "gp": "161",
-          "w": "79",
-          "l": "82",
-          "otl": "8",
-          "d": "0",
-          "pts": "-1.5",
-          "pct": ".491",
-          "gb": "18.5",
-          "streak": "L1",
-          "mine": false
-        },
-        {
-          "name": "Blue Jays",
-          "abbr": "TOR",
-          "gp": "162",
-          "w": "79",
-          "l": "83",
-          "otl": "7",
-          "d": "0",
-          "pts": "-2.0",
-          "pct": ".488",
-          "gb": "19",
-          "streak": "W1",
-          "mine": true
-        },
-        {
-          "name": "Rays",
-          "abbr": "TB",
-          "gp": "162",
-          "w": "98",
-          "l": "64",
-          "otl": "6",
-          "d": "0",
-          "pts": "17.0",
-          "pct": ".605",
-          "gb": "-",
-          "streak": "L1",
-          "mine": false
-        }
-      ]
-    },
-    "NBA": {
-      "group": "Atlantic",
-      "cols": [
-        "w",
-        "l",
-        "pct",
-        "gb"
-      ],
-      "rows": [
-        {
-          "name": "Celtics",
-          "abbr": "BOS",
-          "gp": "",
-          "w": "0",
-          "l": "0",
-          "otl": "",
-          "d": "",
-          "pts": "0.0",
-          "pct": ".000",
-          "gb": "-",
-          "streak": "-",
-          "mine": false
-        },
-        {
-          "name": "Nets",
-          "abbr": "BKN",
-          "gp": "",
-          "w": "0",
-          "l": "0",
-          "otl": "",
-          "d": "",
-          "pts": "0.0",
-          "pct": ".000",
-          "gb": "-",
-          "streak": "-",
-          "mine": false
-        },
-        {
-          "name": "Knicks",
-          "abbr": "NY",
-          "gp": "",
-          "w": "0",
-          "l": "0",
-          "otl": "",
-          "d": "",
-          "pts": "0.0",
-          "pct": ".000",
-          "gb": "-",
-          "streak": "-",
-          "mine": false
-        },
-        {
-          "name": "76ers",
-          "abbr": "PHI",
-          "gp": "",
-          "w": "0",
-          "l": "0",
-          "otl": "",
-          "d": "",
-          "pts": "0.0",
-          "pct": ".000",
-          "gb": "-",
-          "streak": "-",
-          "mine": false
-        },
-        {
-          "name": "Raptors",
-          "abbr": "TOR",
-          "gp": "",
-          "w": "0",
-          "l": "0",
-          "otl": "",
-          "d": "",
-          "pts": "0.0",
-          "pct": ".000",
-          "gb": "-",
-          "streak": "-",
-          "mine": true
-        }
-      ]
-    },
-    "MLS": {
-      "group": "Western Conference",
-      "cols": [
-        "gp",
-        "w",
-        "l",
-        "d",
-        "pts"
-      ],
-      "rows": [
-        {
-          "name": "Colorado",
-          "abbr": "COL",
-          "gp": "27",
-          "w": "11",
-          "l": "13",
-          "otl": "",
-          "d": "3",
-          "pts": "36",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "Dallas",
-          "abbr": "DAL",
-          "gp": "27",
-          "w": "13",
-          "l": "6",
-          "otl": "",
-          "d": "8",
-          "pts": "47",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "Kansas City",
-          "abbr": "SKC",
-          "gp": "27",
-          "w": "6",
-          "l": "18",
-          "otl": "",
-          "d": "3",
-          "pts": "21",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "LA Galaxy",
-          "abbr": "LA",
-          "gp": "28",
-          "w": "9",
-          "l": "10",
-          "otl": "",
-          "d": "9",
-          "pts": "36",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "San Jose",
-          "abbr": "SJ",
-          "gp": "27",
-          "w": "13",
-          "l": "8",
-          "otl": "",
-          "d": "6",
-          "pts": "45",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "Salt Lake",
-          "abbr": "RSL",
-          "gp": "27",
-          "w": "9",
-          "l": "13",
-          "otl": "",
-          "d": "5",
-          "pts": "32",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "Houston",
-          "abbr": "HOU",
-          "gp": "27",
-          "w": "13",
-          "l": "9",
-          "otl": "",
-          "d": "5",
-          "pts": "44",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "Portland",
-          "abbr": "POR",
-          "gp": "27",
-          "w": "9",
-          "l": "13",
-          "otl": "",
-          "d": "5",
-          "pts": "32",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "Seattle",
-          "abbr": "SEA",
-          "gp": "27",
-          "w": "10",
-          "l": "9",
-          "otl": "",
-          "d": "8",
-          "pts": "38",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "Vancouver",
-          "abbr": "VAN",
-          "gp": "26",
-          "w": "15",
-          "l": "6",
-          "otl": "",
-          "d": "5",
-          "pts": "50",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": true
-        },
-        {
-          "name": "Minnesota",
-          "abbr": "MIN",
-          "gp": "27",
-          "w": "7",
-          "l": "12",
-          "otl": "",
-          "d": "8",
-          "pts": "29",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "LAFC",
-          "abbr": "LAFC",
-          "gp": "28",
-          "w": "11",
-          "l": "9",
-          "otl": "",
-          "d": "8",
-          "pts": "41",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "Austin",
-          "abbr": "ATX",
-          "gp": "27",
-          "w": "7",
-          "l": "10",
-          "otl": "",
-          "d": "10",
-          "pts": "31",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "St. Louis",
-          "abbr": "STL",
-          "gp": "27",
-          "w": "13",
-          "l": "6",
-          "otl": "",
-          "d": "8",
-          "pts": "47",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        },
-        {
-          "name": "San Diego",
-          "abbr": "SD",
-          "gp": "27",
-          "w": "8",
-          "l": "11",
-          "otl": "",
-          "d": "8",
-          "pts": "32",
-          "pct": "",
-          "gb": "",
-          "streak": "",
-          "mine": false
-        }
-      ]
-    }
-  },
+  "scores": [],
   "stocks": {
     "XEQT.TO": {
       "chart": {
@@ -7948,15 +6440,514 @@ var DASHBOARD_CACHE = {
   ],
   "updated": "2026-10-03T00:15:13.569681+00:00",
   "digest": {
-    "news": "Vancouver e-scooter riders overwhelmingly don’t wear helmets, police find. Meanwhile, BC NDP promises to cap grocery profits while Conservatives unveil wildfire plan. Also today, 5 foreign nationals arrested in connection to B.C. extortions, shootings and arsons. And B.C. man sentenced to 8 months in jail for antisemitic graffiti on Victoria synagogue. Finally, Overnight fire at North Vancouver’s Dorothy Lynas Elementary deemed suspicious.",
-    "sports": "NHL on Sportsnet: Capitals vs. Hurricanes. Which lineups are built to better handle postseason pitching?",
-    "pharmacy": "Giredestrant plus Everolimus in Advanced Breast Cancer. Peripheral arterial disease: counting what matters.",
+    "news": "G7 nations will release 100 million barrels of oil and diesel fuel after prices soar. Meanwhile, Eby announces B.C. grocery ‘price guard’ during Kelowna visit.",
+    "sports": "Rookie RB Price ruled out by Seahawks for Week 4 with chest injury.",
+    "pharmacy": "Possible measles exposure at The Pas hospital ER waiting room, province warns.",
     "method": "extractive",
-    "t": "2026-10-03T00:15:13.664179+00:00"
+    "t": "2026-10-03T01:28:38.903025+00:00"
   },
   "curio": {
     "date": "2026-10-02",
     "id": "chunking"
+  },
+  "newsfeed": {
+    "generated": "2026-10-03T01:20:11+00:00",
+    "generated_local": "Fri Oct 2, 6:20 PM PDT",
+    "scores": [
+      {
+        "league": "NBA",
+        "text": "MIA @ TOR Sat 4:00 PM",
+        "url": "https://www.espn.com/nba/game/_/gameId/401902644/heat-raptors",
+        "fav": true
+      },
+      {
+        "league": "NFL",
+        "text": "LAC @ SEA Sun 1:25 PM",
+        "url": "https://www.espn.com/nfl/game/_/gameId/401872977/chargers-seahawks",
+        "fav": true
+      },
+      {
+        "league": "CFL",
+        "text": "TAT 24 @ WBB 23 F",
+        "url": "https://site.api.espn.com/apis/site/v2/sports/football/cfl/scoreboard",
+        "fav": false
+      },
+      {
+        "league": "NFL",
+        "text": "PIT 24 @ CLE 27 F",
+        "url": "https://www.espn.com/nfl/game/_/gameId/401872964/steelers-browns",
+        "fav": false
+      },
+      {
+        "league": "NHL",
+        "text": "NYR 2 @ DET 0 F",
+        "url": "https://www.nhl.com/gamecenter/nyr-vs-det/2026/10/02/2026020017",
+        "fav": false
+      },
+      {
+        "league": "MLB",
+        "text": "CHW @ CLE Sat 10:00 AM",
+        "url": "https://www.espn.com/mlb/game/_/gameId/401907990/white-sox-guardians",
+        "fav": false
+      }
+    ],
+    "my_teams": [
+      {
+        "league": "NHL",
+        "team": "Canucks",
+        "last": "L 7-9 vs EDM",
+        "next": "vs CGY Sat 7:00 PM"
+      },
+      {
+        "league": "NFL",
+        "team": "Seahawks",
+        "last": "L 31-33 @ WSH",
+        "next": "vs LAC Sun 1:25 PM",
+        "record": "2-1"
+      },
+      {
+        "league": "CFL",
+        "team": "BC Lions",
+        "last": null,
+        "next": null,
+        "note": "No free schedule feed - headlines only"
+      },
+      {
+        "league": "MLB",
+        "team": "Blue Jays",
+        "last": null,
+        "next": null,
+        "record": "79-83",
+        "note": "Season over"
+      },
+      {
+        "league": "NBA",
+        "team": "Raptors",
+        "last": null,
+        "next": "vs MIA Sat 4:00 PM"
+      }
+    ],
+    "layout": "v2",
+    "must_know": [
+      {
+        "title": "G7 nations will release 100 million barrels of oil and diesel fuel after prices soar",
+        "source": "Vancouver Is Awesome",
+        "url": "https://www.vancouverisawesome.com/the-mix/g7-nations-will-release-100-million-barrels-of-oil-and-diesel-fuel-after-prices-soar-12849275",
+        "ts": "2026-10-02T21:20:19+00:00",
+        "category": "Local",
+        "section": "Local",
+        "feed": "Vancouver Is Awesome",
+        "score": 9.93,
+        "hits": [
+          "g7"
+        ],
+        "sources": 48,
+        "severity": 5.5,
+        "reason": "multi-source + severity"
+      }
+    ],
+    "fantasy_items": [
+      {
+        "title": "Fantasy Football Injury Update: Does Alvin Kamara or Kendre Miller See a Bigger Boost with Travis Etienne Jr on IR?",
+        "source": "Sports Illustrated",
+        "url": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxPSThkN0ZQb1hEX3RBWnlYbjl0NHJkZXFwSFJxQzdGZl83RExjdFpjNElRM0g5aXBEZlBfQnU0LVJKV2VoVHdXS09UVmZoUkNNaTc4RlFEdF9KVFFDcWNEWWJmYm1SckFzMHp2QmIzM2E5VkNjN1owNm04ODQzdkxfTFNaZ3FpVmdXMGx3ZThVTnNOVHRMM3FLNUctNHdlTU5Tal9fYWhmNzNETkp1Sy1hNkktOF8tZ1FXTzA2QUxfdGZMQXIxeUU1ZUJ6TTlrRTFLMGQ3VVpqdXBGNkFXWFh6a1Fydw?oc=5",
+        "ts": "2026-10-01T21:28:30+00:00",
+        "category": "Fantasy",
+        "section": "Teams",
+        "feed": "GN Fantasy NFL 1",
+        "score": 14.87,
+        "hits": [
+          "fantasy football",
+          "injury",
+          "ir"
+        ],
+        "fantasy": true
+      },
+      {
+        "title": "Travis Etienne Jr injury: What it means for fantasy football after Saints RB goes on IR",
+        "source": "ClutchPoints",
+        "url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQQU83ZDlWNXFmYU9MVlJHWWxpOUZWcGdBd1ZUVW9uM0kxUkVHNi02UWw5Z212WEZjaHNGMjIwdGFSYjdONmY4bERSUE9zajgxdFM3dmRYRUd2VnQ0S1JmM1ZrQWZaLVhXSkYtUWt2MmpVWjl5THlndzRyQ3gtSnBnUFo1bWN2U1E0LVNmY29nMWFNZlZQX1NDWUM5TDkxYmhTaUJQZnZHUGs3bi1zTVRRX0RNcw?oc=5",
+        "ts": "2026-10-02T12:31:06+00:00",
+        "category": "Fantasy",
+        "section": "Teams",
+        "feed": "GN Fantasy NFL 2",
+        "score": 12.94,
+        "hits": [
+          "fantasy football",
+          "injury",
+          "ir"
+        ],
+        "fantasy": true
+      },
+      {
+        "title": "Fantasy Football injury report Week 4: Lamar Jackson, Puka Nacua, Justin Jefferson & more",
+        "source": "Yahoo Sports",
+        "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOVHRWME5FZV9rOEJPVHFWbHVZbWhoS1c3Zkdrdmsxdkh0SThMdnZZbXptR091Y3pKdE9RbTJqLVFlaDBWcFplbW94cHozUXFYYjdPTDBTTlJLSFFjYlAyMUt1QnVaOTF3UWxzVjN6M1ZsQ0g4MkRhSTFvME9OQnllbEN2b2NHb0gwbXFQMw?oc=5",
+        "ts": "2026-10-02T14:17:44+00:00",
+        "category": "Fantasy",
+        "section": "Teams",
+        "feed": "GN Fantasy NFL 3",
+        "score": 12.61,
+        "hits": [
+          "fantasy football",
+          "injury"
+        ],
+        "fantasy": true
+      }
+    ],
+    "fantasy_refreshed": "2026-10-03T01:20:11+00:00",
+    "items": [
+      {
+        "title": "Eby announces B.C. grocery ‘price guard’ during Kelowna visit",
+        "source": "Langley Advance Times",
+        "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPSFlyUHN1QzIzekJtZXl3LWs3T0dNX1p0eDhYYXBydFBpVEZtUVdlUjBtVVk2OWJDQWhiY0ZJMkFNMGVBODY0RnROZnliUHhYVHQwVG9uS2EzcHhRZlhkNjdyRlBFWUU4VWEzcnZUQVVWZjNMSzhWeGVvR3pzVHN1a1NwZkduN2xDVkxiRXFkYkNwT3FwSmtBYkJnN2h1MG9EdmdzRg?oc=5",
+        "ts": "2026-10-02T23:34:21+00:00",
+        "category": "Local",
+        "section": "Local",
+        "feed": "GN Langley",
+        "score": 15.24,
+        "hits": [
+          "b.c.",
+          "eby",
+          "price guard",
+          "grocery"
+        ]
+      },
+      {
+        "title": "Rookie RB Price ruled out by Seahawks for Week 4 with chest injury",
+        "source": "ESPN",
+        "url": "https://www.espn.com/nhl/story/_/id/50086884/rb-jadarian-price-ruled-seattle-seahawks-week-4",
+        "ts": "2026-10-02T23:20:34+00:00",
+        "category": "Football",
+        "section": "Teams",
+        "feed": "ESPN NFL",
+        "score": 13.2,
+        "hits": [
+          "injury",
+          "seahawks",
+          "ruled out"
+        ]
+      },
+      {
+        "title": "Edmonton Oilers, Vancouver Canucks take lessons from high-scoring games",
+        "source": "CTV News",
+        "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPcV95OFgyS2dwYnBudVV3TlRKT242ZE9UUHZJemtOS1hfNlkzU3AwLV9VLU1uUFZrVHdhNmprOG9mWm9JbER6MXhuSU5GNURYNDNNcllNanF3UjlGZWxHZFo1LVV1MTBxLWd2UkdQUVlNMS11amdTeGZreWVDekstYkZZYi15TDJqaEd6UlMwcWNJbHhMR05DeHU2dTc5T1lmWUVrUlBULWVBcnlPUThuN2J2bzU?oc=5",
+        "ts": "2026-10-02T13:36:12+00:00",
+        "category": "Hockey",
+        "section": "Teams",
+        "feed": "GN Canucks",
+        "score": 13.05,
+        "hits": [
+          "canucks",
+          "vancouver canucks",
+          "vancouver"
+        ]
+      },
+      {
+        "title": "Injury Report, Week 4 at Eagles: Puka Nacua and Kamren Kinchens good to go; Colby Parkinson questionable; Terrance Ferguson, Jaylen Watson and Aaron Donald ruled out",
+        "source": "Rams",
+        "url": "https://news.google.com/rss/articles/CBMiiwJBVV95cUxNQkx4MEhZS0ZVeG5TM0FiYk9GSk9ySDlCZURpYzNnb2ZHNFdPVE4ySnhqOUQ0VE15SUp4YkNuNDNTREZQMFdxc21XQlZubUR0bkQteUZPbnBXQ1ZNWEJ5OFdqU0tVbEJnZXZvaVo3VGJQN2xHTm9VMWg5bWVlSUkybWhHQjJ4cFo1cldPTnhMQzM2OWFJQ1VUZ3RtdjI4VDJPS1JMVTg0aE5YcTZjRmNQbzV2Vi12d2FkZV9sejhsc1o3c3JHa2xCVVV2WERwSGRWMFRRNUhrVUpOYlprVkdCc05LZkFISGlrMHNkTVlrczJSb3E1WE9Vd1cxeE41YW4tQXJ0dm90ZW9XMWc?oc=5",
+        "ts": "2026-10-02T21:28:07+00:00",
+        "category": "Fantasy",
+        "section": "Teams",
+        "feed": "GN Fantasy NFL 3",
+        "score": 12.45,
+        "hits": [
+          "injury",
+          "ruled out"
+        ]
+      },
+      {
+        "title": "Possible measles exposure at The Pas hospital ER waiting room, province warns",
+        "source": "CBC",
+        "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPSWwyemhXS2w2WmdGT2lqMW5tYkVFaUlfNDFmZWpLYnNPd0FwaFh2cHJwTUlvSlVSdjQxWTlTZlBsbnhySm9rVFotcTJ2aDNfQzYzYkZSamFFZmJHVkJEOWZweFotRUpTUE9vN202UjI2TnBadU4xTWtDWE5xUllMblZ1RzItd29yV01yLUw2Yw?oc=5",
+        "ts": "2026-10-02T20:33:07+00:00",
+        "category": "Pharmacy",
+        "section": "Health",
+        "feed": "GN BC Health",
+        "score": 11.83,
+        "hits": [
+          "measles",
+          "measles exposure"
+        ]
+      },
+      {
+        "title": "Blue Jays notebook: Dylan Cease plans ashram visit amid shoulder work",
+        "source": "Sportsnet.ca",
+        "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxNSXU3eWk2Q0dVU0IxaDZuQk5OREl4TjVLWmFOdTZTdl9NUmlyYi1tSGN3X05qcmllenZYWmduNWo3Q095ejAwVkMzNnY5bXg5WFNWNzlqSHVkMl8wbU96djh6dDVzX3RmcEpMTVdPWjdpNEp5LUdKRURWTzFiejBFa2RQQVNYemhlTTl1c1d5aVV3ekpibjI4NmZvdlJPZWN2cGpoeHBQTy1TZw?oc=5",
+        "ts": "2026-10-02T20:48:00+00:00",
+        "category": "MLB",
+        "section": "Teams",
+        "feed": "GN Blue Jays",
+        "score": 10.86,
+        "hits": [
+          "blue jays",
+          "jays"
+        ]
+      },
+      {
+        "title": "B.C. Conservatives criticize Eby grocery plan during Okanagan visit",
+        "source": "Castanet",
+        "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQSV9RMGU3ZWRjcnFxaTJVRFc0OEFiMDFfcEZ1TWFCMGhkLXR6aG1tWTN3Wms2QmZoUEh0REF5RHJCa2M4N1Q1NHZobm9KQ25BM25fWllWQTVwMGFEQ3JRNGJUR1pYTlVXODRoN2hUUXBNTUp3OHVQQUlMdVg5MmNUU0hYN09Cem1KelRsZl9xdEF0WXJxdWxnNXVIa2NJc0VHSjBOYlVzUE8yd0FuWG1sbA?oc=5",
+        "ts": "2026-10-02T22:28:00+00:00",
+        "category": "BC",
+        "section": "Local",
+        "feed": "GN BC Election",
+        "score": 10.58,
+        "hits": [
+          "b.c.",
+          "eby",
+          "grocery"
+        ]
+      },
+      {
+        "title": "EVERYONE WINS! Jamal Shead's extension is a home run for the player, the Toronto Raptors & the fans",
+        "source": "KGW",
+        "url": "https://news.google.com/rss/articles/CBMiqgJBVV95cUxPallBbVl2VEUyS2pJbXhTejA0bTBFSTRSUW5Mdk9Sb1l6cm0zOXgydF9aNmRkaHdlREtCY0tlRjFOaUZEajAtcE5PdEJ5RVNjQURiLWFNMzFBRTM1MGN3a1lQY1J5U1BrT3VQWFZJcXNWN09lZnRtQU9IWmJibFkwdFdmRm5zeUg1QmEwQ1ZpakdEa004LVltUWtUS1c3cXpDTmJzbWI4cndUb3pVTkpvRTd1ekxZNEJxNGYwOGc2YzZjVkd0MWUteUxOd19RM3ZYcjI2b1VwYWZGTS1aOEJWNjNuR2NhZktWUDJuQjRablRfMlNqR2J2aFJoTVIzeGR4aWxtM293SXFRbHJzV3ZSOHNwbW1rOERldGFFQzVpbFc3NHcwaVQ1QzBn?oc=5",
+        "ts": "2026-10-02T17:06:00+00:00",
+        "category": "NBA",
+        "section": "Teams",
+        "feed": "GN Raptors",
+        "score": 10.41,
+        "hits": [
+          "raptors",
+          "toronto raptors"
+        ]
+      },
+      {
+        "title": "B.C.’s Eby promises to lower gas prices, while Doerkson praises pipeline as election campaigns continues",
+        "source": "Globe and Mail",
+        "url": "https://www.theglobeandmail.com/canada/british-columbia/article-bcs-eby-vows-to-temporary-suspend-gas-tax-regulate-pump-price-under-if/",
+        "ts": "2026-10-01T17:38:38+00:00",
+        "category": "National",
+        "section": "National",
+        "feed": "Globe and Mail Canada",
+        "score": 10.18,
+        "hits": [
+          "b.c.",
+          "election",
+          "eby",
+          "gas prices"
+        ]
+      },
+      {
+        "title": "Belgian test finds Tesla FSD sped through 20 mph zones, tried illegal cyclist passes",
+        "source": "Yahoo Autos",
+        "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNTVZBYlQtek9jRlQ2c2ROU1JHdlZMTlgxSmZVbVl0a0wyY0s0c1FCcUxEYm5WeE5JeDBfMlRNVDAwQ3Y5U3hUUUhEYUZiSGtVUDNieDB1ZXVCZ0JvVWZWWndtdTVZdG5kS0k2UVh4SC1SbmxuZ1VJbFBzaGlzTVJuaXdtUXZmRWJuTzVPbTdhTzB4SFgxLTNiSWx5YjdlZ2Vt?oc=5",
+        "ts": "2026-10-02T02:23:00+00:00",
+        "category": "Tesla/EV",
+        "section": "Tech",
+        "feed": "GN Tesla",
+        "score": 9.65,
+        "hits": [
+          "tesla",
+          "fsd"
+        ]
+      },
+      {
+        "title": "Congo's Ebola outbreak surpasses 4,000 deaths amid violence and mistrust",
+        "source": "CBC World",
+        "url": "https://www.cbc.ca/news/world/congo-outbreak-death-toll-treatment-centre-beating-9.7366690?cmp=rss",
+        "ts": "2026-10-02T14:15:35+00:00",
+        "category": "World",
+        "section": "World",
+        "feed": "CBC World",
+        "score": 9.11,
+        "hits": [
+          "outbreak",
+          "ebola"
+        ]
+      },
+      {
+        "title": "North American Agriculture Leaders Back CUSMA and Long-Term Trade Stability",
+        "source": "Farms.com",
+        "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxQdXZvaVp4b0NqVDdDNnpwLXlXQzhIMDJzbk5NaWxWV1ZZN3NTVzdjRDVfMnRSaURRNXJUZW1BNEFRRnhmaDV4cFJaMHpGN21tRHBZclJmMmkwR3JHMVpvNjlxMjZNLXRFSXJnN0VWNThiZ0lZNHZ6VGtlak15cnJjR3ZVbmg0b25lWkRWSWlWcjQ5U2c1bnI2dWdfSEtMd0dkYlE4cUtTdm00ckRtbmZMeTNjV2E5YXlVZ3BtcWlubUI?oc=5",
+        "ts": "2026-10-02T22:19:08+00:00",
+        "category": "Money/Policy",
+        "section": "National",
+        "feed": "GN Tariffs & Trade",
+        "score": 9.06,
+        "hits": [
+          "trade",
+          "cusma"
+        ]
+      },
+      {
+        "title": "The cautionary case for investing in OpenAI and Anthropic",
+        "source": "Yahoo Finance",
+        "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNMms3aFZ3T1Z0T0VsbEltWS1UTGFFb2gwNlJuSnJ2eXpHLWRScjRwYkd2UTNnRmtSZUJHdk5UREhmMWRpa3YzOF9sRUtZMXRDVEE2THkxUThaT2VRYVZyS3FPZ1FYQTN6a2NneFlxM1FVdGpVWmkyNXVNUFk0MTlEcDNRMWhheF9tVi1SXzJsOXJYN3c?oc=5",
+        "ts": "2026-10-02T20:37:00+00:00",
+        "category": "AI",
+        "section": "Tech",
+        "feed": "GN AI",
+        "score": 8.84,
+        "hits": [
+          "openai",
+          "anthropic"
+        ]
+      },
+      {
+        "title": "Week 18: BC Lions at Toronto Argonauts",
+        "source": "CFL",
+        "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE8zaGhtUU11LU9mU1RCRGU4c2NxUW9qOWRJMlh3LTVKRWxJdV9KWGRnd2ZDVzVBUHBnQi0wc1ZHeWlyT3VvLXAtdnhubVkyc3JvWVFhenJtRE52UGhnZ1RtNjFJSjdfX2lTLUtXcg?oc=5",
+        "ts": "2026-10-01T22:05:34+00:00",
+        "category": "CFL",
+        "section": "Teams",
+        "feed": "GN BC Lions",
+        "score": 7.9,
+        "hits": [
+          "bc lions",
+          "lions"
+        ]
+      },
+      {
+        "title": "VIDEO: Five men face extortion, gun, explosives charges in Langley/Surrey case",
+        "source": "Langley Advance Times",
+        "url": "https://langleyadvancetimes.com/2026/10/02/five-men-face-extortion-guns-and-explosives-charged/",
+        "ts": "2026-10-02T19:05:00+00:00",
+        "category": "Local",
+        "section": "Local",
+        "feed": "Langley Advance Times",
+        "score": 15.14,
+        "hits": [
+          "langley",
+          "surrey",
+          "extortion"
+        ]
+      },
+      {
+        "title": "Five charged after targeted extortion involving Langley, Surrey car dealership",
+        "source": "Fraser Valley Today",
+        "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxOUXNEcmVHSXFSNEZQa05uSlRKN1hTSTY3di1leU1obmxuUmxPN212MU9kTEMzWVVuYTljX0t6a2YtRGI3Nkl2UHItcFU4ME1aVUhjSzJYTzBuNGRwLVRiT2I2RGJzbEF4Yks2T3UybEg5UC12dzNyb2tSQ1RHOHlPTUxTTnNraUhkZDRLNHBKd0N4LTBOb3dZaEdIb0xwVU1nb0NGYkhsaV9VdHR6TTBhWjFOZkJ0c2lNVWc?oc=5",
+        "ts": "2026-10-02T20:06:40+00:00",
+        "category": "Local",
+        "section": "Local",
+        "feed": "GN Local Safety",
+        "score": 13.27,
+        "hits": [
+          "langley",
+          "surrey",
+          "extortion"
+        ]
+      },
+      {
+        "title": "Seahawks Injury Report: Jadarian Price Officially Ruled Out",
+        "source": "Sports Illustrated",
+        "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNOTFLT1Z2cE5BMGtkT3ZiNHdIVXNsc09jWWRDTVphTk9MUVZqSjhIRzFmTGVmUWgzbE5mTERsOXN3dHpidm1wXzdJcmtVVUQyWXN5SGpzV1lOa1UxOTJqS2hMa3ZzNEpzVFI5dUFkdFFKR3ZiSjFpX2d1Zk9meU9HYTRWMDRmeTVLV1RDa29RMXA1X3VYX0ZVdU5vNA?oc=5",
+        "ts": "2026-10-02T21:09:51+00:00",
+        "category": "Football",
+        "section": "Teams",
+        "feed": "GN Seahawks",
+        "score": 12.91,
+        "hits": [
+          "injury",
+          "seahawks",
+          "ruled out"
+        ]
+      },
+      {
+        "title": "Vancouver Canucks Straight Up: Trying to piece together what happened in 9-7 loss to the Oilers",
+        "source": "The Georgia Straight",
+        "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxPQlhyOHFxTFZ5WlFISl9BdmlZcHBIWEhlLVI5bFB3TVZ3TW5fdGJVaUZ1MlB0TVBBamZ5dEMwZWNyRmxHSk4zb05XUmRlTmplNUJFQzJ1RWgwUWdwNTQ2MVJrQUw3TVUwM1ozZzZqTEtnY2JUX09JWHVsWWNfYThtWDliSjlTd3RTemxIRUtVWXNBMW9KZENxa0kwWnA0aUtvMXphWk04RVdYdV9VeTJGTG1zN0hfY3pQMW45WFB3?oc=5",
+        "ts": "2026-10-02T07:30:29+00:00",
+        "category": "Hockey",
+        "section": "Teams",
+        "feed": "GN Canucks",
+        "score": 12.51,
+        "hits": [
+          "canucks",
+          "vancouver canucks",
+          "vancouver"
+        ]
+      },
+      {
+        "title": "Edmonton Oilers vs Vancouver Canucks Box Score - October 01, 2026 - The Athletic",
+        "source": "The New York Times",
+        "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPVUNmMkQwZC1rLWNRZmpUSmhfdDZ1YzRzbjFCbG04MEJ0ZzJQZzF4UWppRUhlcW5XVW5ncjhpUFFnbDU5UjMyR0tzZi14X3ZOd1dMYXEyUWg2OTIzaDZSUHVFZGdqUTFxUjlRTVZvY3hJTHlGQV9DY1l2Y3pTMnpyc1Nmb0RWRGtNQmJHd250YkIwNWY5Z2dqTlR0emhRUGNuYlJ5VA?oc=5",
+        "ts": "2026-10-02T06:57:36+00:00",
+        "category": "Hockey",
+        "section": "Teams",
+        "feed": "GN Canucks",
+        "score": 12.47,
+        "hits": [
+          "canucks",
+          "vancouver canucks",
+          "vancouver"
+        ]
+      },
+      {
+        "title": "McDavid tallies 5 points as Oilers hang on for 9-7 win over Vancouver Canucks",
+        "source": "The Ashcroft-Cache Creek Journal",
+        "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxQSThoX3VqY254ZU0yX0tZN3prMTZoOEhwSDZVRW83TFRxbGVMSlJBT2VCTmhRNGNMZDZhX1Jjc05IWUJObkdST3JGQ3Rhb09lRmljT3I0cURSVlNkcFI2TGlyTmtTcGxNcDlwRUFUaUZsRW9sck90a09WV1pnNy1qT0tlQTlVcGtadEdaeDdvdmJpVEJ5ejdwSVdRM1NEc2ZfNkw5UlVvZkJKa3VpRnV6R3FZeWJtQ0hYbndYbXFTdGNvMkV2aUE?oc=5",
+        "ts": "2026-10-02T06:00:09+00:00",
+        "category": "Hockey",
+        "section": "Teams",
+        "feed": "GN Canucks",
+        "score": 12.4,
+        "hits": [
+          "canucks",
+          "vancouver canucks",
+          "vancouver"
+        ]
+      }
+    ],
+    "_status": {
+      "CBC BC": "ok (20)",
+      "Global News BC": "ok (10)",
+      "Vancouver Is Awesome": "ok (20)",
+      "Langley Advance Times": "ok (10)",
+      "GN Langley": "ok (28)",
+      "GN BC Hazards": "ok (27)",
+      "CBC Canada": "ok (20)",
+      "CBC Politics": "ok (20)",
+      "Globe and Mail Canada": "ok (100)",
+      "CBC Business": "ok (20)",
+      "Bank of Canada": "ok (10)",
+      "GN Rates & Housing": "ok (100)",
+      "GN Tariffs & Trade": "ok (100)",
+      "GN Canada Post & Transport": "ok (20)",
+      "BBC World": "ok (37)",
+      "CBC World": "ok (20)",
+      "GN Geopolitics": "ok (100)",
+      "GN Pharmacy": "ok (86)",
+      "GN BC Health": "ok (29)",
+      "GN Health Policy": "ok (1)",
+      "GN Canucks": "ok (100)",
+      "ESPN NHL": "ok (13)",
+      "GN Seahawks": "ok (100)",
+      "ESPN NFL": "ok (26)",
+      "GN BC Lions": "ok (100)",
+      "GN Blue Jays": "ok (100)",
+      "GN Raptors": "ok (100)",
+      "Electrek Tesla": "ok (100)",
+      "GN Tesla": "ok (33)",
+      "The Verge AI": "ok (10)",
+      "GN AI": "ok (100)",
+      "GN Local Safety": "ok (31)",
+      "GN TransLink": "ok (16)",
+      "GN BC Election": "ok (100)",
+      "GN Cost of Living": "ok (40)",
+      "GN Apple": "ok (100)",
+      "GN AI Health": "ok (3)",
+      "GN Fantasy NHL 1": "ok (34)",
+      "GN Fantasy NHL 2": "ok (15)",
+      "GN Fantasy NHL 3": "ok (26)",
+      "GN Fantasy NHL 4": "ok (37)",
+      "GN Fantasy NHL 5": "ok (33)",
+      "GN Fantasy NHL 6": "ok (33)",
+      "GN Fantasy NHL 7": "ok (40)",
+      "GN Fantasy NHL 8": "ok (7)",
+      "GN Fantasy NFL 1": "ok (46)",
+      "GN Fantasy NFL 2": "ok (63)",
+      "GN Fantasy NFL 3": "ok (100)",
+      "fantasy": "roster read at build time: 3 player headlines",
+      "NHL scores": "ok",
+      "NFL scores": "ok",
+      "CFL scores": "ok",
+      "MLB scores": "ok",
+      "NBA scores": "ok",
+      "team status": "ok"
+    }
   }
 };
 // ── DIAGNOSTIC TEST FOR FETCH/API SUPPORT ──
@@ -8035,26 +7026,6 @@ function httpGet(url) {
       if (DASHBOARD_CACHE.stocks[cachedSym]) {
         return Promise.resolve(DASHBOARD_CACHE.stocks[cachedSym]);
       }
-    }
-    return tryDirectRequest();
-  }
-
-  // Check if this is a cached feed (news or sports) embedded in HTML
-  if (url.includes('rss2json.com')) {
-    if (DASHBOARD_CACHE) {
-      var match = url.match(/rss_url=([^&]+)/);
-      if (match) {
-        var decodedFeed = decodeURIComponent(match[1]);
-        var feedData = (DASHBOARD_CACHE.news && DASHBOARD_CACHE.news[decodedFeed]) ||
-                       (DASHBOARD_CACHE.sports && DASHBOARD_CACHE.sports[decodedFeed]) ||
-                       (DASHBOARD_CACHE.pharmacy && DASHBOARD_CACHE.pharmacy[decodedFeed]);
-        if (feedData && feedData.items && feedData.items.length > 0) {
-          return Promise.resolve(feedData);
-        }
-      }
-      // Feed not in embedded cache — return null immediately rather than hanging
-      // on live API calls that will timeout in Tesla browser environments
-      return Promise.resolve(null);
     }
     return tryDirectRequest();
   }
@@ -8291,243 +7262,127 @@ function createBookmarkSvg(filled) {
   return '<svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2z"/></svg>';
 }
 
-function renderFeed(items, id) {
-  var el = document.getElementById(id);
-  if (!items || !items.length) {
-    el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">No stories right now</div><div style="font-size:11px;color:var(--t3)">Headlines refresh automatically every hour — check back soon</div></div>';
-    return;
-  }
-  var html = '';
-  var limit = Math.min(items.length, 15);
-  for (var i = 0; i < limit; i++) {
-    var item = items[i];
-    var timeStr = 'Recently';
-    if (item.pubDate) {
-      try {
-        var ms = Date.now() - new Date(item.pubDate.replace(' ', 'T')).getTime();
-        if (!isNaN(ms) && ms > 0) {
-          var mins = Math.floor(ms / 60000);
-          if (mins < 60) timeStr = mins + 'm ago';
-          else if (mins < 1440) timeStr = Math.floor(mins / 60) + 'h ago';
-          else timeStr = Math.floor(mins / 1440) + 'd ago';
-        }
-      } catch(e) {}
-    }
-    var href = /^https?:\/\//i.test(item.link || '') ? item.link : '#';
-    var isSaved = bookmarks.some(function(b) { return b.link === href; });
-    html += '<div class="feed-item" style="display:flex;gap:12px;align-items:stretch;padding:0!important;border:none!important">'
-      + '<a href="' + escHtml(href) + '" target="_blank" rel="noopener" style="flex:1;padding:20px 24px;display:flex;flex-direction:column;justify-content:center">'
-      + '<div class="feed-t">' + escHtml(item.title || '') + '</div>'
-      + '<div class="feed-m" style="margin:10px 0 0"><span class="feed-src">' + escHtml(item.source || 'News') + '</span><span>' + timeStr + '</span></div>'
-      + '</a>'
-      + '<button class="bookmark-btn ' + (isSaved ? 'saved' : '') + '" data-title="' + escHtml(item.title || '') + '" data-url="' + escHtml(href) + '" data-source="' + escHtml(item.source || 'News') + '" title="Save article">' + createBookmarkSvg(isSaved) + '</button>'
-      + '</div>';
-  }
-  el.innerHTML = html;
-
+// ── NEWS MODULE ──
+// Single source of truth: news-widget-feed feed.json — the same file the iPhone
+// Scriptable widget reads. No other news/sports API is called from the dashboard.
+// Offline / Tesla-browser fallbacks: last good copy in localStorage, then the
+// copy baked into DASHBOARD_CACHE.newsfeed by the hourly Actions job (same file).
+var NF_URL = 'https://wghtkbpxwx-a11y.github.io/news-widget-feed/feed.json';
+var nfData = null, nfTab = 'all';
+function nfAge(ts) {
+  var ms = Date.now() - new Date(ts).getTime();
+  if (isNaN(ms) || ms < 0) return '';
+  var m = Math.floor(ms / 60000);
+  return m < 60 ? Math.max(1, m) + 'm ago' : m < 1440 ? Math.floor(m / 60) + 'h ago' : Math.floor(m / 1440) + 'd ago';
+}
+function nfSafeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : '#'; }
+function nfItem(it, big) {
+  var href = nfSafeUrl(it.url);
+  var saved = bookmarks.some(function(b) { return b.link === href; });
+  return '<div class="feed-item" style="display:flex;gap:12px;align-items:stretch;padding:0!important;border:none!important">'
+    + '<a href="' + escHtml(href) + '" target="_blank" rel="noopener" style="flex:1;padding:20px 24px;display:flex;flex-direction:column;justify-content:center">'
+    + '<div class="feed-t">' + escHtml(it.title || '') + '</div>'
+    + '<div class="feed-m" style="margin:10px 0 0"><span class="feed-src">' + escHtml(it.source || 'News') + '</span><span>' + nfAge(it.ts) + '</span></div>'
+    + '</a>'
+    + '<button class="bookmark-btn ' + (saved ? 'saved' : '') + '" data-title="' + escHtml(it.title || '') + '" data-url="' + escHtml(href) + '" data-source="' + escHtml(it.source || 'News') + '" title="Save article">' + createBookmarkSvg(saved) + '</button>'
+    + '</div>';
+}
+function nfBindBookmarks(id) {
   document.querySelectorAll('#' + id + ' .bookmark-btn').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      var title = btn.getAttribute('data-title');
-      var url = btn.getAttribute('data-url');
-      var source = btn.getAttribute('data-source');
-      if (title && url) {
-        saveBookmark(title, url, source);
-        btn.classList.toggle('saved');
-      }
+      e.stopPropagation(); e.preventDefault();
+      var t = btn.getAttribute('data-title'), u = btn.getAttribute('data-url'), s = btn.getAttribute('data-source');
+      if (t && u) { saveBookmark(t, u, s); btn.classList.toggle('saved'); }
     });
   });
 }
-
-// ── FEED LOADER (shared for news + sports) ──
-// Now with diversity balancing: limits articles per source and interleaves them
-function loadFeeds(configs, targetId) {
-  var el = document.getElementById(targetId);
-  if (el) el.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px">Loading...</div>';
-
-  Promise.all(configs.map(function(c) { return fetchCached(c.url, c.key, 10); }))
-    .then(function(results) {
-      var bySource = {};
-      // Organize articles by source and limit to 3 per source for diversity
-      results.forEach(function(r, i) {
-        if (!r || !r.items) return;
-        var source = configs[i].source;
-        bySource[source] = [];
-        r.items.forEach(function(item) {
-          var it = {title: item.title, link: item.link, pubDate: item.pubDate, source: source};
-          try {
-            var age = Date.now() - new Date(it.pubDate.replace(' ', 'T')).getTime();
-            if (!isNaN(age) && age > 604800000) return;
-          } catch(e) {}
-          if (it.link && it.title && bySource[source].length < 3) bySource[source].push(it);
-        });
-      });
-      // Interleave articles from different sources for diversity
-      var all = [];
-      var sources = Object.keys(bySource);
-      var maxArticles = sources.length > 0 ? Math.max.apply(null, sources.map(function(s) { return bySource[s].length; })) : 0;
-      for (var round = 0; round < maxArticles; round++) {
-        sources.forEach(function(source) {
-          if (bySource[source][round]) all.push(bySource[source][round]);
-        });
-      }
-      all.sort(function(a, b) { return new Date(b.pubDate.replace(' ', 'T')) - new Date(a.pubDate.replace(' ', 'T')); });
-      currentFeed = all;
-      renderFeed(all, targetId);
-    }).catch(function(err) {
-      console.error('Feed load error:', err);
-      // Try to show any cached data even if expired
-      var el = document.getElementById(targetId);
-      if (el) {
-        var msg = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(255,69,58,0.1);border-radius:12px;margin:20px">';
-        msg += '<div style="font-weight:600;margin-bottom:8px">Unable to load ' + targetId + '</div>';
-        msg += '<div style="font-size:12px;color:var(--t3)">Network error - check connectivity</div>';
-        msg += '</div>';
-        el.innerHTML = msg;
-      }
-    });
-}
-
-// News split into Local (BC) / National (Canada) / World, switchable via sub-tabs.
-// Lists mirror NEWS_FEEDS in .github/scripts/update_cache.py — only feeds that
-// the Actions job pre-fetches into DASHBOARD_CACHE are worth requesting here
-// (uncached rss2json URLs fast-fail by design). Add feeds in both places.
-newsCategories = {
-  local: [
-    {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Fbc%2Ffeed%2F', key:'n_loc_gbc', source:'Global BC'},
-    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-canada-britishcolumbia', key:'n_loc_cbc', source:'CBC BC'},
-    {url:RSS+'https%3A%2F%2Fvancouver.citynews.ca%2Ffeed%2F', key:'n_loc_city', source:'CityNews Van'},
-    {url:RSS+'https%3A%2F%2Fdailyhive.com%2Ffeed%2Fvancouver', key:'n_loc_dh', source:'Daily Hive'},
-    {url:RSS+'https%3A%2F%2Fvancouversun.com%2Ffeed', key:'n_loc_vs', source:'Vancouver Sun'}
-  ],
-  national: [
-    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-topstories', key:'n_nat_cbc', source:'CBC News'},
-    {url:RSS+'https%3A%2F%2Fglobalnews.ca%2Ffeed%2F', key:'n_nat_gn', source:'Global News'},
-    {url:RSS+'https%3A%2F%2Fnationalpost.com%2Ffeed%2F', key:'n_nat_np', source:'National Post'},
-    {url:RSS+'https%3A%2F%2Ffinancialpost.com%2Ffeed', key:'n_nat_fp', source:'Financial Post'},
-    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-politics', key:'n_nat_cbp', source:'CBC Politics'}
-  ],
-  world: [
-    {url:RSS+'https%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Fworld%2Frss.xml', key:'n_wld_bbc', source:'BBC World'},
-    {url:RSS+'https%3A%2F%2Fwww.aljazeera.com%2Fxml%2Frss%2Fall.xml', key:'n_wld_aje', source:'Al Jazeera'},
-    {url:RSS+'https%3A%2F%2Fwww.theguardian.com%2Finternational%2Frss', key:'n_wld_grd', source:'Guardian'},
-    {url:RSS+'https%3A%2F%2Fwww.france24.com%2Fen%2Frss', key:'n_wld_f24', source:'France24'},
-    {url:RSS+'https%3A%2F%2Frss.nytimes.com%2Fservices%2Fxml%2Frss%2Fnyt%2FWorld.xml', key:'n_wld_nyt', source:'NYT World'},
-    {url:RSS+'https%3A%2F%2Ffeeds.skynews.com%2Ffeeds%2Frss%2Fworld.xml', key:'n_wld_sky', source:'Sky News'},
-    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-world', key:'n_wld_cbw', source:'CBC World'}
-  ],
-  // Pharmacy & medicine (David is a pharmacist): landmark trials + health news.
-  // Mirrors PHARMACY_FEEDS in update_cache.py.
-  pharmacy: [
-    {url:RSS+'https%3A%2F%2Fwww.nejm.org%2Faction%2FshowFeed%3Fjc%3Dnejm%26type%3Detoc%26feed%3Drss', key:'n_rx_nejm', source:'NEJM'},
-    {url:RSS+'https%3A%2F%2Fwww.thelancet.com%2Frssfeed%2Flancet_current.xml', key:'n_rx_lan', source:'The Lancet'},
-    {url:RSS+'https%3A%2F%2Fjamanetwork.com%2Frss%2Fsite_3%2F67.xml', key:'n_rx_jama', source:'JAMA'},
-    {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fwebfeed%2Frss%2Frss-health', key:'n_rx_cbch', source:'CBC Health'}
-  ]
-};
-function showNews(cat) { loadFeeds(newsCategories[cat] || newsCategories.local, 'news-feed'); }
-// Scope to news tabs only — .ntab is also used by camera/games/copy buttons,
-// and this handler used to steal their clicks (clearing the news-tab highlight
-// and reloading the feed whenever e.g. the camera pager was tapped)
-document.querySelectorAll('.ntab[data-news]').forEach(function(b) {
-  b.addEventListener('click', function() {
-    if (b.classList.contains('on')) return;
-    document.querySelectorAll('.ntab[data-news]').forEach(function(x) { x.classList.remove('on'); });
-    b.classList.add('on');
-    document.getElementById('news-feed').innerHTML = '<div class="muted">Loading News…</div>';
-    showNews(b.dataset.news);
-  });
-});
-showNews('local');
-
-// Mirrors SPORTS_FEEDS in .github/scripts/update_cache.py (see note above).
-loadFeeds([
-  {url:RSS+'https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnews', key:'s_espn', source:'ESPN'},
-  {url:RSS+'https%3A%2F%2Fwww.sportsnet.ca%2Ffeed%2F', key:'s_snet', source:'Sportsnet'},
-  {url:RSS+'https%3A%2F%2Fwww.cfl.ca%2Frss%2F', key:'s_cfl', source:'CFL.ca'},
-  {url:RSS+'https%3A%2F%2Fwww.mlb.com%2Ffeeds%2Fnews%2Frss.xml', key:'s_mlb', source:'MLB.com'},
-  {url:RSS+'https%3A%2F%2Fwww.cbc.ca%2Fcmlink%2Frss-sports', key:'s_cbcs', source:'CBC Sports'},
-  {url:RSS+'https%3A%2F%2Fsports.yahoo.com%2Frss%2F', key:'s_yah', source:'Yahoo Sports'},
-  {url:RSS+'https%3A%2F%2Fwww.theglobeandmail.com%2Farc%2Foutboundfeeds%2Frss%2Fcategory%2Fsports%2F', key:'s_glb', source:'Globe Sports'},
-  {url:RSS+'https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fnhl%2Fnews', key:'s_enhl', source:'ESPN NHL'},
-  {url:RSS+'https%3A%2F%2Fwww.espn.com%2Fespn%2Frss%2Fmlb%2Fnews', key:'s_emlb', source:'ESPN MLB'}
-], 'sports-feed');
-
-// ── MY TEAMS TRACKER ──
-// Renders pre-fetched scores embedded in DASHBOARD_CACHE.scores (refreshed by
-// GitHub Actions). Teams with no current game show their league + status.
-(function() {
-  var sfeed = document.getElementById('scores-feed');
-  if (!sfeed) return;
-  var scores = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE.scores) || [];
-  if (!scores.length) {
-    sfeed.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px;background:rgba(100,100,100,0.1);border-radius:12px;margin:20px;line-height:1.6"><div style="font-size:14px;font-weight:500;margin-bottom:4px">Scores unavailable</div><div style="font-size:11px;color:var(--t3)">Check back when games are scheduled</div></div>';
+function nfRender() {
+  var F = nfData;
+  var list = document.getElementById('nf-list');
+  if (!list) return;
+  if (!F) {
+    list.innerHTML = '<div class="muted" style="text-align:center;padding:40px 20px"><div style="font-size:14px;font-weight:500;margin-bottom:4px">No stories right now</div><div style="font-size:12px">The news feed is unavailable — it will retry shortly.</div></div>';
     return;
   }
-  function row(side) {
-    if (!side) return '';
-    var w = side.winner ? 'font-weight:700;color:var(--t1)' : '';
-    return '<div class="score-row" style="' + w + '"><span>' + escHtml(side.name || side.abbr || '') + '</span><span>' + escHtml(side.score || '-') + '</span></div>';
+  // Everyone must know (banner)
+  var mk = document.getElementById('nf-must'), must = (F.must_know || []).slice(0, 2);
+  if (mk) {
+    if (must.length) {
+      mk.innerHTML = must.map(function(m) {
+        return '<a href="' + escHtml(nfSafeUrl(m.url)) + '" target="_blank" rel="noopener"><div class="nf-lab"><i></i>Everyone must know</div>'
+          + '<div class="feed-t">' + escHtml(m.title || '') + '</div>'
+          + '<div class="feed-m" style="margin-top:8px"><span>' + escHtml(m.source || '') + '</span><span>' + nfAge(m.ts) + '</span></div></a>';
+      }).join('');
+      mk.style.display = '';
+    } else { mk.style.display = 'none'; mk.innerHTML = ''; }
   }
-  var html = '';
-  scores.forEach(function(s) {
-    var status = escHtml(s.league + (s.status ? ' · ' + s.status : ''));
-    if (s.home && s.away) {
-      html += '<div class="score-card"><div class="score-teams">' + row(s.away) + row(s.home)
-        + '</div><div class="score-status">' + status + '</div></div>';
-    } else {
-      // No game (offseason / unavailable) — show the team name + league status
-      html += '<div class="score-card"><div class="score-teams"><div class="score-row">'
-        + '<span>' + escHtml(s.team) + '</span></div></div>'
-        + '<div class="score-status">' + status + '</div></div>';
-    }
-  });
-  sfeed.innerHTML = html;
-})();
-
-// ── STANDINGS ── division / conference tables for the followed teams' leagues,
-// baked hourly into DASHBOARD_CACHE.standings by fetch_standings(). Cache-driven,
-// no live fetch; your team's row is highlighted. Big groups (e.g. the 15-team MLS
-// conference) are windowed to the top plus your team so the table stays compact.
-function renderStandings() {
-  var wrap = document.getElementById('standings-wrap');
-  if (!wrap) return;
-  var st = (typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE.standings) || {};
-  var ORDER = ['NHL', 'MLB', 'NBA', 'MLS', 'CFL'];
-  var EMO = { NHL: '🏒', MLB: '⚾', NBA: '🏀', MLS: '⚽', CFL: '🏈' };
-  var LBL = { gp: 'GP', w: 'W', l: 'L', otl: 'OTL', d: 'D', pts: 'PTS', pct: 'PCT', gb: 'GB', streak: 'STRK' };
-  var leagues = ORDER.filter(function(k) { return st[k] && st[k].rows && st[k].rows.length; });
-  if (!leagues.length) return;   // keep the "updates hourly" placeholder
-  var html = '';
-  leagues.forEach(function(lg) {
-    var d = st[lg], cols = (d.cols && d.cols.length) ? d.cols : ['w', 'l', 'pts'], rows = d.rows;
-    var myRank = -1;
-    rows.forEach(function(r, i) { if (r.mine) myRank = i; });
-    // Window large groups: top 8, plus your team's row (with a gap) if it's lower.
-    var view = rows;
-    if (rows.length > 9) {
-      view = rows.slice(0, 8);
-      if (myRank >= 8) view = view.concat([{ _gap: true }, rows[myRank]]);
-    }
-    html += '<div class="stand-card">'
-      + '<div class="stand-head">' + (EMO[lg] || '') + ' ' + escHtml(lg) + ' · <span>' + escHtml(d.group || '') + '</span></div>'
-      + '<table class="stand-table"><thead><tr><th class="st-rank">#</th><th class="st-team">Team</th>'
-      + cols.map(function(c) { return '<th>' + escHtml(LBL[c] || c.toUpperCase()) + '</th>'; }).join('')
-      + '</tr></thead><tbody>';
-    view.forEach(function(r) {
-      if (r._gap) { html += '<tr class="stand-gap"><td colspan="' + (2 + cols.length) + '">⋯</td></tr>'; return; }
-      html += '<tr class="' + (r.mine ? 'stand-mine' : '') + '">'
-        + '<td class="st-rank">' + (rows.indexOf(r) + 1) + '</td>'
-        + '<td class="st-team">' + escHtml(r.name || r.abbr || '') + '</td>'
-        + cols.map(function(c) { return '<td>' + escHtml(r[c] != null && r[c] !== '' ? r[c] : '—') + '</td>'; }).join('')
-        + '</tr>';
+  // Headlines (tab filter; fantasy items live in My Players)
+  var items = (F.items || []).filter(function(it) { return it.category !== 'Fantasy' && (nfTab === 'all' || it.section === nfTab); });
+  items.sort(function(a, b) { return new Date(b.ts) - new Date(a.ts); });
+  items = items.slice(0, 15);
+  list.innerHTML = items.length ? items.map(nfItem).join('')
+    : '<div class="muted" style="text-align:center;padding:40px 20px">No stories in this section right now</div>';
+  nfBindBookmarks('nf-list');
+  // Scores: My Teams, then other games
+  var sc = document.getElementById('nf-scores');
+  if (sc) {
+    var h = '';
+    (F.my_teams || []).forEach(function(t) {
+      var has = t.last || t.next;
+      h += '<div class="score-card"><div class="score-teams">'
+        + '<div class="score-row"><span>' + escHtml(t.team) + '</span><span>' + escHtml(t.last || t.note || '') + '</span></div>'
+        + (t.next ? '<div class="score-row nf-next"><span>Next</span><span>' + escHtml(t.next) + '</span></div>'
+          : (has ? '' : '<div class="score-row nf-next"><span>' + escHtml(t.record || '') + '</span><span></span></div>'))
+        + '</div><div class="score-status">' + escHtml(t.league + (t.record ? ' · ' + t.record : '')) + '</div></div>';
     });
-    html += '</tbody></table></div>';
-  });
-  wrap.innerHTML = html;
+    (F.scores || []).filter(function(s) { return !s.fav; }).slice(0, 4).forEach(function(s) {
+      h += '<a class="score-card" href="' + escHtml(nfSafeUrl(s.url)) + '" target="_blank" rel="noopener"><div class="score-teams"><div class="score-row nf-next"><span>' + escHtml(s.text) + '</span></div></div><div class="score-status">' + escHtml(s.league) + '</div></a>';
+    });
+    sc.innerHTML = h || '<div class="muted" style="text-align:center;padding:40px 20px">Scores unavailable</div>';
+  }
+  // Player headlines (fantasy rosters, built privately — only headlines are public)
+  var fw = document.getElementById('nf-fan-wrap'), fan = F.fantasy_items || [];
+  if (fw) {
+    fw.style.display = fan.length ? '' : 'none';
+    document.getElementById('nf-fan').innerHTML = fan.slice(0, 5).map(nfItem).join('');
+    nfBindBookmarks('nf-fan');
+  }
+  var st = document.getElementById('nf-stamp');
+  if (st) st.textContent = F.generated_local ? 'Updated ' + F.generated_local : '';
 }
-renderStandings();
+function nfUse(F, store) {
+  if (!F || !F.items) return false;
+  nfData = F;
+  if (store) { try { localStorage.setItem('nf_feed_v1', JSON.stringify(F)); } catch (e) {} }
+  nfRender();
+  return true;
+}
+function nfLoad() {
+  var done = false;
+  var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var tm = setTimeout(function() { if (ctl) ctl.abort(); }, 8000);
+  fetch(NF_URL + '?t=' + Math.floor(Date.now() / 300000), ctl ? { signal: ctl.signal } : {})
+    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(F) { clearTimeout(tm); done = nfUse(F, true); if (!done) throw new Error('bad feed'); })
+    .catch(function() {
+      clearTimeout(tm);
+      if (nfData) return;
+      try { if (nfUse(JSON.parse(localStorage.getItem('nf_feed_v1') || 'null'), false)) return; } catch (e) {}
+      try { if (nfUse((typeof DASHBOARD_CACHE !== 'undefined' && DASHBOARD_CACHE.newsfeed) || null, false)) return; } catch (e) {}
+      nfRender();
+    });
+}
+document.querySelectorAll('#nf-tabs .ntab').forEach(function(b) {
+  b.addEventListener('click', function() {
+    if (b.classList.contains('on')) return;
+    document.querySelectorAll('#nf-tabs .ntab').forEach(function(x) { x.classList.remove('on'); });
+    b.classList.add('on');
+    nfTab = b.dataset.nf;
+    nfRender();
+  });
+});
+nfLoad();
+setInterval(function() { if (!document.hidden) nfLoad(); }, 10 * 60 * 1000);
 
 // ── CALCULATOR ──
 function calcUpdate() {
