@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Fetch RSS feeds and weather, then embed them into DASHBOARD_CACHE in index.html."""
+"""Fetch the shared news feed.json, weather, stocks etc., then embed them into DASHBOARD_CACHE in index.html."""
 
 import json
 import os
 import re
 import sys
-import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode
 
@@ -16,53 +15,10 @@ LON = os.environ.get("LON", "-122.85")
 TIMEOUT = 15
 MAX_ITEMS = 5
 
-NEWS_FEEDS = {
-    # Local (BC)
-    "https://globalnews.ca/bc/feed/": "Global BC",
-    "https://www.cbc.ca/cmlink/rss-canada-britishcolumbia": "CBC BC",
-    "https://vancouver.citynews.ca/feed/": "CityNews Van",
-    "https://dailyhive.com/feed/vancouver": "Daily Hive",
-    "https://vancouversun.com/feed": "Vancouver Sun",
-    # National
-    "https://www.cbc.ca/cmlink/rss-topstories": "CBC News",
-    "https://globalnews.ca/feed/": "Global News",
-    "https://nationalpost.com/feed/": "National Post",
-    "https://financialpost.com/feed": "Financial Post",
-    "https://www.cbc.ca/cmlink/rss-politics": "CBC Politics",
-    # World
-    "https://feeds.bbci.co.uk/news/world/rss.xml": "BBC World",
-    "https://www.aljazeera.com/xml/rss/all.xml": "Al Jazeera",
-    "https://www.theguardian.com/international/rss": "Guardian",
-    "https://www.france24.com/en/rss": "France24",
-    "https://rss.nytimes.com/services/xml/rss/nyt/World.xml": "NYT World",
-    "https://feeds.skynews.com/feeds/rss/world.xml": "Sky News",
-    "https://www.cbc.ca/cmlink/rss-world": "CBC World",
-}
+# The ONLY news/sports source: the public feed the iPhone widget also reads.
+# (Built every 3 h by github.com/wghtkbpxwx-a11y/news-widget-feed.)
+NEWS_FEED_URL = "https://wghtkbpxwx-a11y.github.io/news-widget-feed/feed.json"
 
-SPORTS_FEEDS = {
-    "https://www.espn.com/espn/rss/news": "ESPN",
-    "https://www.sportsnet.ca/feed/": "Sportsnet",
-    "https://www.cfl.ca/rss/": "CFL.ca",
-    "https://www.mlb.com/feeds/news/rss.xml": "MLB.com",
-    "https://www.cbc.ca/cmlink/rss-sports": "CBC Sports",
-    "https://sports.yahoo.com/rss/": "Yahoo Sports",
-    "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/sports/": "Globe Sports",
-    "https://www.espn.com/espn/rss/nhl/news": "ESPN NHL",
-    "https://www.espn.com/espn/rss/mlb/news": "ESPN MLB",
-}
-
-# Pharmacy / medicine — David is a pharmacist. Landmark trials from the big
-# journals + Canadian health news. (BCPhA and the PharmaCare newsletter don't
-# publish RSS feeds, so they can't be pulled automatically.)
-PHARMACY_FEEDS = {
-    "https://www.nejm.org/action/showFeed?jc=nejm&type=etoc&feed=rss": "NEJM",
-    "https://www.thelancet.com/rssfeed/lancet_current.xml": "The Lancet",
-    "https://jamanetwork.com/rss/site_3/67.xml": "JAMA",
-    "https://www.cbc.ca/webfeed/rss/rss-health": "CBC Health",
-}
-
-# "My Teams" — the scores box on the Live panel. ESPN site API, team schedule
-# endpoint per team. `path` is the sport/league, `id` is the ESPN team id/abbr.
 DEFAULT_STOCKS = ["XEQT.TO", "VFV.TO", "AAPL", "TSLA", "MSFT", "NVDA", "AMZN", "GOOGL",
                   # Popular Canadian ETFs so watchlist adds work offline in-car
                   "XGRO.TO", "VGRO.TO", "XBAL.TO", "VBAL.TO", "ZSP.TO", "XIC.TO",
@@ -107,259 +63,33 @@ EVENTS_BBOX = "-123.40,48.95,-119.30,50.40"
 EVENTS_PER_CAM = 2
 EVENT_MATCH_KM = 8.0
 
-MY_TEAMS = [
-    {"name": "Blue Jays", "league": "MLB", "path": "baseball/mlb",  "id": "tor"},
-    {"name": "Canucks",   "league": "NHL", "path": "hockey/nhl",    "id": "van"},
-    {"name": "Raptors",   "league": "NBA", "path": "basketball/nba", "id": "tor"},
-    {"name": "Whitecaps", "league": "MLS", "path": "soccer/usa.1",  "id": "9727"},
-    {"name": "BC Lions",  "league": "CFL", "path": "football/cfl",  "id": "79"},
-]
-
-
-def _event_dt(ev):
+def fetch_newsfeed() -> dict | None:
+    """Fetch the shared feed.json (single news/sports source for dashboard + widget)."""
     try:
-        return datetime.fromisoformat(ev["date"].replace("Z", "+00:00"))
-    except Exception:
-        return None
-
-
-def _pick_game(events):
-    """Choose the most relevant game to show: a live one, else a *recent* final
-    (last couple of days), else the next upcoming game within a short horizon.
-
-    The recency window is the whole point: without it we'd surface a months-old
-    final during the offseason (e.g. a June NBA Finals game still shown as
-    "FINAL" in July). If nothing is live/recent/soon, return None → "No game"."""
-    now = datetime.now(timezone.utc)
-    RECENT_FINAL = timedelta(days=2)   # show last night's / yesterday's result
-    UPCOMING = timedelta(days=8)       # show a game that's genuinely coming up
-    live = recent_final = next_up = None
-    for ev in events:
-        comp = (ev.get("competitions") or [{}])[0]
-        state = comp.get("status", {}).get("type", {}).get("state")
-        dt = _event_dt(ev)
-        if state == "in":
-            live = ev
-        elif state == "post" and dt and (now - dt) <= RECENT_FINAL:
-            if recent_final is None or dt > _event_dt(recent_final):
-                recent_final = ev
-        elif state == "pre" and dt and now <= dt <= now + UPCOMING:
-            if next_up is None or dt < _event_dt(next_up):
-                next_up = ev
-    return live or recent_final or next_up
-
-
-def _side(competitors, home_away):
-    c = next((x for x in competitors if x.get("homeAway") == home_away), None)
-    if not c:
-        return None
-    score = c.get("score")
-    if isinstance(score, dict):
-        score = score.get("displayValue")
-    team = c.get("team", {})
-    return {
-        "abbr": team.get("abbreviation", ""),
-        "name": team.get("shortDisplayName") or team.get("displayName", ""),
-        "score": score if score not in (None, "") else "-",
-        "winner": bool(c.get("winner", False)),
-    }
-
-
-def fetch_scores():
-    """Fetch the latest/next game for each followed team."""
-    out = []
-    for t in MY_TEAMS:
-        rec = {"team": t["name"], "league": t["league"]}
-        try:
-            url = f'https://site.api.espn.com/apis/site/v2/sports/{t["path"]}/teams/{t["id"]}/schedule'
-            resp = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
-            resp.raise_for_status()
-            game = _pick_game(resp.json().get("events", []))
-            if not game:
-                rec["status"] = "No game"
-                print(f'  • {t["name"]}: no current game')
-            else:
-                comp = game["competitions"][0]
-                st = comp.get("status", {}).get("type", {})
-                rec["home"] = _side(comp.get("competitors", []), "home")
-                rec["away"] = _side(comp.get("competitors", []), "away")
-                rec["state"] = st.get("state")
-                rec["status"] = st.get("shortDetail") or st.get("description") or ""
-                print(f'  • {t["name"]}: {rec["status"]}')
-        except Exception as e:
-            rec["status"] = "Unavailable"
-            print(f'  ✗ {t["name"]}: {e}')
-        out.append(rec)
-    return out
-
-
-# Division/conference standings for each followed team's league. `abbr` is the
-# ESPN team abbreviation used to locate the right group. `cols` are the
-# normalized stat keys the dashboard shows for that league, in order.
-STANDINGS_TEAMS = [
-    {"league": "NHL", "path": "hockey/nhl",     "abbr": "van", "cols": ["gp", "w", "l", "otl", "pts"]},
-    {"league": "MLB", "path": "baseball/mlb",   "abbr": "tor", "cols": ["w", "l", "pct", "gb"]},
-    {"league": "NBA", "path": "basketball/nba", "abbr": "tor", "cols": ["w", "l", "pct", "gb"]},
-    {"league": "MLS", "path": "soccer/usa.1",   "abbr": "van", "cols": ["gp", "w", "l", "d", "pts"]},
-    {"league": "CFL", "path": "football/cfl",   "abbr": "bc",  "cols": ["gp", "w", "l", "pts"]},
-]
-
-
-def _stat(stats, *types):
-    """Pull a stat's displayValue by any of its ESPN `type` names (stable)."""
-    for s in stats or []:
-        if s.get("type") in types:
-            v = s.get("displayValue")
-            return "" if v is None else str(v)
-    return ""
-
-
-def _standings_groups(node, out):
-    """Collect every leaf group (name, entries) from the nested standings tree."""
-    ents = (node.get("standings") or {}).get("entries") or []
-    if ents:
-        out.append((node.get("name") or node.get("abbreviation") or "", ents))
-    for ch in node.get("children") or []:
-        _standings_groups(ch, out)
-
-
-def fetch_standings():
-    """Division (or smallest available) standings for each followed team's
-    league via ESPN's site API at level=3. Entries arrive pre-ranked. Returns
-    {league: {group, cols, rows:[{name,abbr,gp,w,l,otl,d,pts,pct,gb,streak,mine}]}}."""
-    out = {}
-    for t in STANDINGS_TEAMS:
-        abbr = t["abbr"].lower()
-        try:
-            url = f'https://site.api.espn.com/apis/v2/sports/{t["path"]}/standings?level=3'
-            resp = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
-            resp.raise_for_status()
-            groups = []
-            _standings_groups(resp.json(), groups)
-            mine = [g for g in groups
-                    if any((e.get("team", {}).get("abbreviation", "") or "").lower() == abbr for e in g[1])]
-            if not mine:
-                raise ValueError("team not found in standings")
-            mine.sort(key=lambda g: len(g[1]))       # smallest group = most specific (division)
-            gname, ents = mine[0]
-            rows = []
-            for e in ents:
-                team = e.get("team", {})
-                stats = e.get("stats") or []
-                ab = team.get("abbreviation", "") or ""
-                rows.append({
-                    "name": team.get("shortDisplayName") or team.get("displayName", ""),
-                    "abbr": ab,
-                    "gp": _stat(stats, "gamesplayed"),
-                    "w": _stat(stats, "wins"),
-                    "l": _stat(stats, "losses"),
-                    "otl": _stat(stats, "otlosses", "overtimelosses"),
-                    "d": _stat(stats, "ties"),
-                    "pts": _stat(stats, "points"),
-                    "pct": _stat(stats, "winpercent"),
-                    "gb": _stat(stats, "gamesbehind"),
-                    "streak": _stat(stats, "streak"),
-                    "mine": ab.lower() == abbr,
-                })
-            out[t["league"]] = {"group": gname, "cols": t["cols"], "rows": rows}
-            print(f'  • {t["league"]}: {gname} ({len(rows)} teams)')
-        except Exception as e:
-            print(f'  ✗ {t["league"]} standings: {e}')
-    return out
-
-
-def _localname(tag) -> str:
-    return tag.rsplit("}", 1)[-1] if isinstance(tag, str) else ""
-
-
-def _norm_date(pub: str) -> str:
-    """Normalise RFC-2822 or ISO dates to UTC ISO-8601 Z; fall back to now."""
-    try:
-        from email.utils import parsedate_to_datetime
-        return parsedate_to_datetime(pub).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    except Exception:
-        pass
-    try:
-        dt = datetime.fromisoformat(pub.replace("Z", "+00:00"))
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    except Exception:
-        return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def parse_rss(content: bytes, source: str) -> list[dict]:
-    """Parse RSS 2.0, RSS 1.0/RDF (namespaced <item>, dc:date — NEJM/Lancet
-    style) and Atom, returning a list of item dicts."""
-    items = []
-    try:
-        root = ET.fromstring(content)
-        ns = {"atom": "http://www.w3.org/2005/Atom"}
-
-        # Channel title, so we can skip self-referential items (JAMA ships an
-        # item literally titled "JAMA")
-        chan_title = ""
-        for el in root.iter():
-            if _localname(el.tag) == "title":
-                chan_title = "".join(el.itertext()).strip()
-                break
-
-        # RSS 2.0 and RSS 1.0/RDF: match any element whose LOCAL name is
-        # 'item', and read children by local name so namespaced feeds work
-        for item in root.iter():
-            if _localname(item.tag) != "item":
-                continue
-            def txt(name):
-                for c in item:
-                    if _localname(c.tag) == name:
-                        v = "".join(c.itertext()).strip()
-                        if v:
-                            return v
-                return ""
-            title = txt("title")
-            link = txt("link") or item.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about") or ""
-            pub = txt("pubDate") or txt("date")  # dc:date on RDF feeds
-            if not title or not link or title == chan_title or len(title) < 6:
-                continue
-            items.append({"title": title, "link": link, "pubDate": _norm_date(pub), "source": source})
-
-        # Atom
-        if not items:
-            for entry in root.findall("atom:entry", ns):
-                def atxt(tag):
-                    el = entry.find(f"atom:{tag}", ns)
-                    return el.text.strip() if el is not None and el.text else ""
-                title = atxt("title")
-                link_el = entry.find("atom:link", ns)
-                link = (link_el.get("href") or "") if link_el is not None else ""
-                pub = atxt("updated") or atxt("published")
-                if not title or not link:
-                    continue
-                try:
-                    dt = datetime.fromisoformat(pub.rstrip("Z")).replace(tzinfo=timezone.utc)
-                    pub = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-                except Exception:
-                    pub = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-                items.append({"title": title, "link": link, "pubDate": pub, "source": source})
-    except Exception as e:
-        print(f"  XML parse error: {e}", file=sys.stderr)
-    return items[:MAX_ITEMS]
-
-
-def fetch_feed(url: str, source: str) -> dict | None:
-    """Fetch one RSS feed URL and return {status, items} or None on failure."""
-    try:
-        resp = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": "Mozilla/5.0"})
+        resp = requests.get(NEWS_FEED_URL, timeout=TIMEOUT, headers={"User-Agent": "tesla-dashboard-cache"})
         resp.raise_for_status()
-        items = parse_rss(resp.content, source)
-        if items:
-            print(f"  ✓ {source}: {len(items)} items")
-            return {"status": "ok", "items": items}
-        print(f"  ✗ {source}: no items parsed")
-        return None
+        feed = resp.json()
+        if not isinstance(feed.get("items"), list) or not feed["items"]:
+            raise ValueError("feed has no items")
+        print(f"  ✓ news feed: {len(feed['items'])} items, {len(feed.get('scores', []))} scores")
+        return feed
     except Exception as e:
-        print(f"  ✗ {source}: {e}")
+        print(f"  ✗ news feed: {e}")
         return None
+
+
+def feed_to_legacy(feed: dict) -> tuple[dict, dict, dict]:
+    """Project feed.json into the {url: {status, items}} shape the glance card,
+    spoken digest and audio briefing already read — same source, no extra fetches."""
+    def pack(items, label):
+        out = [{"title": i["title"], "link": i.get("url", ""), "pubDate": i.get("ts", ""), "source": i.get("source", label)}
+               for i in items if i.get("title")]
+        return {NEWS_FEED_URL + "#" + label: {"status": "ok", "items": out[:8]}} if out else {}
+    items = feed.get("items", [])
+    news = pack([i for i in feed.get("must_know", [])] + [i for i in items if i.get("section") in ("Local", "National", "World", "Tech")], "news")
+    sports = pack([i for i in items if i.get("section") == "Teams"] + feed.get("fantasy_items", []), "sports")
+    pharmacy = pack([i for i in items if i.get("section") == "Health"], "health")
+    return news, sports, pharmacy
 
 
 def fetch_weather() -> dict | None:
@@ -574,32 +304,9 @@ def main():
     print("Fetching 7-day forecast...")
     forecast = fetch_forecast()
 
-    print("Fetching news feeds...")
-    news = {}
-    for url, source in NEWS_FEEDS.items():
-        result = fetch_feed(url, source)
-        if result:
-            news[url] = result
-
-    print("Fetching sports feeds...")
-    sports = {}
-    for url, source in SPORTS_FEEDS.items():
-        result = fetch_feed(url, source)
-        if result:
-            sports[url] = result
-
-    print("Fetching pharmacy feeds...")
-    pharmacy = {}
-    for url, source in PHARMACY_FEEDS.items():
-        result = fetch_feed(url, source)
-        if result:
-            pharmacy[url] = result
-
-    print("Fetching My Teams scores...")
-    scores = fetch_scores()
-
-    print("Fetching standings...")
-    standings = fetch_standings()
+    print("Fetching shared news feed...")
+    newsfeed = fetch_newsfeed()
+    news, sports, pharmacy = feed_to_legacy(newsfeed) if newsfeed else ({}, {}, {})
 
     print("Fetching stock quotes...")
     stocks = fetch_stocks()
@@ -626,26 +333,6 @@ def main():
         except Exception:
             pass
 
-    # Per-feed fallback: keep the last good items for any source that failed
-    # this run (feeds like ESPN parse 0 items intermittently — without this,
-    # a source vanishes from its tab until the next successful hourly run)
-    for url in NEWS_FEEDS:
-        if url not in news and url in existing.get("news", {}):
-            news[url] = existing["news"][url]
-    for url in SPORTS_FEEDS:
-        if url not in sports and url in existing.get("sports", {}):
-            sports[url] = existing["sports"][url]
-    for url in PHARMACY_FEEDS:
-        if url not in pharmacy and url in existing.get("pharmacy", {}):
-            pharmacy[url] = existing["pharmacy"][url]
-
-    # Per-league standings fallback: keep the last good table for any league
-    # whose fetch failed this run (offseason / ESPN hiccup) so it never blanks.
-    for t in STANDINGS_TEAMS:
-        lg = t["league"]
-        if lg not in standings and lg in existing.get("standings", {}):
-            standings[lg] = existing["standings"][lg]
-
     # Build new cache, keeping existing data as fallback if live fetch failed
     cache = {
         "weather": weather or existing.get("weather"),
@@ -653,8 +340,8 @@ def main():
         "news": news if news else existing.get("news", {}),
         "sports": sports if sports else existing.get("sports", {}),
         "pharmacy": pharmacy if pharmacy else existing.get("pharmacy", {}),
-        "scores": scores if scores else existing.get("scores", []),
-        "standings": standings if standings else existing.get("standings", {}),
+        "newsfeed": newsfeed if newsfeed else existing.get("newsfeed"),
+        "scores": [],  # structured live scores retired; scores now come from newsfeed
         "stocks": stocks if stocks else existing.get("stocks", {}),
         "air": air or existing.get("air"),
         "cameras": cameras if cameras else existing.get("cameras", []),  # events attached below
@@ -692,7 +379,7 @@ def main():
         f.write(html)
 
     forecast_days = len((cache.get("forecast") or {}).get("daily", {}).get("weather_code", []))
-    print(f"Done. news={len(cache['news'])} sources, sports={len(cache['sports'])} sources, scores={len(cache['scores'])} teams, forecast={forecast_days} days, stocks={len(cache['stocks'])} tickers")
+    print(f"Done. newsfeed={'ok' if cache.get('newsfeed') else 'missing'}, forecast={forecast_days} days, stocks={len(cache['stocks'])} tickers")
 
 
 if __name__ == "__main__":

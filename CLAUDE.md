@@ -472,3 +472,11 @@ Coquihalla/Connector cams, smarter stock search, two new games" — pushed,
 **PR not yet created/merged**. To finish: create PR → squash-merge →
 dispatch update-cache.yml on main (bakes new cams/ETFs; hourly would also
 catch it) → verify Pages deploy → tell user to reload in car.
+
+## News module (feed.json) — Oct 2026
+Live News, My Teams, the Sports panel (standings + sports news) and every RSS/ESPN fetch were removed.
+The ONLY news/sports source is https://wghtkbpxwx-a11y.github.io/news-widget-feed/feed.json (also read by the
+iPhone Scriptable widget). `#nf` renders: Everyone-must-know banner, section tabs, headlines, My Teams strip
+(feed.my_teams/scores) and My Players (feed.fantasy_items). Fallbacks: localStorage `nf_feed_v1`, then
+`DASHBOARD_CACHE.newsfeed` baked by update_cache.py. update_cache.py also projects the feed into
+`news`/`sports`/`pharmacy` so glance, spoken digest and audio briefing keep working. Theme tokens only (no new colours).
